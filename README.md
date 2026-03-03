@@ -17,7 +17,7 @@ Cálculo automático de tarifas
 Gestión eficiente de la flota
 
 # 🚀 Funcionalidades Principales
-👤 Usuario
+Usuario
 
 Registro e inicio de sesión
 
