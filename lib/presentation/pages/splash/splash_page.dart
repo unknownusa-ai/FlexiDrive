@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../onboarding/onboarding_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -20,6 +21,15 @@ class _SplashPageState extends State<SplashPage>
       duration: const Duration(seconds: 3),
     );
     _progressAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
+    
+    _progressAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const OnboardingPage()),
+        );
+      }
+    });
+    
     _controller.forward();
   }
 
