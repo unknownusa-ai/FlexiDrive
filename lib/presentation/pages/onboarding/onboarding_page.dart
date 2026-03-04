@@ -3,7 +3,6 @@ import 'onboarding_page_rental.dart';
 import 'onboarding_page_map.dart';
 import 'onboarding_page_payment.dart';
 import '../login/login_page.dart';
-import '../home/home_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
