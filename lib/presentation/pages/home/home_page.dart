@@ -42,10 +42,8 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header
+            // Header with search bar inside
             _buildHeader(),
-            // Search Bar
-            _buildSearchBar(),
             SizedBox(height: 20),
             // Promo Banner
             _buildPromoBanner(),
@@ -88,162 +86,211 @@ class _HomePageState extends State<HomePage> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
             Color(0xFF5B6FED),
             Color(0xFF6B5BCD),
           ],
         ),
       ),
-      padding: EdgeInsets.fromLTRB(20, 50, 20, 30),
-      child: Row(
+      child: Column(
         children: [
-          // Profile Section
-          Expanded(
-            child: Row(
+          // Top section with profile and title
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 50, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.grey.shade300,
-                  child:
-                      Icon(Icons.person, color: Colors.grey.shade600, size: 28),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Buenas tardes 👋',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
+                // Top row with profile and notification
+                Row(
+                  children: [
+                    // Profile Section
+                    Expanded(
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.grey.shade300,
+                            child: Icon(Icons.person, color: Colors.grey.shade600, size: 28),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Buenas tardes 👋',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                Text(
+                                  'Carlos',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Carlos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Notification Bell
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(Icons.notifications_none, color: Colors.white, size: 24),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
                     ),
+                    // Notification Bell
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(Icons.notifications_none, color: Colors.white, size: 24),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Main Title
+                Row(
+                  children: [
+                    Text(
+                      '¿A dónde vas hoy?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '🏞️',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Encuentra el vehículo perfecto para ti',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
                   ),
                 ),
+                SizedBox(height: 16),
               ],
             ),
           ),
+          // Search Bar inside header
+          _buildSearchBar(),
+          SizedBox(height: 20),
         ],
       ),
     );
   }
 
   Widget _buildSearchBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 16),
+            child: Icon(Icons.search, color: Colors.grey.shade400, size: 24),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Buscar vehículo, marca...',
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 16),
-              child: Icon(Icons.search, color: Colors.grey.shade400, size: 24),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar vehículo, marca...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 15,
+          ),
+          // Location indicator
+          GestureDetector(
+            onTap: _showCitySelector,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Color(0xFFEEF3FF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Color(0xFF5B6FED),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.location_on,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                   ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 16),
-                ),
+                  SizedBox(width: 6),
+                  Text(
+                    _selectedCity,
+                    style: TextStyle(
+                      color: Color(0xFF5B6FED),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ),
-            // Location indicator
-            GestureDetector(
-              onTap: _showCitySelector,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                margin: EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: Color(0xFFEEF3FF),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Color(0xFF5B6FED),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.location_on,
-                        color: Colors.white,
-                        size: 14,
-                      ),
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      _selectedCity,
-                      style: TextStyle(
-                        color: Color(0xFF5B6FED),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -253,46 +300,82 @@ class _HomePageState extends State<HomePage> {
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: Color(0xFFF0F7FF),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Color(0xFFD4E8FF), width: 1),
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFF10B981),
+              Color(0xFF34D399),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
         ),
         padding: EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.trending_up, color: Color(0xFF17A697), size: 32),
-            SizedBox(width: 16),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.trending_down,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '❤️ Ahorra hasta un 60%',
-                    style: TextStyle(
-                      color: Color(0xFF17A697),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '🌿 ',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      Text(
+                        'Ahorra hasta un 60%',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
                     'vs. taxi tradicional en Bogotá',
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withOpacity(0.9),
                       fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'Ver más →',
-                style: TextStyle(
-                  color: Color(0xFF4D8FF5),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+            GestureDetector(
+              onTap: () {},
+              child: Row(
+                children: [
+                  Text(
+                    'Ver más',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white,
+                    size: 10,
+                  ),
+                ],
               ),
             ),
           ],
@@ -328,22 +411,25 @@ class _HomePageState extends State<HomePage> {
       onTap: () => setState(() => _selectedDate = label),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF5B6FED) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isSelected
-              ? null
-              : Border.all(color: Colors.grey.shade300, width: 1),
-          boxShadow: isSelected
-              ? [
+        decoration: isSelected
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF5B6FED), Color(0xFF6B5BCD)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
                   BoxShadow(
                     color: Color(0xFF5B6FED).withOpacity(0.3),
                     blurRadius: 12,
                     offset: Offset(0, 4),
                   ),
-                ]
-              : null,
-        ),
+                ],
+              )
+            : BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade300, width: 1),
+              ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -502,7 +588,7 @@ class _HomePageState extends State<HomePage> {
                 reviews: 128,
                 price: 38000,
                 available: true,
-                image: 'assets/mazda.png',
+                image: 'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Mazda+CX-5',
               ),
               SizedBox(width: 16),
               _buildVehicleCard(
@@ -512,7 +598,7 @@ class _HomePageState extends State<HomePage> {
                 reviews: 245,
                 price: 25000,
                 available: true,
-                image: 'assets/toyota.png',
+                image: 'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Toyota+Corolla',
               ),
             ],
           ),
@@ -537,8 +623,8 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 16,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
             offset: Offset(0, 4),
           ),
         ],
@@ -546,126 +632,127 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Container
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-                child: Container(
+          // Image Container with actual car image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: Stack(
+              children: [
+                // Car Image
+                Image.network(
+                  image,
                   height: 130,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF2D3436),
-                        Color(0xFF636E72),
+                  width: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 130,
+                      width: 200,
+                      color: Colors.grey.shade800,
+                      child: Icon(
+                        Icons.directions_car,
+                        size: 50,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    );
+                  },
+                ),
+                // Type Badge
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: type == 'SUV' ? Color(0xFF5B6FED) : Color(0xFFE53935),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.directions_car,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          type,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Center(
-                    child: Icon(
-                      Icons.directions_car,
-                      size: 60,
-                      color: Colors.white.withOpacity(0.3),
+                ),
+                // Available Badge
+                if (available)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF10B981),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'DISPONIBLE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              // Type Badge
-              Positioned(
-                top: 10,
-                left: 10,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color:
-                        type == 'SUV' ? Color(0xFF2196F3) : Color(0xFFE53935),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        type == 'SUV' ? Icons.terrain : Icons.directions_car,
-                        color: Colors.white,
-                        size: 12,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        type.toUpperCase(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Available Badge
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF00C896),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.circle,
-                        color: Colors.white,
-                        size: 8,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'DISPONIBLE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           // Vehicle Info
           Padding(
-            padding: EdgeInsets.all(14),
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A1A),
+                    color: Color(0xFF1F2937),
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Color(0xFFFFC107), size: 16),
+                    Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
                     SizedBox(width: 4),
                     Text(
                       '$rating',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: Color(0xFF1A1A1A),
+                        fontSize: 12,
+                        color: Color(0xFF1F2937),
                       ),
                     ),
                     SizedBox(width: 2),
@@ -673,51 +760,41 @@ class _HomePageState extends State<HomePage> {
                       '($reviews)',
                       style: TextStyle(
                         color: Colors.grey.shade500,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 14),
+                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '\$ ${(price / 1000).toStringAsFixed(3).replaceAll('.', ',')}',
-                              style: TextStyle(
-                                color: Color(0xFF5B6FED),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          '\$${(price / 1000).toInt()}K',
+                          style: TextStyle(
+                            color: Color(0xFF5B6FED),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
                         ),
                         Text(
                           '/hora',
                           style: TextStyle(
                             color: Colors.grey.shade500,
-                            fontSize: 11,
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF5B6FED),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF5B6FED), Color(0xFF6B5BCD)],
                         ),
-                        elevation: 0,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         'RENTAR',
@@ -1488,39 +1565,60 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: Offset(0, -4),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, -5),
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: Color(0xFF4D8FF5),
-        unselectedItemColor: Colors.grey.shade400,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Inicio',
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home_filled, 'Inicio', 0),
+              _buildNavItem(Icons.description_outlined, 'Reservas', 1),
+              _buildNavItem(Icons.notifications_outlined, 'Alertas', 2),
+              _buildNavItem(Icons.person_outline, 'Perfil', 3),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            activeIcon: Icon(Icons.assignment),
-            label: 'Reservas',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF5B6FED).withOpacity(0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              size: 24,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
-            label: 'Alertas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: 'Perfil',
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ],
       ),
