@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'onboarding_page_rental.dart';
 import 'onboarding_page_map.dart';
 import 'onboarding_page_payment.dart';
+import '../login/login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -33,12 +34,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // TODO: Navigate to home
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
     }
   }
 
   void _skip() {
-    // TODO: Navigate to home
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
   }
 
   @override
