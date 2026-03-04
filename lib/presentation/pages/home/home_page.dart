@@ -442,23 +442,10 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (emoji != null)
-              Text(emoji, style: TextStyle(fontSize: 18))
-            else
-              Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Color(0xFF5B6FED),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Icon(
-                  Icons.apps,
-                  color: isSelected ? Color(0xFF5B6FED) : Colors.white,
-                  size: 14,
-                ),
-              ),
-            SizedBox(width: 8),
+            if (emoji != null) ...[
+              Text(emoji, style: TextStyle(fontSize: 18)),
+              SizedBox(width: 8),
+            ],
             Text(
               category,
               style: TextStyle(
