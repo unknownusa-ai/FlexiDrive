@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../notifications/notifications_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -112,7 +113,8 @@ class _HomePageState extends State<HomePage> {
                           CircleAvatar(
                             radius: 28,
                             backgroundColor: Colors.grey.shade300,
-                            child: Icon(Icons.person, color: Colors.grey.shade600, size: 28),
+                            child: Icon(Icons.person,
+                                color: Colors.grey.shade600, size: 28),
                           ),
                           SizedBox(width: 12),
                           Expanded(
@@ -152,7 +154,8 @@ class _HomePageState extends State<HomePage> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          Icon(Icons.notifications_none, color: Colors.white, size: 24),
+                          Icon(Icons.notifications_none,
+                              color: Colors.white, size: 24),
                           Positioned(
                             top: 8,
                             right: 8,
@@ -588,7 +591,8 @@ class _HomePageState extends State<HomePage> {
                 reviews: 128,
                 price: 38000,
                 available: true,
-                image: 'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Mazda+CX-5',
+                image:
+                    'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Mazda+CX-5',
               ),
               SizedBox(width: 16),
               _buildVehicleCard(
@@ -598,7 +602,8 @@ class _HomePageState extends State<HomePage> {
                 reviews: 245,
                 price: 25000,
                 available: true,
-                image: 'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Toyota+Corolla',
+                image:
+                    'https://placehold.co/400x260/2D3436/FFFFFF/png?text=Toyota+Corolla',
               ),
             ],
           ),
@@ -666,7 +671,8 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: type == 'SUV' ? Color(0xFF5B6FED) : Color(0xFFE53935),
+                      color:
+                          type == 'SUV' ? Color(0xFF5B6FED) : Color(0xFFE53935),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -789,7 +795,8 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Color(0xFF5B6FED), Color(0xFF6B5BCD)],
@@ -1592,9 +1599,17 @@ class _HomePageState extends State<HomePage> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
+        if (index == 2) {
+          // Alertas/Notificaciones
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsPage()),
+          );
+        } else {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1602,12 +1617,15 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF5B6FED).withOpacity(0.1) : Colors.transparent,
+              color: isSelected
+                  ? const Color(0xFF5B6FED).withOpacity(0.1)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              color:
+                  isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
               size: 24,
             ),
           ),
@@ -1615,7 +1633,8 @@ class _HomePageState extends State<HomePage> {
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              color:
+                  isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
