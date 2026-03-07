@@ -70,17 +70,17 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
       child: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: isSmallPhone ? 50 : 80),
+            SizedBox(height: isSmallPhone ? 30 : 80),
             Expanded(
               flex: 2,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 24 : 40),
+                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 40),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      width: isSmallPhone ? 240 : 280,
-                      height: isSmallPhone ? 180 : 220,
+                      width: isSmallPhone ? 200 : 280,
+                      height: isSmallPhone ? 150 : 220,
                       decoration: BoxDecoration(
                         color: const Color(0xFFE0E7FF),
                         borderRadius: BorderRadius.circular(24),
@@ -91,8 +91,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                           _buildVerticalLine(isSmallPhone: isSmallPhone),
                           _buildHorizontalLine(isSmallPhone: isSmallPhone),
                           Positioned(
-                            top: isSmallPhone ? 30 : 40,
-                            left: isSmallPhone ? 35 : 50,
+                            top: isSmallPhone ? 20 : 40,
+                            left: isSmallPhone ? 25 : 50,
                             child: AnimatedBuilder(
                               animation: _pin1Animation,
                               builder: (context, child) {
@@ -104,8 +104,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                             ),
                           ),
                           Positioned(
-                            top: isSmallPhone ? 20 : 30,
-                            right: isSmallPhone ? 40 : 60,
+                            top: isSmallPhone ? 15 : 30,
+                            right: isSmallPhone ? 25 : 60,
                             child: AnimatedBuilder(
                               animation: _pin2Animation,
                               builder: (context, child) {
@@ -117,8 +117,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                             ),
                           ),
                           Positioned(
-                            bottom: isSmallPhone ? 35 : 50,
-                            left: isSmallPhone ? 40 : 60,
+                            bottom: isSmallPhone ? 25 : 50,
+                            left: isSmallPhone ? 25 : 60,
                             child: AnimatedBuilder(
                               animation: _pin3Animation,
                               builder: (context, child) {
@@ -130,8 +130,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                             ),
                           ),
                           Positioned(
-                            bottom: isSmallPhone ? 45 : 60,
-                            right: isSmallPhone ? 60 : 90,
+                            bottom: isSmallPhone ? 30 : 60,
+                            right: isSmallPhone ? 35 : 90,
                             child: AnimatedBuilder(
                               animation: _pin4Animation,
                               builder: (context, child) {
@@ -146,11 +146,11 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                       ),
                     ),
                     Positioned(
-                      bottom: isSmallPhone ? 45 : 65,
+                      bottom: isSmallPhone ? 30 : 65,
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isSmallPhone ? 14 : 20,
-                          vertical: isSmallPhone ? 8 : 12,
+                          horizontal: isSmallPhone ? 10 : 20,
+                          vertical: isSmallPhone ? 6 : 12,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -177,14 +177,14 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                             const SizedBox(width: 8),
                             Icon(
                               Icons.location_on,
-                              size: isSmallPhone ? 14 : 16,
+                              size: isSmallPhone ? 12 : 16,
                               color: const Color(0xFFEF4444),
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Bogotá, Colombia',
+                              'Bogotá, CO',
                               style: TextStyle(
-                                fontSize: isSmallPhone ? 12 : 14,
+                                fontSize: isSmallPhone ? 11 : 14,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF1F2937),
                               ),
@@ -200,33 +200,33 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
             Expanded(
               flex: 1,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 24),
+                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Reserva desde\ncualquier lugar',
                       style: TextStyle(
-                        fontSize: isSmallPhone ? 22 : 28,
+                        fontSize: isSmallPhone ? 18 : 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1F2937),
                         height: 1.2,
                       ),
                     ),
-                    SizedBox(height: isSmallPhone ? 10 : 16),
+                    SizedBox(height: isSmallPhone ? 6 : 16),
                     Text(
                       'Encuentra vehículos disponibles cerca de ti en segundos. Cobertura en toda Colombia.',
                       style: TextStyle(
-                        fontSize: isSmallPhone ? 14 : 16,
+                        fontSize: isSmallPhone ? 12 : 16,
                         color: const Color(0xFF6B7280),
-                        height: 1.5,
+                        height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: isSmallPhone ? 140 : 180),
+            SizedBox(height: isSmallPhone ? 100 : 180),
           ],
         ),
       ),
@@ -238,8 +238,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: isSmallPhone ? 24 : 28,
-          height: isSmallPhone ? 24 : 28,
+          width: isSmallPhone ? 20 : 28,
+          height: isSmallPhone ? 20 : 28,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -254,8 +254,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
         ),
         const SizedBox(height: 4),
         Container(
-          width: isSmallPhone ? 10 : 12,
-          height: isSmallPhone ? 5 : 6,
+          width: isSmallPhone ? 8 : 12,
+          height: isSmallPhone ? 4 : 6,
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.2),
             borderRadius: BorderRadius.circular(6),
@@ -280,7 +280,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
 
   Widget _buildVerticalLine({required bool isSmallPhone}) {
     return Positioned(
-      left: isSmallPhone ? 120 : 140,
+      left: isSmallPhone ? 100 : 140,
       top: 0,
       bottom: 0,
       child: Container(
@@ -292,7 +292,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
 
   Widget _buildHorizontalLine({required bool isSmallPhone}) {
     return Positioned(
-      top: isSmallPhone ? 85 : 110,
+      top: isSmallPhone ? 70 : 110,
       left: 0,
       right: 0,
       child: Container(
