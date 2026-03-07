@@ -13,7 +13,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   flutter_svg: ^2.0.9
+<<<<<<< HEAD
   google_fonts: ^6.1.0
+=======
+  google_fonts: ^6.2.1
+>>>>>>> 6c6effafc814e41565bf5324943d8b73133d554f
 
 flutter:
   uses-material-design: true

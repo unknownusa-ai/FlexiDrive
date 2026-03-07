@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../home/home_page.dart';
+import '../reservas/reservas_page.dart';
 import 'widgets/chip_pestana_notificaciones.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -487,6 +488,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
               MaterialPageRoute(builder: (context) => const HomePage()),
             );
           }
+          return;
+        }
+
+        if (index == 1) {
+          // Navigate to Reservas
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReservasPage()),
+          );
           return;
         }
 
