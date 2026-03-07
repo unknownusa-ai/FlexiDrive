@@ -5,6 +5,9 @@ class ResponsiveUtils {
   static bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 600;
 
+  static bool isSmallPhone(BuildContext context) =>
+      MediaQuery.of(context).size.width < 360;
+
   static bool isTablet(BuildContext context) =>
       MediaQuery.of(context).size.width >= 600 &&
       MediaQuery.of(context).size.width < 1024;
@@ -59,6 +62,7 @@ extension ResponsiveBuildContext on BuildContext {
   bool get isMobile => ResponsiveUtils.isMobile(this);
   bool get isTablet => ResponsiveUtils.isTablet(this);
   bool get isDesktop => ResponsiveUtils.isDesktop(this);
+  bool get isSmallPhone => ResponsiveUtils.isSmallPhone(this);
 }
 
 /// Widget para layouts adaptativos
