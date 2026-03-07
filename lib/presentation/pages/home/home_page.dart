@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../notifications/notifications_page.dart';
+import '../profile/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -1600,10 +1601,14 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {
         if (index == 2) {
-          // Alertas/Notificaciones
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const NotificationsPage()),
+          );
+        } else if (index == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProfilePage()),
           );
         } else {
           setState(() {
