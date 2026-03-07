@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/chip_pestana_notificaciones.dart';
+
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
@@ -11,6 +13,33 @@ class _NotificationsPageState extends State<NotificationsPage> {
   int _selectedIndex = 2; // Alertas tab selected
   String _selectedTab = 'Todas';
   int _unreadCount = 2;
+
+  void _markAllAsRead() {
+    setState(() {
+      for (var notification in notifications) {
+        notification['unread'] = false;
+      }
+      _unreadCount = 0;
+    });
+  }
+
+  void _markAsRead(Map<String, dynamic> notification) {
+    setState(() {
+      if (notification['unread'] == true) {
+        notification['unread'] = false;
+        _unreadCount = _unreadCount > 0 ? _unreadCount - 1 : 0;
+      }
+    });
+  }
+
+  void _deleteNotification(Map<String, dynamic> notification) {
+    setState(() {
+      if (notification['unread'] == true) {
+        _unreadCount = _unreadCount > 0 ? _unreadCount - 1 : 0;
+      }
+      notifications.remove(notification);
+    });
+  }
 
   // Sample notifications data
   final List<Map<String, dynamic>> notifications = [
@@ -135,39 +164,56 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ),
                       ),
                       SizedBox(height: 4),
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEF4444),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '$_unreadCount sin leer',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                      if (_unreadCount > 0)
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$_unreadCount sin leer',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Leer todo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                  if (_unreadCount > 0)
+                    GestureDetector(
+                      onTap: _markAllAsRead,
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Leer todo',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -190,66 +236,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
           children: tabs
               .map((tab) => Padding(
                     padding: EdgeInsets.only(right: 12),
-                    child: GestureDetector(
+                    child: ChipPestanaNotificaciones(
+                      label: tab,
+                      isSelected: _selectedTab == tab,
+                      leading: _buildTabLeading(tab),
                       onTap: () => setState(() => _selectedTab = tab),
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: _selectedTab == tab
-                              ? Color(0xFF5B6FED)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (tab == 'Reservas')
-                              Padding(
-                                padding: EdgeInsets.only(right: 6),
-                                child: Icon(
-                                  Icons.check_circle,
-                                  color: Color(0xFF10B981),
-                                  size: 16,
-                                ),
-                              ),
-                            if (tab == 'Recordatorios')
-                              Padding(
-                                padding: EdgeInsets.only(right: 6),
-                                child: Text(
-                                  '⏰',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            if (tab == 'Promos')
-                              Padding(
-                                padding: EdgeInsets.only(right: 6),
-                                child: Text(
-                                  '🎁',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            Text(
-                              tab,
-                              style: TextStyle(
-                                color: _selectedTab == tab
-                                    ? Colors.white
-                                    : Colors.grey.shade600,
-                                fontWeight: _selectedTab == tab
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ))
               .toList(),
         ),
       ),
     );
+  }
+
+  Widget? _buildTabLeading(String tab) {
+    if (tab == 'Reservas') {
+      return Icon(
+        Icons.check_circle,
+        color: Color(0xFF10B981),
+        size: 16,
+      );
+    }
+
+    if (tab == 'Recordatorios') {
+      return Text(
+        '⏰',
+        style: TextStyle(fontSize: 14),
+      );
+    }
+
+    if (tab == 'Promos') {
+      return Text(
+        '🎁',
+        style: TextStyle(fontSize: 14),
+      );
+    }
+
+    return null;
   }
 
   Widget _buildNotificationsList() {
@@ -390,20 +413,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 ),
                 Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'Marcar leído',
-                        style: TextStyle(
-                          color: Color(0xFF3B82F6),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                    if (notification['unread'])
+                      GestureDetector(
+                        onTap: () => _markAsRead(notification),
+                        child: Text(
+                          'Marcar leído',
+                          style: TextStyle(
+                            color: Color(0xFF3B82F6),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 12),
+                    if (notification['unread']) SizedBox(width: 12),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => _deleteNotification(notification),
                       child: Icon(
                         Icons.delete_outline,
                         color: Color(0xFFEF4444),
