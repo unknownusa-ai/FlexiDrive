@@ -491,37 +491,70 @@ class _ReservasPageState extends State<ReservasPage> {
                   ],
                 ),
                 SizedBox(height: 14),
-                // Ver Detalles button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Ver detalles action
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF5B6FED),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Ver Detalles',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                // Ver Detalles button and Rating button
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Ver detalles action
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF5B6FED),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
+                          elevation: 0,
                         ),
-                        SizedBox(width: 4),
-                        Icon(Icons.chevron_right, size: 18),
-                      ],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Ver Detalles',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(Icons.chevron_right, size: 18),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Calificar action
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFFCD34D),
+                        foregroundColor: Color(0xFFF59E0B),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star_rounded, size: 20),
+                          SizedBox(width: 6),
+                          Text(
+                            'Calificar',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
