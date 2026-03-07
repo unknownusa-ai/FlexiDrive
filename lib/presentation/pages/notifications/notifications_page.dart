@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../home/home_page.dart';
 import 'widgets/chip_pestana_notificaciones.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -477,6 +478,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
+        if (index == 0) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          }
+          return;
+        }
+
         setState(() {
           _selectedIndex = index;
         });
