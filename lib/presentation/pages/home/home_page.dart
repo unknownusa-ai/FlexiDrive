@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../notifications/notifications_page.dart';
+import '../reservas/reservas_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -1599,17 +1600,27 @@ class _HomePageState extends State<HomePage> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
+        if (index == 1) {
+          // Reservas
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReservasPage()),
+          );
+          return;
+        }
+
         if (index == 2) {
           // Alertas/Notificaciones
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const NotificationsPage()),
           );
-        } else {
-          setState(() {
-            _selectedIndex = index;
-          });
+          return;
         }
+
+        setState(() {
+          _selectedIndex = index;
+        });
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
