@@ -295,6 +295,7 @@ class _ReservasPageState extends State<ReservasPage> {
             statusColor: Color(0xFF06B6D4),
             imageUrl:
                 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80', // Example car image
+            showEnCurso: true,
           ),
         ],
       );
@@ -346,6 +347,7 @@ class _ReservasPageState extends State<ReservasPage> {
     required String status,
     required Color statusColor,
     required String imageUrl,
+    bool showEnCurso = false,
   }) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -363,47 +365,88 @@ class _ReservasPageState extends State<ReservasPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Vehicle Image (compact)
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-            child: Container(
-              height: 140,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFFE5E7EB),
-                    Color(0xFFD1D5DB),
-                  ],
+          // Vehicle Image (compact) with EN CURSO badge
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: Container(
+                  height: 140,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFE5E7EB),
+                        Color(0xFFD1D5DB),
+                      ],
+                    ),
+                  ),
+                  child: imageUrl.isEmpty
+                      ? _buildPlaceholder()
+                      : imageUrl.startsWith('http')
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return _buildPlaceholder();
+                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return _buildPlaceholder();
+                              },
+                            )
+                          : Image.asset(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return _buildPlaceholder();
+                              },
+                            ),
                 ),
               ),
-              child: imageUrl.isEmpty
-                  ? _buildPlaceholder()
-                  : imageUrl.startsWith('http')
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _buildPlaceholder();
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return _buildPlaceholder();
-                          },
-                        )
-                      : Image.asset(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _buildPlaceholder();
-                          },
+              // EN CURSO badge (solo en activas)
+              if (showEnCurso)
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF5B6FED),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                          ),
                         ),
-            ),
+                        SizedBox(width: 6),
+                        Text(
+                          'EN CURSO',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
           // Card content
           Padding(
