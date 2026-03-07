@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../login/login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -32,14 +33,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
+    final scale = ResponsiveUtils.scale(context, 1.0);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF6B5BCD),
-      body: Column(
+      backgroundColor: const Color(0xFF7B61FF),
+      body: ConstrainedContainer(
+        maxWidth: 600,
+        child: Column(
         children: [
           // Header Section
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16 * scale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -50,38 +56,38 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Icon(
                           Icons.arrow_back_ios,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withAlpha((0.9 * 255).round()),
                           size: 18,
                         ),
                         Text(
                           'Atrás',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withAlpha((0.9 * 255).round()),
                             fontSize: 14,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24 * scale),
                   // Title
-                  const Text(
+                  Text(
                     'Crear Cuenta 🎉',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: ResponsiveUtils.fontSize(context, 32),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8 * scale),
                   Text(
                     'Únete a miles de usuarios FlexiDrive',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
+                      color: Colors.white.withAlpha((0.8 * 255).round()),
+                      fontSize: ResponsiveUtils.fontSize(context, 14),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24 * scale),
                 ],
               ),
             ),
@@ -97,7 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24 * scale),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -296,10 +302,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 56,
                           decoration: _acceptTerms
                               ? BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF4F7DF3), Color(0xFF6B5BCD)],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [Color(0xFF4F7DF3), Color(0xFF7B61FF)],
                                   ),
                                   borderRadius: BorderRadius.circular(16),
                                 )
@@ -369,8 +375,9 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLabel(String text) {
     return Text(

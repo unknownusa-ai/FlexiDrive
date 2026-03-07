@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -16,26 +17,29 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: Column(
-        children: [
-          _buildHeaderWithStats(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Column(children: [
-                _buildDarkModeToggle(),
-                const SizedBox(height: 8),
-                _buildAccountSection(),
-                const SizedBox(height: 8),
-                _buildActivitySection(),
-                const SizedBox(height: 8),
-                _buildLogoutButton(),
-                const SizedBox(height: 4),
-                _buildVersionInfo(),
-              ]),
+      body: ConstrainedContainer(
+        maxWidth: 800,
+        child: Column(
+          children: [
+            _buildHeaderWithStats(),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Column(children: [
+                  _buildDarkModeToggle(),
+                  const SizedBox(height: 8),
+                  _buildAccountSection(),
+                  const SizedBox(height: 8),
+                  _buildActivitySection(),
+                  const SizedBox(height: 8),
+                  _buildLogoutButton(),
+                  const SizedBox(height: 4),
+                  _buildVersionInfo(),
+                ]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

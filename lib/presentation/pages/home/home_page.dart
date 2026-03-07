@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,32 +42,35 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 20),
-              _buildPromoBanner(),
-              const SizedBox(height: 24),
-              _buildDateSelector(),
-              const SizedBox(height: 24),
-              _buildCategories(),
-              const SizedBox(height: 24),
-              if (_selectedCategory == 'Todos') ...[
-                _buildDestacadosSection(),
+          child: ConstrainedContainer(
+            maxWidth: 800,
+            child: Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 20),
+                _buildPromoBanner(),
                 const SizedBox(height: 24),
-                _buildAllVehiclesSection(),
+                _buildDateSelector(),
                 const SizedBox(height: 24),
-              ] else if (_selectedCategory == 'Sedán') ...[
-                _buildSedanSection(),
+                _buildCategories(),
                 const SizedBox(height: 24),
-              ] else if (_selectedCategory == 'SUV') ...[
-                _buildSUVSection(),
-                const SizedBox(height: 24),
-              ] else if (_selectedCategory == 'Compacto') ...[
-                _buildCompactoSection(),
-                const SizedBox(height: 24),
+                if (_selectedCategory == 'Todos') ...[
+                  _buildDestacadosSection(),
+                  const SizedBox(height: 24),
+                  _buildAllVehiclesSection(),
+                  const SizedBox(height: 24),
+                ] else if (_selectedCategory == 'Sedán') ...[
+                  _buildSedanSection(),
+                  const SizedBox(height: 24),
+                ] else if (_selectedCategory == 'SUV') ...[
+                  _buildSUVSection(),
+                  const SizedBox(height: 24),
+                ] else if (_selectedCategory == 'Compacto') ...[
+                  _buildCompactoSection(),
+                  const SizedBox(height: 24),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
