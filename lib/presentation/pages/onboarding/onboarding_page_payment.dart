@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class OnboardingPagePayment extends StatefulWidget {
   const OnboardingPagePayment({super.key});
@@ -78,16 +79,18 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
 
   @override
   Widget build(BuildContext context) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return Container(
       color: const Color(0xFFF5F3FF),
       child: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 80),
+            SizedBox(height: isSmallPhone ? 50 : 80),
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
+                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 20 : 40),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -104,7 +107,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                                   0,
                                   -5 + (_floatAnimation.value * 10),
                                 ),
-                                child: _buildCreditCard(_tagAnimation),
+                                child: _buildCreditCard(_tagAnimation, isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -112,7 +115,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                       },
                     ),
                     Positioned(
-                      bottom: 75,
+                      bottom: isSmallPhone ? 55 : 75,
                       child: Row(
                         children: [
                           AnimatedBuilder(
@@ -120,27 +123,27 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method1Animation.value),
-                                child: _buildPaymentMethod('💳 Tarjeta'),
+                                child: _buildPaymentMethod('💳 Tarjeta', isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: isSmallPhone ? 4 : 8),
                           AnimatedBuilder(
                             animation: _method2Animation,
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method2Animation.value),
-                                child: _buildPaymentMethod('🏦 PSE'),
+                                child: _buildPaymentMethod('🏦 PSE', isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: isSmallPhone ? 4 : 8),
                           AnimatedBuilder(
                             animation: _method3Animation,
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method3Animation.value),
-                                child: _buildPaymentMethod('💵 Efectivo'),
+                                child: _buildPaymentMethod('💵 Efectivo', isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -154,25 +157,25 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             Expanded(
               flex: 1,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Paga fácil\ny seguro',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: isSmallPhone ? 22 : 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
+                        color: const Color(0xFF1F2937),
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
+                    SizedBox(height: isSmallPhone ? 10 : 16),
+                    Text(
                       'Múltiples métodos de pago: tarjeta, PSE o efectivo. Tus datos siempre protegidos.',
                       style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF6B7280),
+                        fontSize: isSmallPhone ? 14 : 16,
+                        color: const Color(0xFF6B7280),
                         height: 1.5,
                       ),
                     ),
@@ -180,17 +183,17 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 ),
               ),
             ),
-            const SizedBox(height: 180),
+            SizedBox(height: isSmallPhone ? 140 : 180),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCreditCard(Animation<double> tagAnimation) {
+  Widget _buildCreditCard(Animation<double> tagAnimation, {required bool isSmallPhone}) {
     return Container(
-      width: 260,
-      height: 160,
+      width: isSmallPhone ? 220 : 260,
+      height: isSmallPhone ? 135 : 160,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
@@ -230,21 +233,21 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                         width: 1,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.lock,
-                          size: 10,
-                          color: Color(0xFF16A34A),
+                          size: isSmallPhone ? 8 : 10,
+                          color: const Color(0xFF16A34A),
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'SEGURO',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: isSmallPhone ? 8 : 10,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF16A34A),
+                            color: const Color(0xFF16A34A),
                           ),
                         ),
                       ],
@@ -258,8 +261,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             top: 20,
             left: 20,
             child: Container(
-              width: 50,
-              height: 35,
+              width: isSmallPhone ? 42 : 50,
+              height: isSmallPhone ? 28 : 35,
               decoration: BoxDecoration(
                 color: const Color(0xFFFACC15),
                 borderRadius: BorderRadius.circular(6),
@@ -272,7 +275,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             child: Text(
               'FLEXIDRIVE',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: isSmallPhone ? 10 : 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.white.withOpacity(0.8),
                 letterSpacing: 2,
@@ -280,23 +283,23 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             ),
           ),
           Positioned(
-            top: 70,
+            top: isSmallPhone ? 60 : 70,
             left: 20,
             child: Row(
               children: [
                 Text(
                   '•••• •••• ••••',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isSmallPhone ? 14 : 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.9),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   '4821',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isSmallPhone ? 14 : 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -313,16 +316,16 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 Text(
                   'TITULAR',
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: isSmallPhone ? 8 : 9,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   'Carlos R.',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: isSmallPhone ? 10 : 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -339,16 +342,16 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 Text(
                   'VENCE',
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: isSmallPhone ? 8 : 9,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   '12/28',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: isSmallPhone ? 10 : 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -361,9 +364,9 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
     );
   }
 
-  Widget _buildPaymentMethod(String text) {
+  Widget _buildPaymentMethod(String text, {required bool isSmallPhone}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 7 : 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -377,10 +380,10 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
+        style: TextStyle(
+          fontSize: isSmallPhone ? 10 : 12,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF4B5563),
+          color: const Color(0xFF4B5563),
         ),
       ),
     );
