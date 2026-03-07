@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
+import '../../../core/utils/responsive_utils.dart';
 import 'widgets/chip_pestana_notificaciones.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -82,11 +83,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(children: [
-        _buildHeader(),
-        _buildTabs(),
-        Expanded(child: _buildNotificationsList()),
-      ]),
+      body: ConstrainedContainer(
+        maxWidth: 800,
+        child: Column(children: [
+          _buildHeader(),
+          _buildTabs(),
+          Expanded(child: _buildNotificationsList()),
+        ]),
+      ),
     );
   }
 

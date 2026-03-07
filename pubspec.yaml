@@ -15,6 +15,16 @@ dependencies:
   flutter_svg: ^2.0.9
   google_fonts: ^6.2.1
 
+dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "icons/icono.png"
+  adaptive_icon_background: "#6B5BCD"
+  adaptive_icon_foreground: "icons/icono.png"
+
 flutter:
   uses-material-design: true
   assets:

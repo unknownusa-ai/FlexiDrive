@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class ReservasPage extends StatefulWidget {
   const ReservasPage({super.key});
@@ -19,16 +20,19 @@ class _ReservasPageState extends State<ReservasPage> {
       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
       child: Scaffold(
         backgroundColor: const Color(0xFFF9FAFB),
-        body: Column(children: [
-          Stack(clipBehavior: Clip.none, children: [
-            _buildHeader(),
-            Positioned(left: 20, right: 20, bottom: -45, child: _buildStatisticsCards()),
+        body: ConstrainedContainer(
+          maxWidth: 800,
+          child: Column(children: [
+            Stack(clipBehavior: Clip.none, children: [
+              _buildHeader(),
+              Positioned(left: 20, right: 20, bottom: -45, child: _buildStatisticsCards()),
+            ]),
+            const SizedBox(height: 58),
+            _buildFilterButtons(),
+            const SizedBox(height: 20),
+            Expanded(child: _buildReservationsList()),
           ]),
-          const SizedBox(height: 58),
-          _buildFilterButtons(),
-          const SizedBox(height: 20),
-          Expanded(child: _buildReservationsList()),
-        ]),
+        ),
       ),
     );
   }
