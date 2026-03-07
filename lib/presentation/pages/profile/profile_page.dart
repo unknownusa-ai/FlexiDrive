@@ -15,36 +15,51 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: ConstrainedContainer(
-        maxWidth: 800,
-        child: Column(
-          children: [
-            _buildHeaderWithStats(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Column(children: [
-                  _buildDarkModeToggle(),
-                  const SizedBox(height: 8),
-                  _buildAccountSection(),
-                  const SizedBox(height: 8),
-                  _buildActivitySection(),
-                  const SizedBox(height: 8),
-                  _buildLogoutButton(),
-                  const SizedBox(height: 4),
-                  _buildVersionInfo(),
-                ]),
+      body: SafeArea(
+        child: ConstrainedContainer(
+          maxWidth: 800,
+          child: Column(
+            children: [
+              _buildHeaderWithStats(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    isSmallPhone ? 12 : 16, 
+                    8, 
+                    isSmallPhone ? 12 : 16, 
+                    0
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDarkModeToggle(),
+                      SizedBox(height: isSmallPhone ? 6 : 8),
+                      _buildAccountSection(),
+                      SizedBox(height: isSmallPhone ? 6 : 8),
+                      _buildActivitySection(),
+                      SizedBox(height: isSmallPhone ? 6 : 8),
+                      _buildLogoutButton(),
+                      const SizedBox(height: 4),
+                      _buildVersionInfo(),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeaderWithStats() {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -55,57 +70,101 @@ class _ProfilePageState extends State<ProfilePage> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+          padding: EdgeInsets.fromLTRB(
+            isSmallPhone ? 12 : 20, 
+            8, 
+            isSmallPhone ? 12 : 20, 
+            isSmallPhone ? 10 : 14
+          ),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text('Mi Perfil',
-                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.poppins(
+                    color: Colors.white, 
+                    fontSize: isSmallPhone ? 18 : 22, 
+                    fontWeight: FontWeight.bold
+                  )),
               Container(
-                width: 40, height: 40,
+                width: isSmallPhone ? 32 : 40, 
+                height: isSmallPhone ? 32 : 40,
                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
-                child: const Icon(Icons.nights_stay_outlined, color: Colors.white, size: 20),
+                child: Icon(Icons.nights_stay_outlined, color: Colors.white, size: isSmallPhone ? 16 : 20),
               ),
             ]),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(children: [
               CircleAvatar(
-                radius: 30,
+                radius: isSmallPhone ? 24 : 30,
                 backgroundColor: Colors.white,
-                child: const Icon(Icons.person, color: Color(0xFF5B6FED), size: 32),
+                child: Icon(Icons.person, color: const Color(0xFF5B6FED), size: isSmallPhone ? 26 : 32),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: isSmallPhone ? 10 : 14),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Carlos Rodríguez',
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallPhone ? 14 : 18, 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.white
+                    )),
                 Text('carlos.rodriguez@email.com',
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.8))),
-                const SizedBox(height: 4),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallPhone ? 10 : 12, 
+                      color: Colors.white.withOpacity(0.8)
+                    )),
+                const SizedBox(height: 2),
                 Row(children: [
-                  const Icon(Icons.star, color: Color(0xFFFBBF24), size: 13),
-                  const SizedBox(width: 3),
+                  const Icon(Icons.star, color: Color(0xFFFBBF24), size: 12),
+                  const SizedBox(width: 2),
                   Text('4.9',
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
-                  const SizedBox(width: 10),
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold, 
+                        fontSize: isSmallPhone ? 11 : 13, 
+                        color: Colors.white
+                      )),
+                  SizedBox(width: isSmallPhone ? 6 : 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFF10B981), borderRadius: BorderRadius.circular(12)),
+                    padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 5 : 7, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981), 
+                      borderRadius: BorderRadius.circular(12)
+                    ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.check, color: Colors.white, size: 9),
+                      const Icon(Icons.check, color: Colors.white, size: 8),
                       const SizedBox(width: 2),
                       Text('Verificado',
-                          style: GoogleFonts.poppins(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.poppins(
+                            color: Colors.white, 
+                            fontSize: isSmallPhone ? 9 : 10, 
+                            fontWeight: FontWeight.bold
+                          )),
                     ]),
                   ),
                 ]),
               ])),
             ]),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(children: [
-              Expanded(child: _buildStatCard(icon: Icons.directions_car_outlined, value: '2', label: 'Viajes')),
-              const SizedBox(width: 10),
-              Expanded(child: _buildStatCard(icon: Icons.account_balance_wallet_outlined, value: '\$1.3M', label: 'Gastado')),
-              const SizedBox(width: 10),
-              Expanded(child: _buildStatCard(icon: Icons.star_outline, value: '1,240', label: 'Puntos')),
+              Expanded(child: _buildStatCard(
+                icon: Icons.directions_car_outlined, 
+                value: '2', 
+                label: isSmallPhone ? 'Viajes' : 'Viajes'
+              )),
+              SizedBox(width: isSmallPhone ? 6 : 10),
+              Expanded(child: _buildStatCard(
+                icon: Icons.account_balance_wallet_outlined, 
+                value: isSmallPhone ? '\$1.3M' : '\$1.3M', 
+                label: isSmallPhone ? 'Gasto' : 'Gastado'
+              )),
+              SizedBox(width: isSmallPhone ? 6 : 10),
+              Expanded(child: _buildStatCard(
+                icon: Icons.star_outline, 
+                value: '1,240', 
+                label: isSmallPhone ? 'Pts' : 'Puntos'
+              )),
             ]),
           ]),
         ),
@@ -114,48 +173,79 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildStatCard({required IconData icon, required String value, required String label}) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 6 : 10, horizontal: isSmallPhone ? 4 : 6),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: Column(children: [
-        Container(width: 34, height: 34,
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
-            child: Icon(icon, color: Colors.white, size: 17)),
-        const SizedBox(height: 7),
-        Text(value, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text(label, style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.9))),
+        Container(
+          width: isSmallPhone ? 28 : 34, 
+          height: isSmallPhone ? 28 : 34,
+          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+          child: Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17)
+        ),
+        SizedBox(height: isSmallPhone ? 4 : 7),
+        Text(value, style: GoogleFonts.poppins(
+          fontSize: isSmallPhone ? 12 : 15, 
+          fontWeight: FontWeight.bold, 
+          color: Colors.white
+        )),
+        Text(label, style: GoogleFonts.poppins(
+          fontSize: isSmallPhone ? 9 : 11, 
+          fontWeight: FontWeight.w500, 
+          color: Colors.white.withOpacity(0.9)
+        )),
       ]),
     );
   }
 
   Widget _buildDarkModeToggle() {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 6 : 8),
       decoration: BoxDecoration(
         color: Colors.white, borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Row(children: [
-        Container(width: 36, height: 36,
-            decoration: BoxDecoration(color: const Color(0xFFFFF4E6), borderRadius: BorderRadius.circular(9)),
-            child: const Icon(Icons.wb_sunny_outlined, color: Color(0xFFF59E0B), size: 18)),
-        const SizedBox(width: 12),
+        Container(
+          width: isSmallPhone ? 32 : 36, 
+          height: isSmallPhone ? 32 : 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4E6), 
+            borderRadius: BorderRadius.circular(9)
+          ),
+          child: Icon(Icons.wb_sunny_outlined, color: const Color(0xFFF59E0B), size: isSmallPhone ? 16 : 18)
+        ),
+        SizedBox(width: isSmallPhone ? 8 : 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Modo Claro',
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A1A))),
-          Text('Cambiar apariencia de la app',
-              style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 12 : 14, 
+                fontWeight: FontWeight.bold, 
+                color: const Color(0xFF1A1A1A)
+              )),
+          Text('Cambiar apariencia',
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 9 : 11, 
+                color: Colors.grey.shade500
+              )),
         ])),
-        Transform.scale(scale: 0.8, child: CupertinoSwitch(
-          value: _isDarkMode,
-          onChanged: (v) => setState(() => _isDarkMode = v),
-          activeColor: const Color(0xFF5B6FED),
-          trackColor: Colors.grey.shade300,
-        )),
+        Transform.scale(
+          scale: isSmallPhone ? 0.7 : 0.8, 
+          child: CupertinoSwitch(
+            value: _isDarkMode,
+            onChanged: (v) => setState(() => _isDarkMode = v),
+            activeColor: const Color(0xFF5B6FED),
+            trackColor: Colors.grey.shade300,
+          )
+        ),
       ]),
     );
   }
@@ -207,39 +297,63 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildMenuItem({required IconData icon, required Color iconColor, required Color iconBgColor,
       required String title, required String subtitle, required VoidCallback onTap}) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
         child: Row(children: [
-          Container(width: 36, height: 36,
-              decoration: BoxDecoration(color: iconBgColor, borderRadius: BorderRadius.circular(9)),
-              child: Icon(icon, color: iconColor, size: 18)),
-          const SizedBox(width: 12),
+          Container(
+            width: isSmallPhone ? 32 : 36, 
+            height: isSmallPhone ? 32 : 36,
+            decoration: BoxDecoration(color: iconBgColor, borderRadius: BorderRadius.circular(9)),
+            child: Icon(icon, color: iconColor, size: isSmallPhone ? 16 : 18)
+          ),
+          SizedBox(width: isSmallPhone ? 8 : 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A1A))),
-            Text(subtitle, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+            Text(title, 
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 12 : 13, 
+                fontWeight: FontWeight.bold, 
+                color: const Color(0xFF1A1A1A)
+              )),
+            Text(subtitle, 
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 9 : 11, 
+                color: Colors.grey.shade500
+              )),
           ])),
-          Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
+          Icon(Icons.chevron_right, color: Colors.grey.shade400, size: isSmallPhone ? 16 : 18),
         ]),
       ),
     );
   }
 
   Widget _buildLogoutButton() {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    
     return GestureDetector(
       onTap: () => Navigator.of(context).pushReplacementNamed('/login'),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 8 : 11),
         decoration: BoxDecoration(
           color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFFCA5A5)),
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.logout, color: Color(0xFFEF4444), size: 18),
-          const SizedBox(width: 8),
+          Icon(Icons.logout, color: const Color(0xFFEF4444), size: isSmallPhone ? 16 : 18),
+          SizedBox(width: isSmallPhone ? 6 : 8),
           Text('Cerrar Sesión',
-              style: GoogleFonts.poppins(color: const Color(0xFFEF4444), fontSize: 14, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.poppins(
+                color: const Color(0xFFEF4444), 
+                fontSize: isSmallPhone ? 12 : 14, 
+                fontWeight: FontWeight.bold
+              )),
         ]),
       ),
     );
