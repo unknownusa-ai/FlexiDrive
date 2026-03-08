@@ -317,7 +317,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
   ) {
     final unidad = _unidadPeriodo();
     final image = vehiculoImage.isEmpty
-        ? 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80'
+        ? 'assets/imagenes_carros/cx5.jpg'
         : vehiculoImage;
 
     return Container(
@@ -338,7 +338,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
                 SizedBox(
                   height: 110,
                   width: double.infinity,
-                  child: Image.network(
+                  child: Image.asset(
                     image,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(

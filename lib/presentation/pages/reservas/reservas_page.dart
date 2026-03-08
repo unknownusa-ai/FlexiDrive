@@ -322,11 +322,10 @@ class _ReservasPageState extends State<ReservasPage> {
                   ])),
               child: imageUrl.isEmpty
                   ? _buildPlaceholder()
-                  : Image.network(imageUrl,
+                  : Image.asset(imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                      loadingBuilder: (_, child, p) =>
-                          p == null ? child : _buildPlaceholder()),
+                    ),
             ),
           ),
           if (showEnCurso)

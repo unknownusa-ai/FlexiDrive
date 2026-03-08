@@ -36,8 +36,7 @@ class ReservasStore {
       startDate: '22 Feb 2026',
       endDate: '24 Feb 2026',
       location: 'Av. El Dorado, Bogotá',
-      imageUrl:
-          'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80',
+      imageUrl: 'assets/imagenes_carros/cx5.jpg',
     ),
   ]);
 

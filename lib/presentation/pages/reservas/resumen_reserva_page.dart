@@ -310,8 +310,8 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: Image.network(
-              'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
+            child: Image.asset(
+              'assets/imagenes_carros/cx5.jpg',
               height: isSmallPhone ? 180 : 220,
               width: double.infinity,
               fit: BoxFit.cover,

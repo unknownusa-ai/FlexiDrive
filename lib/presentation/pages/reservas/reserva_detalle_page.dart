@@ -146,8 +146,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.network(
-              widget.vehicleImage ?? 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80',
+            child: Image.asset(
+              widget.vehicleImage ?? 'assets/imagenes_carros/cx5.jpg',
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                 color: const Color(0xFFE5E7EB),

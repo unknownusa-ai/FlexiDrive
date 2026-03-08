@@ -504,11 +504,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               _buildFeaturedCard(title: 'Mazda CX-5 2024', type: 'SUV', typeColor: const Color(0xFF4F46E5),
                   rating: 4.9, reviews: 128, price: 38000,
-                  image: 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Mazda+CX-5'),
+                  image: 'assets/imagenes_carros/cx5.jpg'),
               const SizedBox(width: 16),
               _buildFeaturedCard(title: 'Toyota Corolla 2024', type: 'Sedán', typeColor: const Color(0xFFE53935),
                   rating: 4.8, reviews: 245, price: 25000,
-                  image: 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Toyota+Corolla'),
+                  image: 'assets/imagenes_carros/corolla.jpg'),
             ],
           ),
         ),
@@ -540,7 +540,7 @@ class _HomePageState extends State<HomePage> {
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             child: Stack(
               children: [
-                Image.network(image, height: 135, width: 210, fit: BoxFit.cover,
+                Image.asset(image, height: 135, width: 210, fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       height: 135, width: 210,
                       color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
@@ -629,12 +629,12 @@ class _HomePageState extends State<HomePage> {
   Widget _buildAllVehiclesSection() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final List<Map<String, dynamic>> vehicles = [
-      {'name': 'Mazda CX-5 2024',      'specs': '2024 • Automático • 5 puestos', 'rating': 4.9, 'reviews': 128,  'price': 38000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Mazda+CX-5'},
-      {'name': 'Toyota Corolla 2024',   'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 245,  'price': 25000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Toyota+Corolla'},
-      {'name': 'Renault Sandero 2023',  'specs': '2023 • Manual • 5 puestos',     'rating': 4.6, 'reviews': 189,  'price': 18000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Renault+Sandero'},
-      {'name': 'Mercedes GLE 2024',     'specs': '2024 • Automático • 5 puestos', 'rating': 4.7, 'reviews': 67,   'price': 65000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Mercedes+GLE'},
-      {'name': 'Porsche 718 2023',      'specs': '2023 • Automático • 2 puestos', 'rating': 4.9, 'reviews': 43,   'price': 80000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Porsche+718'},
-      {'name': 'Tesla Model 3 2024',    'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 156,  'price': 45000, 'image': 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=Tesla+Model+3'},
+      {'name': 'Mazda CX-5 2024',      'specs': '2024 • Automático • 5 puestos', 'rating': 4.9, 'reviews': 128,  'price': 38000, 'image': 'assets/imagenes_carros/cx5.jpg'},
+      {'name': 'Toyota Corolla 2024',   'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 245,  'price': 25000, 'image': 'assets/imagenes_carros/corolla.jpg'},
+      {'name': 'Renault Sandero 2023',  'specs': '2023 • Manual • 5 puestos',     'rating': 4.6, 'reviews': 189,  'price': 18000, 'image': 'assets/imagenes_carros/Renault-Sandero.jpg'},
+      {'name': 'Mercedes GLE 2024',     'specs': '2024 • Automático • 5 puestos', 'rating': 4.7, 'reviews': 67,   'price': 65000, 'image': 'assets/imagenes_carros/mercedes.jpg'},
+      {'name': 'Porsche 718 2023',      'specs': '2023 • Automático • 2 puestos', 'rating': 4.9, 'reviews': 43,   'price': 80000, 'image': 'assets/imagenes_carros/porsche.jpg'},
+      {'name': 'Tesla Model 3 2024',    'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 156,  'price': 45000, 'image': 'assets/imagenes_carros/tesla.jpg'},
     ];
 
     return Column(
@@ -681,7 +681,7 @@ class _HomePageState extends State<HomePage> {
       child: Row(children: [
         ClipRRect(
           borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
-          child: Image.network(
+          child: Image.asset(
             vehicle['image'],
             width: isSmallPhone ? 100 : 120,
             height: isSmallPhone ? 100 : 120,
@@ -827,7 +827,7 @@ class _HomePageState extends State<HomePage> {
     _buildCategoryHeader('🚗', 'Sedán', '1 disponibles'),
     const SizedBox(height: 16),
     Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Toyota Corolla 2024', '2024 • Automático • 5 puestos', 4.8, 245, 25000)),
+        child: _buildHorizontalCard('Toyota Corolla 2024', '2024 • Automático • 5 puestos', 4.8, 245, 25000, 'assets/imagenes_carros/corolla.jpg')),
     const SizedBox(height: 24),
     _buildCompareSection(true),
   ]);
@@ -836,7 +836,7 @@ class _HomePageState extends State<HomePage> {
     _buildCategoryHeader('🚙', 'SUV', '1 disponibles'),
     const SizedBox(height: 16),
     Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Mazda CX-5 2024', '2024 • Automático • 5 puestos', 4.9, 128, 38000)),
+        child: _buildHorizontalCard('Mazda CX-5 2024', '2024 • Automático • 5 puestos', 4.9, 128, 38000, 'assets/imagenes_carros/cx5.jpg')),
     const SizedBox(height: 24),
     _buildCompareSection(true),
   ]);
@@ -845,7 +845,7 @@ class _HomePageState extends State<HomePage> {
     _buildCategoryHeader('🚗', 'Compacto', '1 disponibles'),
     const SizedBox(height: 16),
     Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Renault Sandero 2023', '2023 • Manual • 5 puestos', 4.6, 189, 18000)),
+        child: _buildHorizontalCard('Renault Sandero 2023', '2023 • Manual • 5 puestos', 4.6, 189, 18000, 'assets/imagenes_carros/Renault-Sandero.jpg')),
     const SizedBox(height: 24),
     _buildCompareSection(true),
   ]);
@@ -869,7 +869,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHorizontalCard(String name, String specs, double rating, int reviews, int price) {
+  Widget _buildHorizontalCard(String name, String specs, double rating, int reviews, int price, String image) {
     return Container(
       decoration: BoxDecoration(
         color: _cardBg,
@@ -880,10 +880,17 @@ class _HomePageState extends State<HomePage> {
       child: Row(children: [
         ClipRRect(
           borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
-          child: Container(
-            width: 120, height: 120,
-            color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-            child: Icon(Icons.directions_car, size: 50, color: Colors.white.withValues(alpha: 0.25)),
+          child: Image.asset(
+            image,
+            width: 120,
+            height: 120,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              width: 120,
+              height: 120,
+              color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
+              child: Icon(Icons.directions_car, size: 50, color: Colors.white.withValues(alpha: 0.25)),
+            ),
           ),
         ),
         Expanded(
@@ -919,7 +926,7 @@ class _HomePageState extends State<HomePage> {
                         vehicleRating: rating,
                         vehicleReviews: reviews,
                         vehiclePrice: price,
-                        vehicleImage: 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=${name.replaceAll(' ', '+')}',
+                        vehicleImage: image,
                       )),
                     ),
                     child: Container(
