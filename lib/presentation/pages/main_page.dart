@@ -48,12 +48,17 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildBottomNavBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: isDark 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -77,7 +82,15 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildNavItem(IconData icon, String label, int index) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _selectedIndex == index;
+    
+    final selectedColor = const Color(0xFF2563EB);
+    final unselectedColor = isDark 
+        ? const Color(0xFF8B93B8)  // dark text secondary
+        : Colors.grey.shade400;
+    
     return GestureDetector(
       onTap: () => setIndex(index),
       child: Column(
@@ -87,13 +100,13 @@ class _MainPageState extends State<MainPage> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF5B6FED).withOpacity(0.1)
+                  ? selectedColor.withOpacity(isDark ? 0.2 : 0.1)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              color: isSelected ? selectedColor : unselectedColor,
               size: 24,
             ),
           ),
@@ -101,7 +114,7 @@ class _MainPageState extends State<MainPage> {
           Text(
             label,
             style: GoogleFonts.poppins(
-              color: isSelected ? const Color(0xFF5B6FED) : Colors.grey.shade400,
+              color: isSelected ? selectedColor : unselectedColor,
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),

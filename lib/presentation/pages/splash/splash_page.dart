@@ -48,12 +48,10 @@ class _SplashPageState extends State<SplashPage>
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
             colors: [
-              Color(0xFF4D8FF5),
-              Color(0xFF5566E8),
-              Color(0xFF7345D6),
-              Color(0xFF6B28C8),
+              Color(0xFF4F46E5),
+              Color(0xFF7C3AED),
             ],
-            stops: [0.0, 0.30, 0.65, 1.0],
+            stops: [0.0, 1.0],
           ),
         ),
         child: Stack(
