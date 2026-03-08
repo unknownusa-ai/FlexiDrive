@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../onboarding/onboarding_page.dart';
+import '../main_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -22,11 +24,23 @@ class _SplashPageState extends State<SplashPage>
     );
     _progressAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
     
-    _progressAnimation.addStatusListener((status) {
+    _progressAnimation.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const OnboardingPage()),
-        );
+        final prefs = await SharedPreferences.getInstance();
+        final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+        
+        if (mounted) {
+          if (hasSeenOnboarding) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainPage()),
+            );
+          } else {
+            await prefs.setBool('has_seen_onboarding', true);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const OnboardingPage()),
+            );
+          }
+        }
       }
     });
     
