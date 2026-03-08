@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/responsive_utils.dart';
+import 'factura_digital_page.dart';
 import '../main_page.dart';
 
 class ReservaConfirmadaPage extends StatelessWidget {
@@ -53,6 +54,34 @@ class ReservaConfirmadaPage extends StatelessWidget {
     if (periodoLower.contains('hora')) return 'horas';
     if (periodoLower.contains('semana')) return 'semanas';
     return 'días';
+  }
+
+  String _mesCortoEs(int month) {
+    const meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
+    ];
+    return meses[month - 1];
+  }
+
+  String _fechaFactura() {
+    final now = DateTime.now();
+    return '${now.day.toString().padLeft(2, '0')} ${_mesCortoEs(now.month)} ${now.year}';
+  }
+
+  String _numeroFactura() {
+    final base = codigoReserva.replaceFirst('FXD-', '');
+    return 'FXD-INV-$base';
   }
 
   @override
@@ -398,19 +427,15 @@ class ReservaConfirmadaPage extends StatelessWidget {
     Color borderColor,
     Color textPrimary,
   ) {
-    Widget buildAction(String label, IconData icon, Color iconColor) {
+    Widget buildAction(
+      String label,
+      IconData icon,
+      Color iconColor,
+      VoidCallback onPressed,
+    ) {
       return Expanded(
         child: OutlinedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '$label próximamente',
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                ),
-              ),
-            );
-          },
+          onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             side: BorderSide(color: borderColor),
             shape:
@@ -433,9 +458,35 @@ class ReservaConfirmadaPage extends StatelessWidget {
     return Row(
       children: [
         buildAction(
-            'Ver factura', Icons.download_outlined, const Color(0xFF2563EB)),
+            'Ver factura', Icons.download_outlined, const Color(0xFF2563EB),
+            () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FacturaDigitalPage(
+                numeroFactura: _numeroFactura(),
+                fecha: _fechaFactura(),
+                descripcionServicio: 'Renta Vehículo',
+                cantidad: cantidad,
+                periodoUnidad: _unidadPeriodo().replaceAll('s', ''),
+                tarifaServicio: 0,
+                seguroBasico: totalPagado,
+              ),
+            ),
+          );
+        }),
         const SizedBox(width: 12),
-        buildAction('Compartir', Icons.share_outlined, const Color(0xFF7C3AED)),
+        buildAction('Compartir', Icons.share_outlined, const Color(0xFF7C3AED),
+            () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Compartir próximamente',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+        }),
       ],
     );
   }
