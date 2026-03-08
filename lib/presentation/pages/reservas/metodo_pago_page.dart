@@ -9,11 +9,17 @@ class MetodoPagoPage extends StatefulWidget {
     this.total = 54900,
     this.alquilerVehiculo = 38000,
     this.servicioSeguro = 16900,
+    this.periodo = 'Semanas',
+    this.cantidad = 1,
+    this.precioUnitario = 38000,
   });
 
   final int total;
   final int alquilerVehiculo;
   final int servicioSeguro;
+  final String periodo;
+  final int cantidad;
+  final int precioUnitario;
 
   @override
   State<MetodoPagoPage> createState() => _MetodoPagoPageState();
@@ -639,7 +645,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildResumenLinea('Alquiler vehiculo', widget.alquilerVehiculo),
+          _buildResumenLineaDetallada(),
           const SizedBox(height: 8),
           _buildResumenLinea('Servicio + Seguro', widget.servicioSeguro),
           const SizedBox(height: 16),
@@ -674,8 +680,68 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  Widget _buildResumenLineaDetallada() {
+    String unidadLabel = widget.cantidad == 1
+        ? widget.periodo.toLowerCase().replaceAll('s', '')
+        : widget.periodo.toLowerCase();
+
+    final precioFormateado = _formatearPrecio(widget.precioUnitario);
+    final totalAlquilerFormateado = _formatearPrecio(widget.alquilerVehiculo);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Alquiler vehículo',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: _textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              '\$ $totalAlquilerFormateado',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: _textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '\$ $precioFormateado x ${widget.cantidad} $unidadLabel',
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: _textSecondary.withOpacity(0.7),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatearPrecio(int precio) {
+    final asString = precio.toString();
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < asString.length; i++) {
+      final reverseIndex = asString.length - i;
+      buffer.write(asString[i]);
+      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
+        buffer.write('.');
+      }
+    }
+
+    return buffer.toString();
+  }
+
   Widget _buildResumenLinea(String label, int monto) {
-    final montoFormateado = monto.toString();
+    final montoFormateado = _formatearPrecio(monto);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

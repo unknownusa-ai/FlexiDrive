@@ -657,7 +657,11 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ResumenReservaPage(),
+                            builder: (context) => ResumenReservaPage(
+                              periodo: _periodoSeleccionado,
+                              cantidad: _cantidad,
+                              precioUnitario: _precioUnitario,
+                            ),
                           ),
                         );
                       },
@@ -735,7 +739,11 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ResumenReservaPage(),
+                              builder: (context) => ResumenReservaPage(
+                                periodo: _periodoSeleccionado,
+                                cantidad: _cantidad,
+                                precioUnitario: _precioUnitario,
+                              ),
                             ),
                           );
                         },

@@ -227,6 +227,9 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                                       widget.precioUnitario * widget.cantidad,
                                   servicioSeguro: widget.tarifaServicio +
                                       widget.seguroBasico,
+                                  periodo: widget.periodo,
+                                  cantidad: widget.cantidad,
+                                  precioUnitario: widget.precioUnitario,
                                 ),
                               ),
                             );
