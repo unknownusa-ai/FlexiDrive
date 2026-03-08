@@ -200,7 +200,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.arrow_back_ios_new,
@@ -258,7 +258,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       );
     } else {
       // Step futuro (paso 3) - fondo semi-transparente con número blanco
-      backgroundColor = Colors.white.withOpacity(0.3);
+      backgroundColor = Colors.white.withValues(alpha: 0.3);
       child = Text(
         '$step',
         style: GoogleFonts.poppins(
@@ -285,7 +285,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       width: 60,
       height: 2,
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      color: completed ? Colors.white : Colors.white.withOpacity(0.3),
+      color: completed ? Colors.white : Colors.white.withValues(alpha: 0.3),
     );
   }
 
@@ -414,7 +414,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 letterSpacing: 1,
               ),
             ),
@@ -520,10 +520,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           Container(
             padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF4F46E5).withOpacity(0.1),
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFF4F46E5).withOpacity(0.2),
+                color: const Color(0xFF4F46E5).withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -532,7 +532,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                   width: isSmallPhone ? 36 : 40,
                   height: isSmallPhone ? 36 : 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5).withOpacity(0.15),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -590,7 +590,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 width: isSmallPhone ? 36 : 40,
                 height: isSmallPhone ? 36 : 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.15),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -633,7 +633,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                   _isDark ? const Color(0xFF0F3D2D) : const Color(0xFFD1FAE5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFF10B981).withOpacity(0.5),
+                color: const Color(0xFF10B981).withValues(alpha: 0.5),
               ),
             ),
             child: Row(
@@ -780,7 +780,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           '\$ $precioFormateado x ${widget.cantidad} $unidadLabel',
           style: GoogleFonts.poppins(
             fontSize: 12,
-            color: _textSecondary.withOpacity(0.7),
+            color: _textSecondary.withValues(alpha: 0.7),
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -916,7 +916,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               elevation: 8,
-              shadowColor: const Color(0xFF4F46E5).withOpacity(0.35),
+              shadowColor: const Color(0xFF4F46E5).withValues(alpha: 0.35),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

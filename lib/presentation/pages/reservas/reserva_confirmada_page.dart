@@ -184,7 +184,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
             ? const Color(0xFF10B981)
             : active
                 ? const Color(0xFF6366F1)
-                : Colors.white.withOpacity(0.25),
+                : Colors.white.withValues(alpha: 0.25),
       ),
       child: Center(
         child: check
@@ -222,7 +222,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
           height: isSmallPhone ? 90 : 104,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFF10B981).withOpacity(0.18),
+            color: const Color(0xFF10B981).withValues(alpha: 0.18),
           ),
           child: Center(
             child: Container(
@@ -277,7 +277,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
           Text(
             'CÓDIGO DE RESERVA',
             style: GoogleFonts.poppins(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
               fontSize: isSmallPhone ? 12 : 13,
@@ -297,7 +297,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
           Text(
             'Presenta este código al recoger tu vehículo',
             style: GoogleFonts.poppins(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               fontWeight: FontWeight.bold,
               fontSize: isSmallPhone ? 11 : 12,
             ),

@@ -346,7 +346,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         Text(
                           '¿Ya tienes cuenta? ',
                           style: GoogleFonts.poppins(
-                            color: Colors.grey.withOpacity(0.8),
+                            color: Colors.grey.withValues(alpha: 0.8),
                             fontSize: 14,
                           ),
                         ),
@@ -385,7 +385,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        color: Colors.grey.withOpacity(0.7),
+        color: Colors.grey.withValues(alpha: 0.7),
         fontSize: 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
@@ -408,7 +408,7 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.poppins(
-          color: Colors.grey.withOpacity(0.6),
+          color: Colors.grey.withValues(alpha: 0.6),
           fontSize: 14,
         ),
         prefixIcon: Icon(

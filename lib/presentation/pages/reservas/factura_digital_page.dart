@@ -116,7 +116,7 @@ class FacturaDigitalPage extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.16),
+                    color: Colors.white.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.arrow_back_ios_new,
@@ -207,10 +207,10 @@ class FacturaDigitalPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF22C55E).withOpacity(0.12),
+                        color: const Color(0xFF22C55E).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                            color: const Color(0xFF22C55E).withOpacity(0.35)),
+                            color: const Color(0xFF22C55E).withValues(alpha: 0.35)),
                       ),
                       child: Text(
                         '✅ PAGADO',
@@ -351,7 +351,7 @@ class FacturaDigitalPage extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withOpacity(0.13),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

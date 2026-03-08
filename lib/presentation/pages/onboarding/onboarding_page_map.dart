@@ -158,7 +158,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -246,7 +246,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.4),
+                color: color.withValues(alpha: 0.4),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -258,7 +258,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
           width: isSmallPhone ? 8 : 12,
           height: isSmallPhone ? 4 : 6,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
           ),
         ),

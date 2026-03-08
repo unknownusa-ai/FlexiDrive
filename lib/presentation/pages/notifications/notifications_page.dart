@@ -122,7 +122,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         Positioned(right: -40, top: -30,
           child: Container(
             width: 150, height: 150,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.08)),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
           ),
         ),
         SafeArea(child: Padding(
@@ -147,7 +147,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   onTap: _markAllAsRead,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(12)),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       const Icon(Icons.check_rounded, color: Colors.white, size: 16),
                       const SizedBox(width: 5),
@@ -199,7 +199,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           border: isSelected ? null : Border.all(color: _borderColor),
           boxShadow: isSelected
               ? [BoxShadow(
-                  color: const Color(0xFF4F46E5).withOpacity(0.25),
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.25),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 )]
@@ -272,13 +272,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isUnread
-              ? const Color(0xFF4F46E5).withOpacity(0.4)
+              ? const Color(0xFF4F46E5).withValues(alpha: 0.4)
               : _borderColor,
           width: isUnread ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: _isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),

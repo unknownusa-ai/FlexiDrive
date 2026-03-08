@@ -80,7 +80,7 @@ class _ReservasPageState extends State<ReservasPage> {
               const SizedBox(height: 4),
               Text(label,
                   style: GoogleFonts.poppins(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 14,
                       fontWeight: FontWeight.bold)),
             ]),
@@ -127,7 +127,7 @@ class _ReservasPageState extends State<ReservasPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 8,
                 offset: const Offset(0, 2))
           ]),
@@ -142,7 +142,7 @@ class _ReservasPageState extends State<ReservasPage> {
         Flexible(
             child: Text(label,
                 style: GoogleFonts.poppins(
-                    color: textColor.withOpacity(0.85),
+                    color: textColor.withValues(alpha: 0.85),
                     fontSize: 11,
                     fontWeight: FontWeight.bold),
                 maxLines: 1,
@@ -158,7 +158,7 @@ class _ReservasPageState extends State<ReservasPage> {
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-            color: theme.colorScheme.onSurface.withOpacity(0.1),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20)),
         child: Row(children: [
           Expanded(
@@ -178,7 +178,7 @@ class _ReservasPageState extends State<ReservasPage> {
             leadingWidget: Icon(Icons.description_outlined,
                 color: _selectedFilter == 'Historial'
                     ? theme.colorScheme.onSurface
-                    : theme.colorScheme.onSurface.withOpacity(0.5),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 size: 18),
             isSelected: _selectedFilter == 'Historial',
             onTap: () => setState(() => _selectedFilter = 'Historial'),
@@ -206,7 +206,7 @@ class _ReservasPageState extends State<ReservasPage> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 10,
                       offset: const Offset(0, 2))
                 ]
@@ -219,7 +219,7 @@ class _ReservasPageState extends State<ReservasPage> {
               style: GoogleFonts.poppins(
                   color: isSelected
                       ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurface.withOpacity(0.6),
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   fontSize: 14,
                   fontWeight: FontWeight.bold)),
         ]),
@@ -300,7 +300,7 @@ class _ReservasPageState extends State<ReservasPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 2))
           ]),
@@ -317,8 +317,8 @@ class _ReservasPageState extends State<ReservasPage> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                    theme.colorScheme.onSurface.withOpacity(0.1),
-                    theme.colorScheme.onSurface.withOpacity(0.05)
+                    theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    theme.colorScheme.onSurface.withValues(alpha: 0.05)
                   ])),
               child: imageUrl.isEmpty
                   ? _buildPlaceholder()
@@ -381,31 +381,31 @@ class _ReservasPageState extends State<ReservasPage> {
               Text(code,
                   style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Row(children: [
                 Icon(Icons.calendar_today_outlined,
                     size: 14,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(width: 6),
                 Text('$startDate → $endDate',
                     style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 8),
               Row(children: [
                 Icon(Icons.location_on_outlined,
                     size: 14,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(width: 6),
                 Expanded(
                     child: Text(location,
                         style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis)),

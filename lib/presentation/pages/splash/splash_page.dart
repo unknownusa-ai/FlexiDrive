@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../onboarding/onboarding_page.dart';
-import '../main_page.dart';
+import '../login/login_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -32,7 +32,7 @@ class _SplashPageState extends State<SplashPage>
         if (mounted) {
           if (hasSeenOnboarding) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const MainPage()),
+              MaterialPageRoute(builder: (_) => const LoginPage()),
             );
           } else {
             await prefs.setBool('has_seen_onboarding', true);
@@ -79,7 +79,7 @@ class _SplashPageState extends State<SplashPage>
                 height: 460,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.09),
+                  color: Colors.white.withValues(alpha: 0.09),
                 ),
               ),
             ),
@@ -93,7 +93,7 @@ class _SplashPageState extends State<SplashPage>
                 height: 520,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.09),
+                  color: Colors.white.withValues(alpha: 0.09),
                 ),
               ),
             ),
@@ -107,10 +107,10 @@ class _SplashPageState extends State<SplashPage>
                     width: 112,
                     height: 112,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(26),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         width: 1.5,
                       ),
                     ),
@@ -196,7 +196,7 @@ class _SplashPageState extends State<SplashPage>
                       builder: (context, child) {
                         return LinearProgressIndicator(
                           value: _progressAnimation.value,
-                          backgroundColor: Colors.white.withOpacity(0.22),
+                          backgroundColor: Colors.white.withValues(alpha: 0.22),
                           valueColor: const AlwaysStoppedAnimation<Color>(
                               Colors.white),
                           minHeight: 3,

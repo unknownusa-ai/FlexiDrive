@@ -204,7 +204,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.3),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -278,7 +278,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 9 : 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 letterSpacing: 2,
               ),
             ),
@@ -293,7 +293,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                   style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 12 : 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -319,7 +319,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                   style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 7 : 9,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -345,7 +345,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                   style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 7 : 9,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -373,7 +373,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

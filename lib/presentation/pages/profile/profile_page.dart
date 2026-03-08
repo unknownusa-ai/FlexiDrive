@@ -94,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     width: isSmallPhone ? 32 : 40, 
                     height: isSmallPhone ? 32 : 40,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
                     child: Icon(Icons.nights_stay_outlined, color: const Color(0xFF2563EB), size: isSmallPhone ? 16 : 20),
                   ),
                 ]),
@@ -121,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: GoogleFonts.inter(
                           fontSize: isSmallPhone ? 10 : 12, 
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.8)
+                          color: Colors.white.withValues(alpha: 0.8)
                         )),
                     const SizedBox(height: 2),
                     Row(children: [
@@ -186,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
             width: 180,
             height: 180,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -201,15 +201,15 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 6 : 10, horizontal: isSmallPhone ? 4 : 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(children: [
         Container(
           width: isSmallPhone ? 28 : 34, 
           height: isSmallPhone ? 28 : 34,
-          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
           child: Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17)
         ),
         SizedBox(height: isSmallPhone ? 4 : 7),
@@ -221,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Text(label, style: GoogleFonts.poppins(
           fontSize: isSmallPhone ? 9 : 11, 
           fontWeight: FontWeight.w500, 
-          color: Colors.white.withOpacity(0.9)
+          color: Colors.white.withValues(alpha: 0.9)
         )),
       ]),
     );
@@ -232,12 +232,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
             child: Text('MI CUENTA', style: GoogleFonts.poppins(
-                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), letterSpacing: 0.5))),
         _buildMenuItem(icon: Icons.person_outline, iconColor: const Color(0xFF2563EB),
             iconBgColor: const Color(0xFFF0F4FF), title: 'Editar perfil', subtitle: 'Nombre, foto, documento', onTap: () {
               Navigator.push(
@@ -270,12 +270,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
             child: Text('ACTIVIDAD & SOPORTE', style: GoogleFonts.poppins(
-                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), letterSpacing: 0.5))),
         _buildMenuItem(icon: Icons.history, iconColor: const Color(0xFFF59E0B), iconBgColor: const Color(0xFFFFF4E6), title: 'Historial', subtitle: '4 reservas totales', onTap: () => MainPage.of(context).setIndex(1)),
         Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.notifications_outlined, iconColor: const Color(0xFFEF4444), iconBgColor: const Color(0xFFFEE2E2), title: 'Notificaciones', subtitle: 'Gestionar alertas', onTap: () => MainPage.of(context).setIndex(2)),
@@ -307,12 +307,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
             child: Text('PREFERENCIAS', style: GoogleFonts.poppins(
-                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), letterSpacing: 0.5))),
         _buildThemeToggleItem(isDarkMode, isSmallPhone),
       ]),
     );
@@ -355,7 +355,7 @@ class _ProfilePageState extends State<ProfilePage> {
               maxLines: 1,
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 9 : 11, 
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
               )),
           ])),
           Switch(
@@ -364,7 +364,7 @@ class _ProfilePageState extends State<ProfilePage> {
               final appState = FlexiDriveApp.of(context);
               appState?.setDarkMode(value);
             },
-            activeColor: const Color(0xFFF59E0B),
+            activeThumbColor: const Color(0xFFF59E0B),
           ),
         ]),
       ),
@@ -402,10 +402,10 @@ class _ProfilePageState extends State<ProfilePage> {
               maxLines: 1,
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 9 : 11, 
-                color: theme.colorScheme.onSurface.withOpacity(0.6)
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6)
               )),
           ])),
-          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withOpacity(0.4), size: isSmallPhone ? 16 : 18),
+          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withValues(alpha: 0.4), size: isSmallPhone ? 16 : 18),
         ]),
       ),
     );

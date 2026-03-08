@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../reservas/reserva_detalle_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,7 +43,6 @@ class _HomePageState extends State<HomePage> {
 
   // Dark-mode aware palette helpers
   Color get _cardBg         => _isDark ? const Color(0xFF161827) : Colors.white;
-  Color get _cardBgEl       => _isDark ? const Color(0xFF1F2235) : Colors.white;
   Color get _borderColor    => _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
   Color get _dividerColor   => _isDark ? const Color(0xFF252942) : Colors.grey.shade100;
   Color get _textPrimary    => _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF1A1A1A);
@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               width: 150, height: 150,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.07),
+                color: Colors.white.withValues(alpha: 0.07),
                 shape: BoxShape.circle,
               ),
             ),
@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               width: 60, height: 60,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -138,9 +138,9 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 width: 48, height: 48,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
                                 ),
                                 child: const Icon(Icons.person, color: Colors.white, size: 26),
                               ),
@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Buenas tardes 👋',
-                                      style: GoogleFonts.inter(color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                                      style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
                                   Text('Carlos',
                                       style: GoogleFonts.poppins(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
                                 ],
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
                           onTap: () => MainPage.of(context).setIndex(2),
                           child: Container(
                             width: 44, height: 44,
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
@@ -188,14 +188,14 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
                           child: const Text('🏞️', style: TextStyle(fontSize: 16)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text('Encuentra el vehículo perfecto para ti',
-                        style: GoogleFonts.inter(color: Colors.white.withOpacity(0.8), fontSize: 13)),
+                        style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
                     const SizedBox(height: 18),
                   ],
                 ),
@@ -211,7 +211,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSearchBar() {
     final theme = Theme.of(context);
-    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       height: 52,
@@ -221,8 +220,8 @@ class _HomePageState extends State<HomePage> {
         boxShadow: [
           BoxShadow(
             color: theme.brightness == Brightness.dark 
-                ? Colors.black.withOpacity(0.30)
-                : Colors.black.withOpacity(0.10),
+                ? Colors.black.withValues(alpha: 0.30)
+                : Colors.black.withValues(alpha: 0.10),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -255,7 +254,9 @@ class _HomePageState extends State<HomePage> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: _isDark ? const Color(0xFF4F46E5).withOpacity(0.2) : const Color(0xFFEEF2FF),
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF4F46E5).withValues(alpha: 0.2)
+                    : const Color(0xFFEEF2FF),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -293,7 +294,7 @@ class _HomePageState extends State<HomePage> {
           border: Border.all(color: isDark ? colorScheme.outline : const Color(0xFFD1FAE5), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF10B981).withOpacity(isDark ? 0.15 : 0.08),
+              color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.15 : 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -385,7 +386,7 @@ class _HomePageState extends State<HomePage> {
             ? BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [BoxShadow(color: const Color(0xFF4F46E5).withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: const Color(0xFF4F46E5).withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
               )
             : BoxDecoration(
                 color: _cardBg,
@@ -401,7 +402,7 @@ class _HomePageState extends State<HomePage> {
             )),
             const SizedBox(height: 2),
             Text(date, style: GoogleFonts.inter(
-              color: isSelected ? Colors.white.withOpacity(0.85) : _textSub,
+              color: isSelected ? Colors.white.withValues(alpha: 0.85) : _textSub,
               fontSize: 11,
             )),
           ],
@@ -454,7 +455,7 @@ class _HomePageState extends State<HomePage> {
           border: isSelected ? null : Border.all(color: _borderColor),
           boxShadow: [
             BoxShadow(
-              color: isSelected ? const Color(0xFF4F46E5).withOpacity(0.3) : Colors.black.withOpacity(_isDark ? 0.2 : 0.04),
+              color: isSelected ? const Color(0xFF4F46E5).withValues(alpha: 0.3) : Colors.black.withValues(alpha: _isDark ? 0.2 : 0.04),
               blurRadius: isSelected ? 12 : 4,
               offset: const Offset(0, 2),
             ),
@@ -527,7 +528,7 @@ class _HomePageState extends State<HomePage> {
         border: _isDark ? Border.all(color: _borderColor) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(_isDark ? 0.35 : 0.08),
+            color: Colors.black.withValues(alpha: _isDark ? 0.35 : 0.08),
             blurRadius: 16, offset: const Offset(0, 4),
           ),
         ],
@@ -543,7 +544,7 @@ class _HomePageState extends State<HomePage> {
                     errorBuilder: (_, __, ___) => Container(
                       height: 135, width: 210,
                       color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-                      child: Icon(Icons.directions_car, size: 50, color: Colors.white.withOpacity(0.25)),
+                      child: Icon(Icons.directions_car, size: 50, color: Colors.white.withValues(alpha: 0.25)),
                     )),
                 Positioned(top: 10, left: 10,
                   child: Container(
@@ -593,13 +594,26 @@ class _HomePageState extends State<HomePage> {
                           style: GoogleFonts.poppins(color: const Color(0xFF4F46E5), fontWeight: FontWeight.w700, fontSize: 17)),
                       TextSpan(text: '/hora', style: GoogleFonts.inter(color: _textSub, fontSize: 11)),
                     ])),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
-                        borderRadius: BorderRadius.circular(10),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => ReservaDetallePage(
+                          vehicleName: title,
+                          vehicleSpecs: '$type • 2024 • Automático • 5 puestos',
+                          vehicleRating: rating,
+                          vehicleReviews: reviews,
+                          vehiclePrice: price,
+                          vehicleImage: image,
+                        )),
                       ),
-                      child: Text('RENTAR', style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3)),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text('RENTAR', style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3)),
+                      ),
                     ),
                   ],
                 ),
@@ -662,7 +676,7 @@ class _HomePageState extends State<HomePage> {
         color: _cardBg,
         borderRadius: BorderRadius.circular(16),
         border: _isDark ? Border.all(color: _borderColor) : null,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(_isDark ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: _isDark ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 2))],
       ),
       child: Row(children: [
         ClipRRect(
@@ -676,7 +690,7 @@ class _HomePageState extends State<HomePage> {
               width: isSmallPhone ? 100 : 120,
               height: isSmallPhone ? 100 : 120,
               color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-              child: Icon(Icons.directions_car, size: 36, color: Colors.white.withOpacity(0.3)),
+              child: Icon(Icons.directions_car, size: 36, color: Colors.white.withValues(alpha: 0.3)),
             ),
           ),
         ),
@@ -690,7 +704,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(
-                    color: _isDark ? const Color(0xFF10B981).withOpacity(0.15) : const Color(0xFFD1FAE5),
+                    color: _isDark ? const Color(0xFF10B981).withValues(alpha: 0.15) : const Color(0xFFD1FAE5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text('LIBRE',
@@ -716,17 +730,30 @@ class _HomePageState extends State<HomePage> {
                         style: GoogleFonts.poppins(color: const Color(0xFF4F46E5), fontWeight: FontWeight.w700, fontSize: isSmallPhone ? 15 : 17)),
                     TextSpan(text: '/h', style: GoogleFonts.inter(color: _textSub, fontSize: 11)),
                   ])),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 14, vertical: isSmallPhone ? 7 : 9),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
-                      borderRadius: BorderRadius.circular(10),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ReservaDetallePage(
+                        vehicleName: vehicle['name'],
+                        vehicleSpecs: vehicle['specs'],
+                        vehicleRating: vehicle['rating'],
+                        vehicleReviews: vehicle['reviews'],
+                        vehiclePrice: vehicle['price'],
+                        vehicleImage: vehicle['image'],
+                      )),
                     ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Text('Ver', style: GoogleFonts.inter(color: Colors.white, fontSize: isSmallPhone ? 12 : 13, fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 12),
-                    ]),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 14, vertical: isSmallPhone ? 7 : 9),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text('Ver', style: GoogleFonts.inter(color: Colors.white, fontSize: isSmallPhone ? 12 : 13, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 12),
+                      ]),
+                    ),
                   ),
                 ],
               ),
@@ -746,7 +773,7 @@ class _HomePageState extends State<HomePage> {
           color: _cardBg,
           borderRadius: BorderRadius.circular(20),
           border: _isDark ? Border.all(color: _borderColor) : Border.all(color: Colors.grey.shade100),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(_isDark ? 0.3 : 0.04), blurRadius: 10, offset: const Offset(0, 2))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: _isDark ? 0.3 : 0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
         padding: EdgeInsets.all(isSmallPhone ? 16 : 20),
         child: Column(children: [
@@ -779,9 +806,9 @@ class _HomePageState extends State<HomePage> {
             width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 10 : 12),
             decoration: BoxDecoration(
-              color: _isDark ? const Color(0xFF10B981).withOpacity(0.1) : const Color(0xFFF0FDF4),
+              color: _isDark ? const Color(0xFF10B981).withValues(alpha: 0.1) : const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(12),
-              border: _isDark ? Border.all(color: const Color(0xFF10B981).withOpacity(0.2)) : null,
+              border: _isDark ? Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.2)) : null,
             ),
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Text('🎉', style: TextStyle(fontSize: 16)),
@@ -848,7 +875,7 @@ class _HomePageState extends State<HomePage> {
         color: _cardBg,
         borderRadius: BorderRadius.circular(20),
         border: _isDark ? Border.all(color: _borderColor) : null,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(_isDark ? 0.3 : 0.06), blurRadius: 16, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: _isDark ? 0.3 : 0.06), blurRadius: 16, offset: const Offset(0, 4))],
       ),
       child: Row(children: [
         ClipRRect(
@@ -856,7 +883,7 @@ class _HomePageState extends State<HomePage> {
           child: Container(
             width: 120, height: 120,
             color: _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-            child: Icon(Icons.directions_car, size: 50, color: Colors.white.withOpacity(0.25)),
+            child: Icon(Icons.directions_car, size: 50, color: Colors.white.withValues(alpha: 0.25)),
           ),
         ),
         Expanded(
@@ -883,17 +910,30 @@ class _HomePageState extends State<HomePage> {
                         style: GoogleFonts.poppins(color: const Color(0xFF4F46E5), fontWeight: FontWeight.w700, fontSize: 17)),
                     TextSpan(text: '/h', style: GoogleFonts.inter(color: _textSub, fontSize: 12)),
                   ])),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
-                      borderRadius: BorderRadius.circular(12),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ReservaDetallePage(
+                        vehicleName: name,
+                        vehicleSpecs: specs,
+                        vehicleRating: rating,
+                        vehicleReviews: reviews,
+                        vehiclePrice: price,
+                        vehicleImage: 'https://placehold.co/400x260/1E1B4B/FFFFFF/png?text=${name.replaceAll(' ', '+')}',
+                      )),
                     ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Text('Ver', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 14),
-                    ]),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text('Ver', style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 14),
+                      ]),
+                    ),
                   ),
                 ],
               ),
@@ -986,7 +1026,7 @@ class _HomePageState extends State<HomePage> {
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
                           color: isSel
-                              ? (_isDark ? const Color(0xFF4F46E5).withOpacity(0.15) : const Color(0xFFEEF2FF))
+                              ? (_isDark ? const Color(0xFF4F46E5).withValues(alpha: 0.15) : const Color(0xFFEEF2FF))
                               : (_isDark ? const Color(0xFF1F2235) : Colors.white),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
@@ -999,7 +1039,7 @@ class _HomePageState extends State<HomePage> {
                             width: 38, height: 38,
                             decoration: BoxDecoration(
                               color: isSel
-                                  ? (_isDark ? const Color(0xFF4F46E5).withOpacity(0.2) : const Color(0xFFDDE4FF))
+                                  ? (_isDark ? const Color(0xFF4F46E5).withValues(alpha: 0.2) : const Color(0xFFDDE4FF))
                                   : (_isDark ? const Color(0xFF272B40) : Colors.grey.shade100),
                               borderRadius: BorderRadius.circular(10),
                             ),

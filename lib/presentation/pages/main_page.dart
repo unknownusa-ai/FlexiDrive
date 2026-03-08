@@ -65,8 +65,8 @@ class _MainPageState extends State<MainPage> {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.3)
-                : Colors.black.withOpacity(0.1),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -108,7 +108,7 @@ class _MainPageState extends State<MainPage> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isSelected
-                  ? selectedColor.withOpacity(isDark ? 0.2 : 0.1)
+                  ? selectedColor.withValues(alpha: isDark ? 0.2 : 0.1)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),

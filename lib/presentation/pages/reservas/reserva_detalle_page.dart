@@ -5,7 +5,22 @@ import '../../../core/utils/responsive_utils.dart';
 import 'resumen_reserva_page.dart';
 
 class ReservaDetallePage extends StatefulWidget {
-  const ReservaDetallePage({super.key});
+  final String? vehicleName;
+  final String? vehicleSpecs;
+  final double? vehicleRating;
+  final int? vehicleReviews;
+  final int? vehiclePrice;
+  final String? vehicleImage;
+
+  const ReservaDetallePage({
+    super.key,
+    this.vehicleName,
+    this.vehicleSpecs,
+    this.vehicleRating,
+    this.vehicleReviews,
+    this.vehiclePrice,
+    this.vehicleImage,
+  });
 
   @override
   State<ReservaDetallePage> createState() => _ReservaDetallePageState();
@@ -30,8 +45,6 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       _isDark ? const Color(0xFF272B40) : const Color(0xFFFFFBEB);
   Color get _ratingBorderColor =>
       _isDark ? const Color(0xFF3D4158) : const Color(0xFFFCD7A3);
-  Color get _characteristicBgColor =>
-      _isDark ? const Color(0xFF272B40) : Colors.white;
 
   int get _precioUnitario {
     switch (_periodoSeleccionado) {
@@ -134,7 +147,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
         children: [
           Positioned.fill(
             child: Image.network(
-              'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80',
+              widget.vehicleImage ?? 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80',
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                 color: const Color(0xFFE5E7EB),
@@ -184,7 +197,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                   const Text('🚙', style: TextStyle(fontSize: 12)),
                   const SizedBox(width: 6),
                   Text(
-                    'SUV',
+                    widget.vehicleSpecs?.split('•').first.trim() ?? 'SUV',
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: isSmallPhone ? 16 : 20,
@@ -234,7 +247,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.45),
+          color: Colors.black.withValues(alpha: 0.45),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: isSmallPhone ? 18 : 22),
@@ -251,7 +264,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mazda CX-5 2024',
+                widget.vehicleName ?? 'Mazda CX-5 2024',
                 style: GoogleFonts.poppins(
                   fontSize: isSmallPhone ? 28 : 40,
                   fontWeight: FontWeight.bold,
@@ -260,7 +273,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
               ),
               const SizedBox(height: 2),
               Text(
-                '2024 • Negro Jet',
+                widget.vehicleSpecs ?? '2024 • Negro Jet',
                 style: GoogleFonts.poppins(
                   fontSize: isSmallPhone ? 12 : 14,
                   color: _textSecondary,
@@ -289,7 +302,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                   const Icon(Icons.star, color: Color(0xFFF59E0B), size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    '4.9',
+                    '${widget.vehicleRating ?? 4.9}',
                     style: GoogleFonts.poppins(
                       color: const Color(0xFFF59E0B),
                       fontSize: isSmallPhone ? 14 : 16,
@@ -301,7 +314,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
             ),
             const SizedBox(height: 8),
             Text(
-              '128 reseñas',
+              '${widget.vehicleReviews ?? 128} reseñas',
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 11 : 12,
                 color: _textSecondary,
@@ -319,28 +332,28 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       children: [
         _CaracteristicaItem(
             icon: Icons.people_outline,
-            color: Color(0xFF2563EB),
+            color: const Color(0xFF2563EB),
             label: '5 Puestos',
             isSmallPhone: isSmallPhone,
             isDark: _isDark),
         SizedBox(width: isSmallPhone ? 6 : 10),
         _CaracteristicaItem(
             icon: Icons.settings_outlined,
-            color: Color(0xFF8B5CF6),
+            color: const Color(0xFF8B5CF6),
             label: 'Automático',
             isSmallPhone: isSmallPhone,
             isDark: _isDark),
         SizedBox(width: isSmallPhone ? 6 : 10),
         _CaracteristicaItem(
             icon: Icons.air,
-            color: Color(0xFF10B981),
+            color: const Color(0xFF10B981),
             label: 'A/C',
             isSmallPhone: isSmallPhone,
             isDark: _isDark),
         SizedBox(width: isSmallPhone ? 6 : 10),
         _CaracteristicaItem(
             icon: Icons.local_gas_station_outlined,
-            color: Color(0xFFF59E0B),
+            color: const Color(0xFFF59E0B),
             label: 'Gasolina',
             isSmallPhone: isSmallPhone,
             isDark: _isDark),
@@ -358,7 +371,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
         border: Border.all(color: _borderColor),
       ),
       child: Text(
-        'El Mazda CX-5 2024 combina elegancia y potencia. Perfecto para viajes urbanos y escapadas de fin de semana. Equipado con las últimas tecnologías de seguridad y confort.',
+        'El ${widget.vehicleName ?? 'vehículo'} combina elegancia y potencia. Perfecto para viajes urbanos y escapadas de fin de semana. Equipado con las últimas tecnologías de seguridad y confort.',
         style: GoogleFonts.poppins(
           fontSize: isSmallPhone ? 12 : 13,
           color: _textSecondary,
@@ -435,7 +448,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           TextSpan(
                             text: _totalFormateado,
                             style: TextStyle(
-                              color: Color(0xFF2563EB),
+                              color: const Color(0xFF2563EB),
                               fontSize: isSmallPhone ? 16 : 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -657,10 +670,18 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ResumenReservaPage(
+                            builder: (_) => ResumenReservaPage(
+                              vehiculoBrand: widget.vehicleName ?? 'Mazda CX-5 2024',
+                              vehiculoColor: widget.vehicleSpecs?.split('•').elementAtOrNull(1)?.trim() ?? 'Negro Jet',
+                              vehiculoImage: widget.vehicleImage ?? '',
                               periodo: _periodoSeleccionado,
                               cantidad: _cantidad,
-                              precioUnitario: _precioUnitario,
+                              precioUnitario: widget.vehiclePrice ?? 1300000,
+                              fechaInicio: '22 Feb 2026, 8:00 AM',
+                              lugarRecogida: 'Av. El Dorado, Bogotá',
+                              conductor: 'Carlos Rodríguez',
+                              tarifaServicio: 1900,
+                              seguroBasico: 15000,
                             ),
                           ),
                         );
@@ -673,7 +694,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 8,
-                        shadowColor: const Color(0xFF10B981).withOpacity(0.35),
+                        shadowColor: const Color(0xFF10B981).withValues(alpha: 0.35),
                       ),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
@@ -714,7 +735,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                         Text(
                           '\$ $_totalFormateado',
                           style: GoogleFonts.poppins(
-                            color: const Color(0xFF2563EB),
+                            color: const Color(0xFF22C55E).withValues(alpha: 0.35),
                             fontSize: isSmallPhone ? 18 : 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -740,9 +761,17 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ResumenReservaPage(
+                                vehiculoBrand: widget.vehicleName ?? 'Mazda CX-5 2024',
+                                vehiculoColor: widget.vehicleSpecs?.split('•').elementAtOrNull(1)?.trim() ?? 'Negro Jet',
+                                vehiculoImage: widget.vehicleImage ?? '',
                                 periodo: _periodoSeleccionado,
                                 cantidad: _cantidad,
-                                precioUnitario: _precioUnitario,
+                                precioUnitario: widget.vehiclePrice ?? 1300000,
+                                fechaInicio: '22 Feb 2026, 8:00 AM',
+                                lugarRecogida: 'Av. El Dorado, Bogotá',
+                                conductor: 'Carlos Rodríguez',
+                                tarifaServicio: 1900,
+                                seguroBasico: 15000,
                               ),
                             ),
                           );
@@ -755,8 +784,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           elevation: 8,
-                          shadowColor:
-                              const Color(0xFF10B981).withOpacity(0.35),
+                          shadowColor: const Color(0xFF10B981).withValues(alpha: 0.13),
                         ),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,

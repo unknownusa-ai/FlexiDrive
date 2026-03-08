@@ -152,7 +152,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -187,7 +187,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.1),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -206,7 +206,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               width: isSmallPhone ? 90 : 110,
               height: isSmallPhone ? 90 : 110,
               decoration: BoxDecoration(
-                color: isDark ? AppThemes.darkSurface : Colors.white.withOpacity(0.2),
+                color: isDark ? AppThemes.darkSurface : Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white,
@@ -214,7 +214,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -262,7 +262,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 12 : 14,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -436,7 +436,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         color: isDark ? AppThemes.darkBg : AppThemes.lightSurface,
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),

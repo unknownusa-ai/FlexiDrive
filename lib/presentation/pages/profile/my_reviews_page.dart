@@ -65,7 +65,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                       width: isSmallPhone ? 36 : 40,
                       height: isSmallPhone ? 36 : 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -97,7 +97,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -145,7 +145,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 13 : 14,
                   fontWeight: FontWeight.w400,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   height: 1.5,
                 ),
                 children: [
@@ -197,7 +197,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF5722).withOpacity(0.35),
+                      color: const Color(0xFFFF5722).withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -262,7 +262,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -301,7 +301,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                     Text(
                       '5.0',
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: isSmallPhone ? 10 : 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -330,7 +330,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                   style: GoogleFonts.inter(
                     fontSize: isSmallPhone ? 12 : 13,
                     fontWeight: FontWeight.w400,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -351,7 +351,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 12 : 13,
             fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             letterSpacing: 0.5,
           ),
         ),
@@ -373,7 +373,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -444,7 +444,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 12 : 13,
                         fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -453,7 +453,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 11 : 12,
                         fontWeight: FontWeight.w400,
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],

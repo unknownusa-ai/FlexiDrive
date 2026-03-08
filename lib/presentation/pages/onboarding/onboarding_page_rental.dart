@@ -148,7 +148,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF4F46E5).withOpacity(0.3),
+                                    color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -213,7 +213,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

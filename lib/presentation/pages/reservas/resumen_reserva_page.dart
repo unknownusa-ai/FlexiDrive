@@ -90,7 +90,6 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
     final padding = isSmallPhone ? 12.0 : 20.0;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return DefaultTextStyle.merge(
       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
@@ -103,13 +102,13 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                 // Header con pasos
                 Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF5B58FF),
-                        const Color(0xFF7C3AED),
+                        Color(0xFF5B58FF),
+                        Color(0xFF7C3AED),
                       ],
                     ),
                   ),
@@ -130,7 +129,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -169,7 +168,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                                 child: Container(
                                   margin:
                                       const EdgeInsets.symmetric(horizontal: 8),
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                             ),
@@ -182,7 +181,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                                 child: Container(
                                   margin:
                                       const EdgeInsets.symmetric(horizontal: 8),
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                             ),
@@ -245,7 +244,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                             ),
                             elevation: 8,
                             shadowColor:
-                                const Color(0xFF5B58FF).withOpacity(0.35),
+                                const Color(0xFF5B58FF).withValues(alpha: 0.35),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -279,7 +278,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: activo ? Colors.white : Colors.white.withOpacity(0.2),
+        color: activo ? Colors.white : Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -301,7 +300,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -335,7 +334,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                   ],
                 ),
               ),
@@ -419,7 +418,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
             Icons.schedule,
             const Color(0xFF5B58FF),
             'Período',
-            '${widget.cantidad} ${_unidadLabel}',
+            '${widget.cantidad} $_unidadLabel',
             isSmallPhone,
           ),
           _buildDetalleItem(
@@ -466,7 +465,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.15),
+                color: iconColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: iconColor, size: 20),
@@ -504,7 +503,6 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
 
   Widget _buildDesglosePrecios(bool isSmallPhone) {
     final precioVehiculo = widget.precioUnitario * widget.cantidad;
-    final ahorro = precioVehiculo ~/ 10; // 10% de ahorro
 
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
@@ -526,24 +524,24 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
           ),
           SizedBox(height: isSmallPhone ? 12 : 16),
           _buildFilaPrice(
-            '${widget.vehiculoBrand} (${widget.cantidad} ${_unidadLabel})',
+            '$widget.vehiculoBrand ($widget.cantidad $_unidadLabel)',
             _formatearPrecio(precioVehiculo),
             isSmallPhone,
-            const Color(0xFF5B58FF).withOpacity(0.15),
+            const Color(0xFF5B58FF).withValues(alpha: 0.15),
           ),
           SizedBox(height: isSmallPhone ? 8 : 10),
           _buildFilaPrice(
             'Tarifa de servicio (5%)',
             _formatearPrecio(widget.tarifaServicio),
             isSmallPhone,
-            const Color(0xFFFB923C).withOpacity(0.15),
+            const Color(0xFFFB923C).withValues(alpha: 0.15),
           ),
           SizedBox(height: isSmallPhone ? 8 : 10),
           _buildFilaPrice(
             'Seguro básico incluido',
             _formatearPrecio(widget.seguroBasico),
             isSmallPhone,
-            const Color(0xFF10B981).withOpacity(0.15),
+            const Color(0xFF10B981).withValues(alpha: 0.15),
           ),
           SizedBox(height: isSmallPhone ? 12 : 16),
           Divider(
@@ -629,7 +627,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
         color: _successBgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _successBorderColor.withOpacity(0.5),
+          color: _successBorderColor.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
@@ -657,7 +655,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                   'Ahorras aprox. \$ ${_formatearPrecio(ahorro)} vs. transporte tradicional',
                   style: GoogleFonts.poppins(
                     color: _isDark
-                        ? const Color(0xFF10B981).withOpacity(0.8)
+                        ? const Color(0xFF10B981).withValues(alpha: 0.8)
                         : const Color(0xFF047857),
                     fontSize: isSmallPhone ? 11 : 12,
                   ),

@@ -230,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(16 * scale),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF7B61FF).withAlpha((0.3 * 255).round()),
+                            color: const Color(0xFF4F46E5).withAlpha((0.15 * 255).round()),
                             blurRadius: 12 * scale,
                             offset: Offset(0, 6 * scale),
                           ),
@@ -277,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         Expanded(
                           child: Divider(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withAlpha((0.3 * 255).round()),
                             thickness: 1,
                           ),
                         ),
@@ -286,14 +286,14 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'o continúa con',
                             style: GoogleFonts.poppins(
-                              color: Colors.grey.withOpacity(0.7),
+                              color: Colors.grey.withAlpha((0.7 * 255).round()),
                               fontSize: 13,
                             ),
                           ),
                         ),
                         Expanded(
                           child: Divider(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withAlpha((0.3 * 255).round()),
                             thickness: 1,
                           ),
                         ),
@@ -330,7 +330,7 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           '¿No tienes cuenta? ',
                           style: GoogleFonts.poppins(
-                            color: Colors.grey.withOpacity(0.8),
+                            color: Colors.grey.withAlpha((0.8 * 255).round()),
                             fontSize: 14,
                           ),
                         ),

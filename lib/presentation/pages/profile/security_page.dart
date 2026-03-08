@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
@@ -104,7 +103,7 @@ class _SecurityPageState extends State<SecurityPage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.2),
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -130,7 +129,7 @@ class _SecurityPageState extends State<SecurityPage> {
                   Text(
                     'Protege tu cuenta FlexiDrive',
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: isSmallPhone ? 12 : 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -143,7 +142,7 @@ class _SecurityPageState extends State<SecurityPage> {
                       vertical: isSmallPhone ? 6 : 8,
                     ),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.2),
+                      color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -179,7 +178,7 @@ class _SecurityPageState extends State<SecurityPage> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -196,7 +195,7 @@ class _SecurityPageState extends State<SecurityPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -383,7 +382,7 @@ class _SecurityPageState extends State<SecurityPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -479,7 +478,7 @@ class _SecurityPageState extends State<SecurityPage> {
           height: isSmallPhone ? 24 : 28,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            color: value ? const Color(0xFF8B5CF6) : (secondaryTextColor.withOpacity(0.3)),
+            color: value ? const Color(0xFF8B5CF6) : (secondaryTextColor.withValues(alpha: 0.3)),
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
@@ -498,7 +497,7 @@ class _SecurityPageState extends State<SecurityPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 2,
                           offset: const Offset(0, 1),
                         ),
@@ -535,7 +534,7 @@ class _SecurityPageState extends State<SecurityPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
+                color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -615,7 +614,7 @@ class _SecurityPageState extends State<SecurityPage> {
               vertical: isSmallPhone ? 4 : 6,
             ),
             decoration: BoxDecoration(
-              color: AppThemes.accentGreen.withOpacity(0.2),
+              color: AppThemes.accentGreen.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -652,7 +651,7 @@ class _SecurityPageState extends State<SecurityPage> {
           color: isDark ? AppThemes.darkSurface : const Color(0xFFFEF2F2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppThemes.accentRed.withOpacity(0.5),
+            color: AppThemes.accentRed.withValues(alpha: 0.5),
             width: 1,
           ),
         ),

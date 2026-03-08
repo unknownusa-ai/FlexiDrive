@@ -128,7 +128,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             Positioned.fill(
               child: GestureDetector(
                 onTap: _closeChat,
-                child: Container(color: Colors.black.withOpacity(0.45)),
+                child: Container(color: Colors.black.withValues(alpha: 0.45)),
               ),
             ),
 
@@ -181,7 +181,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -206,7 +206,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                           Text(
                             'Soporte 24/7 · Respuesta en < 5 min',
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                               fontSize: isSmallPhone ? 12 : 13,
                               fontWeight: FontWeight.w400,
                             ),
@@ -224,7 +224,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -237,11 +237,11 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                         hintStyle: GoogleFonts.inter(
                           fontSize: isSmallPhone ? 13 : 14,
                           fontWeight: FontWeight.w400,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                         prefixIcon: Icon(
                           Icons.search_rounded,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           size: isSmallPhone ? 20 : 22,
                         ),
                         border: InputBorder.none,
@@ -267,7 +267,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -307,7 +307,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -345,7 +345,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 9 : 10,
                 fontWeight: FontWeight.w400,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -370,7 +370,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 11 : 12,
             fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             letterSpacing: 0.8,
           ),
         ),
@@ -381,7 +381,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -429,7 +429,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                   faq['isExpanded']
                       ? Icons.keyboard_arrow_up_rounded
                       : Icons.keyboard_arrow_down_rounded,
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   size: isSmallPhone ? 22 : 24,
                 ),
               ],
@@ -449,7 +449,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 12 : 13,
                 fontWeight: FontWeight.w400,
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 height: 1.5,
               ),
             ),
@@ -486,7 +486,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF4F46E5).withOpacity(0.35),
+              color: const Color(0xFF4F46E5).withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -498,7 +498,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               width: isSmallPhone ? 40 : 44,
               height: isSmallPhone ? 40 : 44,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -526,7 +526,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                     style: GoogleFonts.inter(
                       fontSize: isSmallPhone ? 11 : 12,
                       fontWeight: FontWeight.w400,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -540,7 +540,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF10B981).withOpacity(0.5),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.5),
                     blurRadius: 6,
                     spreadRadius: 1,
                   ),
@@ -604,7 +604,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -788,7 +788,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                 boxShadow: [
                   if (!isUser)
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -817,7 +817,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                       fontSize: isSmallPhone ? 10 : 11,
                       fontWeight: FontWeight.w400,
                       color: isUser
-                          ? Colors.white.withOpacity(0.65)
+                          ? Colors.white.withValues(alpha: 0.65)
                           : isDark 
                               ? const Color(0xFF8B93B8)  // dark text secondary
                               : Colors.grey.shade500,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
@@ -127,7 +126,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.2),
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -152,7 +151,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           Text(
                             '${_paymentMethods.length} tarjetas guardadas',
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                               fontSize: isSmallPhone ? 12 : 13,
                               fontWeight: FontWeight.w400,
                             ),
@@ -174,7 +173,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             width: 130,
             height: 130,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -186,7 +185,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.04) : Colors.white.withOpacity(0.06),
+              color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.06),
               shape: BoxShape.circle,
             ),
           ),
@@ -235,7 +234,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: gradientColors[0].withOpacity(isDark ? 0.4 : 0.25),
+            color: gradientColors[0].withValues(alpha: isDark ? 0.4 : 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -251,7 +250,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.07),
+                color: Colors.white.withValues(alpha: 0.07),
                 shape: BoxShape.circle,
               ),
             ),
@@ -263,7 +262,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -280,7 +279,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                     Text(
                       '····  ····  ····  ${method['last4']}',
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: isSmallPhone ? 13 : 14,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.5,
@@ -292,7 +291,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                         width: isSmallPhone ? 28 : 32,
                         height: isSmallPhone ? 28 : 32,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -318,7 +317,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 Text(
                   '${isVisa ? 'Visa' : 'Mastercard'} · ${method['expiry']}',
                   style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.75),
+                    color: Colors.white.withValues(alpha: 0.75),
                     fontSize: isSmallPhone ? 11 : 12,
                     fontWeight: FontWeight.w400,
                   ),
@@ -335,7 +334,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           vertical: isSmallPhone ? 3 : 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -368,10 +367,10 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                             vertical: isSmallPhone ? 3 : 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
+                              color: Colors.white.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
@@ -437,7 +436,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
               width: isSmallPhone ? 22 : 26,
               height: isSmallPhone ? 22 : 26,
               decoration: BoxDecoration(
-                color: const Color(0xFFF79E1B).withOpacity(0.9),
+                color: const Color(0xFFF79E1B).withValues(alpha: 0.9),
                 shape: BoxShape.circle,
               ),
             ),
@@ -457,12 +456,12 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           color: isDark ? cardColor : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppThemes.primaryIndigo.withOpacity(isDark ? 0.5 : 0.35),
+            color: AppThemes.primaryIndigo.withValues(alpha: isDark ? 0.5 : 0.35),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.04),
+              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -511,7 +510,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.04),
+                color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -593,7 +592,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 ),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppThemes.accentGreen.withOpacity(isDark ? 0.2 : 0.15)
+                      ? AppThemes.accentGreen.withValues(alpha: isDark ? 0.2 : 0.15)
                       : isDark ? AppThemes.darkSurfaceEl : AppThemes.lightBg,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -631,10 +630,10 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         vertical: isSmallPhone ? 10 : 12,
       ),
       decoration: BoxDecoration(
-        color: AppThemes.accentGreen.withOpacity(isDark ? 0.15 : 0.1),
+        color: AppThemes.accentGreen.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppThemes.accentGreen.withOpacity(isDark ? 0.3 : 0.2), 
+          color: AppThemes.accentGreen.withValues(alpha: isDark ? 0.3 : 0.2), 
           width: 1
         ),
       ),
