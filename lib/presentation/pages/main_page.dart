@@ -6,7 +6,9 @@ import 'notifications/notifications_page.dart';
 import 'profile/profile_page.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  const MainPage({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   static _MainPageState of(BuildContext context) {
     final state = context.findAncestorStateOfType<_MainPageState>();
@@ -19,7 +21,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<Widget> _pages = const [
     HomePage(),
@@ -27,6 +29,12 @@ class _MainPageState extends State<MainPage> {
     NotificationsPage(),
     ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex.clamp(0, _pages.length - 1);
+  }
 
   void setIndex(int index) {
     if (index >= 0 && index < _pages.length) {
@@ -50,13 +58,13 @@ class _MainPageState extends State<MainPage> {
   Widget _buildBottomNavBar() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: isDark 
+            color: isDark
                 ? Colors.black.withOpacity(0.3)
                 : Colors.black.withOpacity(0.1),
             blurRadius: 20,
@@ -85,12 +93,12 @@ class _MainPageState extends State<MainPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isSelected = _selectedIndex == index;
-    
+
     final selectedColor = const Color(0xFF2563EB);
-    final unselectedColor = isDark 
-        ? const Color(0xFF8B93B8)  // dark text secondary
+    final unselectedColor = isDark
+        ? const Color(0xFF8B93B8) // dark text secondary
         : Colors.grey.shade400;
-    
+
     return GestureDetector(
       onTap: () => setIndex(index),
       child: Column(

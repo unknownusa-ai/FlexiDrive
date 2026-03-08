@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'reserva_detalle_page.dart';
+import 'reservas_store.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class ReservasPage extends StatefulWidget {
@@ -12,7 +13,6 @@ class ReservasPage extends StatefulWidget {
 
 class _ReservasPageState extends State<ReservasPage> {
   String _selectedFilter = 'Activas';
-  final int _activasCount = 1;
   final int _finalizadasCount = 2;
   final int _canceladasCount = 1;
 
@@ -21,30 +21,41 @@ class _ReservasPageState extends State<ReservasPage> {
     final theme = Theme.of(context);
     return DefaultTextStyle.merge(
       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: ConstrainedContainer(
-          maxWidth: 800,
-          child: Column(children: [
-            Stack(clipBehavior: Clip.none, children: [
-              _buildHeader(),
-              Positioned(
-                  left: 20,
-                  right: 20,
-                  bottom: -45,
-                  child: _buildStatisticsCards()),
-            ]),
-            const SizedBox(height: 58),
-            _buildFilterButtons(),
-            const SizedBox(height: 20),
-            Expanded(child: _buildReservationsList()),
-          ]),
-        ),
+      child: ValueListenableBuilder<List<ReservaActiva>>(
+        valueListenable: ReservasStore.activasNotifier,
+        builder: (context, activas, _) {
+          final activasCount = activas.length;
+
+          return Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: ConstrainedContainer(
+              maxWidth: 800,
+              child: Column(children: [
+                Stack(clipBehavior: Clip.none, children: [
+                  _buildHeader(activasCount),
+                  Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: -45,
+                      child: _buildStatisticsCards(activasCount)),
+                ]),
+                const SizedBox(height: 58),
+                _buildFilterButtons(),
+                const SizedBox(height: 20),
+                Expanded(child: _buildReservationsList(activas)),
+              ]),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(int activasCount) {
+    final label = activasCount == 1
+        ? '1 reserva activa'
+        : '$activasCount reservas activas';
+
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -67,7 +78,7 @@ class _ReservasPageState extends State<ReservasPage> {
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5)),
               const SizedBox(height: 4),
-              Text('$_activasCount reserva activa',
+              Text(label,
                   style: GoogleFonts.poppins(
                       color: Colors.white.withOpacity(0.85),
                       fontSize: 14,
@@ -77,13 +88,13 @@ class _ReservasPageState extends State<ReservasPage> {
     );
   }
 
-  Widget _buildStatisticsCards() {
+  Widget _buildStatisticsCards(int activasCount) {
     return SizedBox(
         height: 86,
         child: Row(children: [
           Expanded(
               child: _buildStatCard(
-                  count: _activasCount,
+                  count: activasCount,
                   label: 'Activas',
                   color: const Color(0xFFD1FAE5),
                   textColor: const Color(0xFF10B981))),
@@ -216,26 +227,25 @@ class _ReservasPageState extends State<ReservasPage> {
     );
   }
 
-  Widget _buildReservationsList() {
+  Widget _buildReservationsList(List<ReservaActiva> activas) {
     if (_selectedFilter == 'Activas') {
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          children: [
-            _buildReservationCard(
-              vehicleName: 'Mazda CX-5 2024',
-              code: 'FXD-2024-0089',
-              price: '\$ 440,000',
-              startDate: '22 Feb 2026',
-              endDate: '24 Feb 2026',
-              location: 'Av. El Dorado, Bogotá',
-              progress: 0.4,
-              status: 'Activa',
-              statusColor: const Color(0xFF06B6D4),
-              imageUrl:
-                  'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80',
-              showEnCurso: true,
-            ),
-          ]);
+          children: activas
+              .map((reserva) => _buildReservationCard(
+                    vehicleName: reserva.vehicleName,
+                    code: reserva.code,
+                    price: reserva.price,
+                    startDate: reserva.startDate,
+                    endDate: reserva.endDate,
+                    location: reserva.location,
+                    progress: reserva.progress,
+                    status: reserva.status,
+                    statusColor: const Color(0xFF06B6D4),
+                    imageUrl: reserva.imageUrl,
+                    showEnCurso: true,
+                  ))
+              .toList());
     } else {
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

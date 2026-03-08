@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/responsive_utils.dart';
+import 'reserva_confirmada_page.dart';
+import 'reservas_store.dart';
 
 class MetodoPagoPage extends StatefulWidget {
   const MetodoPagoPage({
@@ -12,6 +14,9 @@ class MetodoPagoPage extends StatefulWidget {
     this.periodo = 'Semanas',
     this.cantidad = 1,
     this.precioUnitario = 38000,
+    this.vehiculoBrand = 'Mazda CX-5 2024',
+    this.vehiculoImage = '',
+    this.lugarRecogida = 'Av. El Dorado, Bogotá',
   });
 
   final int total;
@@ -20,6 +25,9 @@ class MetodoPagoPage extends StatefulWidget {
   final String periodo;
   final int cantidad;
   final int precioUnitario;
+  final String vehiculoBrand;
+  final String vehiculoImage;
+  final String lugarRecogida;
 
   @override
   State<MetodoPagoPage> createState() => _MetodoPagoPageState();
@@ -57,6 +65,61 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
 
     return buffer.toString();
+  }
+
+  String _formatearNumero(int value) {
+    final asString = value.toString();
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < asString.length; i++) {
+      final reverseIndex = asString.length - i;
+      buffer.write(asString[i]);
+      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
+        buffer.write('.');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  String _formatearFechaCorta(DateTime date) {
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  DateTime _calcularFechaFin(DateTime inicio) {
+    final periodo = widget.periodo.toLowerCase();
+
+    if (periodo.contains('hora')) {
+      return inicio.add(Duration(hours: widget.cantidad));
+    }
+
+    if (periodo.contains('semana')) {
+      return inicio.add(Duration(days: widget.cantidad * 7));
+    }
+
+    return inicio.add(Duration(days: widget.cantidad));
+  }
+
+  String _generarCodigoReserva() {
+    final now = DateTime.now();
+    final suffix =
+        (now.microsecondsSinceEpoch % 10000).toString().padLeft(4, '0');
+    return 'FXD-${now.year}-$suffix';
   }
 
   @override
@@ -815,13 +878,34 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           height: isSmallPhone ? 48 : 56,
           child: ElevatedButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Pago realizado exitosamente',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              final codigoReserva = _generarCodigoReserva();
+              final fechaInicio = DateTime.now();
+              final fechaFin = _calcularFechaFin(fechaInicio);
+
+              ReservasStore.addActiva(
+                ReservaActiva(
+                  vehicleName: widget.vehiculoBrand,
+                  code: codigoReserva,
+                  price: '\$ ${_formatearNumero(widget.total)}',
+                  startDate: _formatearFechaCorta(fechaInicio),
+                  endDate: _formatearFechaCorta(fechaFin),
+                  location: widget.lugarRecogida,
+                  imageUrl: widget.vehiculoImage,
+                ),
+              );
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReservaConfirmadaPage(
+                    vehiculoBrand: widget.vehiculoBrand,
+                    vehiculoImage: widget.vehiculoImage,
+                    periodo: widget.periodo,
+                    cantidad: widget.cantidad,
+                    lugarRecogida: widget.lugarRecogida,
+                    totalPagado: widget.total,
+                    codigoReserva: codigoReserva,
                   ),
-                  backgroundColor: const Color(0xFF10B981),
                 ),
               );
             },
