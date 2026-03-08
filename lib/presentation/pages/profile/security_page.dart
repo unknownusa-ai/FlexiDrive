@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../core/theme/app_themes.dart';
 
 class SecurityPage extends StatefulWidget {
   const SecurityPage({super.key});
@@ -32,12 +33,19 @@ class _SecurityPageState extends State<SecurityPage> {
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? AppThemes.darkBg : AppThemes.lightBg;
+    final cardColor = isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
+    final textColor = isDark ? AppThemes.darkText : AppThemes.lightText;
+    final secondaryTextColor = isDark ? AppThemes.darkTextSub : AppThemes.lightTextSub;
+    final inputBackground = isDark ? AppThemes.darkSurfaceHi : AppThemes.lightSurface;
+    final borderColor = isDark ? AppThemes.darkBorder : AppThemes.lightBorder;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
-          _buildGradientHeader(isSmallPhone),
+          _buildGradientHeader(isSmallPhone, isDark),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
@@ -47,13 +55,13 @@ class _SecurityPageState extends State<SecurityPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPasswordSection(isSmallPhone),
+                  _buildPasswordSection(isSmallPhone, isDark, cardColor, textColor, inputBackground, borderColor, secondaryTextColor),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  _buildSecurityOptionsSection(isSmallPhone),
+                  _buildSecurityOptionsSection(isSmallPhone, isDark, cardColor, textColor, secondaryTextColor),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  _buildActiveSessionsSection(isSmallPhone),
+                  _buildActiveSessionsSection(isSmallPhone, isDark, cardColor, textColor, secondaryTextColor),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  _buildDeleteAccountButton(isSmallPhone),
+                  _buildDeleteAccountButton(isSmallPhone, isDark),
                   SizedBox(height: isSmallPhone ? 32 : 48),
                 ],
               ),
@@ -64,7 +72,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
-  Widget _buildGradientHeader(bool isSmallPhone) {
+  Widget _buildGradientHeader(bool isSmallPhone, bool isDark) {
     return Stack(
       children: [
         Container(
@@ -96,7 +104,7 @@ class _SecurityPageState extends State<SecurityPage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -135,7 +143,7 @@ class _SecurityPageState extends State<SecurityPage> {
                       vertical: isSmallPhone ? 6 : 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: isDark ? Colors.white.withOpacity(0.15) : Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -171,7 +179,7 @@ class _SecurityPageState extends State<SecurityPage> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -180,15 +188,15 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
-  Widget _buildPasswordSection(bool isSmallPhone) {
+  Widget _buildPasswordSection(bool isSmallPhone, bool isDark, Color cardColor, Color textColor, Color inputBackground, Color borderColor, Color labelColor) {
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 16 : 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -205,11 +213,11 @@ class _SecurityPageState extends State<SecurityPage> {
                 width: isSmallPhone ? 36 : 40,
                 height: isSmallPhone ? 36 : 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F4FF),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFF0F4FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  Icons.shield_outlined,
+                  Icons.lock_outline,
                   color: const Color(0xFF2563EB),
                   size: isSmallPhone ? 18 : 20,
                 ),
@@ -220,7 +228,7 @@ class _SecurityPageState extends State<SecurityPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 14 : 16,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A1A),
+                  color: textColor,
                 ),
               ),
             ],
@@ -233,6 +241,10 @@ class _SecurityPageState extends State<SecurityPage> {
             obscureText: _obscureCurrentPassword,
             onToggle: () => setState(() => _obscureCurrentPassword = !_obscureCurrentPassword),
             isSmallPhone: isSmallPhone,
+            isDark: isDark,
+            inputBackground: inputBackground,
+            textColor: textColor,
+            labelColor: labelColor,
           ),
           SizedBox(height: isSmallPhone ? 12 : 16),
           _buildPasswordField(
@@ -241,6 +253,10 @@ class _SecurityPageState extends State<SecurityPage> {
             obscureText: _obscureNewPassword,
             onToggle: () => setState(() => _obscureNewPassword = !_obscureNewPassword),
             isSmallPhone: isSmallPhone,
+            isDark: isDark,
+            inputBackground: inputBackground,
+            textColor: textColor,
+            labelColor: labelColor,
           ),
           SizedBox(height: isSmallPhone ? 12 : 16),
           _buildPasswordField(
@@ -249,6 +265,10 @@ class _SecurityPageState extends State<SecurityPage> {
             obscureText: _obscureConfirmPassword,
             onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
             isSmallPhone: isSmallPhone,
+            isDark: isDark,
+            inputBackground: inputBackground,
+            textColor: textColor,
+            labelColor: labelColor,
           ),
           SizedBox(height: isSmallPhone ? 16 : 20),
           // Update button
@@ -288,6 +308,10 @@ class _SecurityPageState extends State<SecurityPage> {
     required bool obscureText,
     required VoidCallback onToggle,
     required bool isSmallPhone,
+    required bool isDark,
+    required Color inputBackground,
+    required Color textColor,
+    required Color labelColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,15 +321,19 @@ class _SecurityPageState extends State<SecurityPage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 10 : 11,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade500,
+            color: labelColor,
             letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: isSmallPhone ? 6 : 8),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
+            color: inputBackground,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade700 : Colors.transparent,
+              width: 1,
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -313,25 +341,25 @@ class _SecurityPageState extends State<SecurityPage> {
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 14 : 15,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A1A),
+              color: textColor,
             ),
             decoration: InputDecoration(
               prefixIcon: Icon(
                 Icons.lock_outline,
-                color: Colors.grey.shade400,
+                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                 size: isSmallPhone ? 18 : 20,
               ),
               hintText: '••••••••',
               hintStyle: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 14 : 15,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade600,
               ),
               suffixIcon: GestureDetector(
                 onTap: onToggle,
                 child: Icon(
                   obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.grey.shade400,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                   size: isSmallPhone ? 18 : 20,
                 ),
               ),
@@ -347,15 +375,15 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
-  Widget _buildSecurityOptionsSection(bool isSmallPhone) {
+  Widget _buildSecurityOptionsSection(bool isSmallPhone, bool isDark, Color cardColor, Color textColor, Color secondaryTextColor) {
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 16 : 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -364,25 +392,29 @@ class _SecurityPageState extends State<SecurityPage> {
       child: Column(
         children: [
           _buildToggleOption(
-            icon: Icons.key_outlined,
+            icon: Icons.smartphone_outlined,
             iconColor: const Color(0xFF8B5CF6),
-            iconBgColor: const Color(0xFFF3E8FF),
+            iconBgColor: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF3E8FF),
             title: 'Verificación en 2 pasos',
             subtitle: 'SMS o app de autenticación',
             value: _isTwoFactorEnabled,
             onChanged: (v) => setState(() => _isTwoFactorEnabled = v),
             isSmallPhone: isSmallPhone,
+            textColor: textColor,
+            secondaryTextColor: secondaryTextColor,
           ),
-          Divider(height: 24, color: Colors.grey.shade100),
+          Divider(height: 24, color: isDark ? AppThemes.darkDivider : AppThemes.lightBorder),
           _buildToggleOption(
             icon: Icons.fingerprint_outlined,
-            iconColor: const Color(0xFF10B981),
-            iconBgColor: const Color(0xFFD1FAE5),
+            iconColor: isDark ? Colors.grey.shade400 : const Color(0xFF64748B),
+            iconBgColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
             title: 'Acceso biométrico',
             subtitle: 'Huella dactilar o Face ID',
             value: _isBiometricEnabled,
             onChanged: (v) => setState(() => _isBiometricEnabled = v),
             isSmallPhone: isSmallPhone,
+            textColor: textColor,
+            secondaryTextColor: secondaryTextColor,
           ),
         ],
       ),
@@ -398,6 +430,8 @@ class _SecurityPageState extends State<SecurityPage> {
     required bool value,
     required ValueChanged<bool> onChanged,
     required bool isSmallPhone,
+    required Color textColor,
+    required Color secondaryTextColor,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -425,7 +459,7 @@ class _SecurityPageState extends State<SecurityPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 13 : 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A1A),
+                  color: textColor,
                 ),
               ),
               SizedBox(height: 2),
@@ -434,26 +468,53 @@ class _SecurityPageState extends State<SecurityPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 11 : 12,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade500,
+                  color: secondaryTextColor,
                 ),
               ),
             ],
           ),
         ),
-        Transform.scale(
-          scale: isSmallPhone ? 0.8 : 0.9,
-          child: CupertinoSwitch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: const Color(0xFF2563EB),
-            trackColor: Colors.grey.shade300,
+        Container(
+          width: isSmallPhone ? 44 : 48,
+          height: isSmallPhone ? 24 : 28,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: value ? const Color(0xFF8B5CF6) : (secondaryTextColor.withOpacity(0.3)),
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: GestureDetector(
+              onTap: () => onChanged(!value),
+              child: Padding(
+                padding: const EdgeInsets.all(2),
+                child: AnimatedAlign(
+                  duration: const Duration(milliseconds: 200),
+                  alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    width: isSmallPhone ? 20 : 24,
+                    height: isSmallPhone ? 20 : 24,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildActiveSessionsSection(bool isSmallPhone) {
+  Widget _buildActiveSessionsSection(bool isSmallPhone, bool isDark, Color cardColor, Color textColor, Color secondaryTextColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -462,7 +523,7 @@ class _SecurityPageState extends State<SecurityPage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 12 : 13,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: isDark ? Colors.white : secondaryTextColor,
             letterSpacing: 0.5,
           ),
         ),
@@ -470,11 +531,11 @@ class _SecurityPageState extends State<SecurityPage> {
         Container(
           padding: EdgeInsets.all(isSmallPhone ? 16 : 20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: isDark ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -487,13 +548,17 @@ class _SecurityPageState extends State<SecurityPage> {
                 location: 'Bogotá, Colombia · Ahora',
                 isCurrent: true,
                 isSmallPhone: isSmallPhone,
+                textColor: textColor,
+                secondaryTextColor: secondaryTextColor,
               ),
-              Divider(height: 20, color: Colors.grey.shade100),
+              Divider(height: 20, color: isDark ? AppThemes.darkDivider : AppThemes.lightBorder),
               _buildSessionItem(
                 device: 'Chrome / Mac',
                 location: 'Medellín, Colombia · Hace 2h',
                 isCurrent: false,
                 isSmallPhone: isSmallPhone,
+                textColor: textColor,
+                secondaryTextColor: secondaryTextColor,
               ),
             ],
           ),
@@ -507,13 +572,15 @@ class _SecurityPageState extends State<SecurityPage> {
     required String location,
     required bool isCurrent,
     required bool isSmallPhone,
+    required Color textColor,
+    required Color secondaryTextColor,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           device.contains('iPhone') ? Icons.phone_iphone : Icons.laptop_mac,
-          color: Colors.grey.shade600,
+          color: secondaryTextColor,
           size: isSmallPhone ? 20 : 24,
         ),
         SizedBox(width: isSmallPhone ? 10 : 12),
@@ -526,7 +593,7 @@ class _SecurityPageState extends State<SecurityPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 13 : 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A1A),
+                  color: textColor,
                 ),
               ),
               SizedBox(height: 2),
@@ -535,7 +602,7 @@ class _SecurityPageState extends State<SecurityPage> {
                 style: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 11 : 12,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade500,
+                  color: secondaryTextColor,
                 ),
               ),
             ],
@@ -548,7 +615,7 @@ class _SecurityPageState extends State<SecurityPage> {
               vertical: isSmallPhone ? 4 : 6,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFD1FAE5),
+              color: AppThemes.accentGreen.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -556,7 +623,7 @@ class _SecurityPageState extends State<SecurityPage> {
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 9 : 10,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF10B981),
+                color: AppThemes.accentGreen,
               ),
             ),
           )
@@ -568,7 +635,7 @@ class _SecurityPageState extends State<SecurityPage> {
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 12 : 13,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFEF4444),
+                color: AppThemes.accentRed,
               ),
             ),
           ),
@@ -576,16 +643,16 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
-  Widget _buildDeleteAccountButton(bool isSmallPhone) {
+  Widget _buildDeleteAccountButton(bool isSmallPhone, bool isDark) {
     return GestureDetector(
       onTap: () => _showDeleteAccountDialog(),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 14 : 16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEF2F2),
+          color: isDark ? AppThemes.darkSurface : const Color(0xFFFEF2F2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEF4444).withOpacity(0.3),
+            color: AppThemes.accentRed.withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -594,7 +661,7 @@ class _SecurityPageState extends State<SecurityPage> {
           children: [
             Icon(
               Icons.warning_amber_outlined,
-              color: const Color(0xFFEF4444),
+              color: AppThemes.accentRed,
               size: isSmallPhone ? 18 : 20,
             ),
             SizedBox(width: isSmallPhone ? 8 : 10),
@@ -603,7 +670,7 @@ class _SecurityPageState extends State<SecurityPage> {
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 14 : 15,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFEF4444),
+                color: AppThemes.accentRed,
               ),
             ),
           ],
@@ -619,7 +686,7 @@ class _SecurityPageState extends State<SecurityPage> {
           message,
           style: GoogleFonts.inter(fontWeight: FontWeight.w500),
         ),
-        backgroundColor: const Color(0xFF10B981),
+        backgroundColor: AppThemes.accentGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -643,7 +710,9 @@ class _SecurityPageState extends State<SecurityPage> {
           '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.',
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? AppThemes.darkTextSub 
+                : AppThemes.lightTextSub,
           ),
         ),
         actions: [
@@ -653,7 +722,7 @@ class _SecurityPageState extends State<SecurityPage> {
               'Cancelar',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey,
+                color: AppThemes.darkTextSub,
               ),
             ),
           ),
@@ -666,7 +735,7 @@ class _SecurityPageState extends State<SecurityPage> {
               'Eliminar',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFEF4444),
+                color: AppThemes.accentRed,
               ),
             ),
           ),

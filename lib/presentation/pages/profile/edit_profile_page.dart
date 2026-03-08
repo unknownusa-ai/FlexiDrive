@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../core/theme/app_themes.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -37,12 +38,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? AppThemes.darkBg : AppThemes.lightBg;
+    final cardColor = isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
+    final textColor = isDark ? AppThemes.darkText : AppThemes.lightText;
+    final labelColor = isDark ? AppThemes.darkTextSub : AppThemes.lightTextSub;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
-          _buildGradientHeaderWithPhoto(isSmallPhone),
+          _buildGradientHeaderWithPhoto(isSmallPhone, isDark),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
@@ -58,8 +64,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     icon: Icons.person_outline,
                     keyboardType: TextInputType.name,
                     isSmallPhone: isSmallPhone,
-                    borderColor: const Color(0xFF2563EB),
-                    iconColor: const Color(0xFF2563EB),
+                    borderColor: AppThemes.primaryIndigo,
+                    iconColor: AppThemes.primaryIndigo,
+                    cardColor: cardColor,
+                    textColor: textColor,
+                    labelColor: labelColor,
                   ),
                   SizedBox(height: isSmallPhone ? 12 : 16),
                   _buildTextField(
@@ -68,8 +77,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     isSmallPhone: isSmallPhone,
-                    borderColor: const Color(0xFF8B5CF6),
-                    iconColor: const Color(0xFF8B5CF6),
+                    borderColor: AppThemes.primaryPurple,
+                    iconColor: AppThemes.primaryPurple,
+                    cardColor: cardColor,
+                    textColor: textColor,
+                    labelColor: labelColor,
                   ),
                   SizedBox(height: isSmallPhone ? 12 : 16),
                   _buildTextField(
@@ -78,11 +90,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
                     isSmallPhone: isSmallPhone,
-                    borderColor: const Color(0xFF10B981),
-                    iconColor: const Color(0xFF10B981),
+                    borderColor: AppThemes.accentGreen,
+                    iconColor: AppThemes.accentGreen,
+                    cardColor: cardColor,
+                    textColor: textColor,
+                    labelColor: labelColor,
                   ),
                   SizedBox(height: isSmallPhone ? 12 : 16),
-                  _buildDocumentTypeDropdown(isSmallPhone),
+                  _buildDocumentTypeDropdown(isSmallPhone, cardColor, textColor, labelColor),
                   SizedBox(height: isSmallPhone ? 12 : 16),
                   _buildTextField(
                     label: 'NÚMERO DE DOCUMENTO',
@@ -90,24 +105,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     icon: Icons.folder_outlined,
                     keyboardType: TextInputType.number,
                     isSmallPhone: isSmallPhone,
-                    borderColor: const Color(0xFFF59E0B),
-                    iconColor: const Color(0xFFF59E0B),
+                    borderColor: AppThemes.accentAmber,
+                    iconColor: AppThemes.accentAmber,
+                    cardColor: cardColor,
+                    textColor: textColor,
+                    labelColor: labelColor,
                   ),
                   SizedBox(height: isSmallPhone ? 32 : 48),
                 ],
               ),
             ),
           ),
-          _buildSaveButton(isSmallPhone),
+          _buildSaveButton(isSmallPhone, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildGradientHeaderWithPhoto(bool isSmallPhone) {
+  Widget _buildGradientHeaderWithPhoto(bool isSmallPhone, bool isDark) {
     return Stack(
       children: [
-        // Background gradient with bubble
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -120,7 +137,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             bottom: false,
             child: Column(
               children: [
-                // Header with back button
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     isSmallPhone ? 16 : 20,
@@ -158,14 +174,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ],
                   ),
                 ),
-                // Profile photo inside gradient area
-                _buildProfilePhotoInGradient(isSmallPhone),
+                _buildProfilePhotoInGradient(isSmallPhone, isDark),
                 SizedBox(height: isSmallPhone ? 20 : 24),
               ],
             ),
           ),
         ),
-        // Decorative bubble in top-right corner
         Positioned(
           top: -50,
           right: -50,
@@ -173,7 +187,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -182,7 +196,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildProfilePhotoInGradient(bool isSmallPhone) {
+  Widget _buildProfilePhotoInGradient(bool isSmallPhone, bool isDark) {
     return Column(
       children: [
         Stack(
@@ -192,7 +206,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               width: isSmallPhone ? 90 : 110,
               height: isSmallPhone ? 90 : 110,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? AppThemes.darkSurface : Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white,
@@ -214,7 +228,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     return Icon(
                       Icons.person,
                       size: isSmallPhone ? 45 : 55,
-                      color: const Color(0xFF2563EB),
+                      color: AppThemes.primaryIndigo,
                     );
                   },
                 ),
@@ -229,13 +243,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFF2563EB),
+                    color: AppThemes.primaryIndigo,
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   Icons.camera_alt_outlined,
-                  color: const Color(0xFF2563EB),
+                  color: AppThemes.primaryIndigo,
                   size: isSmallPhone ? 16 : 18,
                 ),
               ),
@@ -263,9 +277,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     required bool isSmallPhone,
     Color? borderColor,
     Color? iconColor,
+    required Color cardColor,
+    required Color textColor,
+    required Color labelColor,
   }) {
-    final actualBorderColor = borderColor ?? const Color(0xFF2563EB);
-    final actualIconColor = iconColor ?? const Color(0xFF2563EB);
+    final actualBorderColor = borderColor ?? AppThemes.primaryIndigo;
+    final actualIconColor = iconColor ?? AppThemes.primaryIndigo;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,14 +292,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 10 : 11,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade500,
+            color: labelColor,
             letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: isSmallPhone ? 4 : 6),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: actualBorderColor,
@@ -295,7 +312,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 14 : 15,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A1A),
+              color: textColor,
             ),
             decoration: InputDecoration(
               prefixIcon: Icon(
@@ -315,7 +332,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildDocumentTypeDropdown(bool isSmallPhone) {
+  Widget _buildDocumentTypeDropdown(bool isSmallPhone, Color cardColor, Color textColor, Color labelColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,17 +341,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
           style: GoogleFonts.inter(
             fontSize: isSmallPhone ? 10 : 11,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade500,
+            color: labelColor,
             letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: isSmallPhone ? 4 : 6),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFFF59E0B),
+              color: AppThemes.accentAmber,
               width: 1,
             ),
           ),
@@ -346,7 +363,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding: EdgeInsets.only(right: isSmallPhone ? 12 : 16),
                 child: Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: const Color(0xFFF59E0B),
+                  color: AppThemes.accentAmber,
                   size: isSmallPhone ? 20 : 22,
                 ),
               ),
@@ -363,7 +380,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         children: [
                           Icon(
                             Icons.folder_outlined,
-                            color: const Color(0xFFF59E0B),
+                            color: AppThemes.accentAmber,
                             size: isSmallPhone ? 18 : 20,
                           ),
                           SizedBox(width: isSmallPhone ? 8 : 12),
@@ -372,7 +389,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             style: GoogleFonts.inter(
                               fontSize: isSmallPhone ? 14 : 15,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A1A),
+                              color: textColor,
                             ),
                           ),
                         ],
@@ -388,6 +405,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     type,
                     style: GoogleFonts.poppins(
                       fontSize: isSmallPhone ? 13 : 14,
+                      color: textColor,
                     ),
                   ),
                 );
@@ -406,7 +424,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildSaveButton(bool isSmallPhone) {
+  Widget _buildSaveButton(bool isSmallPhone, bool isDark) {
     return Container(
       padding: EdgeInsets.fromLTRB(
         isSmallPhone ? 16 : 24,
@@ -415,10 +433,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         isSmallPhone ? 16 : 24,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppThemes.darkBg : AppThemes.lightSurface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -459,70 +477,74 @@ class _EditProfilePageState extends State<EditProfilePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Text(
-                      'Cambiar foto de perfil',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildPhotoOption(
-                      icon: Icons.camera_alt_outlined,
-                      title: 'Tomar foto',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Implement camera
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPhotoOption(
-                      icon: Icons.photo_library_outlined,
-                      title: 'Elegir de la galería',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Implement gallery picker
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPhotoOption(
-                      icon: Icons.delete_outline,
-                      title: 'Eliminar foto',
-                      isDestructive: true,
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Implement delete
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sheetColor = isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
+        final textColor = isDark ? AppThemes.darkText : AppThemes.lightText;
+        
+        return Container(
+          decoration: BoxDecoration(
+            color: sheetColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-        ),
-      ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppThemes.darkBorder : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Cambiar foto de perfil',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildPhotoOption(
+                        icon: Icons.camera_alt_outlined,
+                        title: 'Tomar foto',
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildPhotoOption(
+                        icon: Icons.photo_library_outlined,
+                        title: 'Elegir de la galería',
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildPhotoOption(
+                        icon: Icons.delete_outline,
+                        title: 'Eliminar foto',
+                        isDestructive: true,
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -532,6 +554,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -539,7 +563,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         decoration: BoxDecoration(
           color: isDestructive
               ? const Color(0xFFFEF2F2)
-              : const Color(0xFFF8F9FA),
+              : isDark ? AppThemes.darkSurfaceHi : AppThemes.lightBg,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -547,8 +571,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             Icon(
               icon,
               color: isDestructive
-                  ? const Color(0xFFEF4444)
-                  : const Color(0xFF2563EB),
+                  ? AppThemes.accentRed
+                  : AppThemes.primaryIndigo,
               size: 22,
             ),
             const SizedBox(width: 12),
@@ -558,8 +582,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: isDestructive
-                    ? const Color(0xFFEF4444)
-                    : const Color(0xFF1A1A1A),
+                    ? AppThemes.accentRed
+                    : isDark ? AppThemes.darkText : AppThemes.lightText,
               ),
             ),
           ],
@@ -569,14 +593,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _saveChanges() {
-    // TODO: Implement save logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           'Perfil actualizado exitosamente',
           style: GoogleFonts.inter(fontWeight: FontWeight.w500),
         ),
-        backgroundColor: const Color(0xFF10B981),
+        backgroundColor: AppThemes.accentGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
