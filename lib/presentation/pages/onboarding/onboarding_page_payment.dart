@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class OnboardingPagePayment extends StatefulWidget {
@@ -163,7 +164,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                   children: [
                     Text(
                       'Paga fácil\ny seguro',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 18 : 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1F2937),
@@ -173,7 +174,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                     SizedBox(height: isSmallPhone ? 6 : 16),
                     Text(
                       'Múltiples métodos de pago: tarjeta, PSE o efectivo. Tus datos siempre protegidos.',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 12 : 16,
                         color: const Color(0xFF6B7280),
                         height: 1.4,
@@ -244,7 +245,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                         const SizedBox(width: 4),
                         Text(
                           'SEGURO',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             fontSize: isSmallPhone ? 7 : 10,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF16A34A),
@@ -274,7 +275,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             right: 20,
             child: Text(
               'FLEXIDRIVE',
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 9 : 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.white.withOpacity(0.8),
@@ -289,7 +290,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
               children: [
                 Text(
                   '•••• •••• ••••',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 12 : 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.9),
@@ -298,7 +299,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 const SizedBox(width: 8),
                 Text(
                   '4821',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 12 : 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -315,7 +316,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
               children: [
                 Text(
                   'TITULAR',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 7 : 9,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.7),
@@ -324,7 +325,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 const SizedBox(height: 2),
                 Text(
                   'Carlos R.',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 9 : 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -341,7 +342,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
               children: [
                 Text(
                   'VENCE',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 7 : 9,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.7),
@@ -350,7 +351,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                 const SizedBox(height: 2),
                 Text(
                   '12/28',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: isSmallPhone ? 9 : 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -380,7 +381,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: GoogleFonts.poppins(
           fontSize: isSmallPhone ? 9 : 12,
           fontWeight: FontWeight.w600,
           color: const Color(0xFF4B5563),

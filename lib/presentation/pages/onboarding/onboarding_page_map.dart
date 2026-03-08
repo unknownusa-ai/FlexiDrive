@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class OnboardingPageMap extends StatefulWidget {
@@ -183,7 +184,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                             const SizedBox(width: 6),
                             Text(
                               'Bogotá, CO',
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 fontSize: isSmallPhone ? 11 : 14,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF1F2937),
@@ -206,7 +207,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                   children: [
                     Text(
                       'Reserva desde\ncualquier lugar',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 18 : 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1F2937),
@@ -216,7 +217,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                     SizedBox(height: isSmallPhone ? 6 : 16),
                     Text(
                       'Encuentra vehículos disponibles cerca de ti en segundos. Cobertura en toda Colombia.',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 12 : 16,
                         color: const Color(0xFF6B7280),
                         height: 1.4,

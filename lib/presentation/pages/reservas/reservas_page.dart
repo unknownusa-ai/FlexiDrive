@@ -16,10 +16,11 @@ class _ReservasPageState extends State<ReservasPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTextStyle.merge(
       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF9FAFB),
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: ConstrainedContainer(
           maxWidth: 800,
           child: Column(children: [
@@ -43,7 +44,7 @@ class _ReservasPageState extends State<ReservasPage> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [Color(0xFF5B6FED), Color(0xFF7B68EE)],
+          colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
         ),
       ),
       child: SafeArea(bottom: false, child: Padding(
@@ -89,11 +90,15 @@ class _ReservasPageState extends State<ReservasPage> {
   }
 
   Widget _buildFilterButtons() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(color: const Color(0xFFDCE2EC), borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20)
+        ),
         child: Row(children: [
           Expanded(child: _buildFilterButton(
             label: 'Activas',
@@ -105,7 +110,7 @@ class _ReservasPageState extends State<ReservasPage> {
           Expanded(child: _buildFilterButton(
             label: 'Historial',
             leadingWidget: Icon(Icons.description_outlined,
-                color: _selectedFilter == 'Historial' ? const Color(0xFF1F2937) : const Color(0xFF9CA3AF), size: 18),
+                color: _selectedFilter == 'Historial' ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.5), size: 18),
             isSelected: _selectedFilter == 'Historial',
             onTap: () => setState(() => _selectedFilter = 'Historial'),
           )),
@@ -116,13 +121,14 @@ class _ReservasPageState extends State<ReservasPage> {
 
   Widget _buildFilterButton({required String label, required Widget leadingWidget,
       required bool isSelected, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180), curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected ? theme.cardTheme.color : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: isSelected
               ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 2))]
@@ -132,7 +138,7 @@ class _ReservasPageState extends State<ReservasPage> {
           leadingWidget,
           const SizedBox(width: 8),
           Text(label, style: GoogleFonts.poppins(
-              color: isSelected ? const Color(0xFF1F2937) : const Color(0xFF6B7280),
+              color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.6),
               fontSize: 14, fontWeight: FontWeight.bold)),
         ]),
       ),
@@ -173,19 +179,23 @@ class _ReservasPageState extends State<ReservasPage> {
       required String startDate, required String endDate, required String location,
       required double progress, required String status, required Color statusColor,
       required String imageUrl, bool showEnCurso = false}) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 2))]),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 2))]
+      ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Stack(children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
             child: Container(
               height: 140, width: double.infinity,
-              decoration: const BoxDecoration(gradient: LinearGradient(
+              decoration: BoxDecoration(gradient: LinearGradient(
                   begin: Alignment.topLeft, end: Alignment.bottomRight,
-                  colors: [Color(0xFFE5E7EB), Color(0xFFD1D5DB)])),
+                  colors: [theme.colorScheme.onSurface.withOpacity(0.1), theme.colorScheme.onSurface.withOpacity(0.05)])),
               child: imageUrl.isEmpty
                   ? _buildPlaceholder()
                   : Image.network(imageUrl, fit: BoxFit.cover,
@@ -196,7 +206,7 @@ class _ReservasPageState extends State<ReservasPage> {
           if (showEnCurso) Positioned(bottom: 12, left: 12,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: const Color(0xFF5B6FED), borderRadius: BorderRadius.circular(6)),
+              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(6)),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(width: 8, height: 8,
                     decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle)),
@@ -210,26 +220,26 @@ class _ReservasPageState extends State<ReservasPage> {
         Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Text(vehicleName, style: GoogleFonts.poppins(
-                fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1F2937)))),
+                fontSize: 16, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface))),
             const SizedBox(width: 8),
             Text(price, style: GoogleFonts.poppins(
-                fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF5B6FED))),
+                fontSize: 16, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
           ]),
           const SizedBox(height: 4),
-          Text(code, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
+          Text(code, style: GoogleFonts.poppins(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.5), fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           Row(children: [
-            const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF9CA3AF)),
+            Icon(Icons.calendar_today_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.5)),
             const SizedBox(width: 6),
             Text('$startDate → $endDate', style: GoogleFonts.poppins(
-                fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+                fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6), fontWeight: FontWeight.bold)),
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF9CA3AF)),
+            Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.5)),
             const SizedBox(width: 6),
             Expanded(child: Text(location, style: GoogleFonts.poppins(
-                fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6), fontWeight: FontWeight.bold),
                 maxLines: 1, overflow: TextOverflow.ellipsis)),
           ]),
           const SizedBox(height: 14),
@@ -237,7 +247,7 @@ class _ReservasPageState extends State<ReservasPage> {
             Expanded(child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5B6FED), foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), elevation: 0,
               ),
@@ -251,7 +261,7 @@ class _ReservasPageState extends State<ReservasPage> {
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFCD34D), foregroundColor: const Color(0xFFF59E0B),
+                backgroundColor: const Color(0xFFFCD34D),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), elevation: 0,
               ),

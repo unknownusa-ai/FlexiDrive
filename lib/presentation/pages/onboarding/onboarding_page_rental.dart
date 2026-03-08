@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class OnboardingPageRental extends StatefulWidget {
@@ -177,7 +178,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                   children: [
                     Text(
                       'Alquila por horas,\ndías o semanas',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 18 : 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1F2937),
@@ -187,7 +188,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                     SizedBox(height: isSmallPhone ? 6 : 16),
                     Text(
                       'Flexibilidad total para adaptarse a tu ritmo de vida. Sin compromisos, sin complicaciones.',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 12 : 16,
                         color: const Color(0xFF6B7280),
                         height: 1.4,
@@ -220,7 +221,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: GoogleFonts.poppins(
           fontSize: isSmallPhone ? 10 : 13,
           fontWeight: FontWeight.w600,
           color: color,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'onboarding_page_rental.dart';
 import 'onboarding_page_map.dart';
 import 'onboarding_page_payment.dart';
@@ -68,7 +69,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               onTap: _skip,
               child: Text(
                 'Omitir',
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   color: _getSkipColor(),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -123,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             _currentPage == _pages.length - 1
                                 ? 'Comenzar'
                                 : 'Siguiente',
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

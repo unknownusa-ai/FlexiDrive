@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
+import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+import 'edit_profile_page.dart';
+import 'security_page.dart';
+import 'payment_methods_page.dart';
+import 'my_reviews_page.dart';
+import 'help_center_page.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -11,14 +16,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool _isDarkMode = false;
-
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ConstrainedContainer(
           maxWidth: 800,
@@ -36,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildDarkModeToggle(),
+                      _buildPreferencesSection(),
                       SizedBox(height: isSmallPhone ? 6 : 8),
                       _buildAccountSection(),
                       SizedBox(height: isSmallPhone ? 6 : 8),
@@ -60,115 +64,134 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildHeaderWithStats() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter, end: Alignment.bottomCenter,
-          colors: [Color(0xFF5B6FED), Color(0xFF6B5BCD)],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            isSmallPhone ? 12 : 20, 
-            8, 
-            isSmallPhone ? 12 : 20, 
-            isSmallPhone ? 10 : 14
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter, 
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+            ),
           ),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('Mi Perfil',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white, 
-                    fontSize: isSmallPhone ? 18 : 22, 
-                    fontWeight: FontWeight.bold
-                  )),
-              Container(
-                width: isSmallPhone ? 32 : 40, 
-                height: isSmallPhone ? 32 : 40,
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
-                child: Icon(Icons.nights_stay_outlined, color: Colors.white, size: isSmallPhone ? 16 : 20),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                isSmallPhone ? 12 : 20, 
+                8, 
+                isSmallPhone ? 12 : 20, 
+                isSmallPhone ? 10 : 14
               ),
-            ]),
-            const SizedBox(height: 8),
-            Row(children: [
-              CircleAvatar(
-                radius: isSmallPhone ? 24 : 30,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: const Color(0xFF5B6FED), size: isSmallPhone ? 26 : 32),
-              ),
-              SizedBox(width: isSmallPhone ? 10 : 14),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Carlos Rodríguez',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: GoogleFonts.poppins(
-                      fontSize: isSmallPhone ? 14 : 18, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.white
-                    )),
-                Text('carlos.rodriguez@email.com',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: GoogleFonts.poppins(
-                      fontSize: isSmallPhone ? 10 : 12, 
-                      color: Colors.white.withOpacity(0.8)
-                    )),
-                const SizedBox(height: 2),
-                Row(children: [
-                  const Icon(Icons.star, color: Color(0xFFFBBF24), size: 12),
-                  const SizedBox(width: 2),
-                  Text('4.9',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold, 
-                        fontSize: isSmallPhone ? 11 : 13, 
-                        color: Colors.white
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text('Mi Perfil',
+                      style: GoogleFonts.inter(
+                        color: Colors.white, 
+                        fontSize: isSmallPhone ? 18 : 22, 
+                        fontWeight: FontWeight.bold
                       )),
-                  SizedBox(width: isSmallPhone ? 6 : 10),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 5 : 7, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981), 
-                      borderRadius: BorderRadius.circular(12)
-                    ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.check, color: Colors.white, size: 8),
-                      const SizedBox(width: 2),
-                      Text('Verificado',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white, 
-                            fontSize: isSmallPhone ? 9 : 10, 
-                            fontWeight: FontWeight.bold
-                          )),
-                    ]),
+                    width: isSmallPhone ? 32 : 40, 
+                    height: isSmallPhone ? 32 : 40,
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                    child: Icon(Icons.nights_stay_outlined, color: const Color(0xFF2563EB), size: isSmallPhone ? 16 : 20),
                   ),
                 ]),
-              ])),
-            ]),
-            const SizedBox(height: 10),
-            Row(children: [
-              Expanded(child: _buildStatCard(
-                icon: Icons.directions_car_outlined, 
-                value: '2', 
-                label: isSmallPhone ? 'Viajes' : 'Viajes'
-              )),
-              SizedBox(width: isSmallPhone ? 6 : 10),
-              Expanded(child: _buildStatCard(
-                icon: Icons.account_balance_wallet_outlined, 
-                value: isSmallPhone ? '\$1.3M' : '\$1.3M', 
-                label: isSmallPhone ? 'Gasto' : 'Gastado'
-              )),
-              SizedBox(width: isSmallPhone ? 6 : 10),
-              Expanded(child: _buildStatCard(
-                icon: Icons.star_outline, 
-                value: '1,240', 
-                label: isSmallPhone ? 'Pts' : 'Puntos'
-              )),
-            ]),
-          ]),
+                const SizedBox(height: 8),
+                Row(children: [
+                  CircleAvatar(
+                    radius: isSmallPhone ? 24 : 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, color: const Color(0xFF2563EB), size: isSmallPhone ? 26 : 32),
+                  ),
+                  SizedBox(width: isSmallPhone ? 10 : 14),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Carlos Rodríguez',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.inter(
+                          fontSize: isSmallPhone ? 14 : 18, 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        )),
+                    Text('carlos.rodriguez@email.com',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.inter(
+                          fontSize: isSmallPhone ? 10 : 12, 
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.8)
+                        )),
+                    const SizedBox(height: 2),
+                    Row(children: [
+                      const Icon(Icons.star, color: Color(0xFFFBBF24), size: 12),
+                      const SizedBox(width: 2),
+                      Text('4.9',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: isSmallPhone ? 11 : 13, 
+                            color: Colors.white
+                          )),
+                      SizedBox(width: isSmallPhone ? 6 : 10),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 5 : 7, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981), 
+                          borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.check, color: Colors.white, size: 8),
+                          const SizedBox(width: 2),
+                          Text('Verificado',
+                              style: GoogleFonts.inter(
+                                color: Colors.white, 
+                                fontSize: isSmallPhone ? 9 : 10, 
+                                fontWeight: FontWeight.bold
+                              )),
+                        ]),
+                      ),
+                    ]),
+                  ])),
+                ]),
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(child: _buildStatCard(
+                    icon: Icons.directions_car_outlined, 
+                    value: '2', 
+                    label: isSmallPhone ? 'Viajes' : 'Viajes'
+                  )),
+                  SizedBox(width: isSmallPhone ? 6 : 10),
+                  Expanded(child: _buildStatCard(
+                    icon: Icons.account_balance_wallet_outlined, 
+                    value: isSmallPhone ? '\$1.3M' : '\$1.3M', 
+                    label: isSmallPhone ? 'Gasto' : 'Gastado'
+                  )),
+                  SizedBox(width: isSmallPhone ? 6 : 10),
+                  Expanded(child: _buildStatCard(
+                    icon: Icons.star_outline, 
+                    value: '1,240', 
+                    label: isSmallPhone ? 'Pts' : 'Puntos'
+                  )),
+                ]),
+              ]),
+            ),
+          ),
         ),
-      ),
+        // Decorative bubble in top-right corner
+        Positioned(
+          top: -60,
+          right: -60,
+          child: Container(
+            width: 180,
+            height: 180,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -204,100 +227,154 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildDarkModeToggle() {
-    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 6 : 8),
-      decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
-      ),
-      child: Row(children: [
-        Container(
-          width: isSmallPhone ? 32 : 36, 
-          height: isSmallPhone ? 32 : 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF4E6), 
-            borderRadius: BorderRadius.circular(9)
-          ),
-          child: Icon(Icons.wb_sunny_outlined, color: const Color(0xFFF59E0B), size: isSmallPhone ? 16 : 18)
-        ),
-        SizedBox(width: isSmallPhone ? 8 : 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Modo Claro',
-              style: GoogleFonts.poppins(
-                fontSize: isSmallPhone ? 12 : 14, 
-                fontWeight: FontWeight.bold, 
-                color: const Color(0xFF1A1A1A)
-              )),
-          Text('Cambiar apariencia',
-              style: GoogleFonts.poppins(
-                fontSize: isSmallPhone ? 9 : 11, 
-                color: Colors.grey.shade500
-              )),
-        ])),
-        Transform.scale(
-          scale: isSmallPhone ? 0.7 : 0.8, 
-          child: CupertinoSwitch(
-            value: _isDarkMode,
-            onChanged: (v) => setState(() => _isDarkMode = v),
-            activeColor: const Color(0xFF5B6FED),
-            trackColor: Colors.grey.shade300,
-          )
-        ),
-      ]),
-    );
-  }
-
   Widget _buildAccountSection() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(14),
+        color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
             child: Text('MI CUENTA', style: GoogleFonts.poppins(
-                fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade400, letterSpacing: 0.5))),
-        _buildMenuItem(icon: Icons.person_outline, iconColor: const Color(0xFF5B6FED),
-            iconBgColor: const Color(0xFFF0F4FF), title: 'Editar perfil', subtitle: 'Nombre, foto, documento', onTap: () {}),
-        Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
+        _buildMenuItem(icon: Icons.person_outline, iconColor: const Color(0xFF2563EB),
+            iconBgColor: const Color(0xFFF0F4FF), title: 'Editar perfil', subtitle: 'Nombre, foto, documento', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditProfilePage()),
+              );
+            }),
+        Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.credit_card_outlined, iconColor: const Color(0xFF8B5CF6),
-            iconBgColor: const Color(0xFFF3E8FF), title: 'Métodos de pago', subtitle: 'Tarjetas y PSE guardadas', onTap: () {}),
-        Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+            iconBgColor: const Color(0xFFF3E8FF), title: 'Métodos de pago', subtitle: 'Tarjetas y PSE guardadas', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PaymentMethodsPage()),
+              );
+            }),
+        Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.shield_outlined, iconColor: const Color(0xFF10B981),
-            iconBgColor: const Color(0xFFD1FAE5), title: 'Seguridad', subtitle: 'Contraseña y verificación', onTap: () {}),
+            iconBgColor: const Color(0xFFD1FAE5), title: 'Seguridad', subtitle: 'Contraseña y verificación', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SecurityPage()),
+              );
+            }),
       ]),
     );
   }
 
   Widget _buildActivitySection() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(14),
+        color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
             child: Text('ACTIVIDAD & SOPORTE', style: GoogleFonts.poppins(
-                fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade400, letterSpacing: 0.5))),
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
         _buildMenuItem(icon: Icons.history, iconColor: const Color(0xFFF59E0B), iconBgColor: const Color(0xFFFFF4E6), title: 'Historial', subtitle: '4 reservas totales', onTap: () => MainPage.of(context).setIndex(1)),
-        Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+        Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.notifications_outlined, iconColor: const Color(0xFFEF4444), iconBgColor: const Color(0xFFFEE2E2), title: 'Notificaciones', subtitle: 'Gestionar alertas', onTap: () => MainPage.of(context).setIndex(2)),
-        Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+        Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.star_border, iconColor: const Color(0xFFFBBF24),
-            iconBgColor: const Color(0xFFFEF3C7), title: 'Mis reseñas', subtitle: '3 reseñas escritas', onTap: () {}),
-        Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+            iconBgColor: const Color(0xFFFEF3C7), title: 'Mis reseñas', subtitle: '3 reseñas escritas', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyReviewsPage()),
+              );
+            }),
+        Divider(height: 1, indent: 14, endIndent: 14, color: Theme.of(context).dividerTheme.color),
         _buildMenuItem(icon: Icons.headset_outlined, iconColor: const Color(0xFF3B82F6),
-            iconBgColor: const Color(0xFFDBEAFE), title: 'Centro de ayuda', subtitle: 'Chat en vivo 24/7', onTap: () {}),
+            iconBgColor: const Color(0xFFDBEAFE), title: 'Centro de ayuda', subtitle: 'Chat en vivo 24/7', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HelpCenterPage()),
+              );
+            }),
       ]),
+    );
+  }
+
+  Widget _buildPreferencesSection() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color, borderRadius: BorderRadius.circular(14),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
+            child: Text('PREFERENCIAS', style: GoogleFonts.poppins(
+                fontSize: 10, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), letterSpacing: 0.5))),
+        _buildThemeToggleItem(isDarkMode, isSmallPhone),
+      ]),
+    );
+  }
+
+  Widget _buildThemeToggleItem(bool isDarkMode, bool isSmallPhone) {
+    return InkWell(
+      onTap: () {
+        final appState = FlexiDriveApp.of(context);
+        appState?.toggleTheme();
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
+        child: Row(children: [
+          Container(
+            width: isSmallPhone ? 32 : 36, 
+            height: isSmallPhone ? 32 : 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF4E6), 
+              borderRadius: BorderRadius.circular(9)
+            ),
+            child: Icon(
+              Icons.wb_sunny_outlined, 
+              color: const Color(0xFFF59E0B), 
+              size: isSmallPhone ? 16 : 18
+            )
+          ),
+          SizedBox(width: isSmallPhone ? 8 : 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Modo Oscuro', 
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 12 : 13, 
+                fontWeight: FontWeight.bold, 
+                color: Theme.of(context).colorScheme.onSurface
+              )),
+            Text(isDarkMode ? 'Activado' : 'Desactivado', 
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 9 : 11, 
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+              )),
+          ])),
+          Switch(
+            value: isDarkMode,
+            onChanged: (value) {
+              final appState = FlexiDriveApp.of(context);
+              appState?.setDarkMode(value);
+            },
+            activeColor: const Color(0xFFF59E0B),
+          ),
+        ]),
+      ),
     );
   }
 
   Widget _buildMenuItem({required IconData icon, required Color iconColor, required Color iconBgColor,
       required String title, required String subtitle, required VoidCallback onTap}) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
     
     return InkWell(
       onTap: onTap,
@@ -318,17 +395,17 @@ class _ProfilePageState extends State<ProfilePage> {
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 12 : 13, 
                 fontWeight: FontWeight.bold, 
-                color: const Color(0xFF1A1A1A)
+                color: theme.colorScheme.onSurface
               )),
             Text(subtitle, 
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 9 : 11, 
-                color: Colors.grey.shade500
+                color: theme.colorScheme.onSurface.withOpacity(0.6)
               )),
           ])),
-          Icon(Icons.chevron_right, color: Colors.grey.shade400, size: isSmallPhone ? 16 : 18),
+          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withOpacity(0.4), size: isSmallPhone ? 16 : 18),
         ]),
       ),
     );

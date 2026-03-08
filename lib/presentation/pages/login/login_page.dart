@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../onboarding/onboarding_page.dart';
 import '../register/register_page.dart';
 import '../main_page.dart';
 
@@ -27,9 +29,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
     final scale = ResponsiveUtils.scale(context, 1.0);
+    final theme = Theme.of(context);
     
     return Scaffold(
-      backgroundColor: const Color(0xFF7B61FF),
+      backgroundColor: theme.colorScheme.primary,
       body: ConstrainedContainer(
         maxWidth: 600,
         child: Column(
@@ -40,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF4F7DF3), Color(0xFF7B61FF)],
+                colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
               ),
             ),
             child: Stack(
@@ -66,7 +69,15 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         // Back button
                         GestureDetector(
-                          onTap: () => Navigator.pop(context),
+                          onTap: () {
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const OnboardingPage()),
+                              );
+                            }
+                          },
                           child: Row(
                             children: [
                               Icon(
@@ -76,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               Text(
                                 'Atrás',
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
                                   color: Colors.white.withAlpha((0.9 * 255).round()),
                                   fontSize: 14,
                                 ),
@@ -102,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                             SizedBox(width: 12 * scale),
                             Text(
                               'FlexiDrive',
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontSize: ResponsiveUtils.fontSize(context, 24),
                                 fontWeight: FontWeight.bold,
@@ -114,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                         // Welcome text
                         Text(
                           '¡Bienvenido de\nvuelta! 👋',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: ResponsiveUtils.fontSize(context, 32),
                             fontWeight: FontWeight.bold,
@@ -124,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: 8 * scale),
                         Text(
                           'Inicia sesión para continuar',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.white.withAlpha((0.8 * 255).round()),
                             fontSize: ResponsiveUtils.fontSize(context, 14),
                           ),
@@ -197,10 +208,10 @@ class _LoginPageState extends State<LoginPage> {
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
+                        child: Text(
                           '¿Olvidaste tu contraseña?',
-                          style: TextStyle(
-                            color: Color(0xFF4F7DF3),
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFF4F7DF3),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -214,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF4F7DF3), Color(0xFF7B61FF)],
+                          colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
                         ),
                         borderRadius: BorderRadius.circular(16 * scale),
                         boxShadow: [
@@ -244,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Text(
                               'Iniciar Sesión',
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 color: Colors.white,
                                 fontSize: ResponsiveUtils.fontSize(context, 16),
                                 fontWeight: FontWeight.w600,
@@ -274,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             'o continúa con',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               color: Colors.grey.withOpacity(0.7),
                               fontSize: 13,
                             ),
@@ -318,7 +329,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         Text(
                           '¿No tienes cuenta? ',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.grey.withOpacity(0.8),
                             fontSize: 14,
                           ),
@@ -331,9 +342,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             'Regístrate',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               color: Color(0xFF4F7DF3),
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -357,7 +368,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLabel(String text, double scale) {
     return Text(
       text,
-      style: TextStyle(
+      style: GoogleFonts.poppins(
         color: const Color(0xFF9CA3AF),
         fontSize: ResponsiveUtils.fontSize(context, 12),
         fontWeight: FontWeight.w600,
@@ -381,7 +392,7 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(
+        hintStyle: GoogleFonts.poppins(
           color: const Color(0xFF9CA3AF),
           fontSize: ResponsiveUtils.fontSize(context, 14),
         ),
@@ -442,7 +453,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(width: 8 * scale),
             Text(
               label,
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 color: Colors.black87,
                 fontSize: ResponsiveUtils.fontSize(context, 14),
                 fontWeight: FontWeight.w500,

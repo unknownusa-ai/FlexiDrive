@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flexidrive/presentation/pages/main_page.dart';
-import '../../../core/utils/responsive_utils.dart';
-import 'widgets/chip_pestana_notificaciones.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -13,267 +11,408 @@ class _NotificationsPageState extends State<NotificationsPage> {
   String _selectedTab = 'Todas';
   int _unreadCount = 2;
 
-  void _markAllAsRead() => setState(() {
-    for (var n in notifications) n['unread'] = false;
-    _unreadCount = 0;
-  });
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
-  void _markAsRead(Map<String, dynamic> n) => setState(() {
-    if (n['unread'] == true) { n['unread'] = false; if (_unreadCount > 0) _unreadCount--; }
-  });
+  // Dark-mode aware palette helpers
+  Color get _cardBg       => _isDark ? const Color(0xFF161827) : Colors.white;
+  Color get _borderColor  => _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
+  Color get _textPrimary  => _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF1A1A1A);
+  Color get _textSub      => _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
 
-  void _deleteNotification(Map<String, dynamic> n) => setState(() {
-    if (n['unread'] == true && _unreadCount > 0) _unreadCount--;
-    notifications.remove(n);
-  });
+  // Icon background colors based on notification type
+  Color _getIconBgColor(String type, bool isDark) {
+    switch (type) {
+      case 'reserva':
+        return isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
+      case 'recordatorio':
+        return isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFFE4E4);
+      case 'promo':
+        return isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7);
+      case 'auto':
+        return isDark ? const Color(0xFF1E3A8A) : const Color(0xFFDBEAFE);
+      default:
+        return isDark ? const Color(0xFF5B21B6) : const Color(0xFFEDE9FE);
+    }
+  }
 
-  final List<Map<String, dynamic>> notifications = [
+  late final List<Map<String, dynamic>> _notifications = [
     {
       'type': 'reserva',
       'title': '¡Reserva Confirmada!',
+      'titleEmoji': '🎉',
       'description': 'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
       'time': 'Hace 2 horas',
       'unread': true,
-      'icon': Icons.check,
-      'iconColor': const Color(0xFF10B981),
-      'iconBgColor': const Color(0xFFD1F2DF),
+      'emoji': '✅',
     },
     {
       'type': 'recordatorio',
       'title': 'Recordatorio de Devolución',
+      'titleEmoji': '⏰',
       'description': 'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
       'time': 'Ayer, 3:00 PM',
       'unread': true,
-      'icon': Icons.access_time,
-      'iconColor': const Color(0xFFEF4444),
-      'iconBgColor': const Color(0xFFEEC2C2),
+      'emoji': '⏰',
     },
     {
       'type': 'promo',
       'title': '¡Oferta Exclusiva!',
+      'titleEmoji': '🔥',
       'description': '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
       'time': 'Hace 2 días',
       'unread': false,
-      'icon': Icons.card_giftcard,
-      'iconColor': const Color(0xFFF59E0B),
-      'iconBgColor': const Color(0xFFFFECD2),
+      'emoji': '🎁',
     },
     {
       'type': 'auto',
       'title': 'Nuevo Vehículo Disponible',
+      'titleEmoji': '🚗',
       'description': 'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
       'time': 'Hace 3 días',
       'unread': false,
-      'icon': Icons.new_releases,
-      'iconColor': const Color(0xFF3B82F6),
-      'iconBgColor': const Color(0xFFCCE5FF),
+      'emoji': '🆕',
     },
     {
       'type': 'promo',
       'title': 'Programa de Referidos',
+      'titleEmoji': '👥',
       'description': 'Invita a un amigo y gana \$50,000 COP en crédito FlexiDrive para tu próxima renta.',
       'time': 'Hace 5 días',
       'unread': false,
-      'icon': Icons.attach_money,
-      'iconColor': const Color(0xFF8B5CF6),
-      'iconBgColor': const Color(0xFFE9D5FF),
+      'emoji': '💰',
     },
   ];
 
+  void _markAllAsRead() => setState(() {
+    for (var n in _notifications) n['unread'] = false;
+    _unreadCount = 0;
+  });
+  void _markAsRead(Map<String, dynamic> n) => setState(() {
+    if (n['unread'] == true) { n['unread'] = false; if (_unreadCount > 0) _unreadCount--; }
+  });
+  void _deleteNotification(Map<String, dynamic> n) => setState(() {
+    if (n['unread'] == true && _unreadCount > 0) _unreadCount--;
+    _notifications.remove(n);
+  });
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      body: ConstrainedContainer(
-        maxWidth: 800,
-        child: Column(children: [
-          _buildHeader(),
-          _buildTabs(),
-          Expanded(child: _buildNotificationsList()),
-        ]),
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Column(children: [
+        _buildHeader(),
+        _buildTabs(),
+        Expanded(child: _buildList()),
+      ]),
     );
   }
 
+  // ─── HEADER ──────────────────────────────────────────────────────
   Widget _buildHeader() {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF5B6FED), Color(0xFF6B5BCD)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
         ),
       ),
       child: Stack(children: [
-        Positioned(
-          right: -40, top: -30,
+        Positioned(right: -40, top: -30,
           child: Container(
             width: 150, height: 150,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.1),
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.08)),
           ),
         ),
         SafeArea(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Notificaciones',
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Notificaciones',
+                    style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                if (_unreadCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(12)),
+                    child: Text('$_unreadCount sin leer',
+                        style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  ),
+              ]),
               if (_unreadCount > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(12),
+                GestureDetector(
+                  onTap: _markAllAsRead,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(12)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 5),
+                      Text('Leer todo', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                    ]),
                   ),
-                  child: Text('$_unreadCount sin leer',
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                 ),
-            ]),
-            if (_unreadCount > 0)
-              GestureDetector(
-                onTap: _markAllAsRead,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.check, color: Colors.white, size: 16),
-                    SizedBox(width: 4),
-                    Text('Leer todo',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                  ]),
-                ),
-              ),
-          ]),
+            ],
+          ),
         )),
       ]),
     );
   }
 
+  // ─── TABS ────────────────────────────────────────────────────────
   Widget _buildTabs() {
     final tabs = ['Todas', 'Reservas', 'Recordatorios', 'Promos'];
     return Container(
-      color: Colors.white,
+      color: _cardBg,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           children: tabs.map((tab) => Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: ChipPestanaNotificaciones(
-              label: tab,
-              isSelected: _selectedTab == tab,
-              leading: _buildTabLeading(tab),
-              onTap: () => setState(() => _selectedTab = tab),
-            ),
+            padding: const EdgeInsets.only(right: 10),
+            child: _buildTabChip(tab),
           )).toList(),
         ),
       ),
     );
   }
 
-  Widget? _buildTabLeading(String tab) {
-    if (tab == 'Reservas')      return const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 16);
-    if (tab == 'Recordatorios') return const Icon(Icons.access_time,  color: Color(0xFFEF4444), size: 16);
-    if (tab == 'Promos')        return const Icon(Icons.card_giftcard, color: Color(0xFFF59E0B), size: 16);
-    return null;
+  Widget _buildTabChip(String tab) {
+    final isSelected = _selectedTab == tab;
+    Widget? leading;
+    if (tab == 'Reservas')      leading = const Text('✅', style: TextStyle(fontSize: 13));
+    else if (tab == 'Recordatorios') leading = const Text('⏰', style: TextStyle(fontSize: 13));
+    else if (tab == 'Promos')   leading = const Text('🎁', style: TextStyle(fontSize: 13));
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedTab = tab),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF4F46E5) : _cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected ? null : Border.all(color: _borderColor),
+          boxShadow: isSelected
+              ? [BoxShadow(
+                  color: const Color(0xFF4F46E5).withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                )]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (leading != null) ...[leading, const SizedBox(width: 5)],
+            Text(
+              tab,
+              style: GoogleFonts.inter(
+                color: isSelected ? Colors.white : _textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _buildNotificationsList() {
+  // ─── LIST ────────────────────────────────────────────────────────
+  Widget _buildList() {
     final filtered = _selectedTab == 'Todas'
-        ? notifications
-        : notifications.where((n) {
+        ? _notifications
+        : _notifications.where((n) {
             if (_selectedTab == 'Reservas')      return n['type'] == 'reserva';
             if (_selectedTab == 'Recordatorios') return n['type'] == 'recordatorio';
             if (_selectedTab == 'Promos')        return n['type'] == 'promo';
             return true;
           }).toList();
 
-    return Container(
-      color: const Color(0xFFF9FAFB),
-      child: filtered.isEmpty
-          ? Center(child: Text('No hay notificaciones',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16)))
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              itemCount: filtered.length,
-              itemBuilder: (context, i) => _buildNotificationCard(filtered[i]),
+    if (filtered.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🔔', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 16),
+            Text(
+              'No hay notificaciones',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: _textSub,
+              ),
             ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      itemCount: filtered.length,
+      itemBuilder: (context, i) => _buildCard(filtered[i]),
     );
   }
 
-  Widget _buildNotificationCard(Map<String, dynamic> n) {
+  // ─── NOTIFICATION CARD ───────────────────────────────────────────
+  Widget _buildCard(Map<String, dynamic> n) {
+    final bool isUnread = n['unread'] == true;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: n['unread'] == true ? const Color(0xFF5B6FED) : Colors.grey.shade200,
-          width: 2,
+          color: isUnread
+              ? const Color(0xFF4F46E5).withOpacity(0.4)
+              : _borderColor,
+          width: isUnread ? 1.5 : 1,
         ),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // ✅ Usar Icon() porque 'icon' es IconData
-            Container(
-              width: 50, height: 50,
-              decoration: BoxDecoration(
-                color: n['iconBgColor'] as Color,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Icon(
-                  n['icon'] as IconData,
-                  color: n['iconColor'] as Color,
-                  size: 26,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(n['title'] as String,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937), height: 1.2)),
-              const SizedBox(height: 4),
-              Text(n['description'] as String,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
-                  maxLines: 2, overflow: TextOverflow.ellipsis),
-            ])),
-            const SizedBox(width: 8),
-            if (n['unread'] == true)
-              Container(width: 12, height: 12,
-                  decoration: const BoxDecoration(color: Color(0xFF5B6FED), shape: BoxShape.circle)),
-          ]),
-          const SizedBox(height: 12),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text(n['time'] as String,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
-            Row(children: [
-              if (n['unread'] == true) ...[
-                GestureDetector(
-                  onTap: () => _markAsRead(n),
-                  child: const Text('Marcar leído',
-                      style: TextStyle(color: Color(0xFF3B82F6), fontSize: 11, fontWeight: FontWeight.w600)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Emoji icon box
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: _getIconBgColor(n['type'] as String, _isDark),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(
+                      n['emoji'] as String,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
+                // Title + description
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title with inline emoji
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: n['title'] as String,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: _textPrimary,
+                                height: 1.2,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' ${n['titleEmoji']}',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        n['description'] as String,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: _textSub,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Unread blue dot
+                if (isUnread)
+                  Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.only(top: 4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF4F46E5),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
               ],
-              GestureDetector(
-                onTap: () => _deleteNotification(n),
-                child: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-              ),
-            ]),
-          ]),
-        ]),
+            ),
+            const SizedBox(height: 12),
+            // Bottom row: time + actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  n['time'] as String,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: _textSub,
+                  ),
+                ),
+                Row(
+                  children: [
+                    // "Marcar leído" for unread / "No leído" (blue) for read
+                    if (isUnread)
+                      GestureDetector(
+                        onTap: () => _markAsRead(n),
+                        child: Text(
+                          'Marcar leido',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF4F46E5),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        'No leído',
+                        style: GoogleFonts.inter(
+                          color: _textSub,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    const SizedBox(width: 12),
+                    // Delete icon
+                    GestureDetector(
+                      onTap: () => _deleteNotification(n),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Color(0xFFEF4444),
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

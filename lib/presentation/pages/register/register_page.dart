@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../login/login_page.dart';
 
@@ -35,9 +36,10 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
     final scale = ResponsiveUtils.scale(context, 1.0);
+    final theme = Theme.of(context);
     
     return Scaffold(
-      backgroundColor: const Color(0xFF7B61FF),
+      backgroundColor: theme.colorScheme.primary,
       body: ConstrainedContainer(
         maxWidth: 600,
         child: Column(
@@ -61,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         Text(
                           'Atrás',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.white.withAlpha((0.9 * 255).round()),
                             fontSize: 14,
                           ),
@@ -73,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Title
                   Text(
                     'Crear Cuenta 🎉',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: ResponsiveUtils.fontSize(context, 32),
                       fontWeight: FontWeight.bold,
@@ -82,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 8 * scale),
                   Text(
                     'Únete a miles de usuarios FlexiDrive',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       color: Colors.white.withAlpha((0.8 * 255).round()),
                       fontSize: ResponsiveUtils.fontSize(context, 14),
                     ),
@@ -217,7 +219,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                 color: _acceptTerms
-                                    ? const Color(0xFF4F7DF3)
+                                    ? const Color(0xFF2563EB)
                                     : const Color(0xFFD1D5DB),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -241,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
                                   color: Colors.grey.shade600,
                                   fontSize: 12,
                                   height: 1.4,
@@ -252,8 +254,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   TextSpan(
                                     text: 'Términos y Condiciones',
-                                    style: const TextStyle(
-                                      color: Color(0xFF4F7DF3),
+                                    style: GoogleFonts.poppins(
+                                      color: const Color(0xFF2563EB),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -262,8 +264,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   TextSpan(
                                     text: 'Política de Privacidad',
-                                    style: const TextStyle(
-                                      color: Color(0xFF4F7DF3),
+                                    style: GoogleFonts.poppins(
+                                      color: const Color(0xFF2563EB),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -302,10 +304,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 56,
                           decoration: _acceptTerms
                               ? BoxDecoration(
-                                  gradient: LinearGradient(
+                                  gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
-                                    colors: [Color(0xFF4F7DF3), Color(0xFF7B61FF)],
+                                    colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
                                   ),
                                   borderRadius: BorderRadius.circular(16),
                                 )
@@ -315,7 +317,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             children: [
                               Text(
                                 'Crear Cuenta',
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
                                   color: _acceptTerms
                                       ? Colors.white
                                       : const Color(0xFF9CA3AF),
@@ -343,7 +345,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Text(
                           '¿Ya tienes cuenta? ',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.grey.withOpacity(0.8),
                             fontSize: 14,
                           ),
@@ -356,10 +358,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             'Inicia sesión',
-                            style: TextStyle(
-                              color: Color(0xFF4F7DF3),
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF2563EB),
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -382,7 +384,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: TextStyle(
+      style: GoogleFonts.poppins(
         color: Colors.grey.withOpacity(0.7),
         fontSize: 12,
         fontWeight: FontWeight.w600,
@@ -405,7 +407,7 @@ class _RegisterPageState extends State<RegisterPage> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(
+        hintStyle: GoogleFonts.poppins(
           color: Colors.grey.withOpacity(0.6),
           fontSize: 14,
         ),
