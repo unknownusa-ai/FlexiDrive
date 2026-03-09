@@ -13,17 +13,18 @@ class SolicitudesPage extends StatefulWidget {
 class SolicitudesPageState extends State<SolicitudesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _selectedTabIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: 3,
-      vsync: this,
-      initialIndex: widget.initialTab.clamp(0, 2),
-    );
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
     _tabController.addListener(() {
-      setState(() {});
+      if (_selectedTabIndex != _tabController.index) {
+        setState(() {
+          _selectedTabIndex = _tabController.index;
+        });
+      }
     });
   }
 
@@ -175,9 +176,13 @@ class SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Pendientes',
               count: '1',
-              isActive: _tabController.index == 0,
-              onTap: () => _tabController.animateTo(0),
+              isActive: _selectedTabIndex == 0,
+              onTap: () {
+                setState(() => _selectedTabIndex = 0);
+                _tabController.animateTo(0);
+              },
               isSmallPhone: isSmallPhone,
+              activeColor: const Color(0xFFF59E0B),
             ),
           ),
           SizedBox(width: isSmallPhone ? 8 : 10),
@@ -185,8 +190,11 @@ class SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Activas',
               count: '1',
-              isActive: _tabController.index == 1,
-              onTap: () => _tabController.animateTo(1),
+              isActive: _selectedTabIndex == 1,
+              onTap: () {
+                setState(() => _selectedTabIndex = 1);
+                _tabController.animateTo(1);
+              },
               isSmallPhone: isSmallPhone,
             ),
           ),
@@ -195,9 +203,13 @@ class SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Completadas',
               count: '2',
-              isActive: _tabController.index == 2,
-              onTap: () => _tabController.animateTo(2),
+              isActive: _selectedTabIndex == 2,
+              onTap: () {
+                setState(() => _selectedTabIndex = 2);
+                _tabController.animateTo(2);
+              },
               isSmallPhone: isSmallPhone,
+              activeColor: const Color(0xFF64748B),
             ),
           ),
         ],
@@ -211,6 +223,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     required bool isActive,
     required VoidCallback onTap,
     required bool isSmallPhone,
+    Color activeColor = const Color(0xFF10B981),
   }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
@@ -228,7 +241,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
               : (isDarkMode ? const Color(0xFF334155) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFF10B981) : (isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0)),
+            color: isActive ? activeColor : const Color(0xFFE2E8F0),
             width: isActive ? 2 : 1.5,
           ),
         ),
@@ -241,9 +254,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 11 : 14,
                 fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF10B981)
-                    : theme.colorScheme.onSurface,
+                color: isActive ? activeColor : const Color(0xFF0F172A),
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -254,9 +265,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
               style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF10B981)
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: isActive ? activeColor : const Color(0xFF94A3B8),
               ),
             ),
           ],
@@ -371,13 +380,13 @@ class SolicitudesPageState extends State<SolicitudesPage>
         statusText = 'PENDIENTE';
         break;
       case 'active':
-        statusColor = const Color(0xFF3B82F6);
-        statusBgColor = const Color(0xFFEFF6FF);
+        statusColor = const Color(0xFF10B981);
+        statusBgColor = const Color(0xFFE7F7F2);
         statusText = 'ACTIVA';
         break;
       case 'completed':
-        statusColor = const Color(0xFF10B981);
-        statusBgColor = const Color(0xFFECFDF5);
+        statusColor = const Color(0xFF64748B);
+        statusBgColor = const Color(0xFFF1F5F9);
         statusText = 'COMPLETADA';
         break;
       default:
@@ -555,7 +564,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _showRejectDialog(),
-                    icon: const Icon(Icons.cancel_outlined, size: 20),
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
                     label: Text(
                       'Rechazar',
                       style: GoogleFonts.inter(
@@ -564,14 +573,15 @@ class SolicitudesPageState extends State<SolicitudesPage>
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: const Color(0xFFFEF2F2),
                       foregroundColor: const Color(0xFFEF4444),
                       side: const BorderSide(
                         color: Color(0xFFEF4444),
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ),
@@ -580,7 +590,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _showAcceptDialog(),
-                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
                     label: Text(
                       'Aprobar',
                       style: GoogleFonts.inter(
@@ -589,12 +599,12 @@ class SolicitudesPageState extends State<SolicitudesPage>
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ),
@@ -653,6 +663,123 @@ class SolicitudesPageState extends State<SolicitudesPage>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBottomBar(bool isSmallPhone) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8FAFC),
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            isSmallPhone ? 10 : 14,
+            8,
+            isSmallPhone ? 10 : 14,
+            8,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _navItem(
+                icon: Icons.home_outlined,
+                label: 'Inicio',
+                onTap: () => Navigator.pop(context),
+              ),
+              _navItem(
+                icon: Icons.description_outlined,
+                label: 'Solicitudes',
+                active: true,
+              ),
+              Container(
+                width: 74,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.add, color: Colors.white, size: 36),
+              ),
+              _navItem(
+                icon: Icons.notifications_none,
+                label: 'Alertas',
+                dot: true,
+                onTap: () => Navigator.pop(context),
+              ),
+              _navItem(
+                icon: Icons.person_outline,
+                label: 'Perfil',
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem({
+    required IconData icon,
+    required String label,
+    bool active = false,
+    bool dot = false,
+    VoidCallback? onTap,
+  }) {
+    final activeColor = const Color(0xFFF59E0B);
+    final inactiveColor = const Color(0xFF94A3B8);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 66,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: active ? const Color(0xFFFFF7ED) : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    icon,
+                    color: active ? activeColor : inactiveColor,
+                    size: 27,
+                  ),
+                  if (dot)
+                    const Positioned(
+                      right: -2,
+                      top: -1,
+                      child: CircleAvatar(
+                        radius: 3,
+                        backgroundColor: Color(0xFFEF4444),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: active ? activeColor : inactiveColor,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                ),
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
