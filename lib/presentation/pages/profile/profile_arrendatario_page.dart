@@ -2,60 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+import 'arrendatario_main_page.dart';
 import 'edit_profile_page.dart';
 import 'security_page.dart';
 import 'payment_methods_page.dart';
 import 'my_reviews_page.dart';
 import 'help_center_page.dart';
-import 'arrendatario_main_page.dart';
+import 'principal_arrendatario_page.dart';
+import 'mi_saldo_page.dart';
+import 'alertas_page.dart';
 import '../../../core/utils/responsive_utils.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ProfileArrendatarioPage extends StatefulWidget {
+  const ProfileArrendatarioPage({super.key});
+
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfileArrendatarioPage> createState() => _ProfileArrendatarioPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  final bool _isModoArrendatarioActive = true; // Cambiar a false para desactivar modo
-
+class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: ConstrainedContainer(
-          maxWidth: 800,
-          child: Column(
-            children: [
-              _buildHeaderWithStats(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                      isSmallPhone ? 12 : 16, 8, isSmallPhone ? 12 : 16, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildPreferencesSection(),
-                      SizedBox(height: isSmallPhone ? 6 : 8),
-                      _buildAccountSection(),
-                      SizedBox(height: isSmallPhone ? 6 : 8),
-                      _buildModoSection(),
-                      SizedBox(height: isSmallPhone ? 6 : 8),
-                      _buildActivitySection(),
-                      SizedBox(height: isSmallPhone ? 6 : 8),
-                      _buildLogoutButton(),
-                      const SizedBox(height: 4),
-                      _buildVersionInfo(),
-                      const SizedBox(height: 8),
-                    ],
+    return Container(
+      color: theme.scaffoldBackgroundColor,
+      child: Material(
+        color: Colors.transparent,
+        child: SafeArea(
+          child: ConstrainedContainer(
+            maxWidth: 800,
+            child: Column(
+              children: [
+                _buildHeaderWithStats(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                        isSmallPhone ? 12 : 16, 8, isSmallPhone ? 12 : 16, 0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildPreferencesSection(),
+                        SizedBox(height: isSmallPhone ? 6 : 8),
+                        _buildAccountSection(),
+                        SizedBox(height: isSmallPhone ? 6 : 8),
+                        _buildModoArrendatarioSection(),
+                        SizedBox(height: isSmallPhone ? 6 : 8),
+                        _buildActivitySection(),
+                        SizedBox(height: isSmallPhone ? 6 : 8),
+                        _buildLogoutButton(),
+                        const SizedBox(height: 4),
+                        _buildVersionInfo(),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -72,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+              colors: [Color(0xFFF59E0B), Color(0xFFFF7A00)],
             ),
           ),
           child: SafeArea(
@@ -96,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle),
                         child: Icon(Icons.nights_stay_outlined,
-                            color: const Color(0xFF2563EB),
+                            color: const Color(0xFFF59E0B),
                             size: isSmallPhone ? 16 : 20),
                       ),
                     ]),
@@ -106,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     radius: isSmallPhone ? 24 : 30,
                     backgroundColor: Colors.white,
                     child: Icon(Icons.person,
-                        color: const Color(0xFF2563EB),
+                        color: const Color(0xFFF59E0B),
                         size: isSmallPhone ? 26 : 32),
                   ),
                   SizedBox(width: isSmallPhone ? 10 : 14),
@@ -166,13 +171,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: _buildStatCard(
                           icon: Icons.directions_car_outlined,
                           value: '2',
-                          label: isSmallPhone ? 'Viajes' : 'Viajes')),
+                          label: isSmallPhone ? 'Vehic' : 'Vehículos')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.account_balance_wallet_outlined,
-                          value: isSmallPhone ? '\$1.3M' : '\$1.3M',
-                          label: isSmallPhone ? 'Gasto' : 'Gastado')),
+                          value: isSmallPhone ? '\$1.4M' : '\$1.44M',
+                          label: isSmallPhone ? 'Gananc' : 'Ganancias')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
@@ -237,9 +242,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildModoSection() {
+  Widget _buildModoArrendatarioSection() {
     final theme = Theme.of(context);
-    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -258,85 +262,61 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Padding(
                 padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
-                child: Text('MODO',
+                child: Text('MODO ARRENDATARIO (ACTIVO)',
                     style: GoogleFonts.poppins(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5),
+                        color: const Color(0xFF10B981),
                         letterSpacing: 0.5))),
-            InkWell(
-              onTap: () {
-                _showModoArrendatarioDialog(context);
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: isSmallPhone ? 10 : 14,
-                    vertical: isSmallPhone ? 10 : 12),
-                child: Row(
-                  children: [
-                    Container(
-                        width: isSmallPhone ? 32 : 36,
-                        height: isSmallPhone ? 32 : 36,
-                        decoration: BoxDecoration(
-                            color: _isModoArrendatarioActive 
-                                ? const Color(0xFFFFF4E6) 
-                                : const Color(0xFFFFF4E6),
-                            borderRadius: BorderRadius.circular(9)),
-                        child: Icon(_isModoArrendatarioActive ? Icons.home : Icons.home_outlined,
-                            color: const Color(0xFFEF4444),
-                            size: isSmallPhone ? 16 : 18)),
-                    SizedBox(width: isSmallPhone ? 8 : 12),
-                    Expanded(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                          Text(_isModoArrendatarioActive 
-                              ? 'Cambiar a modo arrendatario'
-                              : 'Activar modo arrendatario',
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: GoogleFonts.poppins(
-                                  fontSize: isSmallPhone ? 12 : 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface)),
-                          Text(_isModoArrendatarioActive
-                              ? '✓ Verificado - Gestiona tus vehículos'
-                              : 'Renta tu vehículo y gana dinero',
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: GoogleFonts.poppins(
-                                  fontSize: isSmallPhone ? 9 : 11,
-                                  color: _isModoArrendatarioActive
-                                      ? const Color(0xFF10B981)
-                                      : theme.colorScheme.onSurface
-                                          .withValues(alpha: 0.6))),
-                        ])),
-                    _isModoArrendatarioActive
-                        ? Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.verified,
-                              color: Color(0xFF10B981),
-                              size: 16,
-                            ),
-                          )
-                        : const Text('🚗', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right,
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                        size: isSmallPhone ? 16 : 18),
-                  ],
-                ),
-              ),
-            ),
+            // Cambiar a modo arrendador
+            _buildMenuItem(
+                icon: Icons.swap_horiz,
+                iconColor: const Color(0xFF3B82F6),
+                iconBgColor: const Color(0xFFDBEAFE),
+                title: 'Cambiar a modo arrendador',
+                subtitle: 'Volver a buscar vehículos para rentar',
+                onTap: () {
+                  _showSwitchToArrendadorDialog(context);
+                }),
+            Divider(
+                height: 1,
+                indent: 14,
+                endIndent: 14,
+                color: Theme.of(context).dividerTheme.color),
+            // Gestionar modo arrendatario
+            _buildMenuItemWithCheck(
+                icon: Icons.home_outlined,
+                iconColor: const Color(0xFFF59E0B),
+                iconBgColor: const Color(0xFFFFF4E6),
+                title: 'Gestionar modo arrendatario',
+                subtitle: '✓ Verificado y activo',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PrincipalArrendatarioPage()),
+                  );
+                }),
+            Divider(
+                height: 1,
+                indent: 14,
+                endIndent: 14,
+                color: Theme.of(context).dividerTheme.color),
+            // Mi saldo
+            _buildMenuItem(
+                icon: Icons.account_balance_wallet,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFFD1FAE5),
+                title: 'Mi saldo',
+                subtitle: '\$ 1.440.000 disponible',
+                trailingIcon: Icons.lock,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MiSaldoPage()),
+                  );
+                }),
           ]),
     );
   }
@@ -451,12 +431,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             .withValues(alpha: 0.5),
                         letterSpacing: 0.5))),
             _buildMenuItem(
-                icon: Icons.history,
-                iconColor: const Color(0xFFEF4444),
+                icon: Icons.description_outlined,
+                iconColor: const Color(0xFFF59E0B),
                 iconBgColor: const Color(0xFFFFF4E6),
                 title: 'Historial',
                 subtitle: '4 reservas totales',
-                onTap: () => MainPage.of(context).setIndex(1)),
+                onTap: () => ArrendatarioMainPage.of(context).setHistorialTab(2)),
             Divider(
                 height: 1,
                 indent: 14,
@@ -468,7 +448,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 iconBgColor: const Color(0xFFFEE2E2),
                 title: 'Notificaciones',
                 subtitle: 'Gestionar alertas',
-                onTap: () => MainPage.of(context).setIndex(2)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AlertasPage(),
+                    ),
+                  );
+                }),
             Divider(
                 height: 1,
                 indent: 14,
@@ -562,21 +549,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   color: const Color(0xFFFFF4E6),
                   borderRadius: BorderRadius.circular(9)),
               child: Icon(Icons.wb_sunny_outlined,
-                  color: const Color(0xFFEF4444),
+                  color: const Color(0xFFF59E0B),
                   size: isSmallPhone ? 16 : 18)),
           SizedBox(width: isSmallPhone ? 8 : 12),
           Expanded(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text('Modo Oscuro',
+                Text('Modo Claro',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 12 : 13,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface)),
-                Text(isDarkMode ? 'Activado' : 'Desactivado',
+                Text('Cambiar apariencia',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: GoogleFonts.poppins(
@@ -587,12 +574,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             .withValues(alpha: 0.6))),
               ])),
           Switch(
-            value: isDarkMode,
+            value: !isDarkMode,
             onChanged: (value) {
               final appState = FlexiDriveApp.of(context);
-              appState?.setDarkMode(value);
+              appState?.setDarkMode(!value);
             },
-            activeThumbColor: const Color(0xFFEF4444),
+            activeThumbColor: const Color(0xFFF59E0B),
           ),
         ]),
       ),
@@ -600,6 +587,63 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildMenuItem(
+      {required IconData icon,
+      required Color iconColor,
+      required Color iconBgColor,
+      required String title,
+      required String subtitle,
+      IconData? trailingIcon,
+      required VoidCallback onTap}) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
+        child: Row(children: [
+          Container(
+              width: isSmallPhone ? 32 : 36,
+              height: isSmallPhone ? 32 : 36,
+              decoration: BoxDecoration(
+                  color: iconBgColor, borderRadius: BorderRadius.circular(9)),
+              child:
+                  Icon(icon, color: iconColor, size: isSmallPhone ? 16 : 18)),
+          SizedBox(width: isSmallPhone ? 8 : 12),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(title,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.poppins(
+                        fontSize: isSmallPhone ? 12 : 13,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface)),
+                Text(subtitle,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: GoogleFonts.poppins(
+                        fontSize: isSmallPhone ? 9 : 11,
+                        color: theme.colorScheme.onSurface
+                            .withValues(alpha: 0.6))),
+              ])),
+          if (trailingIcon != null)
+            Icon(trailingIcon,
+                color: const Color(0xFFF59E0B),
+                size: isSmallPhone ? 14 : 16),
+          const SizedBox(width: 4),
+          Icon(Icons.chevron_right,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              size: isSmallPhone ? 16 : 18),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildMenuItemWithCheck(
       {required IconData icon,
       required Color iconColor,
       required Color iconBgColor,
@@ -639,14 +683,165 @@ class _ProfilePageState extends State<ProfilePage> {
                     maxLines: 1,
                     style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 9 : 11,
-                        color: theme.colorScheme.onSurface
-                            .withValues(alpha: 0.6))),
+                        color: const Color(0xFF10B981))),
               ])),
           Icon(Icons.chevron_right,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               size: isSmallPhone ? 16 : 18),
         ]),
       ),
+    );
+  }
+
+  void _showSwitchToArrendadorDialog(BuildContext context) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: EdgeInsets.zero,
+          content: Container(
+            width: isSmallPhone ? 280 : 320,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).cardTheme.color,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(isSmallPhone ? 20 : 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Icono azul con símbolo de sync
+                  Container(
+                    width: isSmallPhone ? 56 : 64,
+                    height: isSmallPhone ? 56 : 64,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.sync,
+                      color: Colors.white,
+                      size: isSmallPhone ? 28 : 32,
+                    ),
+                  ),
+                  SizedBox(height: isSmallPhone ? 16 : 20),
+                  // Título
+                  Text(
+                    'Cambiar a Modo Arrendador',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: isSmallPhone ? 16 : 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  SizedBox(height: isSmallPhone ? 10 : 12),
+                  // Descripción
+                  Text(
+                    'Volverás a modo cliente para buscar y rentar vehículos. Tus publicaciones seguirán activas.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: isSmallPhone ? 12 : 13,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: isSmallPhone ? 16 : 20),
+                  // Botón principal azul
+                  SizedBox(
+                    width: double.infinity,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainPage(initialIndex: 3),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(
+                            vertical: isSmallPhone ? 13 : 15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Sí, cambiar ahora',
+                          style: GoogleFonts.inter(
+                            fontSize: isSmallPhone ? 14 : 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: isSmallPhone ? 12 : 16),
+                  // Botón cancelar
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isSmallPhone ? 12 : 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.2),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: GoogleFonts.inter(
+                          fontSize: isSmallPhone ? 14 : 15,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -685,208 +880,25 @@ class _ProfilePageState extends State<ProfilePage> {
       const Text('🇨🇴', style: TextStyle(fontSize: 11)),
     ]);
   }
+}
 
-  void _showModoArrendatarioDialog(BuildContext context) {
-    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+class ConstrainedContainer extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          contentPadding: EdgeInsets.zero,
-          content: Container(
-            width: isSmallPhone ? 280 : 320,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Theme.of(context).cardTheme.color,
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(isSmallPhone ? 20 : 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Icono naranja
-                  Container(
-                    width: isSmallPhone ? 56 : 64,
-                    height: isSmallPhone ? 56 : 64,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF59E0B),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.home,
-                      color: Colors.white,
-                      size: isSmallPhone ? 28 : 32,
-                    ),
-                  ),
-                  SizedBox(height: isSmallPhone ? 16 : 20),
-                  // Título
-                  Text(
-                    'Cambiar a Modo Arrendatario',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: isSmallPhone ? 16 : 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: isSmallPhone ? 10 : 12),
-                  // Descripción
-                  Text(
-                    'Activarás tu perfil de arrendatario para gestionar tus vehículos publicados y solicitudes de renta. Podrás volver al modo arrendador cuando quieras.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: isSmallPhone ? 12 : 13,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                      height: 1.5,
-                    ),
-                  ),
-                  SizedBox(height: isSmallPhone ? 16 : 20),
-                  // Lista de características con container
-                  Container(
-                    padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildFeatureItem(
-                          Icons.time_to_leave,
-                          'Gestiona tus vehículos publicados',
-                          isSmallPhone,
-                        ),
-                        SizedBox(height: isSmallPhone ? 10 : 12),
-                        _buildFeatureItem(
-                          Icons.insert_drive_file_outlined,
-                          'Revisa solicitudes de renta',
-                          isSmallPhone,
-                        ),
-                        SizedBox(height: isSmallPhone ? 10 : 12),
-                        _buildFeatureItem(
-                          Icons.account_balance_wallet,
-                          'Consulta tus ganancias',
-                          isSmallPhone,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: isSmallPhone ? 24 : 28),
-                  // Botón principal
-                  SizedBox(
-                    width: double.infinity,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ArrendatarioMainPage(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: EdgeInsets.symmetric(
-                            vertical: isSmallPhone ? 13 : 15,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Sí, cambiar ahora',
-                          style: GoogleFonts.inter(
-                            fontSize: isSmallPhone ? 14 : 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Botón secundario
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          vertical: isSmallPhone ? 13 : 15,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.05),
-                      ),
-                      child: Text(
-                        'Cancelar',
-                        style: GoogleFonts.inter(
-                          fontSize: isSmallPhone ? 14 : 15,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  const ConstrainedContainer({
+    super.key,
+    required this.child,
+    required this.maxWidth,
+  });
 
-  Widget _buildFeatureItem(IconData icon, String text, bool isSmallPhone) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: const Color(0xFFF59E0B),
-          size: isSmallPhone ? 18 : 20,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: isSmallPhone ? 12 : 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFF59E0B),
-            ),
-          ),
-        ),
-      ],
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
+      ),
     );
   }
 }

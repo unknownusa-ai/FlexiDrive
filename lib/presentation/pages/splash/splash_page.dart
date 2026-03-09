@@ -36,9 +36,11 @@ class _SplashPageState extends State<SplashPage>
             );
           } else {
             await prefs.setBool('has_seen_onboarding', true);
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const OnboardingPage()),
-            );
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const OnboardingPage()),
+              );
+            }
           }
         }
       }

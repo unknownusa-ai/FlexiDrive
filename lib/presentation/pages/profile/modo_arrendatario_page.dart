@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
-import 'mi_saldo_page.dart';
+import 'arrendatario_main_page.dart';
 
 class ModoArrendatarioPage extends StatefulWidget {
   const ModoArrendatarioPage({super.key});
@@ -93,7 +93,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
+          colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
         ),
       ),
       padding: EdgeInsets.symmetric(
@@ -320,7 +320,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isCompleted
-                    ? const Color(0xFF10B981)
+                    ? const Color(0xFF10B981).withValues(alpha: 0.3)
                     : const Color(0xFFF59E0B).withValues(alpha: 0.4),
                 width: 1.5,
               ),
@@ -360,58 +360,65 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
           const SizedBox(width: 12),
           isCompleted
               ? Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isSmallPhone ? 14 : 16,
-                    vertical: isSmallPhone ? 10 : 12,
-                  ),
+                  width: isSmallPhone ? 40 : 44,
+                  height: isSmallPhone ? 40 : 44,
                   decoration: BoxDecoration(
                     color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check,
-                        size: isSmallPhone ? 16 : 18,
-                        color: const Color(0xFF10B981),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Listo',
-                        style: GoogleFonts.inter(
-                          fontSize: isSmallPhone ? 13 : 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF10B981),
-                        ),
+                  child: Icon(
+                    Icons.check,
+                    size: isSmallPhone ? 22 : 24,
+                    color: const Color(0xFF10B981),
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                )
-              : ElevatedButton.icon(
-                  onPressed: () => _subirDocumento(index),
-                  icon: Icon(
-                    Icons.upload,
-                    size: isSmallPhone ? 16 : 18,
-                    color: Colors.white,
-                  ),
-                  label: Text(
-                    'Subir',
-                    style: GoogleFonts.inter(
-                      fontSize: isSmallPhone ? 13 : 14,
-                      fontWeight: FontWeight.bold,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _subirDocumento(index),
+                    icon: Icon(
+                      Icons.upload,
+                      size: isSmallPhone ? 16 : 18,
                       color: Colors.white,
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isSmallPhone ? 14 : 16,
-                      vertical: isSmallPhone ? 10 : 12,
+                    label: Text(
+                      'Subir',
+                      style: GoogleFonts.inter(
+                        fontSize: isSmallPhone ? 13 : 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmallPhone ? 14 : 16,
+                        vertical: isSmallPhone ? 10 : 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
                   ),
                 ),
         ],
@@ -422,8 +429,28 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
   Widget _buildActivateButton(bool isSmallPhone) {
     final isEnabled = documentosCompletados == totalDocumentos;
 
-    return SizedBox(
+    return Container(
       width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: isEnabled
+            ? const LinearGradient(
+                colors: [Color(0xFF059669), Color(0xFF10B981)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              )
+            : null,
+        color: isEnabled ? null : const Color(0xFF64748B),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
       child: ElevatedButton(
         onPressed: isEnabled
             ? () {
@@ -431,15 +458,16 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
               }
             : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF10B981),
-          disabledBackgroundColor: const Color(0xFF64748B),
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
           padding: EdgeInsets.symmetric(
             vertical: isSmallPhone ? 16 : 18,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          elevation: isEnabled ? 2 : 0,
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -482,13 +510,13 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
         Future.delayed(const Duration(milliseconds: 2500), () {
           if (context.mounted) {
             Navigator.pop(context); // Cerrar diálogo
-            Navigator.pop(context); // Volver a perfil
-            // Navegar a Mi Saldo
-            Navigator.push(
+            // Navegar a ArrendatarioMainPage (con tabbar global)
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const MiSaldoPage(),
+                builder: (context) => const ArrendatarioMainPage(),
               ),
+              (route) => false,
             );
           }
         });
@@ -509,12 +537,12 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
                   width: isSmallPhone ? 80 : 100,
                   height: isSmallPhone ? 80 : 100,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.check,
-                    color: const Color(0xFF10B981),
+                    color: const Color(0xFFF59E0B),
                     size: isSmallPhone ? 50 : 60,
                   ),
                 ),

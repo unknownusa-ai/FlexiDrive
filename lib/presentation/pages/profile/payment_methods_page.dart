@@ -11,7 +11,7 @@ class PaymentMethodsPage extends StatefulWidget {
 }
 
 class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
-  List<Map<String, dynamic>> _paymentMethods = [
+  final List<Map<String, dynamic>> _paymentMethods = [
     {
       'id': '1',
       'type': 'card',
@@ -32,7 +32,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     },
   ];
 
-  List<Map<String, dynamic>> _otherMethods = [
+  final List<Map<String, dynamic>> _otherMethods = [
     {
       'id': 'pse',
       'title': 'PSE',
@@ -209,8 +209,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         ),
         SizedBox(height: isSmallPhone ? 10 : 12),
         ..._paymentMethods
-            .map((method) => _buildGradientCard(method, isSmallPhone, isDark))
-            .toList(),
+            .map((method) => _buildGradientCard(method, isSmallPhone, isDark)),
       ],
     );
   }

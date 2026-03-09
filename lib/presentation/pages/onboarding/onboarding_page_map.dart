@@ -125,7 +125,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(0, _pin3Animation.value),
-                                  child: _buildPin(const Color(0xFFF59E0B), isSmallPhone: isSmallPhone),
+                                  child: _buildPin(const Color(0xFFEF4444), isSmallPhone: isSmallPhone),
                                 );
                               },
                             ),

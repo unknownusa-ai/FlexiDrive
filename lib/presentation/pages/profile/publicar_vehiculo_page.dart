@@ -34,9 +34,10 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           _buildHeader(isSmallPhone),
@@ -72,7 +73,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFF59E0B), Color(0xFFFF7A00)],
+          colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -196,14 +197,15 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildPhotoUploadArea(bool isSmallPhone) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       height: 160,
       decoration: BoxDecoration(
-        color: const Color(0xFFE0E7FF),
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBFDBFE),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -213,7 +215,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           Icon(
             Icons.camera_alt,
             size: 48,
-            color: const Color(0xFF7C3AED),
+            color: theme.colorScheme.primary,
           ),
           const SizedBox(height: 12),
           Text(
@@ -221,7 +223,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -229,7 +231,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
             'Máx. 5 fotos (JPG, PNG)',
             style: GoogleFonts.inter(
               fontSize: 13,
-              color: const Color(0xFF94A3B8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -243,15 +245,16 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     required TextEditingController controller,
     required bool isSmallPhone,
   }) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label + ' *',
+          '$label *',
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -267,17 +270,17 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                 hintText: hint,
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14,
-                  color: const Color(0xFFC5D0DD),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
                 filled: true,
-                fillColor: const Color(0xFFF1F5F9),
+                fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  borderSide: BorderSide(color: theme.dividerColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  borderSide: BorderSide(color: theme.dividerColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -293,7 +296,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
               ),
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: const Color(0xFF0F172A),
+                color: theme.colorScheme.onSurface,
               ),
             );
           },
@@ -303,6 +306,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildCategorySection(bool isSmallPhone) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,7 +315,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 12),
@@ -336,12 +340,14 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.white,
+                  color: isSelected 
+                      ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                      : theme.cardTheme.color,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected
                         ? const Color(0xFFF59E0B)
-                        : const Color(0xFFE2E8F0),
+                        : theme.dividerColor,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -351,7 +357,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0F172A),
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -364,6 +370,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildTransmissionSection() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -372,7 +379,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 12),
@@ -409,6 +416,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
 
   Widget _buildSeatsSection() {
     const options = [2, 4, 5, 7];
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -417,7 +425,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 12),
@@ -447,6 +455,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildDescriptionSection() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -455,7 +464,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -467,28 +476,28 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                 'Describe tu vehículo, características especiales, etc...',
             hintStyle: GoogleFonts.inter(
               fontSize: 16,
-              color: const Color(0xFF94A3B8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
             filled: true,
-            fillColor: const Color(0xFFF1F5F9),
+            fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: const Color(0xFF0F172A),
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ],
@@ -496,6 +505,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildPriceField() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -504,7 +514,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -516,7 +526,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
             hintText: '150000',
             hintStyle: GoogleFonts.inter(
               fontSize: 32,
-              color: const Color(0xFF94A3B8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               fontWeight: FontWeight.w500,
             ),
             prefixIcon: Padding(
@@ -525,32 +535,32 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                 '\$',
                 style: GoogleFonts.inter(
                   fontSize: 38,
-                  color: const Color(0xFF94A3B8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             prefixIconConstraints: const BoxConstraints(minWidth: 0),
             filled: true,
-            fillColor: const Color(0xFFF1F5F9),
+            fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           style: GoogleFonts.inter(
             fontSize: 32,
-            color: const Color(0xFF0F172A),
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -559,7 +569,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           '💡 Recomendación: \$120,000 - \$200,000 por día para tu categoría',
           style: GoogleFonts.inter(
             fontSize: 13,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -568,6 +578,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildLocationField() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -576,7 +587,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -584,32 +595,32 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           controller: ubicacionController,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.location_on_outlined,
-              color: Color(0xFF94A3B8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               size: 28,
             ),
             hintText: '',
             filled: true,
-            fillColor: const Color(0xFFF1F5F9),
+            fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(22),
-              borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: const Color(0xFF0F172A),
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ],
@@ -617,13 +628,14 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   }
 
   Widget _buildPotentialCard() {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F9F0),
+        color: const Color(0xFF10B981).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF86E2B7)),
+        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,8 +643,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           Container(
             width: 50,
             height: 50,
-            decoration: const BoxDecoration(
-              color: Color(0xFFBAEBD2),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.bolt, color: Color(0xFF10B981), size: 28),
@@ -645,7 +657,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                 Text(
                   'Potencial de ganancias',
                   style: GoogleFonts.inter(
-                    fontSize: 34,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF10B981),
                     height: 1.05,
@@ -656,7 +668,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   'Si rentas 15 días al mes, podrías ganar hasta',
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: const Color(0xFF047857),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -665,7 +677,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF059669),
+                    color: const Color(0xFF10B981),
                   ),
                 ),
               ],
@@ -681,15 +693,16 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 54,
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFF59E0B) : Colors.white,
+          color: selected ? const Color(0xFFF59E0B) : theme.cardTheme.color,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+            color: selected ? const Color(0xFFF59E0B) : theme.dividerColor,
             width: 1.2,
           ),
         ),
@@ -699,7 +712,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : const Color(0xFF0F172A),
+              color: selected ? Colors.white : theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -802,7 +815,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           child: Container(
             padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(32),
             ),
             child: Column(
@@ -812,13 +825,12 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   width: 100,
                   height: 100,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFF59E0B),
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_outline,
-                    color: Colors.white,
-                    size: 52,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -830,7 +842,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   style: GoogleFonts.inter(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -839,7 +851,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   TextSpan(
                     style: GoogleFonts.inter(
                       fontSize: 16,
-                      color: const Color(0xFF94A3B8),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       height: 1.45,
                     ),
                     children: [
@@ -865,9 +877,9 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFFAF1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFF7D79B)),
+                    border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -878,14 +890,14 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                               'Precio/día',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: const Color(0xFF94A3B8),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               formattedPrice,
                               style: GoogleFonts.inter(
-                                fontSize: 36,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: const Color(0xFFF59E0B),
                               ),
@@ -896,7 +908,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                       Container(
                         width: 1,
                         height: 56,
-                        color: const Color(0xFFF1DDB4),
+                        color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
                       ),
                       Expanded(
                         child: Column(
@@ -905,7 +917,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                               'Ubicación',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: const Color(0xFF94A3B8),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -913,7 +925,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                               location,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(
-                                fontSize: 36,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 color: const Color(0xFFF59E0B),
                               ),
@@ -969,7 +981,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -986,10 +998,11 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     final isStepOneValid = _isFormValid();
     final isStepTwoValid = _isStepTwoValid();
     final isStepThreeValid = _isStepThreeValid();
+    final theme = Theme.of(context);
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFF6F7F9),
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: Border(top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.5))),
       ),
       padding: EdgeInsets.fromLTRB(
         isSmallPhone ? 14 : 16,
@@ -1043,8 +1056,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                             });
                           },
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            backgroundColor: Theme.of(context).cardTheme.color,
+                            side: BorderSide(color: Theme.of(context).dividerColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -1054,7 +1067,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1109,8 +1122,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                             });
                           },
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                            backgroundColor: Theme.of(context).cardTheme.color,
+                            side: BorderSide(color: Theme.of(context).dividerColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -1120,7 +1133,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),

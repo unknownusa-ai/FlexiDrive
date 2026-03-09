@@ -3,23 +3,36 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class SolicitudesPage extends StatefulWidget {
-  const SolicitudesPage({super.key});
+  final int initialTab;
+  const SolicitudesPage({super.key, this.initialTab = 0});
 
   @override
-  State<SolicitudesPage> createState() => _SolicitudesPageState();
+  State<SolicitudesPage> createState() => SolicitudesPageState();
 }
 
-class _SolicitudesPageState extends State<SolicitudesPage>
+class SolicitudesPageState extends State<SolicitudesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 2),
+    );
     _tabController.addListener(() {
       setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(SolicitudesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) {
+      _tabController.animateTo(widget.initialTab);
+    }
   }
 
   @override
@@ -28,30 +41,39 @@ class _SolicitudesPageState extends State<SolicitudesPage>
     super.dispose();
   }
 
+  void setTab(int index) {
+    if (index >= 0 && index < 3) {
+      _tabController.animateTo(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
-      body: Column(
-        children: [
-          _buildHeader(isSmallPhone),
-          _buildTitleSection(isSmallPhone),
-          _buildTabBar(isSmallPhone),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildPendientesList(isSmallPhone),
-                _buildActivasList(isSmallPhone),
-                _buildCompletadasList(isSmallPhone),
-              ],
+    return Container(
+      color: theme.scaffoldBackgroundColor,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            _buildHeader(isSmallPhone),
+            _buildTitleSection(isSmallPhone),
+            _buildTabBar(isSmallPhone),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildPendientesList(isSmallPhone),
+                  _buildActivasList(isSmallPhone),
+                  _buildCompletadasList(isSmallPhone),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      bottomNavigationBar: _buildBottomBar(isSmallPhone),
     );
   }
 
@@ -66,7 +88,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFF59E0B), Color(0xFFFF7A00)],
+          colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -101,8 +123,9 @@ class _SolicitudesPageState extends State<SolicitudesPage>
   }
 
   Widget _buildTitleSection(bool isSmallPhone) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.cardTheme.color,
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(
         isSmallPhone ? 16 : 20,
@@ -118,7 +141,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 20 : 24,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
+              color: theme.colorScheme.onSurface,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -128,7 +151,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
             'Gestiona las solicitudes de tus vehículos',
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 13 : 15,
-              color: const Color(0xFF94A3B8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -139,8 +162,9 @@ class _SolicitudesPageState extends State<SolicitudesPage>
   }
 
   Widget _buildTabBar(bool isSmallPhone) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.cardTheme.color,
       padding: EdgeInsets.symmetric(
         horizontal: isSmallPhone ? 12 : 16,
         vertical: isSmallPhone ? 10 : 12,
@@ -188,6 +212,9 @@ class _SolicitudesPageState extends State<SolicitudesPage>
     required VoidCallback onTap,
     required bool isSmallPhone,
   }) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -196,10 +223,12 @@ class _SolicitudesPageState extends State<SolicitudesPage>
           vertical: isSmallPhone ? 10 : 12,
         ),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFFFFBEB) : Colors.white,
+          color: isActive 
+              ? (isDarkMode ? const Color(0xFF3B2510) : const Color(0xFFFFFBEB))
+              : (isDarkMode ? const Color(0xFF334155) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+            color: isActive ? const Color(0xFF10B981) : (isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0)),
             width: isActive ? 2 : 1.5,
           ),
         ),
@@ -214,7 +243,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 fontWeight: FontWeight.w600,
                 color: isActive
                     ? const Color(0xFF10B981)
-                    : const Color(0xFF0F172A),
+                    : theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -227,7 +256,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 fontWeight: FontWeight.w600,
                 color: isActive
                     ? const Color(0xFF10B981)
-                    : const Color(0xFF94A3B8),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -337,7 +366,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
 
     switch (status) {
       case 'pending':
-        statusColor = const Color(0xFFF59E0B);
+        statusColor = const Color(0xFFEF4444);
         statusBgColor = const Color(0xFFFFF7ED);
         statusText = 'PENDIENTE';
         break;
@@ -357,10 +386,13 @@ class _SolicitudesPageState extends State<SolicitudesPage>
         statusText = 'DESCONOCIDO';
     }
 
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 16 : 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -386,7 +418,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 17 : 19,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
+                        color: theme.colorScheme.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -397,7 +429,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                         const Icon(
                           Icons.star,
                           size: 16,
-                          color: Color(0xFFF59E0B),
+                          color: Color(0xFFEF4444),
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -405,7 +437,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF0F172A),
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -471,7 +503,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 15 : 17,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
+                        color: theme.colorScheme.onSurface,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -582,6 +614,8 @@ class _SolicitudesPageState extends State<SolicitudesPage>
     Color? valueColor,
     bool valueBold = false,
   }) {
+    final theme = Theme.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -599,7 +633,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: const Color(0xFF94A3B8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -610,7 +644,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: valueBold ? FontWeight.bold : FontWeight.w500,
-                  color: valueColor ?? const Color(0xFF0F172A),
+                  color: valueColor ?? theme.colorScheme.onSurface,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -619,122 +653,6 @@ class _SolicitudesPageState extends State<SolicitudesPage>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomBar(bool isSmallPhone) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            isSmallPhone ? 10 : 14,
-            8,
-            isSmallPhone ? 10 : 14,
-            8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(
-                icon: Icons.home_outlined,
-                label: 'Inicio',
-                onTap: () => Navigator.pop(context),
-              ),
-              _navItem(
-                icon: Icons.description_outlined,
-                label: 'Solicitudes',
-                active: true,
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 74,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 36),
-                ),
-              ),
-              _navItem(
-                icon: Icons.notifications_none,
-                label: 'Alertas',
-                dot: true,
-                onTap: () {},
-              ),
-              _navItem(
-                icon: Icons.person_outline,
-                label: 'Perfil',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    bool active = false,
-    bool dot = false,
-    VoidCallback? onTap,
-  }) {
-    final activeColor = const Color(0xFFF59E0B);
-    final inactiveColor = const Color(0xFF94A3B8);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 66,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: active ? const Color(0xFFFFF7ED) : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(
-                    icon,
-                    color: active ? activeColor : inactiveColor,
-                    size: 27,
-                  ),
-                  if (dot)
-                    const Positioned(
-                      right: -2,
-                      top: -1,
-                      child: CircleAvatar(
-                        radius: 3,
-                        backgroundColor: Color(0xFFEF4444),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: active ? activeColor : inactiveColor,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -882,7 +800,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                     ),
                     value: reason,
                     groupValue: selectedReason,
-                    activeColor: const Color(0xFFF59E0B),
+                    activeColor: const Color(0xFFEF4444),
                     contentPadding: EdgeInsets.zero,
                     onChanged: (value) {
                       setState(() => selectedReason = value);

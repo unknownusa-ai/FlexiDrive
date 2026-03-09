@@ -299,12 +299,12 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star, color: Color(0xFFF59E0B), size: 16),
+                  const Icon(Icons.star, color: Color(0xFFEF4444), size: 16),
                   const SizedBox(width: 4),
                   Text(
                     '${widget.vehicleRating ?? 4.9}',
                     style: GoogleFonts.poppins(
-                      color: const Color(0xFFF59E0B),
+                      color: const Color(0xFFEF4444),
                       fontSize: isSmallPhone ? 14 : 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -353,7 +353,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
         SizedBox(width: isSmallPhone ? 6 : 10),
         _CaracteristicaItem(
             icon: Icons.local_gas_station_outlined,
-            color: const Color(0xFFF59E0B),
+            color: const Color(0xFFEF4444),
             label: 'Gasolina',
             isSmallPhone: isSmallPhone,
             isDark: _isDark),

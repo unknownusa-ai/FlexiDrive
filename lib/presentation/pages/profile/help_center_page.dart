@@ -55,7 +55,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
       'icon': Icons.chat_bubble_outline_rounded,
       'title': 'Chat',
       'subtitle': 'En vivo 24/7',
-      'color': const Color(0xFFF59E0B),
+      'color': const Color(0xFFEF4444),
       'bgColor': const Color(0xFFFEF3C7),
     },
   ];

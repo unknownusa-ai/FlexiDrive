@@ -11,7 +11,7 @@ class MyReviewsPage extends StatefulWidget {
 
 class _MyReviewsPageState extends State<MyReviewsPage> {
   // Empty list to show empty state as per prototype
-  List<Map<String, dynamic>> _reviews = [];
+  final List<Map<String, dynamic>> _reviews = [];
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +124,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
               ),
               child: Icon(
                 Icons.add_comment_outlined,
-                color: const Color(0xFFF59E0B),
+                color: const Color(0xFFEF4444),
                 size: isSmallPhone ? 40 : 44,
               ),
             ),
@@ -166,7 +166,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                     style: GoogleFonts.inter(
                       fontSize: isSmallPhone ? 13 : 14,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFFF59E0B),
+                      color: const Color(0xFFEF4444),
                     ),
                   ),
                   const TextSpan(text: '.'),
@@ -357,8 +357,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
         ),
         SizedBox(height: isSmallPhone ? 10 : 12),
         ..._reviews
-            .map((review) => _buildReviewCard(review, isSmallPhone))
-            .toList(),
+            .map((review) => _buildReviewCard(review, isSmallPhone)),
       ],
     );
   }
