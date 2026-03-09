@@ -12,13 +12,18 @@ class SolicitudesPage extends StatefulWidget {
 class _SolicitudesPageState extends State<SolicitudesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _selectedTabIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
     _tabController.addListener(() {
-      setState(() {});
+      if (_selectedTabIndex != _tabController.index) {
+        setState(() {
+          _selectedTabIndex = _tabController.index;
+        });
+      }
     });
   }
 
@@ -151,9 +156,13 @@ class _SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Pendientes',
               count: '1',
-              isActive: _tabController.index == 0,
-              onTap: () => _tabController.animateTo(0),
+              isActive: _selectedTabIndex == 0,
+              onTap: () {
+                setState(() => _selectedTabIndex = 0);
+                _tabController.animateTo(0);
+              },
               isSmallPhone: isSmallPhone,
+              activeColor: const Color(0xFFF59E0B),
             ),
           ),
           SizedBox(width: isSmallPhone ? 8 : 10),
@@ -161,8 +170,11 @@ class _SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Activas',
               count: '1',
-              isActive: _tabController.index == 1,
-              onTap: () => _tabController.animateTo(1),
+              isActive: _selectedTabIndex == 1,
+              onTap: () {
+                setState(() => _selectedTabIndex = 1);
+                _tabController.animateTo(1);
+              },
               isSmallPhone: isSmallPhone,
             ),
           ),
@@ -171,9 +183,13 @@ class _SolicitudesPageState extends State<SolicitudesPage>
             child: _buildCustomTab(
               label: 'Completadas',
               count: '2',
-              isActive: _tabController.index == 2,
-              onTap: () => _tabController.animateTo(2),
+              isActive: _selectedTabIndex == 2,
+              onTap: () {
+                setState(() => _selectedTabIndex = 2);
+                _tabController.animateTo(2);
+              },
               isSmallPhone: isSmallPhone,
+              activeColor: const Color(0xFF64748B),
             ),
           ),
         ],
@@ -187,6 +203,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
     required bool isActive,
     required VoidCallback onTap,
     required bool isSmallPhone,
+    Color activeColor = const Color(0xFF10B981),
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -199,7 +216,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
           color: isActive ? const Color(0xFFFFFBEB) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+            color: isActive ? activeColor : const Color(0xFFE2E8F0),
             width: isActive ? 2 : 1.5,
           ),
         ),
@@ -212,9 +229,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
               style: GoogleFonts.inter(
                 fontSize: isSmallPhone ? 11 : 14,
                 fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF10B981)
-                    : const Color(0xFF0F172A),
+                color: isActive ? activeColor : const Color(0xFF0F172A),
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -225,9 +240,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
               style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: isActive
-                    ? const Color(0xFF10B981)
-                    : const Color(0xFF94A3B8),
+                color: isActive ? activeColor : const Color(0xFF94A3B8),
               ),
             ),
           ],
@@ -342,13 +355,13 @@ class _SolicitudesPageState extends State<SolicitudesPage>
         statusText = 'PENDIENTE';
         break;
       case 'active':
-        statusColor = const Color(0xFF3B82F6);
-        statusBgColor = const Color(0xFFEFF6FF);
+        statusColor = const Color(0xFF10B981);
+        statusBgColor = const Color(0xFFE7F7F2);
         statusText = 'ACTIVA';
         break;
       case 'completed':
-        statusColor = const Color(0xFF10B981);
-        statusBgColor = const Color(0xFFECFDF5);
+        statusColor = const Color(0xFF64748B);
+        statusBgColor = const Color(0xFFF1F5F9);
         statusText = 'COMPLETADA';
         break;
       default:
@@ -523,7 +536,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _showRejectDialog(),
-                    icon: const Icon(Icons.cancel_outlined, size: 20),
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
                     label: Text(
                       'Rechazar',
                       style: GoogleFonts.inter(
@@ -532,14 +545,15 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: const Color(0xFFFEF2F2),
                       foregroundColor: const Color(0xFFEF4444),
                       side: const BorderSide(
                         color: Color(0xFFEF4444),
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ),
@@ -548,7 +562,7 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _showAcceptDialog(),
-                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
                     label: Text(
                       'Aprobar',
                       style: GoogleFonts.inter(
@@ -557,12 +571,12 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ),
@@ -650,23 +664,20 @@ class _SolicitudesPageState extends State<SolicitudesPage>
                 label: 'Solicitudes',
                 active: true,
               ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 74,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 36),
+              Container(
+                width: 74,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B),
+                  borderRadius: BorderRadius.circular(20),
                 ),
+                child: const Icon(Icons.add, color: Colors.white, size: 36),
               ),
               _navItem(
                 icon: Icons.notifications_none,
                 label: 'Alertas',
                 dot: true,
-                onTap: () {},
+                onTap: () => Navigator.pop(context),
               ),
               _navItem(
                 icon: Icons.person_outline,
@@ -724,12 +735,16 @@ class _SolicitudesPageState extends State<SolicitudesPage>
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: active ? activeColor : inactiveColor,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: active ? activeColor : inactiveColor,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                ),
+                maxLines: 1,
               ),
             ),
           ],
