@@ -17,6 +17,9 @@ class _SolicitudesPageState extends State<SolicitudesPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -138,123 +141,97 @@ class _SolicitudesPageState extends State<SolicitudesPage>
   Widget _buildTabBar(bool isSmallPhone) {
     return Container(
       color: Colors.white,
-      child: TabBar(
-        controller: _tabController,
-        indicatorColor: const Color(0xFFF59E0B),
-        indicatorWeight: 3,
-        labelColor: const Color(0xFFF59E0B),
-        unselectedLabelColor: const Color(0xFF94A3B8),
-        labelStyle: GoogleFonts.inter(
-          fontSize: isSmallPhone ? 12 : 15,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: isSmallPhone ? 12 : 15,
-          fontWeight: FontWeight.w500,
-        ),
-        isScrollable: false,
-        labelPadding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 4 : 8),
-        tabs: [
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    'Pendientes',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(width: isSmallPhone ? 4 : 6),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isSmallPhone ? 5 : 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '1',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFF59E0B),
-                    ),
-                  ),
-                ),
-              ],
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallPhone ? 12 : 16,
+        vertical: isSmallPhone ? 10 : 12,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildCustomTab(
+              label: 'Pendientes',
+              count: '1',
+              isActive: _tabController.index == 0,
+              onTap: () => _tabController.animateTo(0),
+              isSmallPhone: isSmallPhone,
             ),
           ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    'Activas',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(width: isSmallPhone ? 4 : 6),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isSmallPhone ? 5 : 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF94A3B8).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '1',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF94A3B8),
-                    ),
-                  ),
-                ),
-              ],
+          SizedBox(width: isSmallPhone ? 8 : 10),
+          Expanded(
+            child: _buildCustomTab(
+              label: 'Activas',
+              count: '1',
+              isActive: _tabController.index == 1,
+              onTap: () => _tabController.animateTo(1),
+              isSmallPhone: isSmallPhone,
             ),
           ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    isSmallPhone ? 'Completas' : 'Completadas',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(width: isSmallPhone ? 4 : 6),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isSmallPhone ? 5 : 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF94A3B8).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '2',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF94A3B8),
-                    ),
-                  ),
-                ),
-              ],
+          SizedBox(width: isSmallPhone ? 8 : 10),
+          Expanded(
+            child: _buildCustomTab(
+              label: 'Completadas',
+              count: '2',
+              isActive: _tabController.index == 2,
+              onTap: () => _tabController.animateTo(2),
+              isSmallPhone: isSmallPhone,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCustomTab({
+    required String label,
+    required String count,
+    required bool isActive,
+    required VoidCallback onTap,
+    required bool isSmallPhone,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallPhone ? 8 : 12,
+          vertical: isSmallPhone ? 10 : 12,
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFFFFBEB) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+            width: isActive ? 2 : 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: isSmallPhone ? 11 : 14,
+                fontWeight: FontWeight.w600,
+                color: isActive
+                    ? const Color(0xFF10B981)
+                    : const Color(0xFF0F172A),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              count,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isActive
+                    ? const Color(0xFF10B981)
+                    : const Color(0xFF94A3B8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
