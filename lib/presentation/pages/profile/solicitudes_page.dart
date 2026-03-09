@@ -18,7 +18,12 @@ class SolicitudesPageState extends State<SolicitudesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
+    _selectedTabIndex = widget.initialTab;
     _tabController.addListener(() {
       if (_selectedTabIndex != _tabController.index) {
         setState(() {

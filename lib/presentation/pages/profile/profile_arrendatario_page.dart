@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
 import 'arrendatario_main_page.dart';
+import 'alertas_page.dart';
 import 'edit_profile_page.dart';
 import 'security_page.dart';
 import 'payment_methods_page.dart';
@@ -10,7 +11,6 @@ import 'my_reviews_page.dart';
 import 'help_center_page.dart';
 import 'principal_arrendatario_page.dart';
 import 'mi_saldo_page.dart';
-import 'alertas_page.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class ProfileArrendatarioPage extends StatefulWidget {
@@ -448,14 +448,10 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 iconBgColor: const Color(0xFFFEE2E2),
                 title: 'Notificaciones',
                 subtitle: 'Gestionar alertas',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AlertasPage(),
-                    ),
-                  );
-                }),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AlertasPage()),
+                )),
             Divider(
                 height: 1,
                 indent: 14,
