@@ -43,4 +43,9 @@ class ReservasStore {
   static void addActiva(ReservaActiva reserva) {
     activasNotifier.value = [reserva, ...activasNotifier.value];
   }
+
+  static void removeActivaByCode(String code) {
+    activasNotifier.value =
+        activasNotifier.value.where((reserva) => reserva.code != code).toList();
+  }
 }

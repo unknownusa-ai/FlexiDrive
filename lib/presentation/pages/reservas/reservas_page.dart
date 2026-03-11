@@ -14,7 +14,7 @@ class ReservasPage extends StatefulWidget {
 class _ReservasPageState extends State<ReservasPage> {
   String _selectedFilter = 'Activas';
   final int _finalizadasCount = 2;
-  final int _canceladasCount = 1;
+  int _canceladasCount = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -229,6 +229,10 @@ class _ReservasPageState extends State<ReservasPage> {
 
   Widget _buildReservationsList(List<ReservaActiva> activas) {
     if (_selectedFilter == 'Activas') {
+      if (activas.isEmpty) {
+        return _buildEmptyActiveReservations();
+      }
+
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           children: activas
@@ -244,6 +248,13 @@ class _ReservasPageState extends State<ReservasPage> {
                     statusColor: const Color(0xFF06B6D4),
                     imageUrl: reserva.imageUrl,
                     showEnCurso: true,
+                    onSecondaryAction: () => _showCancelReservationSheet(
+                      reserva: reserva,
+                    ),
+                    secondaryActionLabel: 'Cancelar',
+                    secondaryActionIcon: Icons.close,
+                    secondaryButtonColor: const Color(0xFFFEE2E2),
+                    secondaryTextColor: const Color(0xFFDC2626),
                   ))
               .toList());
     } else {
@@ -262,6 +273,11 @@ class _ReservasPageState extends State<ReservasPage> {
               statusColor: const Color(0xFF3B82F6),
               imageUrl:
                   'https://images.unsplash.com/photo-1560958089-b8a63c50ce20?w=800&q=80',
+              secondaryActionLabel: 'Calificar',
+              secondaryActionIcon: Icons.star_rounded,
+              secondaryButtonColor: const Color(0xFFFCD34D),
+              secondaryTextColor: const Color(0xFF111827),
+              onSecondaryAction: () {},
             ),
             const SizedBox(height: 16),
             _buildReservationCard(
@@ -275,10 +291,253 @@ class _ReservasPageState extends State<ReservasPage> {
               status: 'Cancelada',
               statusColor: const Color(0xFFEF4444),
               imageUrl: '',
+              secondaryActionLabel: 'Calificar',
+              secondaryActionIcon: Icons.star_rounded,
+              secondaryButtonColor: const Color(0xFFFCD34D),
+              secondaryTextColor: const Color(0xFF111827),
+              onSecondaryAction: () {},
             ),
           ]);
     }
   }
+
+  Widget _buildEmptyActiveReservations() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.event_available_outlined,
+              size: 56,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'No tienes reservas activas',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCancelReservationSheet({
+    required ReservaActiva reserva,
+  }) async {
+    final theme = Theme.of(context);
+    final shouldCancel = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  width: 76,
+                  height: 76,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Color(0xFFEF4444),
+                    size: 42,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '¿Cancelar reserva?',
+                  style: GoogleFonts.poppins(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Se cancelará la reserva de ${reserva.vehicleName}.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.52),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFFBCFE8)),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          color: const Color(0xFFE5E7EB),
+                          child: reserva.imageUrl.isEmpty
+                              ? _buildSmallPlaceholder()
+                              : Image.asset(
+                                  reserva.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      _buildSmallPlaceholder(),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              reserva.vehicleName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${reserva.startDate} · ${reserva.price}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.45),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: Text(
+                    '⚠ Reembolso sujeto a politica de cancelacion. Puede aplicar cargo del 10%.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFB45309),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(sheetContext, false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.08),
+                          foregroundColor: theme.colorScheme.onSurface,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Mantener',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(sheetContext, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEF4444),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Si, cancelar',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (shouldCancel == true) {
+      setState(() {
+        _canceladasCount += 1;
+      });
+      ReservasStore.removeActivaByCode(reserva.code);
+    }
+  }
+
+  Widget _buildSmallPlaceholder() => const Center(
+        child: Icon(
+          Icons.directions_car,
+          size: 22,
+          color: Color(0xFF9CA3AF),
+        ),
+      );
 
   Widget _buildReservationCard(
       {required String vehicleName,
@@ -291,7 +550,12 @@ class _ReservasPageState extends State<ReservasPage> {
       required String status,
       required Color statusColor,
       required String imageUrl,
-      bool showEnCurso = false}) {
+      bool showEnCurso = false,
+      required String secondaryActionLabel,
+      required IconData secondaryActionIcon,
+      required Color secondaryButtonColor,
+      required Color secondaryTextColor,
+      required VoidCallback onSecondaryAction}) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -322,7 +586,8 @@ class _ReservasPageState extends State<ReservasPage> {
                   ])),
               child: imageUrl.isEmpty
                   ? _buildPlaceholder()
-                  : Image.asset(imageUrl,
+                  : Image.asset(
+                      imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _buildPlaceholder(),
                     ),
@@ -391,7 +656,8 @@ class _ReservasPageState extends State<ReservasPage> {
                 Text('$startDate → $endDate',
                     style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 8),
@@ -404,7 +670,8 @@ class _ReservasPageState extends State<ReservasPage> {
                     child: Text(location,
                         style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.6),
                             fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis)),
@@ -439,9 +706,10 @@ class _ReservasPageState extends State<ReservasPage> {
                 )),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: onSecondaryAction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFCD34D),
+                    backgroundColor: secondaryButtonColor,
+                    foregroundColor: secondaryTextColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -449,9 +717,9 @@ class _ReservasPageState extends State<ReservasPage> {
                     elevation: 0,
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.star_rounded, size: 20),
+                    Icon(secondaryActionIcon, size: 20),
                     const SizedBox(width: 6),
-                    Text('Calificar',
+                    Text(secondaryActionLabel,
                         style: GoogleFonts.poppins(
                             fontSize: 14, fontWeight: FontWeight.bold)),
                   ]),
