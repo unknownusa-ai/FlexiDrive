@@ -44,6 +44,26 @@ services:
     networks:
       - flexidrive_network
 
+  pgadmin:
+    container_name: flexidrive_pgadmin
+    image: dpage/pgadmin4:8
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - flexidrive_network
+
   frontend:
     container_name: flexidrive_frontend
     image: node:20-alpine
@@ -61,6 +81,7 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
 
 networks:
   flexidrive_network:

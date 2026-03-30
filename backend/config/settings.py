@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.security',
     'apps.vehicles',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
