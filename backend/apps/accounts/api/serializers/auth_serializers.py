@@ -13,3 +13,15 @@ class RegisterSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     correo = serializers.EmailField(max_length=254)
     contrasena = serializers.CharField(write_only=True)
+
+
+class TokenRefreshRequestSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(write_only=True)
+
+
+class TokenVerifyRequestSerializer(serializers.Serializer):
+    access_token = serializers.CharField(write_only=True)
+
+
+class LogoutRequestSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(write_only=True)

@@ -1,0 +1,1 @@
+from apps.vehicles.api.serializers.vehicle_category_serializers import VehicleCategorySerializer

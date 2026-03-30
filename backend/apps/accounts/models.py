@@ -89,6 +89,14 @@ class User(models.Model):
 	def __str__(self):
 		return f'{self.full_name} ({self.email})'
 
+	@property
+	def is_authenticated(self):
+		return True
+
+	@property
+	def is_anonymous(self):
+		return False
+
 
 class UserPreference(models.Model):
 	id = models.AutoField(primary_key=True, db_column='preferencia_usuario_id')
