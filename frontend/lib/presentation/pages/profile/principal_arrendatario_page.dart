@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../services/vehiculo_service.dart';
 import 'publicar_vehiculo_page.dart';
 
-class PrincipalArrendatarioPage extends StatelessWidget {
+class PrincipalArrendatarioPage extends StatefulWidget {
   const PrincipalArrendatarioPage({super.key});
+
+  @override
+  State<PrincipalArrendatarioPage> createState() => _PrincipalArrendatarioPageState();
+}
+
+class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
+  final VehiculoService _service = VehiculoService();
+  List<Map<String, dynamic>> _misVehiculos = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarVehiculos();
+  }
+
+  Future<void> _cargarVehiculos() async {
+    await _service.init();
+    setState(() {
+      _misVehiculos = _service.getVehiculosByPropietario(1);
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,36 +52,24 @@ class PrincipalArrendatarioPage extends StatelessWidget {
                         SizedBox(height: isSmallPhone ? 12 : 14),
                         _buildPublishedHeader(context, isSmallPhone),
                         SizedBox(height: isSmallPhone ? 8 : 10),
-                        _buildVehicleCard(
-                          context: context,
-                          isSmallPhone: isSmallPhone,
-                          imagePath: 'assets/imagenes_carros/tesla.jpg',
-                          title: 'Mazda 3 Grand Touring',
-                          subtitle: 'Mazda • Sedán',
-                          rating: '4.8',
-                          trips: '18 viajes',
-                          pricePerDay: '\$180.000/día',
-                          earned: '\$3.240.000',
-                          status: 'RENTADO',
-                          statusColor: const Color(0xFFEF4444),
-                          rentInfo:
-                              'Rentado a Carlos Mendoza hasta el 2026-03-15',
-                        ),
-                        SizedBox(height: isSmallPhone ? 12 : 14),
-                        _buildVehicleCard(
-                          context: context,
-                          isSmallPhone: isSmallPhone,
-                          imagePath: 'assets/imagenes_carros/cx5.jpg',
-                          title: 'Chevrolet Onix Turbo',
-                          subtitle: 'Chevrolet • Compacto',
-                          rating: '4.9',
-                          trips: '13 viajes',
-                          pricePerDay: '\$120.000/día',
-                          earned: '\$1.560.000',
-                          status: 'DISPONIBLE',
-                          statusColor: const Color(0xFF10B981),
-                          rentInfo: null,
-                        ),
+                        if (_isLoading)
+                          const Center(child: CircularProgressIndicator())
+                        else
+                          ..._misVehiculos.map((v) {
+                            final isRentado = v['estado'] == 'RENTADO';
+                            final rentInfo = isRentado
+                                ? 'Rentado a ${v['rentado_a']} hasta el ${v['fecha_fin_renta']}'
+                                : null;
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: isSmallPhone ? 12 : 14),
+                              child: _buildVehicleCardFromJson(
+                                context: context,
+                                isSmallPhone: isSmallPhone,
+                                vehiculo: v,
+                                rentInfo: rentInfo,
+                              ),
+                            );
+                          }).toList(),
                         SizedBox(height: isSmallPhone ? 16 : 18),
                         _buildTipsCard(context, isSmallPhone),
                         const SizedBox(height: 16),
@@ -165,25 +177,25 @@ class PrincipalArrendatarioPage extends StatelessWidget {
             children: [
               _buildStatCard(
                 icon: Icons.attach_money,
-                value: '\$1.440.000',
+                value: _isLoading ? '\$0' : '\$${_formatNumber(_calcularSaldo())}',
                 label: 'Saldo',
               ),
               const SizedBox(width: 6),
               _buildStatCard(
                 icon: Icons.directions_car,
-                value: '2',
+                value: _isLoading ? '0' : '${_misVehiculos.length}',
                 label: 'Vehículos',
               ),
               const SizedBox(width: 6),
               _buildStatCard(
                 icon: Icons.people_outline,
-                value: '1',
+                value: _isLoading ? '0' : '${_calcularRentasActivas()}',
                 label: 'Activas',
               ),
               const SizedBox(width: 6),
               _buildStatCard(
                 icon: Icons.trending_up,
-                value: '\$4.800.000',
+                value: _isLoading ? '\$0' : '\$${_formatNumber(_calcularGanancias())}',
                 label: 'Ganancias',
               ),
             ],
@@ -321,20 +333,21 @@ class PrincipalArrendatarioPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleCard({
+  Widget _buildVehicleCardFromJson({
     required BuildContext context,
     required bool isSmallPhone,
-    required String imagePath,
-    required String title,
-    required String subtitle,
-    required String rating,
-    required String trips,
-    required String pricePerDay,
-    required String earned,
-    required String status,
-    required Color statusColor,
+    required Map<String, dynamic> vehiculo,
     required String? rentInfo,
   }) {
+    final imagePath = vehiculo['imagen'] as String? ?? 'assets/imagenes_carros/tesla.jpg';
+    final title = '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
+    final subtitle = '${vehiculo['marca'] ?? ''} • ${vehiculo['categoria'] ?? 'Sedán'}';
+    final rating = (vehiculo['calificacion'] ?? 4.5).toString();
+    final trips = '${vehiculo['viajes'] ?? 0} viajes';
+    final pricePerDay = '\$${_formatNumber(vehiculo['precio_dia'] ?? 0)}/día';
+    final earned = '\$${_formatNumber(vehiculo['ganado'] ?? 0)}';
+    final status = vehiculo['estado'] as String? ?? 'DISPONIBLE';
+    final statusColor = status == 'RENTADO' ? const Color(0xFFEF4444) : const Color(0xFF10B981);
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 10 : 12),
@@ -588,6 +601,27 @@ class PrincipalArrendatarioPage extends StatelessWidget {
         fontSize: 12,
         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
       ),
+    );
+  }
+
+  int _calcularSaldo() {
+    // Saldo disponible = ganancias totales - un estimado de retención
+    final ganancias = _calcularGanancias();
+    return (ganancias * 0.3).round();
+  }
+
+  int _calcularRentasActivas() {
+    return _misVehiculos.where((v) => v['estado'] == 'RENTADO').length;
+  }
+
+  int _calcularGanancias() {
+    return _misVehiculos.fold(0, (sum, v) => sum + (v['ganado'] as int? ?? 0));
+  }
+
+  String _formatNumber(int number) {
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'),
+      (match) => '${match[1]}.',
     );
   }
 }

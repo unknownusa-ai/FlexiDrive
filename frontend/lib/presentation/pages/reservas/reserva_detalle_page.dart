@@ -11,6 +11,9 @@ class ReservaDetallePage extends StatefulWidget {
   final int? vehicleReviews;
   final int? vehiclePrice;
   final String? vehicleImage;
+  final int? precioHora;
+  final int? precioDia;
+  final int? precioSemana;
 
   const ReservaDetallePage({
     super.key,
@@ -20,6 +23,9 @@ class ReservaDetallePage extends StatefulWidget {
     this.vehicleReviews,
     this.vehiclePrice,
     this.vehicleImage,
+    this.precioHora,
+    this.precioDia,
+    this.precioSemana,
   });
 
   @override
@@ -49,12 +55,12 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   int get _precioUnitario {
     switch (_periodoSeleccionado) {
       case 'Horas':
-        return 38000;
+        return widget.precioHora ?? widget.vehiclePrice ?? 38000;
       case 'Semanas':
-        return 1300000;
+        return widget.precioSemana ?? 1300000;
       case 'Días':
       default:
-        return 220000;
+        return widget.precioDia ?? 220000;
     }
   }
 

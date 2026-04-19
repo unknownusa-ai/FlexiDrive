@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../reservas/reserva_detalle_page.dart';
+import '../../../services/vehiculo_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +16,11 @@ class _HomePageState extends State<HomePage> {
   String _selectedCategory = 'Todos';
   String _selectedDate = 'Hoy';
   String _selectedCity = 'Bogotá';
+
+  // Servicio para cargar datos desde JSON
+  final VehiculoService _vehiculoService = VehiculoService();
+  List<Map<String, dynamic>> _vehiculos = [];
+  bool _isLoading = true;
 
   static const _cityData = [
     {'name': 'Bogotá',        'emoji': '🏙️', 'vehicles': 48},
@@ -47,6 +53,22 @@ class _HomePageState extends State<HomePage> {
   Color get _dividerColor   => _isDark ? const Color(0xFF252942) : Colors.grey.shade100;
   Color get _textPrimary    => _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF1A1A1A);
   Color get _textSub        => _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
+
+  // ─── INIT STATE - Cargar datos desde JSON ─────────────────────────
+  @override
+  void initState() {
+    super.initState();
+    _cargarVehiculos();
+  }
+
+  /// Carga vehículos desde el JSON usando dart:convert
+  Future<void> _cargarVehiculos() async {
+    await _vehiculoService.init();
+    setState(() {
+      _vehiculos = _vehiculoService.getVehiculos();
+      _isLoading = false;
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────
   @override
@@ -478,6 +500,8 @@ class _HomePageState extends State<HomePage> {
 
   // ─── DESTACADOS ──────────────────────────────────────────────────
   Widget _buildDestacadosSection() {
+    final destacados = _vehiculos.take(2).toList();
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -497,28 +521,60 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 14),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              _buildFeaturedCard(title: 'Mazda CX-5 2024', type: 'SUV', typeColor: const Color(0xFF4F46E5),
-                  rating: 4.9, reviews: 128, price: 38000,
-                  image: 'assets/imagenes_carros/cx5.jpg'),
-              const SizedBox(width: 16),
-              _buildFeaturedCard(title: 'Toyota Corolla 2024', type: 'Sedán', typeColor: const Color(0xFFE53935),
-                  rating: 4.8, reviews: 245, price: 25000,
-                  image: 'assets/imagenes_carros/corolla.jpg'),
-            ],
+        if (_isLoading)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20),
+            child: CircularProgressIndicator(),
+          ))
+        else if (destacados.isEmpty)
+          const Center(child: Text('No hay vehículos destacados'))
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: destacados.map((v) {
+                final typeColor = _getTypeColor(v['categoria']);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: _buildFeaturedCard(
+                    title: '${v['marca']} ${v['modelo']} ${v['anio']}',
+                    type: v['categoria'],
+                    typeColor: typeColor,
+                    rating: v['calificacion'],
+                    reviews: v['resenas'],
+                    price: v['precio_hora'],
+                    precioDia: v['precio_dia'],
+                    precioSemana: v['precio_semana'],
+                    image: v['imagen'],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
     );
   }
 
+  Color _getTypeColor(String categoria) {
+    switch (categoria) {
+      case 'SUV':
+        return const Color(0xFF4F46E5);
+      case 'Sedán':
+        return const Color(0xFFE53935);
+      case 'Compacto':
+        return const Color(0xFF10B981);
+      case 'Premium':
+        return const Color(0xFFF59E0B);
+      default:
+        return const Color(0xFF4F46E5);
+    }
+  }
+
   Widget _buildFeaturedCard({
     required String title, required String type, required Color typeColor,
-    required double rating, required int reviews, required int price, required String image,
+    required double rating, required int reviews, required int price,
+    required int precioDia, required int precioSemana, required String image,
   }) {
     return Container(
       width: 210,
@@ -595,17 +651,23 @@ class _HomePageState extends State<HomePage> {
                       TextSpan(text: '/hora', style: GoogleFonts.inter(color: _textSub, fontSize: 11)),
                     ])),
                     GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => ReservaDetallePage(
-                          vehicleName: title,
-                          vehicleSpecs: '$type • 2024 • Automático • 5 puestos',
-                          vehicleRating: rating,
-                          vehicleReviews: reviews,
-                          vehiclePrice: price,
-                          vehicleImage: image,
-                        )),
-                      ),
+                      onTap: () {
+                        final specs = '$type • 2024 • Automático • 5 puestos';
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => ReservaDetallePage(
+                            vehicleName: title,
+                            vehicleSpecs: specs,
+                            vehicleRating: rating,
+                            vehicleReviews: reviews,
+                            vehiclePrice: price,
+                            vehicleImage: image,
+                            precioHora: price,
+                            precioDia: precioDia,
+                            precioSemana: precioSemana,
+                          )),
+                        );
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
@@ -628,15 +690,7 @@ class _HomePageState extends State<HomePage> {
   // ─── ALL VEHICLES ────────────────────────────────────────────────
   Widget _buildAllVehiclesSection() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    final List<Map<String, dynamic>> vehicles = [
-      {'name': 'Mazda CX-5 2024',      'specs': '2024 • Automático • 5 puestos', 'rating': 4.9, 'reviews': 128,  'price': 38000, 'image': 'assets/imagenes_carros/cx5.jpg'},
-      {'name': 'Toyota Corolla 2024',   'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 245,  'price': 25000, 'image': 'assets/imagenes_carros/corolla.jpg'},
-      {'name': 'Renault Sandero 2023',  'specs': '2023 • Manual • 5 puestos',     'rating': 4.6, 'reviews': 189,  'price': 18000, 'image': 'assets/imagenes_carros/Renault-Sandero.jpg'},
-      {'name': 'Mercedes GLE 2024',     'specs': '2024 • Automático • 5 puestos', 'rating': 4.7, 'reviews': 67,   'price': 65000, 'image': 'assets/imagenes_carros/mercedes.jpg'},
-      {'name': 'Porsche 718 2023',      'specs': '2023 • Automático • 2 puestos', 'rating': 4.9, 'reviews': 43,   'price': 80000, 'image': 'assets/imagenes_carros/porsche.jpg'},
-      {'name': 'Tesla Model 3 2024',    'specs': '2024 • Automático • 5 puestos', 'rating': 4.8, 'reviews': 156,  'price': 45000, 'image': 'assets/imagenes_carros/tesla.jpg'},
-    ];
-
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -653,23 +707,38 @@ class _HomePageState extends State<HomePage> {
                 color: _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text('${vehicles.length} disponibles',
+              child: Text('${_vehiculos.length} disponibles',
                   style: GoogleFonts.inter(color: _textSub, fontSize: 11, fontWeight: FontWeight.w500)),
             ),
           ]),
         ),
         const SizedBox(height: 14),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
-          child: Column(children: vehicles.map((v) => _buildVehicleListItem(v, isSmallPhone)).toList()),
-        ),
+        if (_isLoading)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20),
+            child: CircularProgressIndicator(),
+          ))
+        else
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
+            child: Column(children: _vehiculos.map((v) => _buildVehicleListItem(v, isSmallPhone)).toList()),
+          ),
         const SizedBox(height: 20),
         _buildCompareSection(isSmallPhone),
       ],
     );
   }
 
-  Widget _buildVehicleListItem(Map<String, dynamic> vehicle, bool isSmallPhone) {
+  Widget _buildVehicleListItem(Map<String, dynamic> v, bool isSmallPhone) {
+    final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
+    final specs = '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos';
+    final rating = v['calificacion'] as double;
+    final reviews = v['resenas'] as int;
+    final price = v['precio_hora'] as int;
+    final precioDia = v['precio_dia'] as int;
+    final precioSemana = v['precio_semana'] as int;
+    final image = v['imagen'] as String;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -682,7 +751,7 @@ class _HomePageState extends State<HomePage> {
         ClipRRect(
           borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
           child: Image.asset(
-            vehicle['image'],
+            image,
             width: isSmallPhone ? 100 : 120,
             height: isSmallPhone ? 100 : 120,
             fit: BoxFit.cover,
@@ -699,7 +768,7 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Expanded(child: Text(vehicle['name'],
+                Expanded(child: Text(name,
                     style: GoogleFonts.poppins(fontSize: isSmallPhone ? 13 : 15, fontWeight: FontWeight.w600, color: _textPrimary))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
@@ -712,21 +781,21 @@ class _HomePageState extends State<HomePage> {
                 ),
               ]),
               const SizedBox(height: 4),
-              Text(vehicle['specs'], style: GoogleFonts.inter(fontSize: isSmallPhone ? 11 : 12, color: _textSub)),
+              Text(specs, style: GoogleFonts.inter(fontSize: isSmallPhone ? 11 : 12, color: _textSub)),
               const SizedBox(height: 6),
               Row(children: [
                 const Icon(Icons.star_rounded, color: Color(0xFFFBBF24), size: 14),
                 const SizedBox(width: 3),
-                Text('${vehicle['rating']}', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 12, color: _textPrimary)),
+                Text('$rating', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 12, color: _textPrimary)),
                 const SizedBox(width: 2),
-                Text('(${vehicle['reviews']} reseñas)', style: GoogleFonts.inter(color: _textSub, fontSize: isSmallPhone ? 10 : 11)),
+                Text('($reviews reseñas)', style: GoogleFonts.inter(color: _textSub, fontSize: isSmallPhone ? 10 : 11)),
               ]),
               SizedBox(height: isSmallPhone ? 8 : 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   RichText(text: TextSpan(children: [
-                    TextSpan(text: '\$ ${_formatPrice(vehicle['price'])}',
+                    TextSpan(text: '\$ ${_formatPrice(price)}',
                         style: GoogleFonts.poppins(color: const Color(0xFF4F46E5), fontWeight: FontWeight.w700, fontSize: isSmallPhone ? 15 : 17)),
                     TextSpan(text: '/h', style: GoogleFonts.inter(color: _textSub, fontSize: 11)),
                   ])),
@@ -734,12 +803,15 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => ReservaDetallePage(
-                        vehicleName: vehicle['name'],
-                        vehicleSpecs: vehicle['specs'],
-                        vehicleRating: vehicle['rating'],
-                        vehicleReviews: vehicle['reviews'],
-                        vehiclePrice: vehicle['price'],
-                        vehicleImage: vehicle['image'],
+                        vehicleName: name,
+                        vehicleSpecs: specs,
+                        vehicleRating: rating,
+                        vehicleReviews: reviews,
+                        vehiclePrice: price,
+                        vehicleImage: image,
+                        precioHora: price,
+                        precioDia: precioDia,
+                        precioSemana: precioSemana,
                       )),
                     ),
                     child: Container(
@@ -823,32 +895,56 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ─── CATEGORY SECTIONS ───────────────────────────────────────────
-  Widget _buildSedanSection() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _buildCategoryHeader('🚗', 'Sedán', '1 disponibles'),
-    const SizedBox(height: 16),
-    Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Toyota Corolla 2024', '2024 • Automático • 5 puestos', 4.8, 245, 25000, 'assets/imagenes_carros/corolla.jpg')),
-    const SizedBox(height: 24),
-    _buildCompareSection(true),
-  ]);
+  Widget _buildSedanSection() {
+    final sedanes = _vehiculos.where((v) => v['categoria'] == 'Sedán').toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildCategoryHeader('🚗', 'Sedán', '${sedanes.length} disponibles'),
+      const SizedBox(height: 16),
+      if (_isLoading)
+        const Center(child: CircularProgressIndicator())
+      else
+        ...sedanes.map((v) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          child: _buildHorizontalCardFromJson(v),
+        )).toList(),
+      const SizedBox(height: 24),
+      _buildCompareSection(true),
+    ]);
+  }
 
-  Widget _buildSUVSection() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _buildCategoryHeader('🚙', 'SUV', '1 disponibles'),
-    const SizedBox(height: 16),
-    Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Mazda CX-5 2024', '2024 • Automático • 5 puestos', 4.9, 128, 38000, 'assets/imagenes_carros/cx5.jpg')),
-    const SizedBox(height: 24),
-    _buildCompareSection(true),
-  ]);
+  Widget _buildSUVSection() {
+    final suvs = _vehiculos.where((v) => v['categoria'] == 'SUV').toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildCategoryHeader('🚙', 'SUV', '${suvs.length} disponibles'),
+      const SizedBox(height: 16),
+      if (_isLoading)
+        const Center(child: CircularProgressIndicator())
+      else
+        ...suvs.map((v) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          child: _buildHorizontalCardFromJson(v),
+        )).toList(),
+      const SizedBox(height: 24),
+      _buildCompareSection(true),
+    ]);
+  }
 
-  Widget _buildCompactoSection() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _buildCategoryHeader('🚗', 'Compacto', '1 disponibles'),
-    const SizedBox(height: 16),
-    Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _buildHorizontalCard('Renault Sandero 2023', '2023 • Manual • 5 puestos', 4.6, 189, 18000, 'assets/imagenes_carros/Renault-Sandero.jpg')),
-    const SizedBox(height: 24),
-    _buildCompareSection(true),
-  ]);
+  Widget _buildCompactoSection() {
+    final compactos = _vehiculos.where((v) => v['categoria'] == 'Compacto').toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildCategoryHeader('🚗', 'Compacto', '${compactos.length} disponibles'),
+      const SizedBox(height: 16),
+      if (_isLoading)
+        const Center(child: CircularProgressIndicator())
+      else
+        ...compactos.map((v) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          child: _buildHorizontalCardFromJson(v),
+        )).toList(),
+      const SizedBox(height: 24),
+      _buildCompareSection(true),
+    ]);
+  }
 
   Widget _buildCategoryHeader(String emoji, String title, String count) {
     return Padding(
@@ -869,7 +965,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHorizontalCard(String name, String specs, double rating, int reviews, int price, String image) {
+  Widget _buildHorizontalCardFromJson(Map<String, dynamic> v) {
+    final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
+    final specs = '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos';
+    final rating = v['calificacion'] as double;
+    final reviews = v['resenas'] as int;
+    final price = v['precio_hora'] as int;
+    final precioDia = v['precio_dia'] as int;
+    final precioSemana = v['precio_semana'] as int;
+    final image = v['imagen'] as String;
+    
     return Container(
       decoration: BoxDecoration(
         color: _cardBg,
@@ -927,6 +1032,9 @@ class _HomePageState extends State<HomePage> {
                         vehicleReviews: reviews,
                         vehiclePrice: price,
                         vehicleImage: image,
+                        precioHora: price,
+                        precioDia: precioDia,
+                        precioSemana: precioSemana,
                       )),
                     ),
                     child: Container(
