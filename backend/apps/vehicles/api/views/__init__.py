@@ -1,0 +1,1 @@
+from apps.vehicles.api.views.vehicle_category_views import VehicleCategoryListView

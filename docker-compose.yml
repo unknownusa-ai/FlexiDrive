@@ -1,0 +1,90 @@
+services:
+  db:
+    container_name: flexidrive_db
+    image: postgres:16-alpine
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flexidrive_network
+
+  backend:
+    container_name: flexidrive_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+      DB_HOST: db
+      DB_PORT: 5432
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - flexidrive_network
+
+  pgadmin:
+    container_name: flexidrive_pgadmin
+    image: dpage/pgadmin4:8
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - flexidrive_network
+
+  frontend:
+    container_name: flexidrive_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: "no"
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - flexidrive_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  flexidrive_network:
+    name: flexidrive_network
+    driver: bridge
