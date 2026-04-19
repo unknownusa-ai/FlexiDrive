@@ -66,16 +66,17 @@ services:
 
   frontend:
     container_name: flexidrive_frontend
-    image: node:20-alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     restart: "no"
-    profiles:
-      - frontend
     working_dir: /app
     volumes:
       - ./frontend:/app
     ports:
       - "3000:3000"
-    command: sh -c "sleep infinity"
+    depends_on:
+      - backend
     networks:
       - flexidrive_network
 

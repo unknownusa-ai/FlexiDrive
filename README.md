@@ -106,3 +106,25 @@ Al iniciar sesión en pgAdmin, crea un servidor con estos datos:
 
 Usar `db` como host funciona porque pgAdmin y PostgreSQL están en la misma red Docker.
 
+## 🌐 Frontend Flutter Web en Docker
+
+Se agregó el contenedor `frontend` para ejecutar Flutter en modo web dentro de Docker y poder verlo desde el navegador.
+
+### Levantar frontend + backend
+
+```bash
+docker compose up -d db backend frontend
+```
+
+### URL de acceso
+
+- Frontend Web: http://localhost:3000
+- Backend API: http://localhost:8000
+
+### Probar vista móvil en navegador
+
+1. Abrir `http://localhost:3000` en Chrome o Edge.
+2. Presionar `F12` para abrir DevTools.
+3. Activar el ícono de dispositivo móvil (Toggle device toolbar).
+4. Elegir un modelo (iPhone, Pixel, etc.) para simular pantalla móvil.
+
