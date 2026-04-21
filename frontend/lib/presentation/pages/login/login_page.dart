@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flexidrive/features/accounts/accounts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../onboarding/onboarding_page.dart';
 import '../register/register_page.dart';
@@ -16,7 +17,46 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
   bool _obscurePassword = true;
+  bool _isSubmitting = false;
+
+  Future<void> _submitLogin() async {
+    if (_isSubmitting) return;
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ingresa correo y contraseña')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final user = await _accountRepository.login(email: email, password: password);
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSubmitting = false;
+    });
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Credenciales inválidas')),
+      );
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainPage()),
+    );
+  }
 
   @override
   void dispose() {
@@ -237,11 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const MainPage()),
-                          );
-                        },
+                        onPressed: _submitLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -250,25 +286,34 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(16 * scale),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Iniciar Sesión',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: ResponsiveUtils.fontSize(context, 16),
-                                fontWeight: FontWeight.w600,
+                        child: _isSubmitting
+                            ? SizedBox(
+                                height: 20 * scale,
+                                width: 20 * scale,
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Iniciar Sesión',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: ResponsiveUtils.fontSize(context, 16),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8 * scale),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.white,
+                                    size: 20 * scale,
+                                  ),
+                                ],
                               ),
-                            ),
-                            SizedBox(width: 8 * scale),
-                            Icon(
-                              Icons.chevron_right,
-                              color: Colors.white,
-                              size: 20 * scale,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                     SizedBox(height: 24 * scale),

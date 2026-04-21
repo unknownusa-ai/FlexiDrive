@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
+import 'package:flexidrive/features/accounts/accounts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../reservas/reserva_detalle_page.dart';
 import '../../../services/vehiculo_service.dart';
@@ -13,9 +14,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
+
   String _selectedCategory = 'Todos';
   String _selectedDate = 'Hoy';
   String _selectedCity = 'Bogotá';
+  String _currentUserName = 'Invitado';
 
   // Servicio para cargar datos desde JSON
   final VehiculoService _vehiculoService = VehiculoService();
@@ -59,6 +63,15 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _cargarVehiculos();
+    _cargarUsuarioActual();
+  }
+
+  Future<void> _cargarUsuarioActual() async {
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (!mounted) return;
+    setState(() {
+      _currentUserName = currentUser?.fullName.split(' ').first ?? 'Invitado';
+    });
   }
 
   /// Carga vehículos desde el JSON usando dart:convert
@@ -172,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   Text('Buenas tardes 👋',
                                       style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
-                                  Text('Carlos',
+                                  Text(_currentUserName,
                                       style: GoogleFonts.poppins(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
                                 ],
                               ),

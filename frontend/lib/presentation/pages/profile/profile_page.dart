@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+import 'package:flexidrive/features/accounts/accounts.dart';
 import 'edit_profile_page.dart';
+import '../login/login_page.dart';
 import 'security_page.dart';
 import 'payment_methods_page.dart';
 import 'my_reviews_page.dart';
@@ -17,7 +19,26 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final bool _isModoArrendatarioActive = true; // Cambiar a false para desactivar modo
+  String _profileName = 'Invitado';
+  String _profileEmail = 'sin_sesion@flexidrive.local';
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarUsuarioPerfil();
+  }
+
+  Future<void> _cargarUsuarioPerfil() async {
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (!mounted || currentUser == null) return;
+
+    setState(() {
+      _profileName = currentUser.fullName;
+      _profileEmail = currentUser.email;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,14 +135,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                        Text('Carlos Rodríguez',
+                        Text(_profileName,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: GoogleFonts.inter(
                                 fontSize: isSmallPhone ? 14 : 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white)),
-                        Text('carlos.rodriguez@email.com',
+                        Text(_profileEmail,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: GoogleFonts.inter(
@@ -654,7 +675,15 @@ class _ProfilePageState extends State<ProfilePage> {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushReplacementNamed('/login'),
+      onTap: () async {
+        await _accountRepository.logout();
+        if (!mounted) return;
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+      },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 8 : 11),
         decoration: BoxDecoration(

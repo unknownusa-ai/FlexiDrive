@@ -34,4 +34,4 @@ flutter:
   assets:
     - assets/icons/
     - assets/imagenes_carros/
-    - assets/data/vehiculos_data.json
+    - assets/data/
