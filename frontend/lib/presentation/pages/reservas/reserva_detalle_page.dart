@@ -155,10 +155,12 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
 
     if (_currentUserReviewId != null) {
       // Actualizar opinión existente
-      final reviewIndex = _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
+      final reviewIndex =
+          _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
       if (reviewIndex != -1) {
         final review = _reviewDb.reviews[reviewIndex];
-        final opinionIndex = _reviewDb.opinions.indexWhere((o) => o.id == review.opinionId);
+        final opinionIndex =
+            _reviewDb.opinions.indexWhere((o) => o.id == review.opinionId);
         if (opinionIndex != -1) {
           _reviewDb.opinions[opinionIndex] = OpinionModel(
             id: review.opinionId,
@@ -171,10 +173,14 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       // Crear nueva opinión
       final newOpinionId = _reviewDb.opinions.isEmpty
           ? 1
-          : _reviewDb.opinions.map((o) => o.id).reduce((a, b) => a > b ? a : b) + 1;
+          : _reviewDb.opinions
+                  .map((o) => o.id)
+                  .reduce((a, b) => a > b ? a : b) +
+              1;
       final newReviewId = _reviewDb.reviews.isEmpty
           ? 1
-          : _reviewDb.reviews.map((r) => r.id).reduce((a, b) => a > b ? a : b) + 1;
+          : _reviewDb.reviews.map((r) => r.id).reduce((a, b) => a > b ? a : b) +
+              1;
 
       _reviewDb.opinions.add(OpinionModel(
         id: newOpinionId,
@@ -201,7 +207,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
 
     await _reviewDb.loadIfNeeded();
 
-    final reviewIndex = _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
+    final reviewIndex =
+        _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
     if (reviewIndex != -1) {
       final review = _reviewDb.reviews[reviewIndex];
       _reviewDb.reviews.removeAt(reviewIndex);
@@ -216,8 +223,10 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Iniciar sesión', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('Debes iniciar sesión para opinar', style: GoogleFonts.inter()),
+        title: Text('Iniciar sesión',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        content: Text('Debes iniciar sesión para opinar',
+            style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -228,7 +237,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
               Navigator.pop(ctx);
               // Navegar a login
             },
-            child: Text('Iniciar sesión', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            child: Text('Iniciar sesión',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -463,9 +473,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     final displayRating = _isLoadingReviews
         ? (widget.vehicleRating ?? 4.9)
         : (_averageRating > 0 ? _averageRating : (widget.vehicleRating ?? 4.9));
-    final displayReviews = _isLoadingReviews
-        ? (widget.vehicleReviews ?? 0)
-        : _totalOpinions;
+    final displayReviews =
+        _isLoadingReviews ? (widget.vehicleReviews ?? 0) : _totalOpinions;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,7 +817,9 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.star, color: const Color(0xFFF59E0B), size: isSmallPhone ? 14 : 16),
+                      Icon(Icons.star,
+                          color: const Color(0xFFF59E0B),
+                          size: isSmallPhone ? 14 : 16),
                       const SizedBox(width: 4),
                       Text(
                         _isLoadingReviews
@@ -877,20 +888,27 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                 final index = entry.key;
                 final opinion = entry.value;
                 final review = _vehicleReviews[index];
-                final isCurrentUserReview = _currentUser != null && review.userId == _currentUser!.id;
+                final isCurrentUserReview =
+                    _currentUser != null && review.userId == _currentUser!.id;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: EdgeInsets.all(isSmallPhone ? 10 : 12),
                   decoration: BoxDecoration(
                     color: isCurrentUserReview
-                        ? (_isDark ? const Color(0xFF4F46E5).withOpacity(0.1) : const Color(0xFFEEF2FF))
-                        : (_isDark ? const Color(0xFF1F2235) : Colors.grey.shade50),
+                        ? (_isDark
+                            ? const Color(0xFF4F46E5).withValues(alpha: 0.1)
+                            : const Color(0xFFEEF2FF))
+                        : (_isDark
+                            ? const Color(0xFF1F2235)
+                            : Colors.grey.shade50),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isCurrentUserReview
                           ? const Color(0xFF4F46E5)
-                          : (_isDark ? const Color(0xFF2E3355) : Colors.grey.shade200),
+                          : (_isDark
+                              ? const Color(0xFF2E3355)
+                              : Colors.grey.shade200),
                     ),
                   ),
                   child: Column(
@@ -902,7 +920,9 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           Row(
                             children: List.generate(5, (i) {
                               return Icon(
-                                i < opinion.rating ? Icons.star : Icons.star_border,
+                                i < opinion.rating
+                                    ? Icons.star
+                                    : Icons.star_border,
                                 color: const Color(0xFFF59E0B),
                                 size: isSmallPhone ? 14 : 16,
                               );
@@ -912,15 +932,21 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           // Acciones para el usuario actual
                           if (isCurrentUserReview) ...[
                             IconButton(
-                              onPressed: () => _showReviewDialog(isSmallPhone, existingOpinion: opinion),
-                              icon: Icon(Icons.edit, size: isSmallPhone ? 16 : 18, color: const Color(0xFF4F46E5)),
+                              onPressed: () => _showReviewDialog(isSmallPhone,
+                                  existingOpinion: opinion),
+                              icon: Icon(Icons.edit,
+                                  size: isSmallPhone ? 16 : 18,
+                                  color: const Color(0xFF4F46E5)),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              onPressed: () => _confirmDeleteReview(isSmallPhone),
-                              icon: Icon(Icons.delete, size: isSmallPhone ? 16 : 18, color: const Color(0xFFEF4444)),
+                              onPressed: () =>
+                                  _confirmDeleteReview(isSmallPhone),
+                              icon: Icon(Icons.delete,
+                                  size: isSmallPhone ? 16 : 18,
+                                  color: const Color(0xFFEF4444)),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
@@ -928,7 +954,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      if (opinion.description != null && opinion.description!.isNotEmpty)
+                      if (opinion.description != null &&
+                          opinion.description!.isNotEmpty)
                         Text(
                           opinion.description!,
                           style: GoogleFonts.inter(
@@ -991,7 +1018,20 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   String _formatFechaInicio() {
     try {
       final now = DateTime.now();
-      final meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      final meses = [
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dic'
+      ];
       return '${now.day} ${meses[now.month - 1]} ${now.year}, 8:00 AM';
     } catch (e) {
       return '22 Feb 2026, 8:00 AM';
@@ -999,7 +1039,20 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   }
 
   String _formatDate(DateTime date) {
-    final meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    final meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
+    ];
     return '${date.day} ${meses[date.month - 1]} ${date.year}';
   }
 
@@ -1007,8 +1060,10 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Eliminar opinión', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text('¿Estás seguro de que quieres eliminar tu opinión?', style: GoogleFonts.inter()),
+        title: Text('Eliminar opinión',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        content: Text('¿Estás seguro de que quieres eliminar tu opinión?',
+            style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1019,7 +1074,10 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
               Navigator.pop(ctx);
               _deleteReview();
             },
-            child: Text('Eliminar', style: GoogleFonts.inter(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+            child: Text('Eliminar',
+                style: GoogleFonts.inter(
+                    color: const Color(0xFFEF4444),
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -1028,7 +1086,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
 
   void _showReviewDialog(bool isSmallPhone, {OpinionModel? existingOpinion}) {
     int selectedRating = existingOpinion?.rating ?? 5;
-    final descriptionController = TextEditingController(text: existingOpinion?.description ?? '');
+    final descriptionController =
+        TextEditingController(text: existingOpinion?.description ?? '');
 
     showDialog(
       context: context,
@@ -1043,12 +1102,14 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Calificación', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                Text('Calificación',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Row(
                   children: List.generate(5, (index) {
                     return GestureDetector(
-                      onTap: () => setDialogState(() => selectedRating = index + 1),
+                      onTap: () =>
+                          setDialogState(() => selectedRating = index + 1),
                       child: Icon(
                         index < selectedRating ? Icons.star : Icons.star_border,
                         color: const Color(0xFFF59E0B),
@@ -1058,7 +1119,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                   }),
                 ),
                 const SizedBox(height: 16),
-                Text('Descripción (opcional)', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                Text('Descripción (opcional)',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: descriptionController,
@@ -1066,7 +1128,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                   decoration: InputDecoration(
                     hintText: 'Comparte tu experiencia con este vehículo...',
                     hintStyle: GoogleFonts.inter(fontSize: 13),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ],
@@ -1080,7 +1143,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                _addOrUpdateReview(selectedRating, descriptionController.text.trim());
+                _addOrUpdateReview(
+                    selectedRating, descriptionController.text.trim());
               },
               child: Text(
                 existingOpinion != null ? 'Actualizar' : 'Publicar',
@@ -1151,7 +1215,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => ResumenReservaPage(
-                              vehiculoBrand: widget.vehicleName ?? 'Mazda CX-5 2024',
+                              vehiculoBrand:
+                                  widget.vehicleName ?? 'Mazda CX-5 2024',
                               vehiculoColor: _extractColorFromSpecs(),
                               vehiculoImage: widget.vehicleImage ?? '',
                               periodo: _periodoSeleccionado,
@@ -1174,7 +1239,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 8,
-                        shadowColor: const Color(0xFF10B981).withValues(alpha: 0.35),
+                        shadowColor:
+                            const Color(0xFF10B981).withValues(alpha: 0.35),
                       ),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
@@ -1215,7 +1281,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                         Text(
                           '\$ $_totalFormateado',
                           style: GoogleFonts.poppins(
-                            color: const Color(0xFF22C55E).withValues(alpha: 0.35),
+                            color:
+                                const Color(0xFF22C55E).withValues(alpha: 0.35),
                             fontSize: isSmallPhone ? 18 : 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1241,7 +1308,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ResumenReservaPage(
-                                vehiculoBrand: widget.vehicleName ?? 'Mazda CX-5 2024',
+                                vehiculoBrand:
+                                    widget.vehicleName ?? 'Mazda CX-5 2024',
                                 vehiculoColor: _extractColorFromSpecs(),
                                 vehiculoImage: widget.vehicleImage ?? '',
                                 periodo: _periodoSeleccionado,
@@ -1264,7 +1332,8 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           elevation: 8,
-                          shadowColor: const Color(0xFF10B981).withValues(alpha: 0.13),
+                          shadowColor:
+                              const Color(0xFF10B981).withValues(alpha: 0.13),
                         ),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,

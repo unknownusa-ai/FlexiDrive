@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flexidrive/core/session/local_session_store.dart';
-import 'package:flexidrive/models/reservations/reservation_models.dart';
-import 'package:flexidrive/models/reviews/review_models.dart';
-import 'package:flexidrive/models/vehicles/vehicle_models.dart';
 import 'package:flexidrive/services/publications/local_publication_db.dart';
 import 'package:flexidrive/services/reservations/local_reservation_db.dart';
 import 'package:flexidrive/services/reviews/local_review_db.dart';
@@ -61,19 +58,12 @@ class _ReservasPageState extends State<ReservasPage> {
         publication.id: publication,
     };
     final vehiclesById = {
-      for (final vehicle in _vehiculoService.getVehiculos()) vehicle['id']: vehicle,
+      for (final vehicle in _vehiculoService.getVehiculos())
+        vehicle['id']: vehicle,
     };
     final opinionsById = {
       for (final opinion in _reviewDb.opinions) opinion.id: opinion.rating,
     };
-
-    final mainImagesByPublication = <int, String>{};
-    for (final image in _publicationDb.publicationImages) {
-      final current = mainImagesByPublication[image.publicationId];
-      if (current == null || image.isMain || image.order == 1) {
-        mainImagesByPublication[image.publicationId] = image.imageUrl;
-      }
-    }
 
     final pricesByPublication = <int, Map<int, int>>{};
     for (final price in _publicationDb.publicationPrices) {
@@ -115,8 +105,7 @@ class _ReservasPageState extends State<ReservasPage> {
                 ? 0.0
                 : 1.0,
         status: status,
-        imageUrl: mainImagesByPublication[reservation.publicationId] ??
-            'assets/imagenes_carros/cx5.jpg',
+        imageUrl: vehicle == null ? null : vehicle['imagen'],
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
             ? '2024 • Negro Jet'
@@ -870,7 +859,8 @@ class _ReservasPageState extends State<ReservasPage> {
       context,
       MaterialPageRoute(
         builder: (_) => ReservaDetallePage(
-          vehicleId: 0, // Default value since we don't have vehicleId in this context
+          vehicleId:
+              0, // Default value since we don't have vehicleId in this context
           vehicleName: vehicleName,
           vehicleSpecs: vehicleSpecs,
           vehicleRating: vehicleRating,

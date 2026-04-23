@@ -11,7 +11,6 @@ import '../../../services/reviews/local_review_db.dart';
 import '../../../services/reservations/local_reservation_db.dart';
 import '../../../models/publications/publication_models.dart';
 import '../../../models/reviews/review_models.dart';
-import '../../../models/reservations/reservation_models.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -50,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   List<String> _cities = [];
 
   // Caché de calificaciones calculadas: vehicleId -> {rating, count}
-  Map<int, Map<String, dynamic>> _vehicleRatings = {};
+  final Map<int, Map<String, dynamic>> _vehicleRatings = {};
 
   // Iconos por ciudad
   final Map<String, IconData> _cityIcons = {
@@ -117,12 +116,14 @@ class _HomePageState extends State<HomePage> {
     final publication = _publicationDb.publications
         .where((p) => p.vehicleId == vehicleId)
         .firstOrNull;
-    
+
     if (publication == null) return true;
 
     // Buscar reservas para esta publicación
     final reservations = _reservationDb.reservations
-        .where((r) => r.publicationId == publication.id && r.statusId == 1) // Solo reservas activas
+        .where((r) =>
+            r.publicationId == publication.id &&
+            r.statusId == 1) // Solo reservas activas
         .toList();
 
     // Verificar si alguna reserva se cruza con las fechas seleccionadas
@@ -141,13 +142,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Verifica si dos rangos de fechas se cruzan
-  bool _datesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2) {
+  bool _datesOverlap(
+      DateTime start1, DateTime end1, DateTime start2, DateTime end2) {
     // Si el rango 1 termina antes de que comience el rango 2
     if (end1.isBefore(start2)) return false;
-    
+
     // Si el rango 1 comienza después de que termine el rango 2
     if (start1.isAfter(end2)) return false;
-    
+
     // Hay cruce de fechas
     return true;
   }
@@ -182,7 +184,8 @@ class _HomePageState extends State<HomePage> {
 
     // Filtro por categoría
     if (_selectedCategory != 'Todos') {
-      filtrados = filtrados.where((v) => v['categoria'] == _selectedCategory).toList();
+      filtrados =
+          filtrados.where((v) => v['categoria'] == _selectedCategory).toList();
     }
 
     setState(() {
@@ -247,7 +250,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   String _formatFecha(DateTime fecha) {
-    final meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    final meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
+    ];
     return '${fecha.day} ${meses[fecha.month - 1]}';
   }
 
@@ -261,25 +277,14 @@ class _HomePageState extends State<HomePage> {
 
   /// Carga vehículos desde el JSON usando dart:convert y calcula ratings reales
   Future<void> _cargarVehiculos() async {
-    print('DEBUG: Iniciando carga de vehículos...');
-    
     await _vehiculoService.init();
-    print('DEBUG: VehiculoService inicializado');
-    
     await _publicationDb.loadIfNeeded();
-    print('DEBUG: PublicationDb cargado');
-    
     await _reviewDb.loadIfNeeded();
-    print('DEBUG: ReviewDb cargado');
-    
     await _reservationDb.loadIfNeeded();
-    print('DEBUG: ReservationDb cargado');
 
     final vehiculos = _vehiculoService.getVehiculos();
-    print('DEBUG: Cargados ${vehiculos.length} vehículos');
-    
+
     if (vehiculos.isEmpty) {
-      print('DEBUG: ERROR - No se cargaron vehículos');
       setState(() {
         _isLoading = false;
       });
@@ -292,16 +297,13 @@ class _HomePageState extends State<HomePage> {
       final ratingData = _calcularRatingVehiculo(vehicleId);
       _vehicleRatings[vehicleId] = ratingData;
     }
-    print('DEBUG: Ratings calculados para ${_vehicleRatings.length} vehículos');
 
     setState(() {
       _vehiculos = vehiculos;
       _vehiculosFiltrados = vehiculos;
       _isLoading = false;
     });
-    print('DEBUG: Estado actualizado con ${_vehiculos.length} vehículos');
     _filtrarVehiculos();
-    print('DEBUG: Vehículos filtrados: ${_vehiculosFiltrados.length}');
   }
 
   /// Calcula el rating real de un vehículo desde las reseñas de la BD
@@ -621,8 +623,7 @@ class _HomePageState extends State<HomePage> {
                     height: 20,
                     decoration: const BoxDecoration(
                         color: Color(0xFF4F46E5), shape: BoxShape.circle),
-                    child: Icon(
-                        _cityIcons[_selectedCity] ?? Icons.location_on,
+                    child: Icon(_cityIcons[_selectedCity] ?? Icons.location_on,
                         color: Colors.white, size: 12),
                   ),
                   const SizedBox(width: 5),
@@ -734,7 +735,8 @@ class _HomePageState extends State<HomePage> {
             child: GestureDetector(
               onTap: _selectFechaDesde,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: _cardBg,
                   borderRadius: BorderRadius.circular(14),
@@ -752,7 +754,8 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, color: const Color(0xFF4F46E5), size: 16),
+                        Icon(Icons.calendar_today,
+                            color: const Color(0xFF4F46E5), size: 16),
                         const SizedBox(width: 8),
                         Text(_formatFecha(_fechaDesde),
                             style: GoogleFonts.inter(
@@ -773,7 +776,8 @@ class _HomePageState extends State<HomePage> {
             child: GestureDetector(
               onTap: _selectFechaHasta,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                       colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
@@ -797,7 +801,8 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, color: Colors.white, size: 16),
+                        Icon(Icons.calendar_today,
+                            color: Colors.white, size: 16),
                         const SizedBox(width: 8),
                         Text(_formatFecha(_fechaHasta),
                             style: GoogleFonts.inter(
@@ -943,7 +948,8 @@ class _HomePageState extends State<HomePage> {
               children: destacados.map((v) {
                 final typeColor = _getTypeColor(v['categoria']);
                 final vehicleId = v['id'] as int;
-                final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
+                final ratingData =
+                    _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
                 return Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: _buildFeaturedCard(
@@ -1134,7 +1140,8 @@ class _HomePageState extends State<HomePage> {
                     ])),
                     GestureDetector(
                       onTap: () {
-                        final specs = '$year • $transmission • $seats puestos • $location';
+                        final specs =
+                            '$year • $transmission • $seats puestos • $location';
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1267,7 +1274,8 @@ class _HomePageState extends State<HomePage> {
     final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
     final specs =
         '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
-    final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
+    final ratingData =
+        _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
     final rating = ratingData['rating'] as double;
     final reviews = ratingData['count'] as int;
     final price = v['precio_hora'] as int;
@@ -1513,9 +1521,11 @@ class _HomePageState extends State<HomePage> {
 
   // ─── CATEGORY SECTIONS ───────────────────────────────────────────
   Widget _buildSedanSection() {
-    final sedanes = _vehiculosFiltrados.where((v) => v['categoria'] == 'Sedán').toList();
+    final sedanes =
+        _vehiculosFiltrados.where((v) => v['categoria'] == 'Sedán').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚗', 'Sedán en $_selectedCity', '${sedanes.length} disponibles'),
+      _buildCategoryHeader(
+          '🚗', 'Sedán en $_selectedCity', '${sedanes.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1532,9 +1542,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildSUVSection() {
-    final suvs = _vehiculosFiltrados.where((v) => v['categoria'] == 'SUV').toList();
+    final suvs =
+        _vehiculosFiltrados.where((v) => v['categoria'] == 'SUV').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚙', 'SUV en $_selectedCity', '${suvs.length} disponibles'),
+      _buildCategoryHeader(
+          '🚙', 'SUV en $_selectedCity', '${suvs.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1551,14 +1563,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCompactoSection() {
-    final compactos = _vehiculosFiltrados.where((v) => v['categoria'] == 'Compacto').toList();
+    final compactos =
+        _vehiculosFiltrados.where((v) => v['categoria'] == 'Compacto').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚗', 'Compacto en $_selectedCity', '${compactos.length} disponibles'),
+      _buildCategoryHeader('🚗', 'Compacto en $_selectedCity',
+          '${compactos.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
       else if (compactos.isEmpty)
-        _buildEmptyCategoryMessage('No hay compactos disponibles en esta ciudad')
+        _buildEmptyCategoryMessage(
+            'No hay compactos disponibles en esta ciudad')
       else
         ...compactos.map((v) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -1570,14 +1585,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildPremiumSection() {
-    final premium = _vehiculosFiltrados.where((v) => v['categoria'] == 'Premium').toList();
+    final premium =
+        _vehiculosFiltrados.where((v) => v['categoria'] == 'Premium').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('✨', 'Premium en $_selectedCity', '${premium.length} disponibles'),
+      _buildCategoryHeader(
+          '✨', 'Premium en $_selectedCity', '${premium.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
       else if (premium.isEmpty)
-        _buildEmptyCategoryMessage('No hay vehículos premium disponibles en esta ciudad')
+        _buildEmptyCategoryMessage(
+            'No hay vehículos premium disponibles en esta ciudad')
       else
         ...premium.map((v) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -1589,9 +1607,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildPickupSection() {
-    final pickups = _vehiculosFiltrados.where((v) => v['categoria'] == 'Pickup').toList();
+    final pickups =
+        _vehiculosFiltrados.where((v) => v['categoria'] == 'Pickup').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🛻', 'Pickup en $_selectedCity', '${pickups.length} disponibles'),
+      _buildCategoryHeader(
+          '🛻', 'Pickup en $_selectedCity', '${pickups.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1653,7 +1673,8 @@ class _HomePageState extends State<HomePage> {
     final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
     final specs =
         '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
-    final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
+    final ratingData =
+        _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
     final rating = ratingData['rating'] as double;
     final reviews = ratingData['count'] as int;
     final price = v['precio_hora'] as int;
@@ -1745,7 +1766,8 @@ class _HomePageState extends State<HomePage> {
                                   vehicleId: vehicleId,
                                   vehicleName: name,
                                   vehicleSpecs: specs,
-                                  vehicleDescription: 'Descripción del vehículo',
+                                  vehicleDescription:
+                                      'Descripción del vehículo',
                                   fuelType: 'Gasolina',
                                   hasAC: true,
                                   vehicleRating: rating,
@@ -1905,7 +1927,8 @@ class _HomePageState extends State<HomePage> {
                     final cityName = filtered[index];
                     final isSel = cityName == _selectedCity;
                     final vehicleCount = _contarVehiculosPorCiudad(cityName);
-                    final cityIcon = _cityIcons[cityName] ?? Icons.location_city;
+                    final cityIcon =
+                        _cityIcons[cityName] ?? Icons.location_city;
                     return InkWell(
                       onTap: () {
                         setState(() => _selectedCity = cityName);
@@ -1950,7 +1973,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: Center(
                                 child: Icon(cityIcon,
-                                    color: isSel ? const Color(0xFF4F46E5) : _textSub,
+                                    color: isSel
+                                        ? const Color(0xFF4F46E5)
+                                        : _textSub,
                                     size: 22)),
                           ),
                           const SizedBox(width: 12),

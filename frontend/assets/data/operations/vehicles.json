@@ -9,7 +9,8 @@
         "descripcion":  "Vehiculo 1 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  1
+        "vehiculo_id":  1,
+        "imagen": "assets/imagenes_carros/mazda3.jpg"
     },
     {
         "modelo":  2023,
@@ -21,7 +22,8 @@
         "descripcion":  "Vehiculo 2 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  2
+        "vehiculo_id":  2,
+        "imagen": "assets/imagenes_carros/corolla.jpg"
     },
     {
         "modelo":  2024,
@@ -33,7 +35,8 @@
         "descripcion":  "Vehiculo 3 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  3
+        "vehiculo_id":  3,
+        "imagen": "assets/imagenes_carros/Renault-Sandero.jpg"
     },
     {
         "modelo":  2025,
@@ -45,7 +48,8 @@
         "descripcion":  "Vehiculo 4 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  4,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  4
+        "vehiculo_id":  4,
+        "imagen": "assets/imagenes_carros/onix.jpeg"
     },
     {
         "modelo":  2021,
@@ -57,7 +61,8 @@
         "descripcion":  "Vehiculo 5 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  5,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  5
+        "vehiculo_id":  5,
+        "imagen": "assets/imagenes_carros/sportage.jpg"
     },
     {
         "modelo":  2022,
@@ -69,7 +74,8 @@
         "descripcion":  "Vehiculo 6 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  6
+        "vehiculo_id":  6,
+        "imagen": "assets/imagenes_carros/tucson.jpg"
     },
     {
         "modelo":  2023,
@@ -81,7 +87,8 @@
         "descripcion":  "Vehiculo 7 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  7
+        "vehiculo_id":  7,
+        "imagen": "assets/imagenes_carros/ranger.jpg"
     },
     {
         "modelo":  2024,
@@ -93,7 +100,8 @@
         "descripcion":  "Vehiculo 8 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  8
+        "vehiculo_id":  8,
+        "imagen": "assets/imagenes_carros/sentra.jpg"
     },
     {
         "modelo":  2025,
@@ -105,7 +113,8 @@
         "descripcion":  "Vehiculo 9 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  4,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  9
+        "vehiculo_id":  9,
+        "imagen": "assets/imagenes_carros/bmw.jpg"
     },
     {
         "modelo":  2021,
@@ -117,7 +126,8 @@
         "descripcion":  "Vehiculo 10 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  5,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  10
+        "vehiculo_id":  10,
+        "imagen": "assets/imagenes_carros/mercedes.jpg"
     },
     {
         "modelo":  2022,
@@ -129,7 +139,8 @@
         "descripcion":  "Vehiculo 11 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  11
+        "vehiculo_id":  11,
+        "imagen": "assets/imagenes_carros/tesla.jpg"
     },
     {
         "modelo":  2023,
@@ -141,7 +152,8 @@
         "descripcion":  "Vehiculo 12 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  12
+        "vehiculo_id":  12,
+        "imagen": "assets/imagenes_carros/audia4.jpg"
     },
     {
         "modelo":  2024,
@@ -153,7 +165,8 @@
         "descripcion":  "Vehiculo 13 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  13
+        "vehiculo_id":  13,
+        "imagen": "assets/imagenes_carros/mazda3.jpg"
     },
     {
         "modelo":  2025,
@@ -165,7 +178,8 @@
         "descripcion":  "Vehiculo 14 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  4,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  14
+        "vehiculo_id":  14,
+        "imagen": "assets/imagenes_carros/corolla.jpg"
     },
     {
         "modelo":  2021,
@@ -177,7 +191,8 @@
         "descripcion":  "Vehiculo 15 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  5,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  15
+        "vehiculo_id":  15,
+        "imagen": "assets/imagenes_carros/Renault-Sandero.jpg"
     },
     {
         "modelo":  2022,
@@ -189,7 +204,8 @@
         "descripcion":  "Vehiculo 16 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  16
+        "vehiculo_id":  16,
+        "imagen": "assets/imagenes_carros/onix.jpeg"
     },
     {
         "modelo":  2023,
@@ -201,7 +217,8 @@
         "descripcion":  "Vehiculo 17 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  17
+        "vehiculo_id":  17,
+        "imagen": "assets/imagenes_carros/sportage.jpg"
     },
     {
         "modelo":  2024,
@@ -213,7 +230,8 @@
         "descripcion":  "Vehiculo 18 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  18
+        "vehiculo_id":  18,
+        "imagen": "assets/imagenes_carros/tucson.jpg"
     },
     {
         "modelo":  2025,
@@ -225,7 +243,8 @@
         "descripcion":  "Vehiculo 19 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  4,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  19
+        "vehiculo_id":  19,
+        "imagen": "assets/imagenes_carros/ranger.jpg"
     },
     {
         "modelo":  2021,
@@ -237,7 +256,8 @@
         "descripcion":  "Vehiculo 20 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  5,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  20
+        "vehiculo_id":  20,
+        "imagen": "assets/imagenes_carros/sentra.jpg"
     },
     {
         "modelo":  2022,
@@ -249,7 +269,8 @@
         "descripcion":  "Vehiculo 21 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  21
+        "vehiculo_id":  21,
+        "imagen": "assets/imagenes_carros/bmw.jpg"
     },
     {
         "modelo":  2023,
@@ -261,7 +282,8 @@
         "descripcion":  "Vehiculo 22 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  22
+        "vehiculo_id":  22,
+        "imagen": "assets/imagenes_carros/mercedes.jpg"
     },
     {
         "modelo":  2024,
@@ -273,7 +295,8 @@
         "descripcion":  "Vehiculo 23 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  23
+        "vehiculo_id":  23,
+        "imagen": "assets/imagenes_carros/tesla.jpg"
     },
     {
         "modelo":  2025,
@@ -285,7 +308,8 @@
         "descripcion":  "Vehiculo 24 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  4,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  24
+        "vehiculo_id":  24,
+        "imagen": "assets/imagenes_carros/audia4.jpg"
     },
     {
         "modelo":  2021,
@@ -297,7 +321,8 @@
         "descripcion":  "Vehiculo 25 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  5,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  25
+        "vehiculo_id":  25,
+        "imagen": "assets/imagenes_carros/mazda3.jpg"
     },
     {
         "modelo":  2022,
@@ -309,7 +334,8 @@
         "descripcion":  "Vehiculo 26 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  1,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  26
+        "vehiculo_id":  26,
+        "imagen": "assets/imagenes_carros/corolla.jpg"
     },
     {
         "modelo":  2023,
@@ -321,7 +347,8 @@
         "descripcion":  "Vehiculo 27 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  2,
         "tipo_transmision":  "Manual",
-        "vehiculo_id":  27
+        "vehiculo_id":  27,
+        "imagen": "assets/imagenes_carros/Renault-Sandero.jpg"
     },
     {
         "modelo":  2024,
@@ -333,6 +360,7 @@
         "descripcion":  "Vehiculo 28 en excelente estado con mantenimiento al dia",
         "categoria_vehiculo_id":  3,
         "tipo_transmision":  "Automatica",
-        "vehiculo_id":  28
+        "vehiculo_id":  28,
+        "imagen": "assets/imagenes_carros/onix.jpeg"
     }
 ]
