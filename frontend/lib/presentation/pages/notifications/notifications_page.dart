@@ -53,6 +53,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
+    _notificationDb.changes.addListener(_onNotificationDbChanged);
+    _loadNotifications();
+  }
+
+  @override
+  void dispose() {
+    _notificationDb.changes.removeListener(_onNotificationDbChanged);
+    super.dispose();
+  }
+
+  void _onNotificationDbChanged() {
     _loadNotifications();
   }
 

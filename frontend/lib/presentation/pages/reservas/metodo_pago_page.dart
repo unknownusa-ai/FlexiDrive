@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/session/local_session_store.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../services/notifications/local_notification_db.dart';
 import 'reserva_confirmada_page.dart';
 import 'reservas_store.dart';
 
@@ -34,11 +36,15 @@ class MetodoPagoPage extends StatefulWidget {
 }
 
 class _MetodoPagoPageState extends State<MetodoPagoPage> {
+  static const _reservaCategoryId = 1;
+
   String _metodoPago = 'Tarjeta';
   final _numeroTarjetaCtrl = TextEditingController();
   final _titularCtrl = TextEditingController();
   final _vencimientoCtrl = TextEditingController();
   final _cvvCtrl = TextEditingController();
+  final LocalSessionStore _sessionStore = LocalSessionStore.instance;
+  final LocalNotificationDb _notificationDb = LocalNotificationDb.instance;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -120,6 +126,23 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     final suffix =
         (now.microsecondsSinceEpoch % 10000).toString().padLeft(4, '0');
     return 'FXD-${now.year}-$suffix';
+  }
+
+  Future<void> _crearNotificacionReserva({
+    required String codigoReserva,
+    required DateTime fechaInicio,
+  }) async {
+    await _sessionStore.init();
+    final currentUserId = _sessionStore.userId;
+    if (currentUserId == null) return;
+
+    await _notificationDb.addNotification(
+      userId: currentUserId,
+      categoryId: _reservaCategoryId,
+      subject: 'Reserva confirmada',
+      description:
+          'Tu reserva $codigoReserva de ${widget.vehiculoBrand} fue confirmada para ${_formatearFechaCorta(fechaInicio)} en ${widget.lugarRecogida}.',
+    );
   }
 
   @override
@@ -881,7 +904,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           width: double.infinity,
           height: isSmallPhone ? 48 : 56,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final codigoReserva = _generarCodigoReserva();
               final fechaInicio = DateTime.now();
               final fechaFin = _calcularFechaFin(fechaInicio);
@@ -897,6 +920,13 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                   imageUrl: widget.vehiculoImage,
                 ),
               );
+
+              await _crearNotificacionReserva(
+                codigoReserva: codigoReserva,
+                fechaInicio: fechaInicio,
+              );
+
+              if (!mounted) return;
 
               Navigator.pushReplacement(
                 context,
