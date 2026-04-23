@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+import 'package:flexidrive/services/catalogs/local_catalog_db.dart';
+import 'package:flexidrive/models/catalogs/catalog_models.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../login/login_page.dart';
 
@@ -19,10 +21,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
   bool _isSubmitting = false;
+  bool _isLoadingCatalogs = true;
+
+  List<IdentificationTypeModel> _identificationTypes = [];
+  IdentificationTypeModel? _selectedIdentificationType;
 
   Future<void> _showDialogMessage(String title, String message) async {
     return showDialog<void>(
@@ -40,6 +48,23 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadIdentificationTypes();
+  }
+
+  Future<void> _loadIdentificationTypes() async {
+    await _catalogDb.loadIfNeeded();
+    setState(() {
+      _identificationTypes = _catalogDb.identificationTypes;
+      if (_identificationTypes.isNotEmpty) {
+        _selectedIdentificationType = _identificationTypes.first;
+      }
+      _isLoadingCatalogs = false;
+    });
+  }
+
   Future<void> _submitRegister() async {
     if (_isSubmitting) return;
 
@@ -55,7 +80,8 @@ class _RegisterPageState extends State<RegisterPage> {
         email.isEmpty ||
         phone.isEmpty ||
         password.isEmpty ||
-        confirmPassword.isEmpty) {
+        confirmPassword.isEmpty ||
+        _selectedIdentificationType == null) {
       await _showDialogMessage(
         'Campos obligatorios',
         'Completa todos los campos para crear la cuenta.',
@@ -90,6 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: email,
         phone: phone,
         password: password,
+        identificationTypeId: _selectedIdentificationType!.id,
       );
 
       if (!mounted) return;
@@ -212,13 +239,91 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: Icons.person_outline,
                     ),
                     const SizedBox(height: 16),
+                    // Tipo de Identificación
+                    _buildLabel('TIPO DE IDENTIFICACIÓN'),
+                    const SizedBox(height: 8),
+                    _isLoadingCatalogs
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F7FA),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.badge_outlined,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Cargando...',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey.withValues(alpha: 0.6),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F7FA),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<IdentificationTypeModel>(
+                                value: _selectedIdentificationType,
+                                isExpanded: true,
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.grey,
+                                ),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                ),
+                                dropdownColor: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                items: _identificationTypes.map((type) {
+                                  return DropdownMenuItem<IdentificationTypeModel>(
+                                    value: type,
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.badge_outlined,
+                                          color: const Color(0xFF9CA3AF),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          '${type.name} - ${type.description}',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedIdentificationType = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 16),
                     // Documento
-                    _buildLabel('DOCUMENTO (CC / CE)'),
+                    _buildLabel('NÚMERO DE IDENTIFICACIÓN'),
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _documentController,
                       hintText: 'Número de documento',
-                      prefixIcon: Icons.badge_outlined,
+                      prefixIcon: Icons.numbers_outlined,
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 16),
