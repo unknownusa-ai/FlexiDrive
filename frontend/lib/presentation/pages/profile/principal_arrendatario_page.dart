@@ -344,8 +344,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     required Map<String, dynamic> vehiculo,
     required String? rentInfo,
   }) {
-    final imagePath =
-        vehiculo['imagen'] as String? ?? 'assets/imagenes_carros/tesla.jpg';
+    final imagePath = vehiculo['imagen'] as String?;
     final title =
         '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
     final subtitle =
@@ -377,12 +376,26 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  imagePath,
-                  width: isSmallPhone ? 90 : 100,
-                  height: isSmallPhone ? 70 : 80,
-                  fit: BoxFit.cover,
-                ),
+                child: imagePath != null
+                    ? Image.asset(
+                        imagePath,
+                        width: isSmallPhone ? 90 : 100,
+                        height: isSmallPhone ? 70 : 80,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: isSmallPhone ? 90 : 100,
+                        height: isSmallPhone ? 70 : 80,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.directions_car,
+                          color: Colors.grey,
+                          size: 32,
+                        ),
+                      ),
               ),
               const SizedBox(width: 10),
               Expanded(
