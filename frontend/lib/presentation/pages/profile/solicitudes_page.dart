@@ -241,7 +241,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           vertical: isSmallPhone ? 10 : 12,
         ),
         decoration: BoxDecoration(
-          color: isActive 
+          color: isActive
               ? (isDarkMode ? const Color(0xFF3B2510) : const Color(0xFFFFFBEB))
               : (isDarkMode ? const Color(0xFF334155) : Colors.white),
           borderRadius: BorderRadius.circular(20),
@@ -671,123 +671,6 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
-  Widget _buildBottomBar(bool isSmallPhone) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            isSmallPhone ? 10 : 14,
-            8,
-            isSmallPhone ? 10 : 14,
-            8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(
-                icon: Icons.home_outlined,
-                label: 'Inicio',
-                onTap: () => Navigator.pop(context),
-              ),
-              _navItem(
-                icon: Icons.description_outlined,
-                label: 'Solicitudes',
-                active: true,
-              ),
-              Container(
-                width: 74,
-                height: 62,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.add, color: Colors.white, size: 36),
-              ),
-              _navItem(
-                icon: Icons.notifications_none,
-                label: 'Alertas',
-                dot: true,
-                onTap: () => Navigator.pop(context),
-              ),
-              _navItem(
-                icon: Icons.person_outline,
-                label: 'Perfil',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    bool active = false,
-    bool dot = false,
-    VoidCallback? onTap,
-  }) {
-    final activeColor = const Color(0xFFF59E0B);
-    final inactiveColor = const Color(0xFF94A3B8);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 66,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: active ? const Color(0xFFFFF7ED) : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(
-                    icon,
-                    color: active ? activeColor : inactiveColor,
-                    size: 27,
-                  ),
-                  if (dot)
-                    const Positioned(
-                      right: -2,
-                      top: -1,
-                      child: CircleAvatar(
-                        radius: 3,
-                        backgroundColor: Color(0xFFEF4444),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: active ? activeColor : inactiveColor,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                ),
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showAcceptDialog() {
     showDialog(
       context: context,
@@ -925,6 +808,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                 ),
               ),
               const SizedBox(height: 16),
+              // ignore_for_file: deprecated_member_use
               ...reasons.map((reason) => RadioListTile<String>(
                     title: Text(
                       reason,

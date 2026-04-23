@@ -10,17 +10,17 @@ class MainPage extends StatefulWidget {
 
   final int initialIndex;
 
-  static _MainPageState of(BuildContext context) {
-    final state = context.findAncestorStateOfType<_MainPageState>();
+  static MainPageState of(BuildContext context) {
+    final state = context.findAncestorStateOfType<MainPageState>();
     assert(state != null, 'No MainPage found in context');
     return state!;
   }
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
   late int _selectedIndex;
 
   final List<Widget> _pages = const [

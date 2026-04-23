@@ -14,10 +14,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   // Dark-mode aware palette helpers
-  Color get _cardBg       => _isDark ? const Color(0xFF161827) : Colors.white;
-  Color get _borderColor  => _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
-  Color get _textPrimary  => _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF1A1A1A);
-  Color get _textSub      => _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
+  Color get _cardBg => _isDark ? const Color(0xFF161827) : Colors.white;
+  Color get _borderColor =>
+      _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
+  Color get _textPrimary =>
+      _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF1A1A1A);
+  Color get _textSub =>
+      _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
 
   // Icon background colors based on notification type
   Color _getIconBgColor(String type, bool isDark) {
@@ -40,7 +43,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'type': 'reserva',
       'title': '¡Reserva Confirmada!',
       'titleEmoji': '🎉',
-      'description': 'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
+      'description':
+          'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
       'time': 'Hace 2 horas',
       'unread': true,
       'emoji': '✅',
@@ -49,7 +53,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'type': 'recordatorio',
       'title': 'Recordatorio de Devolución',
       'titleEmoji': '⏰',
-      'description': 'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
+      'description':
+          'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
       'time': 'Ayer, 3:00 PM',
       'unread': true,
       'emoji': '⏰',
@@ -58,7 +63,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'type': 'promo',
       'title': '¡Oferta Exclusiva!',
       'titleEmoji': '🔥',
-      'description': '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
+      'description':
+          '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
       'time': 'Hace 2 días',
       'unread': false,
       'emoji': '🎁',
@@ -67,7 +73,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'type': 'auto',
       'title': 'Nuevo Vehículo Disponible',
       'titleEmoji': '🚗',
-      'description': 'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
+      'description':
+          'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
       'time': 'Hace 3 días',
       'unread': false,
       'emoji': '🆕',
@@ -76,7 +83,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'type': 'promo',
       'title': 'Programa de Referidos',
       'titleEmoji': '👥',
-      'description': 'Invita a un amigo y gana \$50,000 COP en crédito FlexiDrive para tu próxima renta.',
+      'description':
+          'Invita a un amigo y gana \$50,000 COP en crédito FlexiDrive para tu próxima renta.',
       'time': 'Hace 5 días',
       'unread': false,
       'emoji': '💰',
@@ -84,16 +92,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
   ];
 
   void _markAllAsRead() => setState(() {
-    for (var n in _notifications) n['unread'] = false;
-    _unreadCount = 0;
-  });
+        for (var n in _notifications) {
+          n['unread'] = false;
+        }
+        _unreadCount = 0;
+      });
   void _markAsRead(Map<String, dynamic> n) => setState(() {
-    if (n['unread'] == true) { n['unread'] = false; if (_unreadCount > 0) _unreadCount--; }
-  });
+        if (n['unread'] == true) {
+          n['unread'] = false;
+          if (_unreadCount > 0) _unreadCount--;
+        }
+      });
   void _deleteNotification(Map<String, dynamic> n) => setState(() {
-    if (n['unread'] == true && _unreadCount > 0) _unreadCount--;
-    _notifications.remove(n);
-  });
+        if (n['unread'] == true && _unreadCount > 0) _unreadCount--;
+        _notifications.remove(n);
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -114,44 +127,68 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
         ),
       ),
       child: Stack(children: [
-        Positioned(right: -40, top: -30,
+        Positioned(
+          right: -40,
+          top: -30,
           child: Container(
-            width: 150, height: 150,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.08)),
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08)),
           ),
         ),
-        SafeArea(child: Padding(
+        SafeArea(
+            child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Notificaciones',
-                    style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 if (_unreadCount > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(12)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444),
+                        borderRadius: BorderRadius.circular(12)),
                     child: Text('$_unreadCount sin leer',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                        style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
                   ),
               ]),
               if (_unreadCount > 0)
                 GestureDetector(
                   onTap: _markAllAsRead,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(12)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(12)),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                      const Icon(Icons.check_rounded,
+                          color: Colors.white, size: 16),
                       const SizedBox(width: 5),
-                      Text('Leer todo', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('Leer todo',
+                          style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
                     ]),
                   ),
                 ),
@@ -172,10 +209,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
-          children: tabs.map((tab) => Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: _buildTabChip(tab),
-          )).toList(),
+          children: tabs
+              .map((tab) => Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _buildTabChip(tab),
+                  ))
+              .toList(),
         ),
       ),
     );
@@ -184,9 +223,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget _buildTabChip(String tab) {
     final isSelected = _selectedTab == tab;
     Widget? leading;
-    if (tab == 'Reservas')      leading = const Text('✅', style: TextStyle(fontSize: 13));
-    else if (tab == 'Recordatorios') leading = const Text('⏰', style: TextStyle(fontSize: 13));
-    else if (tab == 'Promos')   leading = const Text('🎁', style: TextStyle(fontSize: 13));
+    if (tab == 'Reservas') {
+      leading = const Text('✅', style: TextStyle(fontSize: 13));
+    } else if (tab == 'Recordatorios') {
+      leading = const Text('⏰', style: TextStyle(fontSize: 13));
+    } else if (tab == 'Promos') {
+      leading = const Text('🎁', style: TextStyle(fontSize: 13));
+    }
 
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = tab),
@@ -198,11 +241,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
           borderRadius: BorderRadius.circular(20),
           border: isSelected ? null : Border.all(color: _borderColor),
           boxShadow: isSelected
-              ? [BoxShadow(
-                  color: const Color(0xFF4F46E5).withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                )]
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  )
+                ]
               : [],
         ),
         child: Row(
@@ -228,9 +273,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final filtered = _selectedTab == 'Todas'
         ? _notifications
         : _notifications.where((n) {
-            if (_selectedTab == 'Reservas')      return n['type'] == 'reserva';
-            if (_selectedTab == 'Recordatorios') return n['type'] == 'recordatorio';
-            if (_selectedTab == 'Promos')        return n['type'] == 'promo';
+            if (_selectedTab == 'Reservas') return n['type'] == 'reserva';
+            if (_selectedTab == 'Recordatorios') {
+              return n['type'] == 'recordatorio';
+            }
+            if (_selectedTab == 'Promos') return n['type'] == 'promo';
             return true;
           }).toList();
 

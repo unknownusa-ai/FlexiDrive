@@ -8,7 +8,8 @@ class PrincipalArrendatarioPage extends StatefulWidget {
   const PrincipalArrendatarioPage({super.key});
 
   @override
-  State<PrincipalArrendatarioPage> createState() => _PrincipalArrendatarioPageState();
+  State<PrincipalArrendatarioPage> createState() =>
+      _PrincipalArrendatarioPageState();
 }
 
 class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
@@ -61,7 +62,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                                 ? 'Rentado a ${v['rentado_a']} hasta el ${v['fecha_fin_renta']}'
                                 : null;
                             return Padding(
-                              padding: EdgeInsets.only(bottom: isSmallPhone ? 12 : 14),
+                              padding: EdgeInsets.only(
+                                  bottom: isSmallPhone ? 12 : 14),
                               child: _buildVehicleCardFromJson(
                                 context: context,
                                 isSmallPhone: isSmallPhone,
@@ -69,7 +71,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                                 rentInfo: rentInfo,
                               ),
                             );
-                          }).toList(),
+                          }),
                         SizedBox(height: isSmallPhone ? 16 : 18),
                         _buildTipsCard(context, isSmallPhone),
                         const SizedBox(height: 16),
@@ -112,24 +114,24 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-          Text(
-            'Modo Arrendatario 🏠',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.9),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Mis Vehículos',
-            style: GoogleFonts.inter(
-              fontSize: isSmallPhone ? 24 : 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              height: 1.1,
-            ),
-          ),
+                    Text(
+                      'Modo Arrendatario 🏠',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Mis Vehículos',
+                      style: GoogleFonts.inter(
+                        fontSize: isSmallPhone ? 24 : 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.1,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -177,7 +179,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
             children: [
               _buildStatCard(
                 icon: Icons.attach_money,
-                value: _isLoading ? '\$0' : '\$${_formatNumber(_calcularSaldo())}',
+                value:
+                    _isLoading ? '\$0' : '\$${_formatNumber(_calcularSaldo())}',
                 label: 'Saldo',
               ),
               const SizedBox(width: 6),
@@ -195,7 +198,9 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
               const SizedBox(width: 6),
               _buildStatCard(
                 icon: Icons.trending_up,
-                value: _isLoading ? '\$0' : '\$${_formatNumber(_calcularGanancias())}',
+                value: _isLoading
+                    ? '\$0'
+                    : '\$${_formatNumber(_calcularGanancias())}',
                 label: 'Ganancias',
               ),
             ],
@@ -339,15 +344,17 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     required Map<String, dynamic> vehiculo,
     required String? rentInfo,
   }) {
-    final imagePath = vehiculo['imagen'] as String? ?? 'assets/imagenes_carros/tesla.jpg';
-    final title = '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
-    final subtitle = '${vehiculo['marca'] ?? ''} • ${vehiculo['categoria'] ?? 'Sedán'}';
+    final imagePath =
+        vehiculo['imagen'] as String? ?? 'assets/imagenes_carros/tesla.jpg';
+    final title =
+        '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
+    final subtitle =
+        '${vehiculo['marca'] ?? ''} • ${vehiculo['categoria'] ?? 'Sedán'}';
     final rating = (vehiculo['calificacion'] ?? 4.5).toString();
     final trips = '${vehiculo['viajes'] ?? 0} viajes';
     final pricePerDay = '\$${_formatNumber(vehiculo['precio_dia'] ?? 0)}/día';
     final earned = '\$${_formatNumber(vehiculo['ganado'] ?? 0)}';
     final status = vehiculo['estado'] as String? ?? 'DISPONIBLE';
-    final statusColor = status == 'RENTADO' ? const Color(0xFFEF4444) : const Color(0xFF10B981);
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 10 : 12),
@@ -422,7 +429,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                       subtitle,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -438,7 +446,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                           '$rating • $trips',
                           style: GoogleFonts.inter(
                             fontSize: 11,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.5),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -457,7 +466,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                                 color: const Color(0xFFF59E0B),
                               ),
                               children: [
-                                TextSpan(text: pricePerDay.replaceAll('/día', '')),
+                                TextSpan(
+                                    text: pricePerDay.replaceAll('/día', '')),
                                 TextSpan(
                                   text: '/día',
                                   style: GoogleFonts.inter(
@@ -477,7 +487,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                               'Ganado',
                               style: GoogleFonts.inter(
                                 fontSize: 10,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                             Text(
@@ -499,7 +510,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
           ),
           if (rentInfo != null) ...[
             const SizedBox(height: 8),
-            Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
+            Divider(
+                height: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
@@ -620,8 +632,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+$)'),
-      (match) => '${match[1]}.',
-    );
+          RegExp(r'(\d)(?=(\d{3})+$)'),
+          (match) => '${match[1]}.',
+        );
   }
 }

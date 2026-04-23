@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/vehiculo_service.dart';
+import '../../../services/vehiculo_service.dart';
 
 /// Página que demuestra el uso de JSON + ArrayList
 /// Consumiendo datos desde el VehiculoService
@@ -15,7 +15,6 @@ class _VehiculosPageState extends State<VehiculosPage> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _vehiculos = [];
   String _filtroCategoria = 'Todos';
-  String _busqueda = '';
 
   @override
   void initState() {
@@ -48,7 +47,6 @@ class _VehiculosPageState extends State<VehiculosPage> {
   /// Buscar vehículos
   void _buscar(String query) {
     setState(() {
-      _busqueda = query;
       if (query.isEmpty) {
         _vehiculos = _service.getVehiculos();
       } else {
@@ -129,13 +127,8 @@ class _VehiculosPageState extends State<VehiculosPage> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
-                    children: [
-                      'Todos',
-                      'Sedán',
-                      'SUV',
-                      'Compacto',
-                      'Premium'
-                    ].map((cat) {
+                    children: ['Todos', 'Sedán', 'SUV', 'Compacto', 'Premium']
+                        .map((cat) {
                       final isSelected = _filtroCategoria == cat;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
@@ -172,7 +165,10 @@ class _VehiculosPageState extends State<VehiculosPage> {
                               ),
                               _statItem(
                                 'Categorías',
-                                _service.contarVehiculosPorCategoria().length.toString(),
+                                _service
+                                    .contarVehiculosPorCategoria()
+                                    .length
+                                    .toString(),
                               ),
                             ],
                           ),

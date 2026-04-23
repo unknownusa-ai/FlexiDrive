@@ -12,30 +12,30 @@ class ArrendatarioMainPage extends StatefulWidget {
 
   const ArrendatarioMainPage({super.key, this.initialIndex = 0});
 
-  static _ArrendatarioMainPageState of(BuildContext context) {
-    final state = context.findAncestorStateOfType<_ArrendatarioMainPageState>();
+  static ArrendatarioMainPageState of(BuildContext context) {
+    final state = context.findAncestorStateOfType<ArrendatarioMainPageState>();
     assert(state != null, 'No ArrendatarioMainPage found in context');
     return state!;
   }
 
   @override
-  State<ArrendatarioMainPage> createState() => _ArrendatarioMainPageState();
+  State<ArrendatarioMainPage> createState() => ArrendatarioMainPageState();
 }
 
-class _ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
+class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
   late int _selectedIndex;
   late PageController _pageController;
   int _historialTabIndex = 0;
 
   List<Widget> get _pages => [
-    const PrincipalArrendatarioPage(),
-    SolicitudesPage(
-      key: ValueKey<int>(_historialTabIndex),
-      initialTab: _historialTabIndex,
-    ),
-    const AlertasPage(),
-    const ProfileArrendatarioPage(),
-  ];
+        const PrincipalArrendatarioPage(),
+        SolicitudesPage(
+          key: ValueKey<int>(_historialTabIndex),
+          initialTab: _historialTabIndex,
+        ),
+        const AlertasPage(),
+        const ProfileArrendatarioPage(),
+      ];
 
   @override
   void initState() {
@@ -107,9 +107,8 @@ class _ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        border: Border(top: BorderSide(
-          color: theme.dividerColor.withValues(alpha: 0.5)
-        )),
+        border: Border(
+            top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.5))),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -210,7 +209,7 @@ class _ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? activeColor.withValues(alpha: 0.15)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
