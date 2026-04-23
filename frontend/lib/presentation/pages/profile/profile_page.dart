@@ -52,8 +52,10 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     if (userPreference != null) {
-      final appState = FlexiDriveApp.of(context);
-      appState?.setDarkMode(userPreference.darkMode);
+      if (mounted) {
+        final appState = FlexiDriveApp.of(context);
+        appState?.setDarkMode(userPreference.darkMode);
+      }
     }
   }
 

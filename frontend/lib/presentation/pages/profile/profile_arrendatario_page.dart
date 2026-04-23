@@ -48,8 +48,10 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
         await _preferenceService.findEffectiveByUserId(currentUser.id);
 
     if (userPreference != null) {
-      final appState = FlexiDriveApp.of(context);
-      appState?.setDarkMode(userPreference.darkMode);
+      if (mounted) {
+        final appState = FlexiDriveApp.of(context);
+        appState?.setDarkMode(userPreference.darkMode);
+      }
     }
   }
 
