@@ -65,9 +65,9 @@
         "calificacion":  3
     },
     {
-        "descripcion":  "Opinión 14 del servicio FlexiDrive",
+        "descripcion":  "Excelente experiencia. El vehículo estaba impecable y Juan fue muy puntual con la entrega. Totalmente recomendado.",
         "opinion_id":  14,
-        "calificacion":  4
+        "calificacion":  5
     },
     {
         "descripcion":  "Opinión 15 del servicio FlexiDrive",
@@ -155,9 +155,9 @@
         "calificacion":  1
     },
     {
-        "descripcion":  "Opinión 32 del servicio FlexiDrive",
+        "descripcion":  "El carro estaba bien, pero llegó 30 minutos tarde. A pesar de eso, todo lo demás fue correcto.",
         "opinion_id":  32,
-        "calificacion":  2
+        "calificacion":  4
     },
     {
         "descripcion":  "Opinión 33 del servicio FlexiDrive",
@@ -180,9 +180,9 @@
         "calificacion":  1
     },
     {
-        "descripcion":  "Opinión 37 del servicio FlexiDrive",
+        "descripcion":  "María fue una excelente conductora. Cuidó el vehículo como si fuera suyo. Muy comunicativa y responsable.",
         "opinion_id":  37,
-        "calificacion":  2
+        "calificacion":  5
     },
     {
         "descripcion":  "Opinión 38 del servicio FlexiDrive",

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../services/reviews/local_review_db.dart';
+import '../../../services/accounts/local_account_repository.dart';
+import '../../../services/accounts/local_account_db.dart';
+import '../../../services/vehicles/local_vehicle_db.dart';
+import '../../../services/publications/local_publication_db.dart';
 
 class MyReviewsPage extends StatefulWidget {
   const MyReviewsPage({super.key});
@@ -10,8 +15,81 @@ class MyReviewsPage extends StatefulWidget {
 }
 
 class _MyReviewsPageState extends State<MyReviewsPage> {
-  // Empty list to show empty state as per prototype
-  final List<Map<String, dynamic>> _reviews = [];
+  List<Map<String, dynamic>> _reviews = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    final accountRepository = LocalAccountRepository();
+    await LocalReviewDb.instance.loadIfNeeded();
+    await LocalVehicleDb.instance.loadIfNeeded();
+    await LocalPublicationDb.instance.loadIfNeeded();
+
+    final currentUser = await accountRepository.getCurrentUser();
+    if (currentUser == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Get reviews where current user is the author (usuario_id matches)
+    final userReviews = LocalReviewDb.instance.reviews
+        .where((r) => r.userId == currentUser.id)
+        .toList();
+
+    final reviewsData = <Map<String, dynamic>>[];
+
+    for (final review in userReviews) {
+      // Get the opinion details
+      final opinion = LocalReviewDb.instance.opinions.firstWhere(
+          (o) => o.id == review.opinionId,
+          orElse: () => null as dynamic);
+
+      if (opinion == null) continue;
+
+      // Get publication to find vehicle
+      final publication = LocalPublicationDb.instance.publications.firstWhere(
+          (p) => p.id == review.publicationId,
+          orElse: () => null as dynamic);
+
+      if (publication == null) continue;
+
+      // Get vehicle details
+      final vehicle = LocalVehicleDb.instance.vehicles.firstWhere(
+          (v) => v.id == publication.vehicleId,
+          orElse: () => null as dynamic);
+
+      if (vehicle == null) continue;
+
+      // Get owner details for the name
+      final owner = LocalAccountDb.instance.users.firstWhere(
+          (u) => u.id == publication.userId,
+          orElse: () => null as dynamic);
+
+      reviewsData.add({
+        'userAvatar': owner.fullName.isNotEmpty ? owner.fullName[0] : 'U',
+        'userName': owner.fullName,
+        'rating': opinion.rating,
+        'carModel': '${vehicle.line} ${vehicle.model}',
+        'carPlate': 'Sin placa',
+        'date':
+            '${review.date.day.toString().padLeft(2, '0')}/${review.date.month.toString().padLeft(2, '0')}/${review.date.year}',
+        'comment': opinion.description ?? 'Sin comentario',
+        'ownerResponse': null,
+      });
+    }
+
+    setState(() {
+      _reviews = reviewsData;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +102,11 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
         children: [
           _buildGradientHeader(isSmallPhone),
           Expanded(
-            child: _reviews.isEmpty
-                ? _buildEmptyState(isSmallPhone)
-                : _buildReviewsList(isSmallPhone),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _reviews.isEmpty
+                    ? _buildEmptyState(isSmallPhone)
+                    : _buildReviewsList(isSmallPhone),
           ),
         ],
       ),
@@ -150,7 +230,8 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                 ),
                 children: [
                   const TextSpan(
-                    text: 'Cuando finalices un viaje, podrás\ncalificarlo desde la pantalla de ',
+                    text:
+                        'Cuando finalices un viaje, podrás\ncalificarlo desde la pantalla de ',
                   ),
                   TextSpan(
                     text: 'Mis\nReservas',
@@ -251,8 +332,8 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     final theme = Theme.of(context);
     final avgRating = _reviews.isEmpty
         ? 0.0
-        : _reviews.fold<double>(
-                0.0, (sum, review) => sum + (review['rating'] as double)) /
+        : _reviews.fold<double>(0.0,
+                (sum, review) => sum + (review['rating'] as num).toDouble()) /
             _reviews.length;
 
     return Container(
@@ -279,8 +360,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                 end: Alignment.bottomRight,
                 colors: [Color(0xFFFF6B35), Color(0xFFFF3CAC)],
               ),
-              borderRadius:
-                  BorderRadius.circular(isSmallPhone ? 30 : 35),
+              borderRadius: BorderRadius.circular(isSmallPhone ? 30 : 35),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -296,7 +376,8 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star, color: Colors.white, size: isSmallPhone ? 12 : 14),
+                    Icon(Icons.star,
+                        color: Colors.white, size: isSmallPhone ? 12 : 14),
                     const SizedBox(width: 2),
                     Text(
                       '5.0',
@@ -356,8 +437,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
           ),
         ),
         SizedBox(height: isSmallPhone ? 10 : 12),
-        ..._reviews
-            .map((review) => _buildReviewCard(review, isSmallPhone)),
+        ..._reviews.map((review) => _buildReviewCard(review, isSmallPhone)),
       ],
     );
   }
@@ -393,8 +473,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                     end: Alignment.bottomRight,
                     colors: [Color(0xFFFF6B35), Color(0xFFFF3CAC)],
                   ),
-                  borderRadius:
-                      BorderRadius.circular(isSmallPhone ? 20 : 24),
+                  borderRadius: BorderRadius.circular(isSmallPhone ? 20 : 24),
                 ),
                 child: Center(
                   child: Text(
@@ -443,7 +522,8 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 12 : 13,
                         fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -452,7 +532,8 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 11 : 12,
                         fontWeight: FontWeight.w400,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -466,7 +547,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 13 : 14,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF1A1A1A),
+              color: Colors.white.withValues(alpha: 0.9),
               height: 1.4,
             ),
           ),
