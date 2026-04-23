@@ -18,6 +18,13 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
   List<Map<String, dynamic>> _reviews = [];
   bool _isLoading = true;
 
+  T? _firstWhereOrNull<T>(Iterable<T> items, bool Function(T) test) {
+    for (final item in items) {
+      if (test(item)) return item;
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -47,30 +54,35 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
 
     for (final review in userReviews) {
       // Get the opinion details
-      final opinion = LocalReviewDb.instance.opinions.firstWhere(
-          (o) => o.id == review.opinionId,
-          orElse: () => null as dynamic);
+      final opinion = _firstWhereOrNull(
+        LocalReviewDb.instance.opinions,
+        (o) => o.id == review.opinionId,
+      );
 
       if (opinion == null) continue;
 
       // Get publication to find vehicle
-      final publication = LocalPublicationDb.instance.publications.firstWhere(
-          (p) => p.id == review.publicationId,
-          orElse: () => null as dynamic);
+      final publication = _firstWhereOrNull(
+        LocalPublicationDb.instance.publications,
+        (p) => p.id == review.publicationId,
+      );
 
       if (publication == null) continue;
 
       // Get vehicle details
-      final vehicle = LocalVehicleDb.instance.vehicles.firstWhere(
-          (v) => v.id == publication.vehicleId,
-          orElse: () => null as dynamic);
+      final vehicle = _firstWhereOrNull(
+        LocalVehicleDb.instance.vehicles,
+        (v) => v.id == publication.vehicleId,
+      );
 
       if (vehicle == null) continue;
 
       // Get owner details for the name
-      final owner = LocalAccountDb.instance.users.firstWhere(
-          (u) => u.id == publication.userId,
-          orElse: () => null as dynamic);
+      final owner = _firstWhereOrNull(
+        LocalAccountDb.instance.users,
+        (u) => u.id == publication.userId,
+      );
+      if (owner == null) continue;
 
       reviewsData.add({
         'userAvatar': owner.fullName.isNotEmpty ? owner.fullName[0] : 'U',

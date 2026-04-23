@@ -160,7 +160,7 @@ class LocalAccountRepository {
     }
 
     final user = _db.users[index];
-    _db.users[index] = UserModel(
+    final updatedUser = UserModel(
       id: user.id,
       identificationTypeId: user.identificationTypeId,
       identificationNumber: user.identificationNumber,
@@ -171,5 +171,8 @@ class LocalAccountRepository {
       password: newPassword,
       canPublish: user.canPublish,
     );
+
+    _db.users[index] = updatedUser;
+    await _db.saveUserOverride(updatedUser);
   }
 }
