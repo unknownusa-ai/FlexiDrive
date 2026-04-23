@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+import 'package:flexidrive/services/accounts/local_account_db.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../reservas/reserva_detalle_page.dart';
 import '../../../services/vehiculo_service.dart';
@@ -15,39 +16,37 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final LocalAccountDb _accountDb = LocalAccountDb.instance;
 
   String _selectedCategory = 'Todos';
-  String _selectedDate = 'Hoy';
   String _selectedCity = 'Bogotá';
   String _currentUserName = 'Invitado';
+
+  // Filtros de búsqueda
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  // Fechas de renta
+  DateTime _fechaDesde = DateTime(2026, 4, 23);
+  DateTime _fechaHasta = DateTime(2026, 4, 24);
 
   // Servicio para cargar datos desde JSON
   final VehiculoService _vehiculoService = VehiculoService();
   List<Map<String, dynamic>> _vehiculos = [];
+  List<Map<String, dynamic>> _vehiculosFiltrados = [];
   bool _isLoading = true;
+  bool _isLoadingCities = true;
+  List<String> _cities = [];
 
-  static const _cityData = [
-    {'name': 'Bogotá', 'emoji': '🏙️', 'vehicles': 48},
-    {'name': 'Medellín', 'emoji': '🌸', 'vehicles': 36},
-    {'name': 'Cali', 'emoji': '🎵', 'vehicles': 29},
-    {'name': 'Barranquilla', 'emoji': '🌊', 'vehicles': 22},
-    {'name': 'Cartagena', 'emoji': '🏖️', 'vehicles': 18},
-    {'name': 'Bucaramanga', 'emoji': '🏔️', 'vehicles': 15},
-    {'name': 'Pereira', 'emoji': '☕', 'vehicles': 12},
-    {'name': 'Cúcuta', 'emoji': '🌄', 'vehicles': 12},
-    {'name': 'Santa Marta', 'emoji': '🏝️', 'vehicles': 10},
-    {'name': 'Ibagué', 'emoji': '🎶', 'vehicles': 9},
-    {'name': 'Manizales', 'emoji': '🌋', 'vehicles': 8},
-    {'name': 'Villavicencio', 'emoji': '🦋', 'vehicles': 7},
-    {'name': 'Armenia', 'emoji': '🌺', 'vehicles': 7},
-    {'name': 'Neiva', 'emoji': '🌞', 'vehicles': 6},
-    {'name': 'Popayán', 'emoji': '⛪', 'vehicles': 6},
-    {'name': 'Montería', 'emoji': '🐄', 'vehicles': 5},
-    {'name': 'Valledupar', 'emoji': '🎸', 'vehicles': 5},
-    {'name': 'Pasto', 'emoji': '🎭', 'vehicles': 5},
-    {'name': 'Sincelejo', 'emoji': '🌿', 'vehicles': 4},
-    {'name': 'Tunja', 'emoji': '🏛️', 'vehicles': 4},
-  ];
+  // Iconos por ciudad
+  final Map<String, IconData> _cityIcons = {
+    'Bogotá': Icons.location_city,
+    'Medellín': Icons.landscape,
+    'Cali': Icons.music_note,
+    'Barranquilla': Icons.water,
+    'Cartagena': Icons.beach_access,
+    'Bucaramanga': Icons.terrain,
+  };
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -68,6 +67,120 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _cargarVehiculos();
     _cargarUsuarioActual();
+    _cargarCiudades();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _cargarCiudades() async {
+    await _accountDb.loadIfNeeded();
+    if (!mounted) return;
+    setState(() {
+      _cities = _accountDb.referenceCities;
+      if (_cities.isNotEmpty && !_cities.contains(_selectedCity)) {
+        _selectedCity = _cities.first;
+      }
+      _isLoadingCities = false;
+    });
+  }
+
+  int _contarVehiculosPorCiudad(String city) {
+    return _vehiculos.where((v) => v['ubicacion'] == city).length;
+  }
+
+  void _filtrarVehiculos() {
+    var filtrados = _vehiculos.where((v) {
+      // Filtro por ciudad
+      final matchesCity = v['ubicacion'] == _selectedCity;
+
+      // Filtro por búsqueda de texto
+      bool matchesSearch = true;
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final marca = v['marca'].toString().toLowerCase();
+        final modelo = v['modelo'].toString().toLowerCase();
+        final linea = v['linea']?.toString().toLowerCase() ?? '';
+        final precioHora = v['precio_hora'].toString();
+        final precioDia = v['precio_dia'].toString();
+
+        matchesSearch = marca.contains(query) ||
+            modelo.contains(query) ||
+            linea.contains(query) ||
+            precioHora.contains(query) ||
+            precioDia.contains(query);
+      }
+
+      return matchesCity && matchesSearch;
+    }).toList();
+
+    // Filtro por categoría
+    if (_selectedCategory != 'Todos') {
+      filtrados = filtrados.where((v) => v['categoria'] == _selectedCategory).toList();
+    }
+
+    setState(() {
+      _vehiculosFiltrados = filtrados;
+    });
+  }
+
+  Future<void> _selectFechaDesde() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaDesde,
+      firstDate: DateTime(2026, 4, 23),
+      lastDate: DateTime(2027, 12, 31),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF4F46E5),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _fechaDesde) {
+      setState(() {
+        _fechaDesde = picked;
+        if (_fechaHasta.isBefore(_fechaDesde)) {
+          _fechaHasta = _fechaDesde.add(const Duration(days: 1));
+        }
+      });
+    }
+  }
+
+  Future<void> _selectFechaHasta() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaHasta,
+      firstDate: _fechaDesde,
+      lastDate: DateTime(2027, 12, 31),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF4F46E5),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _fechaHasta) {
+      setState(() {
+        _fechaHasta = picked;
+      });
+    }
+  }
+
+  String _formatFecha(DateTime fecha) {
+    final meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return '${fecha.day} ${meses[fecha.month - 1]}';
   }
 
   Future<void> _cargarUsuarioActual() async {
@@ -83,8 +196,10 @@ class _HomePageState extends State<HomePage> {
     await _vehiculoService.init();
     setState(() {
       _vehiculos = _vehiculoService.getVehiculos();
+      _vehiculosFiltrados = _vehiculos;
       _isLoading = false;
     });
+    _filtrarVehiculos();
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -120,6 +235,12 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
               ] else if (_selectedCategory == 'Compacto') ...[
                 _buildCompactoSection(),
+                const SizedBox(height: 24),
+              ] else if (_selectedCategory == 'Premium') ...[
+                _buildPremiumSection(),
+                const SizedBox(height: 24),
+              ] else if (_selectedCategory == 'Pickup') ...[
+                _buildPickupSection(),
                 const SizedBox(height: 24),
               ],
             ],
@@ -304,8 +425,15 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+                _filtrarVehiculos();
+              },
               decoration: InputDecoration(
-                hintText: 'Buscar vehículo, marca...',
+                hintText: 'Buscar vehículo, marca, precio...',
                 hintStyle: GoogleFonts.inter(
                   color: theme.hintColor,
                   fontSize: 14,
@@ -338,7 +466,8 @@ class _HomePageState extends State<HomePage> {
                     height: 20,
                     decoration: const BoxDecoration(
                         color: Color(0xFF4F46E5), shape: BoxShape.circle),
-                    child: const Icon(Icons.location_on,
+                    child: Icon(
+                        _cityIcons[_selectedCity] ?? Icons.location_on,
                         color: Colors.white, size: 12),
                   ),
                   const SizedBox(width: 5),
@@ -441,68 +570,94 @@ class _HomePageState extends State<HomePage> {
 
   // ─── DATE SELECTOR ───────────────────────────────────────────────
   Widget _buildDateSelector() {
-    final dates = [
-      {'label': 'Hoy', 'date': '22 Feb'},
-      {'label': '2 días', 'date': '23-24 Feb'},
-      {'label': '1 semana', 'date': '22 Feb-1 Mar'},
-    ];
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        children: dates
-            .map((d) => Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _buildDateButton(d['label']!, d['date']!),
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildDateButton(String label, String date) {
-    final isSelected = _selectedDate == label;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedDate = label),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-        decoration: isSelected
-            ? BoxDecoration(
-                gradient: const LinearGradient(
-                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                      color: const Color(0xFF4F46E5).withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4))
-                ],
-              )
-            : BoxDecoration(
-                color: _cardBg,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _borderColor),
+        children: [
+          // Fecha Desde (izquierda)
+          Expanded(
+            child: GestureDetector(
+              onTap: _selectFechaDesde,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: _cardBg,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: _borderColor),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Desde',
+                        style: GoogleFonts.poppins(
+                          color: _textSub,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                        )),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: const Color(0xFF4F46E5), size: 16),
+                        const SizedBox(width: 8),
+                        Text(_formatFecha(_fechaDesde),
+                            style: GoogleFonts.inter(
+                              color: _textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label,
-                style: GoogleFonts.poppins(
-                  color: isSelected ? Colors.white : _textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                )),
-            const SizedBox(height: 2),
-            Text(date,
-                style: GoogleFonts.inter(
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.85)
-                      : _textSub,
-                  fontSize: 11,
-                )),
-          ],
-        ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Fecha Hasta (derecha)
+          Expanded(
+            child: GestureDetector(
+              onTap: _selectFechaHasta,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                        color: const Color(0xFF4F46E5).withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4))
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Hasta',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                        )),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(_formatFecha(_fechaHasta),
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -514,6 +669,8 @@ class _HomePageState extends State<HomePage> {
       {'name': 'Sedán', 'icon': '🚗'},
       {'name': 'SUV', 'icon': '🚙'},
       {'name': 'Compacto', 'icon': '🚗'},
+      {'name': 'Premium', 'icon': '✨'},
+      {'name': 'Pickup', 'icon': '🛻'},
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,7 +703,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCategoryButton(String category, String? emoji) {
     final isSelected = _selectedCategory == category;
     return GestureDetector(
-      onTap: () => setState(() => _selectedCategory = category),
+      onTap: () {
+        setState(() => _selectedCategory = category);
+        _filtrarVehiculos();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -585,7 +745,7 @@ class _HomePageState extends State<HomePage> {
 
   // ─── DESTACADOS ──────────────────────────────────────────────────
   Widget _buildDestacadosSection() {
-    final destacados = _vehiculos.take(2).toList();
+    final destacados = _vehiculosFiltrados.take(2).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -857,7 +1017,7 @@ class _HomePageState extends State<HomePage> {
             const Text('🚗', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
             Expanded(
-                child: Text('Todos los vehículos',
+                child: Text('Vehículos en $_selectedCity',
                     style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 16 : 18,
                         fontWeight: FontWeight.w700,
@@ -868,7 +1028,7 @@ class _HomePageState extends State<HomePage> {
                 color: _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text('${_vehiculos.length} disponibles',
+              child: Text('${_vehiculosFiltrados.length} disponibles',
                   style: GoogleFonts.inter(
                       color: _textSub,
                       fontSize: 11,
@@ -883,11 +1043,39 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.all(20),
             child: CircularProgressIndicator(),
           ))
+        else if (_vehiculosFiltrados.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  Icon(Icons.search_off, size: 48, color: _textSub),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No se encontraron vehículos',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: _textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Intenta con otra búsqueda o ciudad',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: _textSub,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
         else
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
             child: Column(
-                children: _vehiculos
+                children: _vehiculosFiltrados
                     .map((v) => _buildVehicleListItem(v, isSmallPhone))
                     .toList()),
           ),
@@ -1142,12 +1330,14 @@ class _HomePageState extends State<HomePage> {
 
   // ─── CATEGORY SECTIONS ───────────────────────────────────────────
   Widget _buildSedanSection() {
-    final sedanes = _vehiculos.where((v) => v['categoria'] == 'Sedán').toList();
+    final sedanes = _vehiculosFiltrados.where((v) => v['categoria'] == 'Sedán').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚗', 'Sedán', '${sedanes.length} disponibles'),
+      _buildCategoryHeader('🚗', 'Sedán en $_selectedCity', '${sedanes.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
+      else if (sedanes.isEmpty)
+        _buildEmptyCategoryMessage('No hay sedanes disponibles en esta ciudad')
       else
         ...sedanes.map((v) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -1159,12 +1349,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildSUVSection() {
-    final suvs = _vehiculos.where((v) => v['categoria'] == 'SUV').toList();
+    final suvs = _vehiculosFiltrados.where((v) => v['categoria'] == 'SUV').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚙', 'SUV', '${suvs.length} disponibles'),
+      _buildCategoryHeader('🚙', 'SUV en $_selectedCity', '${suvs.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
+      else if (suvs.isEmpty)
+        _buildEmptyCategoryMessage('No hay SUVs disponibles en esta ciudad')
       else
         ...suvs.map((v) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -1176,13 +1368,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCompactoSection() {
-    final compactos =
-        _vehiculos.where((v) => v['categoria'] == 'Compacto').toList();
+    final compactos = _vehiculosFiltrados.where((v) => v['categoria'] == 'Compacto').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚗', 'Compacto', '${compactos.length} disponibles'),
+      _buildCategoryHeader('🚗', 'Compacto en $_selectedCity', '${compactos.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
+      else if (compactos.isEmpty)
+        _buildEmptyCategoryMessage('No hay compactos disponibles en esta ciudad')
       else
         ...compactos.map((v) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -1191,6 +1384,59 @@ class _HomePageState extends State<HomePage> {
       const SizedBox(height: 24),
       _buildCompareSection(true),
     ]);
+  }
+
+  Widget _buildPremiumSection() {
+    final premium = _vehiculosFiltrados.where((v) => v['categoria'] == 'Premium').toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildCategoryHeader('✨', 'Premium en $_selectedCity', '${premium.length} disponibles'),
+      const SizedBox(height: 16),
+      if (_isLoading)
+        const Center(child: CircularProgressIndicator())
+      else if (premium.isEmpty)
+        _buildEmptyCategoryMessage('No hay vehículos premium disponibles en esta ciudad')
+      else
+        ...premium.map((v) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: _buildHorizontalCardFromJson(v),
+            )),
+      const SizedBox(height: 24),
+      _buildCompareSection(true),
+    ]);
+  }
+
+  Widget _buildPickupSection() {
+    final pickups = _vehiculosFiltrados.where((v) => v['categoria'] == 'Pickup').toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildCategoryHeader('🛻', 'Pickup en $_selectedCity', '${pickups.length} disponibles'),
+      const SizedBox(height: 16),
+      if (_isLoading)
+        const Center(child: CircularProgressIndicator())
+      else if (pickups.isEmpty)
+        _buildEmptyCategoryMessage('No hay pickups disponibles en esta ciudad')
+      else
+        ...pickups.map((v) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: _buildHorizontalCardFromJson(v),
+            )),
+      const SizedBox(height: 24),
+      _buildCompareSection(true),
+    ]);
+  }
+
+  Widget _buildEmptyCategoryMessage(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Text(
+          message,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: _textSub,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildCategoryHeader(String emoji, String title, String count) {
@@ -1355,6 +1601,33 @@ class _HomePageState extends State<HomePage> {
     final sheetBg = _isDark ? const Color(0xFF161827) : Colors.white;
     final inputBg = _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100;
 
+    if (_isLoadingCities) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          height: 200,
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text('Cargando ciudades...',
+                    style: GoogleFonts.inter(color: _textSub)),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1362,10 +1635,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         String searchQuery = '';
         return StatefulBuilder(builder: (context, setModalState) {
-          final filtered = _cityData
-              .where((c) => (c['name'] as String)
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()))
+          final filtered = _cities
+              .where((c) => c.toLowerCase().contains(searchQuery.toLowerCase()))
               .toList();
           return Container(
             height: MediaQuery.of(context).size.height * 0.75,
@@ -1401,7 +1672,7 @@ class _HomePageState extends State<HomePage> {
                                   color: _textPrimary)),
                           const SizedBox(height: 2),
                           Text(
-                              '${_cityData.length} ciudades disponibles en Colombia',
+                              '${_cities.length} ciudades disponibles en Colombia',
                               style: GoogleFonts.inter(
                                   fontSize: 12, color: _textSub)),
                         ])),
@@ -1440,12 +1711,14 @@ class _HomePageState extends State<HomePage> {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
-                    final city = filtered[index];
-                    final cityName = city['name'] as String;
+                    final cityName = filtered[index];
                     final isSel = cityName == _selectedCity;
+                    final vehicleCount = _contarVehiculosPorCiudad(cityName);
+                    final cityIcon = _cityIcons[cityName] ?? Icons.location_city;
                     return InkWell(
                       onTap: () {
                         setState(() => _selectedCity = cityName);
+                        _filtrarVehiculos();
                         Navigator.pop(context);
                       },
                       borderRadius: BorderRadius.circular(14),
@@ -1485,8 +1758,9 @@ class _HomePageState extends State<HomePage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Center(
-                                child: Text(city['emoji'] as String,
-                                    style: const TextStyle(fontSize: 20))),
+                                child: Icon(cityIcon,
+                                    color: isSel ? const Color(0xFF4F46E5) : _textSub,
+                                    size: 22)),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -1503,8 +1777,7 @@ class _HomePageState extends State<HomePage> {
                                           ? const Color(0xFF4F46E5)
                                           : _textPrimary,
                                     )),
-                                Text(
-                                    '${city['vehicles']} vehículos disponibles',
+                                Text('$vehicleCount vehículos disponibles',
                                     style: GoogleFonts.inter(
                                         fontSize: 12, color: _textSub)),
                               ])),
