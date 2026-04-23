@@ -136,4 +136,40 @@ class LocalAccountRepository {
 
     _db.preferences[index] = newPreference;
   }
+
+  Future<UserModel?> findUserByEmail(String email) async {
+    await init();
+
+    final normalizedEmail = email.trim().toLowerCase();
+
+    for (final user in _db.users) {
+      if (user.email.trim().toLowerCase() == normalizedEmail) {
+        return user;
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> updatePassword(int userId, String newPassword) async {
+    await init();
+
+    final index = _db.users.indexWhere((u) => u.id == userId);
+    if (index == -1) {
+      throw Exception('Usuario no encontrado');
+    }
+
+    final user = _db.users[index];
+    _db.users[index] = UserModel(
+      id: user.id,
+      identificationTypeId: user.identificationTypeId,
+      identificationNumber: user.identificationNumber,
+      userTypeId: user.userTypeId,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      password: newPassword,
+      canPublish: user.canPublish,
+    );
+  }
 }
