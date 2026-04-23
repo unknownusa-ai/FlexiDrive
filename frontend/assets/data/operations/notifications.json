@@ -214,5 +214,86 @@
         "estado": "leida",
         "usuario_id": 18,
         "categoria_notificacion_id": 3
+    },
+    {
+        "asunto": "Vehículo entregado",
+        "fecha_envio": "2026-04-18T09:00:00Z",
+        "descripcion": "Has entregado el Mazda 3. Gracias por usar FlexiDrive. Califica tu experiencia.",
+        "notificacion_id": 25,
+        "estado": "leida",
+        "usuario_id": 1,
+        "categoria_notificacion_id": 4
+    },
+    {
+        "asunto": "Documentos verificados",
+        "fecha_envio": "2026-04-17T14:30:00Z",
+        "descripcion": "Tu licencia de conducción ha sido verificada. Ya puedes rentar vehículos premium.",
+        "notificacion_id": 26,
+        "estado": "no_leida",
+        "usuario_id": 2,
+        "categoria_notificacion_id": 5
+    },
+    {
+        "asunto": "Seguro activado",
+        "fecha_envio": "2026-04-16T10:00:00Z",
+        "descripcion": "El seguro de tu renta del Hyundai Tucson está activo desde hoy hasta el 20 de abril.",
+        "notificacion_id": 27,
+        "estado": "leida",
+        "usuario_id": 3,
+        "categoria_notificacion_id": 5
+    },
+    {
+        "asunto": "Reembolso procesado",
+        "fecha_envio": "2026-04-15T16:45:00Z",
+        "descripcion": "Tu reembolso de $150.000 por cancelación ha sido procesado. Verás el saldo en 3-5 días.",
+        "notificacion_id": 28,
+        "estado": "no_leida",
+        "usuario_id": 4,
+        "categoria_notificacion_id": 2
+    },
+    {
+        "asunto": "Kilometraje excedido",
+        "fecha_envio": "2026-04-14T08:20:00Z",
+        "descripcion": "Has excedido el límite de kilometraje en tu renta. Se aplicarán cargos adicionales de $50.000.",
+        "notificacion_id": 29,
+        "estado": "no_leida",
+        "usuario_id": 5,
+        "categoria_notificacion_id": 4
+    },
+    {
+        "asunto": "Extensión aprobada",
+        "fecha_envio": "2026-04-13T11:00:00Z",
+        "descripcion": "Tu solicitud de extender la renta del BMW X3 por 2 días más ha sido aprobada.",
+        "notificacion_id": 30,
+        "estado": "leida",
+        "usuario_id": 6,
+        "categoria_notificacion_id": 1
+    },
+    {
+        "asunto": "Recogida confirmada",
+        "fecha_envio": "2026-04-12T09:30:00Z",
+        "descripcion": "Tu recogida del Ford Ranger está confirmada para mañana a las 8:00 AM en la dirección indicada.",
+        "notificacion_id": 31,
+        "estado": "no_leida",
+        "usuario_id": 7,
+        "categoria_notificacion_id": 4
+    },
+    {
+        "asunto": "Daño reportado",
+        "fecha_envio": "2026-04-11T15:00:00Z",
+        "descripcion": "El propietario reportó un rayón menor. Se evaluará el costo de reparación.",
+        "notificacion_id": 32,
+        "estado": "no_leida",
+        "usuario_id": 8,
+        "categoria_notificacion_id": 4
+    },
+    {
+        "asunto": "Renta completada",
+        "fecha_envio": "2026-04-10T18:30:00Z",
+        "descripcion": "Tu renta del Tesla Model 3 ha finalizado. Esperamos que hayas tenido una buena experiencia.",
+        "notificacion_id": 33,
+        "estado": "leida",
+        "usuario_id": 9,
+        "categoria_notificacion_id": 4
     }
 ]
