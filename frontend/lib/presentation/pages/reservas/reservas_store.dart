@@ -9,6 +9,12 @@ class ReservaActiva {
     required this.endDate,
     required this.location,
     required this.imageUrl,
+    this.vehicleSpecs,
+    this.vehicleRating,
+    this.vehicleReviews,
+    this.vehiclePrice,
+    this.precioDia,
+    this.precioSemana,
     this.progress = 0.4,
     this.status = 'Activa',
   });
@@ -20,6 +26,12 @@ class ReservaActiva {
   final String endDate;
   final String location;
   final String imageUrl;
+  final String? vehicleSpecs;
+  final double? vehicleRating;
+  final int? vehicleReviews;
+  final int? vehiclePrice;
+  final int? precioDia;
+  final int? precioSemana;
   final double progress;
   final String status;
 }
@@ -37,6 +49,12 @@ class ReservasStore {
       endDate: '24 Feb 2026',
       location: 'Av. El Dorado, Bogotá',
       imageUrl: 'assets/imagenes_carros/cx5.jpg',
+      vehicleSpecs: '2024 • Negro Jet',
+      vehicleRating: 4.9,
+      vehicleReviews: 128,
+      vehiclePrice: 440000,
+      precioDia: 440000,
+      precioSemana: 2640000,
     ),
   ]);
 

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flexidrive/core/session/local_session_store.dart';
+import 'package:flexidrive/models/notifications/notification_models.dart';
+import 'package:flexidrive/services/catalogs/local_catalog_db.dart';
+import 'package:flexidrive/services/notifications/local_notification_db.dart';
+
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
   @override
@@ -9,7 +14,12 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   String _selectedTab = 'Todas';
-  int _unreadCount = 2;
+  int _unreadCount = 0;
+  bool _isLoading = true;
+
+  final LocalNotificationDb _notificationDb = LocalNotificationDb.instance;
+  final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
+  final LocalSessionStore _sessionStore = LocalSessionStore.instance;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -38,58 +48,166 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  late final List<Map<String, dynamic>> _notifications = [
-    {
-      'type': 'reserva',
-      'title': '¡Reserva Confirmada!',
-      'titleEmoji': '🎉',
+  final List<Map<String, dynamic>> _notifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    await Future.wait([
+      _sessionStore.init(),
+      _catalogDb.loadIfNeeded(),
+      _notificationDb.loadIfNeeded(),
+    ]);
+
+    final currentUserId = _sessionStore.userId;
+    final categoriesById = {
+      for (final c in _catalogDb.notificationCategories) c.id: c.name,
+    };
+
+    final source = currentUserId == null
+        ? _notificationDb.notifications
+        : _notificationDb.notifications.where((n) => n.userId == currentUserId);
+
+    final loaded = source.map((item) {
+      final type = _mapType(categoriesById[item.categoryId]);
+      return _toNotificationCard(item, type);
+    }).toList();
+
+    loaded.sort(
+      (a, b) => (b['sentAt'] as DateTime).compareTo(a['sentAt'] as DateTime),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _notifications
+        ..clear()
+        ..addAll(loaded.isNotEmpty ? loaded : _fallbackNotifications());
+      _unreadCount = _notifications.where((n) => n['unread'] == true).length;
+      _isLoading = false;
+    });
+  }
+
+  String _mapType(String? categoryName) {
+    final raw = (categoryName ?? '').trim().toLowerCase();
+    if (raw == 'reserva') return 'reserva';
+    if (raw == 'recordatorio') return 'recordatorio';
+    if (raw == 'auto') return 'auto';
+    return 'promo';
+  }
+
+  Map<String, dynamic> _toNotificationCard(
+      NotificationModel item, String type) {
+    final defaults = _defaultsByType(type);
+    final isGenericSubject =
+        item.subject.trim().toLowerCase().startsWith('notificacion');
+    final isGenericDescription = item.description
+        .trim()
+        .toLowerCase()
+        .startsWith('detalle de notificacion');
+
+    return {
+      'id': item.id,
+      'type': type,
+      'title': isGenericSubject ? defaults['title'] : item.subject,
+      'titleEmoji': defaults['titleEmoji'],
       'description':
-          'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
-      'time': 'Hace 2 horas',
-      'unread': true,
-      'emoji': '✅',
-    },
-    {
-      'type': 'recordatorio',
-      'title': 'Recordatorio de Devolución',
-      'titleEmoji': '⏰',
-      'description':
-          'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
-      'time': 'Ayer, 3:00 PM',
-      'unread': true,
-      'emoji': '⏰',
-    },
-    {
-      'type': 'promo',
-      'title': '¡Oferta Exclusiva!',
-      'titleEmoji': '🔥',
-      'description':
-          '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
-      'time': 'Hace 2 días',
-      'unread': false,
-      'emoji': '🎁',
-    },
-    {
-      'type': 'auto',
-      'title': 'Nuevo Vehículo Disponible',
-      'titleEmoji': '🚗',
-      'description':
-          'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
-      'time': 'Hace 3 días',
-      'unread': false,
-      'emoji': '🆕',
-    },
-    {
-      'type': 'promo',
-      'title': 'Programa de Referidos',
-      'titleEmoji': '👥',
-      'description':
-          'Invita a un amigo y gana \$50,000 COP en crédito FlexiDrive para tu próxima renta.',
-      'time': 'Hace 5 días',
-      'unread': false,
-      'emoji': '💰',
-    },
-  ];
+          isGenericDescription ? defaults['description'] : item.description,
+      'time': _timeAgo(item.sentAt),
+      'unread': item.status == 'no_leida',
+      'emoji': defaults['emoji'],
+      'sentAt': item.sentAt,
+    };
+  }
+
+  Map<String, String> _defaultsByType(String type) {
+    switch (type) {
+      case 'reserva':
+        return {
+          'title': '¡Reserva Confirmada!',
+          'titleEmoji': '🎉',
+          'description':
+              'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
+          'emoji': '✅',
+        };
+      case 'recordatorio':
+        return {
+          'title': 'Recordatorio de Devolución',
+          'titleEmoji': '⏰',
+          'description':
+              'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
+          'emoji': '⏰',
+        };
+      case 'auto':
+        return {
+          'title': 'Nuevo Vehículo Disponible',
+          'titleEmoji': '🚗',
+          'description':
+              'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
+          'emoji': '🆕',
+        };
+      default:
+        return {
+          'title': '¡Oferta Exclusiva!',
+          'titleEmoji': '🔥',
+          'description':
+              '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
+          'emoji': '🎁',
+        };
+    }
+  }
+
+  String _timeAgo(DateTime sentAt) {
+    final now = DateTime.now();
+    final diff = now.difference(sentAt);
+
+    if (diff.inMinutes < 1) return 'Hace un momento';
+    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'Hace ${diff.inHours} horas';
+    if (diff.inDays == 1) return 'Ayer, 3:00 PM';
+    if (diff.inDays < 7) return 'Hace ${diff.inDays} días';
+    return '${sentAt.day.toString().padLeft(2, '0')}/${sentAt.month.toString().padLeft(2, '0')}/${sentAt.year}';
+  }
+
+  List<Map<String, dynamic>> _fallbackNotifications() => [
+        {
+          'type': 'reserva',
+          'title': '¡Reserva Confirmada!',
+          'titleEmoji': '🎉',
+          'description':
+              'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
+          'time': 'Hace 2 horas',
+          'unread': true,
+          'emoji': '✅',
+          'sentAt': DateTime.now(),
+        },
+        {
+          'type': 'recordatorio',
+          'title': 'Recordatorio de Devolución',
+          'titleEmoji': '⏰',
+          'description':
+              'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
+          'time': 'Ayer, 3:00 PM',
+          'unread': true,
+          'emoji': '⏰',
+          'sentAt': DateTime.now().subtract(const Duration(hours: 20)),
+        },
+        {
+          'type': 'promo',
+          'title': '¡Oferta Exclusiva!',
+          'titleEmoji': '🔥',
+          'description':
+              '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
+          'time': 'Hace 2 días',
+          'unread': false,
+          'emoji': '🎁',
+          'sentAt': DateTime.now().subtract(const Duration(days: 2)),
+        },
+      ];
 
   void _markAllAsRead() => setState(() {
         for (var n in _notifications) {
@@ -270,6 +388,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   // ─── LIST ────────────────────────────────────────────────────────
   Widget _buildList() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final filtered = _selectedTab == 'Todas'
         ? _notifications
         : _notifications.where((n) {
