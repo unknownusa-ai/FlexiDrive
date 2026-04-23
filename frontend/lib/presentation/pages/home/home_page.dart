@@ -53,12 +53,12 @@ class _HomePageState extends State<HomePage> {
 
   // Iconos por ciudad
   final Map<String, IconData> _cityIcons = {
-    'Bogotá': Icons.location_city,
-    'Medellín': Icons.landscape,
-    'Cali': Icons.music_note,
-    'Barranquilla': Icons.water,
-    'Cartagena': Icons.beach_access,
-    'Bucaramanga': Icons.terrain,
+    'Bogotá': Icons.account_balance, // Capital, gobierno
+    'Medellín': Icons.forest, // Ciudad de la eterna primavera
+    'Cali': Icons.nightlife, // Salsa y fiesta
+    'Barranquilla': Icons.waves, // Puerto, mar
+    'Cartagena': Icons.deck, // Ciudad histórica, colonial
+    'Bucaramanga': Icons.hiking, // Ciudad bonita, montañas
   };
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
