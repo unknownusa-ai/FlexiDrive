@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flexidrive/core/session/local_session_store.dart';
+import 'package:flexidrive/models/reservations/reservation_models.dart';
+import 'package:flexidrive/models/reviews/review_models.dart';
+import 'package:flexidrive/models/vehicles/vehicle_models.dart';
+import 'package:flexidrive/services/publications/local_publication_db.dart';
+import 'package:flexidrive/services/reservations/local_reservation_db.dart';
+import 'package:flexidrive/services/reviews/local_review_db.dart';
+import 'package:flexidrive/services/vehicles/local_vehicle_db.dart';
+
 import 'reserva_detalle_page.dart';
 import 'reservas_store.dart';
 import '../../../core/utils/responsive_utils.dart';
@@ -13,8 +22,139 @@ class ReservasPage extends StatefulWidget {
 
 class _ReservasPageState extends State<ReservasPage> {
   String _selectedFilter = 'Activas';
-  final int _finalizadasCount = 2;
-  int _canceladasCount = 1;
+  int _finalizadasCount = 0;
+  int _canceladasCount = 0;
+  bool _isLoadingHistory = true;
+
+  final LocalReservationDb _reservationDb = LocalReservationDb.instance;
+  final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
+  final LocalVehicleDb _vehicleDb = LocalVehicleDb.instance;
+  final LocalReviewDb _reviewDb = LocalReviewDb.instance;
+  final LocalSessionStore _sessionStore = LocalSessionStore.instance;
+
+  List<_ReservaCardData> _historyReservations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistoryReservations();
+  }
+
+  Future<void> _loadHistoryReservations() async {
+    await Future.wait([
+      _sessionStore.init(),
+      _reservationDb.loadIfNeeded(),
+      _publicationDb.loadIfNeeded(),
+      _vehicleDb.loadIfNeeded(),
+      _reviewDb.loadIfNeeded(),
+    ]);
+
+    final currentUserId = _sessionStore.userId;
+    final reservations = currentUserId == null
+        ? _reservationDb.reservations.take(6).toList()
+        : _reservationDb.reservations
+            .where((reservation) => reservation.userId == currentUserId)
+            .toList();
+
+    final publicationsById = {
+      for (final publication in _publicationDb.publications)
+        publication.id: publication,
+    };
+    final vehiclesById = {
+      for (final vehicle in _vehicleDb.vehicles) vehicle.id: vehicle,
+    };
+    final opinionsById = {
+      for (final opinion in _reviewDb.opinions) opinion.id: opinion.rating,
+    };
+
+    final mainImagesByPublication = <int, String>{};
+    for (final image in _publicationDb.publicationImages) {
+      final current = mainImagesByPublication[image.publicationId];
+      if (current == null || image.isMain || image.order == 1) {
+        mainImagesByPublication[image.publicationId] = image.imageUrl;
+      }
+    }
+
+    final pricesByPublication = <int, Map<int, int>>{};
+    for (final price in _publicationDb.publicationPrices) {
+      pricesByPublication.putIfAbsent(
+              price.publicationId, () => {})[price.periodTypeId] =
+          price.price.round();
+    }
+
+    final history = reservations.map((reservation) {
+      final publication = publicationsById[reservation.publicationId];
+      final vehicle =
+          publication == null ? null : vehiclesById[publication.vehicleId];
+      final pubPrices =
+          pricesByPublication[reservation.publicationId] ?? const <int, int>{};
+      final reviewsForPublication = _reviewDb.reviews
+          .where((review) => review.publicationId == reservation.publicationId)
+          .toList();
+      final rating = reviewsForPublication.isEmpty
+          ? 4.9
+          : reviewsForPublication
+                  .map((review) => opinionsById[review.opinionId] ?? 0)
+                  .fold<int>(0, (sum, current) => sum + current) /
+              reviewsForPublication.length;
+
+      final status = _statusLabel(reservation.statusId);
+      return _ReservaCardData(
+        vehicleName: vehicle == null
+            ? 'Reserva ${reservation.code}'
+            : '${vehicle.line} ${vehicle.model}',
+        code: reservation.code,
+        price: '\$ ${_formatAmount(reservation.totalValue.round())}',
+        startDate: _formatDate(reservation.startDate),
+        endDate: _formatDate(reservation.endDate),
+        location:
+            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+        progress: status == 'Activa'
+            ? 0.4
+            : status == 'Cancelada'
+                ? 0.0
+                : 1.0,
+        status: status,
+        imageUrl: mainImagesByPublication[reservation.publicationId] ??
+            'assets/imagenes_carros/cx5.jpg',
+        showEnCurso: status == 'Activa',
+        vehicleSpecs: vehicle == null
+            ? '2024 • Negro Jet'
+            : '${vehicle.model} • ${vehicle.color}',
+        vehicleRating: rating,
+        vehicleReviews: reviewsForPublication.length,
+        vehiclePrice: pubPrices[reservation.periodTypeId] ??
+            reservation.totalValue.round(),
+        precioDia: pubPrices[2],
+        precioSemana: pubPrices[3],
+        statusColor: _statusColor(status),
+        secondaryActionLabel: status == 'Activa' ? 'Cancelar' : 'Calificar',
+        secondaryActionIcon:
+            status == 'Activa' ? Icons.close : Icons.star_rounded,
+        secondaryButtonColor: status == 'Activa'
+            ? const Color(0xFFFEE2E2)
+            : const Color(0xFFFCD34D),
+        secondaryTextColor: status == 'Activa'
+            ? const Color(0xFFDC2626)
+            : const Color(0xFF111827),
+      );
+    }).toList();
+
+    final finalizadas =
+        history.where((item) => item.status == 'Finalizada').length;
+    final canceladas =
+        history.where((item) => item.status == 'Cancelada').length;
+
+    if (!mounted) return;
+
+    setState(() {
+      _historyReservations =
+          history.isNotEmpty ? history : _fallbackHistoryReservations();
+      _finalizadasCount = finalizadas;
+      _canceladasCount = canceladas;
+      _isLoadingHistory = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -237,67 +377,71 @@ class _ReservasPageState extends State<ReservasPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           children: activas
               .map((reserva) => _buildReservationCard(
-                    vehicleName: reserva.vehicleName,
-                    code: reserva.code,
-                    price: reserva.price,
-                    startDate: reserva.startDate,
-                    endDate: reserva.endDate,
-                    location: reserva.location,
-                    progress: reserva.progress,
-                    status: reserva.status,
-                    statusColor: const Color(0xFF06B6D4),
-                    imageUrl: reserva.imageUrl,
-                    showEnCurso: true,
+                    data: _ReservaCardData(
+                      vehicleName: reserva.vehicleName,
+                      code: reserva.code,
+                      price: reserva.price,
+                      startDate: reserva.startDate,
+                      endDate: reserva.endDate,
+                      location: reserva.location,
+                      progress: reserva.progress,
+                      status: reserva.status,
+                      imageUrl: reserva.imageUrl,
+                      showEnCurso: true,
+                      vehicleSpecs: reserva.vehicleSpecs,
+                      vehicleRating: reserva.vehicleRating,
+                      vehicleReviews: reserva.vehicleReviews,
+                      vehiclePrice: reserva.vehiclePrice,
+                      precioDia: reserva.precioDia,
+                      precioSemana: reserva.precioSemana,
+                      statusColor: const Color(0xFF06B6D4),
+                      secondaryActionLabel: 'Cancelar',
+                      secondaryActionIcon: Icons.close,
+                      secondaryButtonColor: const Color(0xFFFEE2E2),
+                      secondaryTextColor: const Color(0xFFDC2626),
+                    ),
                     onSecondaryAction: () => _showCancelReservationSheet(
                       reserva: reserva,
                     ),
-                    secondaryActionLabel: 'Cancelar',
-                    secondaryActionIcon: Icons.close,
-                    secondaryButtonColor: const Color(0xFFFEE2E2),
-                    secondaryTextColor: const Color(0xFFDC2626),
+                    onViewDetails: () => _openReservationDetails(
+                      vehicleName: reserva.vehicleName,
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleRating: reserva.vehicleRating ?? 4.9,
+                      vehicleReviews: reserva.vehicleReviews ?? 128,
+                      vehiclePrice: reserva.vehiclePrice ?? 440000,
+                      vehicleImage: reserva.imageUrl,
+                      precioDia: reserva.precioDia ?? 440000,
+                      precioSemana: reserva.precioSemana ?? 2640000,
+                    ),
                   ))
               .toList());
     } else {
+      if (_isLoadingHistory) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      final reservations = _historyReservations.isNotEmpty
+          ? _historyReservations
+          : _fallbackHistoryReservations();
+
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          children: [
-            _buildReservationCard(
-              vehicleName: 'Tesla Model 3 2024',
-              code: 'FXD-2024-0087',
-              price: '\$ 380,000',
-              startDate: '18 Feb 2026',
-              endDate: '20 Feb 2026',
-              location: 'Cra 7, Bogotá',
-              progress: 1.0,
-              status: 'Finalizada',
-              statusColor: const Color(0xFF3B82F6),
-              imageUrl:
-                  'https://images.unsplash.com/photo-1560958089-b8a63c50ce20?w=800&q=80',
-              secondaryActionLabel: 'Calificar',
-              secondaryActionIcon: Icons.star_rounded,
-              secondaryButtonColor: const Color(0xFFFCD34D),
-              secondaryTextColor: const Color(0xFF111827),
-              onSecondaryAction: () {},
-            ),
-            const SizedBox(height: 16),
-            _buildReservationCard(
-              vehicleName: 'Mercedes GLC 2024',
-              code: 'FXD-2024-0086',
-              price: '\$ 520,000',
-              startDate: '10 Feb 2026',
-              endDate: '12 Feb 2026',
-              location: 'Av. Paseo Consistorial, Bogotá',
-              progress: 0.0,
-              status: 'Cancelada',
-              statusColor: const Color(0xFFEF4444),
-              imageUrl: '',
-              secondaryActionLabel: 'Calificar',
-              secondaryActionIcon: Icons.star_rounded,
-              secondaryButtonColor: const Color(0xFFFCD34D),
-              secondaryTextColor: const Color(0xFF111827),
-              onSecondaryAction: () {},
-            ),
-          ]);
+          children: reservations
+              .map((reserva) => _buildReservationCard(
+                    data: reserva,
+                    onSecondaryAction: () {},
+                    onViewDetails: () => _openReservationDetails(
+                      vehicleName: reserva.vehicleName,
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleRating: reserva.vehicleRating ?? 4.9,
+                      vehicleReviews: reserva.vehicleReviews ?? 128,
+                      vehiclePrice: reserva.vehiclePrice ?? 380000,
+                      vehicleImage: reserva.imageUrl,
+                      precioDia: reserva.precioDia,
+                      precioSemana: reserva.precioSemana,
+                    ),
+                  ))
+              .toList());
     }
   }
 
@@ -539,23 +683,11 @@ class _ReservasPageState extends State<ReservasPage> {
         ),
       );
 
-  Widget _buildReservationCard(
-      {required String vehicleName,
-      required String code,
-      required String price,
-      required String startDate,
-      required String endDate,
-      required String location,
-      required double progress,
-      required String status,
-      required Color statusColor,
-      required String imageUrl,
-      bool showEnCurso = false,
-      required String secondaryActionLabel,
-      required IconData secondaryActionIcon,
-      required Color secondaryButtonColor,
-      required Color secondaryTextColor,
-      required VoidCallback onSecondaryAction}) {
+  Widget _buildReservationCard({
+    required _ReservaCardData data,
+    required VoidCallback onSecondaryAction,
+    required VoidCallback onViewDetails,
+  }) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -584,16 +716,16 @@ class _ReservasPageState extends State<ReservasPage> {
                     theme.colorScheme.onSurface.withValues(alpha: 0.1),
                     theme.colorScheme.onSurface.withValues(alpha: 0.05)
                   ])),
-              child: imageUrl.isEmpty
+              child: data.imageUrl.isEmpty
                   ? _buildPlaceholder()
                   : Image.asset(
-                      imageUrl,
+                      data.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => _buildPlaceholder(),
                     ),
             ),
           ),
-          if (showEnCurso)
+          if (data.showEnCurso)
             Positioned(
               bottom: 12,
               left: 12,
@@ -629,20 +761,20 @@ class _ReservasPageState extends State<ReservasPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        child: Text(vehicleName,
+                        child: Text(data.vehicleName,
                             style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.onSurface))),
                     const SizedBox(width: 8),
-                    Text(price,
+                    Text(data.price,
                         style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary)),
                   ]),
               const SizedBox(height: 4),
-              Text(code,
+              Text(data.code,
                   style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -653,7 +785,7 @@ class _ReservasPageState extends State<ReservasPage> {
                     size: 14,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(width: 6),
-                Text('$startDate → $endDate',
+                Text('${data.startDate} → ${data.endDate}',
                     style: GoogleFonts.poppins(
                         fontSize: 12,
                         color:
@@ -667,7 +799,7 @@ class _ReservasPageState extends State<ReservasPage> {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(width: 6),
                 Expanded(
-                    child: Text(location,
+                    child: Text(data.location,
                         style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: theme.colorScheme.onSurface
@@ -680,13 +812,7 @@ class _ReservasPageState extends State<ReservasPage> {
               Row(children: [
                 Expanded(
                     child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const ReservaDetallePage()),
-                    );
-                  },
+                  onPressed: onViewDetails,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -708,8 +834,8 @@ class _ReservasPageState extends State<ReservasPage> {
                 ElevatedButton(
                   onPressed: onSecondaryAction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: secondaryButtonColor,
-                    foregroundColor: secondaryTextColor,
+                    backgroundColor: data.secondaryButtonColor,
+                    foregroundColor: data.secondaryTextColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -717,9 +843,9 @@ class _ReservasPageState extends State<ReservasPage> {
                     elevation: 0,
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(secondaryActionIcon, size: 20),
+                    Icon(data.secondaryActionIcon, size: 20),
                     const SizedBox(width: 6),
-                    Text(secondaryActionLabel,
+                    Text(data.secondaryActionLabel,
                         style: GoogleFonts.poppins(
                             fontSize: 14, fontWeight: FontWeight.bold)),
                   ]),
@@ -730,10 +856,191 @@ class _ReservasPageState extends State<ReservasPage> {
     );
   }
 
+  void _openReservationDetails({
+    required String vehicleName,
+    required String vehicleSpecs,
+    required double vehicleRating,
+    required int vehicleReviews,
+    required int vehiclePrice,
+    required String vehicleImage,
+    int? precioDia,
+    int? precioSemana,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReservaDetallePage(
+          vehicleName: vehicleName,
+          vehicleSpecs: vehicleSpecs,
+          vehicleRating: vehicleRating,
+          vehicleReviews: vehicleReviews,
+          vehiclePrice: vehiclePrice,
+          vehicleImage: vehicleImage,
+          precioHora: vehiclePrice,
+          precioDia: precioDia,
+          precioSemana: precioSemana,
+        ),
+      ),
+    );
+  }
+
+  String _statusLabel(int statusId) {
+    switch (statusId) {
+      case 2:
+        return 'Finalizada';
+      case 3:
+        return 'Cancelada';
+      default:
+        return 'Activa';
+    }
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Finalizada':
+        return const Color(0xFF3B82F6);
+      case 'Cancelada':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFF06B6D4);
+    }
+  }
+
+  String _formatAmount(int amount) {
+    final digits = amount.toString();
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < digits.length; i++) {
+      final reverseIndex = digits.length - i;
+      buffer.write(digits[i]);
+      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
+        buffer.write('.');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  List<_ReservaCardData> _fallbackHistoryReservations() => [
+        const _ReservaCardData(
+          vehicleName: 'Tesla Model 3 2024',
+          code: 'FXD-2024-0087',
+          price: '\$ 380,000',
+          startDate: '18 Feb 2026',
+          endDate: '20 Feb 2026',
+          location: 'Cra 7, Bogotá',
+          progress: 1.0,
+          status: 'Finalizada',
+          imageUrl: 'assets/imagenes_carros/cx5.jpg',
+          showEnCurso: false,
+          vehicleSpecs: '2024 • Negro Jet',
+          vehicleRating: 4.9,
+          vehicleReviews: 128,
+          vehiclePrice: 380000,
+          precioDia: 380000,
+          precioSemana: 2280000,
+          statusColor: Color(0xFF3B82F6),
+          secondaryActionLabel: 'Calificar',
+          secondaryActionIcon: Icons.star_rounded,
+          secondaryButtonColor: Color(0xFFFCD34D),
+          secondaryTextColor: Color(0xFF111827),
+        ),
+        const _ReservaCardData(
+          vehicleName: 'Mercedes GLC 2024',
+          code: 'FXD-2024-0086',
+          price: '\$ 520,000',
+          startDate: '10 Feb 2026',
+          endDate: '12 Feb 2026',
+          location: 'Av. Paseo Consistorial, Bogotá',
+          progress: 0.0,
+          status: 'Cancelada',
+          imageUrl: 'assets/imagenes_carros/cx5.jpg',
+          showEnCurso: false,
+          vehicleSpecs: '2024 • Negro Jet',
+          vehicleRating: 4.9,
+          vehicleReviews: 128,
+          vehiclePrice: 520000,
+          precioDia: 520000,
+          precioSemana: 3120000,
+          statusColor: Color(0xFFEF4444),
+          secondaryActionLabel: 'Calificar',
+          secondaryActionIcon: Icons.star_rounded,
+          secondaryButtonColor: Color(0xFFFCD34D),
+          secondaryTextColor: Color(0xFF111827),
+        ),
+      ];
+
   Widget _buildPlaceholder() => Container(
         color: const Color(0xFFE5E7EB),
         child: const Center(
             child:
                 Icon(Icons.directions_car, size: 64, color: Color(0xFF9CA3AF))),
       );
+}
+
+class _ReservaCardData {
+  const _ReservaCardData({
+    required this.vehicleName,
+    required this.code,
+    required this.price,
+    required this.startDate,
+    required this.endDate,
+    required this.location,
+    required this.progress,
+    required this.status,
+    required this.imageUrl,
+    required this.showEnCurso,
+    required this.vehicleSpecs,
+    required this.vehicleRating,
+    required this.vehicleReviews,
+    required this.vehiclePrice,
+    required this.precioDia,
+    required this.precioSemana,
+    required this.statusColor,
+    required this.secondaryActionLabel,
+    required this.secondaryActionIcon,
+    required this.secondaryButtonColor,
+    required this.secondaryTextColor,
+  });
+
+  final String vehicleName;
+  final String code;
+  final String price;
+  final String startDate;
+  final String endDate;
+  final String location;
+  final double progress;
+  final String status;
+  final String imageUrl;
+  final bool showEnCurso;
+  final String? vehicleSpecs;
+  final double? vehicleRating;
+  final int? vehicleReviews;
+  final int? vehiclePrice;
+  final int? precioDia;
+  final int? precioSemana;
+  final Color statusColor;
+  final String secondaryActionLabel;
+  final IconData secondaryActionIcon;
+  final Color secondaryButtonColor;
+  final Color secondaryTextColor;
 }
