@@ -167,20 +167,20 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                                 height: 2,
                                 child: Container(
                                   margin:
-                                      const EdgeInsets.symmetric(horizontal: 8),
+                                      const EdgeInsets.symmetric(horizontal: 6),
                                   color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                             ),
                             // Paso 2
-                            _buildPasoCirculo(2, true),
+                            _buildPasoCirculo(2, false),
                             // Línea 2
                             Expanded(
                               child: SizedBox(
                                 height: 2,
                                 child: Container(
                                   margin:
-                                      const EdgeInsets.symmetric(horizontal: 8),
+                                      const EdgeInsets.symmetric(horizontal: 6),
                                   color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
@@ -275,8 +275,8 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
 
   Widget _buildPasoCirculo(int numero, bool activo) {
     return Container(
-      width: 40,
-      height: 40,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
         color: activo ? Colors.white : Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
@@ -286,7 +286,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
           numero.toString(),
           style: GoogleFonts.poppins(
             color: activo ? const Color(0xFF5B58FF) : Colors.white,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -371,20 +371,22 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 6,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF10B981),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '● DISPONIBLE',
+                      'DISPONIBLE',
                       style: GoogleFonts.poppins(
                         color: Colors.white,
-                        fontSize: isSmallPhone ? 11 : 12,
+                        fontSize: isSmallPhone ? 8 : 9,
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ]),
@@ -490,6 +492,8 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                       fontSize: isSmallPhone ? 13 : 14,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -524,7 +528,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
           ),
           SizedBox(height: isSmallPhone ? 12 : 16),
           _buildFilaPrice(
-            '$widget.vehiculoBrand ($widget.cantidad $_unidadLabel)',
+            '${widget.vehiculoBrand} (${widget.cantidad} $_unidadLabel)',
             _formatearPrecio(precioVehiculo),
             isSmallPhone,
             const Color(0xFF5B58FF).withValues(alpha: 0.15),
@@ -600,6 +604,8 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                 color: _textSecondary,
                 fontSize: isSmallPhone ? 12 : 13,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Text(
