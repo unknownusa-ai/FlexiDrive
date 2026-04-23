@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+import 'package:flexidrive/services/accounts/local_account_repository.dart';
+import 'package:flexidrive/services/accounts/user_preference_service.dart';
 import 'arrendatario_main_page.dart';
 import 'alertas_page.dart';
 import 'edit_profile_page.dart';
@@ -17,10 +19,60 @@ class ProfileArrendatarioPage extends StatefulWidget {
   const ProfileArrendatarioPage({super.key});
 
   @override
-  State<ProfileArrendatarioPage> createState() => _ProfileArrendatarioPageState();
+  State<ProfileArrendatarioPage> createState() =>
+      _ProfileArrendatarioPageState();
 }
 
 class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final UserPreferenceService _preferenceService = UserPreferenceService();
+
+  int? _currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferenceState();
+  }
+
+  Future<void> _loadPreferenceState() async {
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (!mounted || currentUser == null) return;
+
+    _currentUserId = currentUser.id;
+    await _preferenceService.setArrendatarioMode(
+      userId: currentUser.id,
+      enabled: true,
+    );
+    final userPreference =
+        await _preferenceService.findEffectiveByUserId(currentUser.id);
+
+    if (userPreference != null) {
+      final appState = FlexiDriveApp.of(context);
+      appState?.setDarkMode(userPreference.darkMode);
+    }
+  }
+
+  Future<void> _persistDarkModePreference(bool isDarkMode) async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    await _preferenceService.setDarkMode(
+      userId: userId,
+      darkMode: isDarkMode,
+    );
+  }
+
+  Future<void> _persistArrendatarioMode(bool enabled) async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    await _preferenceService.setArrendatarioMode(
+      userId: userId,
+      enabled: enabled,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -294,7 +346,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const PrincipalArrendatarioPage()),
+                        builder: (context) =>
+                            const PrincipalArrendatarioPage()),
                   );
                 }),
             Divider(
@@ -436,7 +489,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 iconBgColor: const Color(0xFFFFF4E6),
                 title: 'Historial',
                 subtitle: '4 reservas totales',
-                onTap: () => ArrendatarioMainPage.of(context).setHistorialTab(2)),
+                onTap: () =>
+                    ArrendatarioMainPage.of(context).setHistorialTab(2)),
             Divider(
                 height: 1,
                 indent: 14,
@@ -449,9 +503,9 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 title: 'Notificaciones',
                 subtitle: 'Gestionar alertas',
                 onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AlertasPage()),
-                )),
+                      context,
+                      MaterialPageRoute(builder: (_) => const AlertasPage()),
+                    )),
             Divider(
                 height: 1,
                 indent: 14,
@@ -533,6 +587,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       onTap: () {
         final appState = FlexiDriveApp.of(context);
         appState?.toggleTheme();
+        _persistDarkModePreference(!isDarkMode);
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -574,6 +629,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
             onChanged: (value) {
               final appState = FlexiDriveApp.of(context);
               appState?.setDarkMode(!value);
+              _persistDarkModePreference(!value);
             },
             activeThumbColor: const Color(0xFFF59E0B),
           ),
@@ -628,8 +684,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
               ])),
           if (trailingIcon != null)
             Icon(trailingIcon,
-                color: const Color(0xFFF59E0B),
-                size: isSmallPhone ? 14 : 16),
+                color: const Color(0xFFF59E0B), size: isSmallPhone ? 14 : 16),
           const SizedBox(width: 4),
           Icon(Icons.chevron_right,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
@@ -770,10 +825,12 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          _persistArrendatarioMode(false);
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MainPage(initialIndex: 3),
+                              builder: (context) =>
+                                  const MainPage(initialIndex: 3),
                             ),
                             (route) => false,
                           );

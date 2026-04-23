@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+import 'package:flexidrive/services/accounts/user_preference_service.dart';
 import 'edit_profile_page.dart';
 import '../login/login_page.dart';
 import 'security_page.dart';
@@ -20,7 +21,9 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
-  final bool _isModoArrendatarioActive = true; // Cambiar a false para desactivar modo
+  final UserPreferenceService _preferenceService = UserPreferenceService();
+  bool _isModoArrendatarioActive = false;
+  int? _currentUserId;
   String _profileName = 'Invitado';
   String _profileEmail = 'sin_sesion@flexidrive.local';
 
@@ -34,9 +37,48 @@ class _ProfilePageState extends State<ProfilePage> {
     final currentUser = await _accountRepository.getCurrentUser();
     if (!mounted || currentUser == null) return;
 
+    _currentUserId = currentUser.id;
+    final userPreference =
+        await _preferenceService.findEffectiveByUserId(currentUser.id);
+    final isArrendatarioActive = await _preferenceService.getArrendatarioMode(
+      userId: currentUser.id,
+      defaultValue: false,
+    );
+
     setState(() {
       _profileName = currentUser.fullName;
       _profileEmail = currentUser.email;
+      _isModoArrendatarioActive = isArrendatarioActive;
+    });
+
+    if (userPreference != null) {
+      final appState = FlexiDriveApp.of(context);
+      appState?.setDarkMode(userPreference.darkMode);
+    }
+  }
+
+  Future<void> _persistDarkModePreference(bool isDarkMode) async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    await _preferenceService.setDarkMode(
+      userId: userId,
+      darkMode: isDarkMode,
+    );
+  }
+
+  Future<void> _persistArrendatarioMode(bool enabled) async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    await _preferenceService.setArrendatarioMode(
+      userId: userId,
+      enabled: enabled,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _isModoArrendatarioActive = enabled;
     });
   }
 
@@ -302,11 +344,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         width: isSmallPhone ? 32 : 36,
                         height: isSmallPhone ? 32 : 36,
                         decoration: BoxDecoration(
-                            color: _isModoArrendatarioActive 
-                                ? const Color(0xFFFFF4E6) 
+                            color: _isModoArrendatarioActive
+                                ? const Color(0xFFFFF4E6)
                                 : const Color(0xFFFFF4E6),
                             borderRadius: BorderRadius.circular(9)),
-                        child: Icon(_isModoArrendatarioActive ? Icons.home : Icons.home_outlined,
+                        child: Icon(
+                            _isModoArrendatarioActive
+                                ? Icons.home
+                                : Icons.home_outlined,
                             color: const Color(0xFFEF4444),
                             size: isSmallPhone ? 16 : 18)),
                     SizedBox(width: isSmallPhone ? 8 : 12),
@@ -314,18 +359,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                          Text(_isModoArrendatarioActive 
-                              ? 'Cambiar a modo arrendatario'
-                              : 'Activar modo arrendatario',
+                          Text(
+                              _isModoArrendatarioActive
+                                  ? 'Cambiar a modo arrendatario'
+                                  : 'Activar modo arrendatario',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: GoogleFonts.poppins(
                                   fontSize: isSmallPhone ? 12 : 13,
                                   fontWeight: FontWeight.bold,
                                   color: theme.colorScheme.onSurface)),
-                          Text(_isModoArrendatarioActive
-                              ? '✓ Verificado - Gestiona tus vehículos'
-                              : 'Renta tu vehículo y gana dinero',
+                          Text(
+                              _isModoArrendatarioActive
+                                  ? '✓ Verificado - Gestiona tus vehículos'
+                                  : 'Renta tu vehículo y gana dinero',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: GoogleFonts.poppins(
@@ -339,7 +386,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ? Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                              color: const Color(0xFF10B981)
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -571,6 +619,7 @@ class _ProfilePageState extends State<ProfilePage> {
       onTap: () {
         final appState = FlexiDriveApp.of(context);
         appState?.toggleTheme();
+        _persistDarkModePreference(!isDarkMode);
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -612,6 +661,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onChanged: (value) {
               final appState = FlexiDriveApp.of(context);
               appState?.setDarkMode(value);
+              _persistDarkModePreference(value);
             },
             activeThumbColor: const Color(0xFFEF4444),
           ),
@@ -826,10 +876,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          _persistArrendatarioMode(true);
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ArrendatarioMainPage(),
+                              builder: (context) =>
+                                  const ArrendatarioMainPage(),
                             ),
                             (route) => false,
                           );
