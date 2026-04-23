@@ -1,0 +1,12 @@
+﻿[
+    {
+        "descripcion":  "Tarjeta de credito o debito",
+        "nombre":  "tarjeta",
+        "tipo_metodo_pago_id":  1
+    },
+    {
+        "descripcion":  "Pago en linea PSE",
+        "nombre":  "pse",
+        "tipo_metodo_pago_id":  2
+    }
+]

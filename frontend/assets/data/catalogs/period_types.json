@@ -1,0 +1,18 @@
+﻿[
+    {
+        "nombre":  "hora",
+        "descripcion":  "Cobro por hora",
+        "tipo_periodo_id":  1
+    },
+    {
+        "nombre":  "dia",
+        "descripcion":  "Cobro por día",
+        "tipo_periodo_id":  2
+    },
+    {
+        "nombre":  "semana",
+        "descripcion":  "Cobro por semana",
+        "tipo_periodo_id":  3
+    }
+]
+

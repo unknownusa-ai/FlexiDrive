@@ -1,0 +1,200 @@
+﻿[
+    {
+        "nombre_completo":  "Carlos Rodriguez",
+        "usuario_id":  1,
+        "correo":  "carlos.rodriguez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000001",
+        "numero_identificacion":  "1000000001",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Andrea Lopez",
+        "usuario_id":  2,
+        "correo":  "andrea.lopez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000002",
+        "numero_identificacion":  "1000000002",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Roberto Silva",
+        "usuario_id":  3,
+        "correo":  "roberto.silva@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000003",
+        "numero_identificacion":  "1000000003",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Maria Gonzalez",
+        "usuario_id":  4,
+        "correo":  "maria.gonzalez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000004",
+        "numero_identificacion":  "1000000004",
+        "tipo_identificacion_id":  2
+    },
+    {
+        "nombre_completo":  "Luisa Martinez",
+        "usuario_id":  5,
+        "correo":  "luisa.martinez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000005",
+        "numero_identificacion":  "1000000005",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Jorge Perez",
+        "usuario_id":  6,
+        "correo":  "jorge.perez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  1,
+        "telefono":  "3100000006",
+        "numero_identificacion":  "1000000006",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Paula Torres",
+        "usuario_id":  7,
+        "correo":  "paula.torres@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000007",
+        "numero_identificacion":  "1000000007",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Daniel Castro",
+        "usuario_id":  8,
+        "correo":  "daniel.castro@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000008",
+        "numero_identificacion":  "1000000008",
+        "tipo_identificacion_id":  2
+    },
+    {
+        "nombre_completo":  "Camila Ramirez",
+        "usuario_id":  9,
+        "correo":  "camila.ramirez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000009",
+        "numero_identificacion":  "1000000009",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Santiago Hernandez",
+        "usuario_id":  10,
+        "correo":  "santiago.hernandez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000010",
+        "numero_identificacion":  "1000000010",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Natalia Rojas",
+        "usuario_id":  11,
+        "correo":  "natalia.rojas@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000011",
+        "numero_identificacion":  "1000000011",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Felipe Vargas",
+        "usuario_id":  12,
+        "correo":  "felipe.vargas@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  true,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000012",
+        "numero_identificacion":  "1000000012",
+        "tipo_identificacion_id":  2
+    },
+    {
+        "nombre_completo":  "Diana Diaz",
+        "usuario_id":  13,
+        "correo":  "diana.diaz@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000013",
+        "numero_identificacion":  "1000000013",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Sebastian Moreno",
+        "usuario_id":  14,
+        "correo":  "sebastian.moreno@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000014",
+        "numero_identificacion":  "1000000014",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Valentina Suarez",
+        "usuario_id":  15,
+        "correo":  "valentina.suarez@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000015",
+        "numero_identificacion":  "1000000015",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Julian Mejia",
+        "usuario_id":  16,
+        "correo":  "julian.mejia@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000016",
+        "numero_identificacion":  "1000000016",
+        "tipo_identificacion_id":  2
+    },
+    {
+        "nombre_completo":  "Laura Ortega",
+        "usuario_id":  17,
+        "correo":  "laura.ortega@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  2,
+        "telefono":  "3100000017",
+        "numero_identificacion":  "1000000017",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "nombre_completo":  "Andres Cruz",
+        "usuario_id":  18,
+        "correo":  "andres.cruz@email.com",
+        "contrasena":  "123456",
+        "puede_publicar":  false,
+        "tipo_usuario_id":  3,
+        "telefono":  "3100000018",
+        "numero_identificacion":  "1000000018",
+        "tipo_identificacion_id":  1
+    }
+]

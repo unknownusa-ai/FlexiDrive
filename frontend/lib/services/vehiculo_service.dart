@@ -16,25 +16,25 @@ class VehiculoService {
   Future<void> init() async {
     if (loaded) return;
 
-    // Carga el archivo JSON desde assets
-    final response =
-        await rootBundle.loadString('assets/data/vehiculos_data.json');
-
-    final data = json.decode(response);
-
     // Cargar ArrayList de vehículos desde JSON
-    vehiculos = List<Map<String, dynamic>>.from(data['vehiculos']);
+    vehiculos = await _loadList('assets/data/legacy/vehiculos/vehiculos.json');
 
     // Cargar ArrayList de usuarios desde JSON
-    usuarios = List<Map<String, dynamic>>.from(data['usuarios']);
+    usuarios = await _loadList('assets/data/legacy/vehiculos/usuarios.json');
 
     // Cargar ArrayList de rentas desde JSON
-    rentas = List<Map<String, dynamic>>.from(data['rentas']);
+    rentas = await _loadList('assets/data/legacy/vehiculos/rentas.json');
 
     // Cargar ArrayList de reseñas desde JSON
-    resenas = List<Map<String, dynamic>>.from(data['reseñas']);
+    resenas = await _loadList('assets/data/legacy/vehiculos/resenas.json');
 
     loaded = true;
+  }
+
+  Future<List<Map<String, dynamic>>> _loadList(String assetPath) async {
+    final response = await rootBundle.loadString(assetPath);
+    final decoded = json.decode(response) as List<dynamic>? ?? const [];
+    return List<Map<String, dynamic>>.from(decoded);
   }
 
   // ========== OPERACIONES CRUD ==========

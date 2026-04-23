@@ -1,0 +1,12 @@
+﻿[
+    {
+        "descripcion":  "Persona natural",
+        "nombre":  "natural",
+        "tipo_persona_id":  1
+    },
+    {
+        "descripcion":  "Persona juridica",
+        "nombre":  "juridica",
+        "tipo_persona_id":  2
+    }
+]

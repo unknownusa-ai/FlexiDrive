@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flexidrive/features/accounts/accounts.dart';
+import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../onboarding/onboarding_page.dart';
 import '../register/register_page.dart';
@@ -21,6 +21,24 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   bool _isSubmitting = false;
 
+  Future<void> _showErrorDialog(String title, String message) async {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _submitLogin() async {
     if (_isSubmitting) return;
 
@@ -28,8 +46,9 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ingresa correo y contraseña')),
+      await _showErrorDialog(
+        'Campos obligatorios',
+        'Ingresa correo y contraseña para continuar.',
       );
       return;
     }
@@ -38,24 +57,37 @@ class _LoginPageState extends State<LoginPage> {
       _isSubmitting = true;
     });
 
-    final user = await _accountRepository.login(email: email, password: password);
+    try {
+      final user = await _accountRepository
+          .login(email: email, password: password)
+          .timeout(const Duration(seconds: 10));
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _isSubmitting = false;
-    });
+      if (user == null) {
+        await _showErrorDialog(
+          'Credenciales inválidas',
+          'El correo o la contraseña no son correctos.',
+        );
+        return;
+      }
 
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Credenciales inválidas')),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainPage()),
       );
-      return;
+    } catch (_) {
+      if (!mounted) return;
+      await _showErrorDialog(
+        'Error al iniciar sesión',
+        'No fue posible iniciar sesión. Intenta nuevamente.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainPage()),
-    );
   }
 
   @override
@@ -145,9 +177,10 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.white.withAlpha((0.2 * 255).round()),
                                 borderRadius: BorderRadius.circular(12 * scale),
                               ),
-                              child: Text(
-                                '🚗',
-                                style: TextStyle(fontSize: 24 * scale),
+                              child: Icon(
+                                Icons.directions_car_filled,
+                                color: Colors.white,
+                                size: 24 * scale,
                               ),
                             ),
                             SizedBox(width: 12 * scale),
@@ -164,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: 24 * scale),
                         // Welcome text
                         Text(
-                          '¡Bienvenido de\nvuelta! 👋',
+                          '¡Bienvenido de\nvuelta!',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: ResponsiveUtils.fontSize(context, 32),
@@ -277,7 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: _submitLogin,
+                        onPressed: _isSubmitting ? null : _submitLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,

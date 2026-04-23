@@ -1,0 +1,22 @@
+﻿[
+    {
+        "descripcion":  "Eventos de reservas",
+        "categoria_notificacion_id":  1,
+        "nombre":  "reserva"
+    },
+    {
+        "descripcion":  "Recordatorios de viaje",
+        "categoria_notificacion_id":  2,
+        "nombre":  "recordatorio"
+    },
+    {
+        "descripcion":  "Mensajes del sistema",
+        "categoria_notificacion_id":  3,
+        "nombre":  "sistema"
+    },
+    {
+        "descripcion":  "Eventos de pago",
+        "categoria_notificacion_id":  4,
+        "nombre":  "pago"
+    }
+]

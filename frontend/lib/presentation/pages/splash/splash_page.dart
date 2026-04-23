@@ -209,7 +209,7 @@ class _SplashPageState extends State<SplashPage>
                   ),
                   const SizedBox(height: 14),
                   const Text(
-                    'v2.1.0 • Colombia 🇨🇴',
+                    'v2.1.0 • Colombia',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.white60,

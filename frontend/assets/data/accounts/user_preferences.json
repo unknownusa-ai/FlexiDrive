@@ -1,0 +1,128 @@
+﻿[
+    {
+        "usuario_id":  1,
+        "idioma":  "es",
+        "preferencia_usuario_id":  1,
+        "imagen_perfil":  "assets/avatars/user_1.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  2,
+        "idioma":  "es",
+        "preferencia_usuario_id":  2,
+        "imagen_perfil":  "assets/avatars/user_2.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  3,
+        "idioma":  "es",
+        "preferencia_usuario_id":  3,
+        "imagen_perfil":  "assets/avatars/user_3.png",
+        "modo_oscuro":  true
+    },
+    {
+        "usuario_id":  4,
+        "idioma":  "es",
+        "preferencia_usuario_id":  4,
+        "imagen_perfil":  "assets/avatars/user_4.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  5,
+        "idioma":  "en",
+        "preferencia_usuario_id":  5,
+        "imagen_perfil":  "assets/avatars/user_5.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  6,
+        "idioma":  "es",
+        "preferencia_usuario_id":  6,
+        "imagen_perfil":  "assets/avatars/user_6.png",
+        "modo_oscuro":  true
+    },
+    {
+        "usuario_id":  7,
+        "idioma":  "es",
+        "preferencia_usuario_id":  7,
+        "imagen_perfil":  "assets/avatars/user_7.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  8,
+        "idioma":  "es",
+        "preferencia_usuario_id":  8,
+        "imagen_perfil":  "assets/avatars/user_8.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  9,
+        "idioma":  "es",
+        "preferencia_usuario_id":  9,
+        "imagen_perfil":  "assets/avatars/user_9.png",
+        "modo_oscuro":  true
+    },
+    {
+        "usuario_id":  10,
+        "idioma":  "en",
+        "preferencia_usuario_id":  10,
+        "imagen_perfil":  "assets/avatars/user_10.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  11,
+        "idioma":  "es",
+        "preferencia_usuario_id":  11,
+        "imagen_perfil":  "assets/avatars/user_11.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  12,
+        "idioma":  "es",
+        "preferencia_usuario_id":  12,
+        "imagen_perfil":  "assets/avatars/user_12.png",
+        "modo_oscuro":  true
+    },
+    {
+        "usuario_id":  13,
+        "idioma":  "es",
+        "preferencia_usuario_id":  13,
+        "imagen_perfil":  "assets/avatars/user_13.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  14,
+        "idioma":  "es",
+        "preferencia_usuario_id":  14,
+        "imagen_perfil":  "assets/avatars/user_14.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  15,
+        "idioma":  "en",
+        "preferencia_usuario_id":  15,
+        "imagen_perfil":  "assets/avatars/user_15.png",
+        "modo_oscuro":  true
+    },
+    {
+        "usuario_id":  16,
+        "idioma":  "es",
+        "preferencia_usuario_id":  16,
+        "imagen_perfil":  "assets/avatars/user_16.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  17,
+        "idioma":  "es",
+        "preferencia_usuario_id":  17,
+        "imagen_perfil":  "assets/avatars/user_17.png",
+        "modo_oscuro":  false
+    },
+    {
+        "usuario_id":  18,
+        "idioma":  "es",
+        "preferencia_usuario_id":  18,
+        "imagen_perfil":  "assets/avatars/user_18.png",
+        "modo_oscuro":  true
+    }
+]

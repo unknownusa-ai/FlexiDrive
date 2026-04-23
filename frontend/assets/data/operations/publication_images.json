@@ -1,0 +1,450 @@
+﻿[
+    {
+        "fecha_subida":  "2026-02-01T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  1,
+        "imagen_publicacion_id":  1,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_1.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-01T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  1,
+        "imagen_publicacion_id":  2,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_1_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-02T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  2,
+        "imagen_publicacion_id":  3,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_2.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-02T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  2,
+        "imagen_publicacion_id":  4,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_2_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-03T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  3,
+        "imagen_publicacion_id":  5,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_3.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-03T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  3,
+        "imagen_publicacion_id":  6,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_3_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-04T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  4,
+        "imagen_publicacion_id":  7,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_4.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-04T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  4,
+        "imagen_publicacion_id":  8,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_4_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-05T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  5,
+        "imagen_publicacion_id":  9,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_5.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-05T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  5,
+        "imagen_publicacion_id":  10,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_5_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-06T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  6,
+        "imagen_publicacion_id":  11,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_6.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-06T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  6,
+        "imagen_publicacion_id":  12,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_6_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-07T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  7,
+        "imagen_publicacion_id":  13,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_7.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-07T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  7,
+        "imagen_publicacion_id":  14,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_7_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-08T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  8,
+        "imagen_publicacion_id":  15,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_8.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-08T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  8,
+        "imagen_publicacion_id":  16,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_8_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-09T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  9,
+        "imagen_publicacion_id":  17,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_9.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-09T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  9,
+        "imagen_publicacion_id":  18,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_9_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-10T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  10,
+        "imagen_publicacion_id":  19,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_10.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-10T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  10,
+        "imagen_publicacion_id":  20,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_10_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-11T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  11,
+        "imagen_publicacion_id":  21,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_11.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-11T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  11,
+        "imagen_publicacion_id":  22,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_11_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-12T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  12,
+        "imagen_publicacion_id":  23,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_12.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-12T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  12,
+        "imagen_publicacion_id":  24,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_12_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-13T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  13,
+        "imagen_publicacion_id":  25,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_13.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-13T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  13,
+        "imagen_publicacion_id":  26,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_13_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-14T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  14,
+        "imagen_publicacion_id":  27,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_14.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-14T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  14,
+        "imagen_publicacion_id":  28,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_14_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-15T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  15,
+        "imagen_publicacion_id":  29,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_15.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-15T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  15,
+        "imagen_publicacion_id":  30,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_15_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-16T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  16,
+        "imagen_publicacion_id":  31,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_16.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-16T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  16,
+        "imagen_publicacion_id":  32,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_16_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-17T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  17,
+        "imagen_publicacion_id":  33,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_17.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-17T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  17,
+        "imagen_publicacion_id":  34,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_17_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-18T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  18,
+        "imagen_publicacion_id":  35,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_18.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-18T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  18,
+        "imagen_publicacion_id":  36,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_18_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-19T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  19,
+        "imagen_publicacion_id":  37,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_19.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-19T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  19,
+        "imagen_publicacion_id":  38,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_19_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-20T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  20,
+        "imagen_publicacion_id":  39,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_20.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-20T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  20,
+        "imagen_publicacion_id":  40,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_20_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-21T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  21,
+        "imagen_publicacion_id":  41,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_21.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-21T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  21,
+        "imagen_publicacion_id":  42,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_21_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-22T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  22,
+        "imagen_publicacion_id":  43,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_22.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-22T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  22,
+        "imagen_publicacion_id":  44,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_22_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-23T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  23,
+        "imagen_publicacion_id":  45,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_23.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-23T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  23,
+        "imagen_publicacion_id":  46,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_23_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-24T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  24,
+        "imagen_publicacion_id":  47,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_24.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-24T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  24,
+        "imagen_publicacion_id":  48,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_24_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-25T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  25,
+        "imagen_publicacion_id":  49,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_25.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-25T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  25,
+        "imagen_publicacion_id":  50,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_25_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-26T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  26,
+        "imagen_publicacion_id":  51,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_26.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-26T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  26,
+        "imagen_publicacion_id":  52,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_26_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-27T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  27,
+        "imagen_publicacion_id":  53,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_27.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-27T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  27,
+        "imagen_publicacion_id":  54,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_27_2.jpg",
+        "es_principal":  false
+    },
+    {
+        "fecha_subida":  "2026-02-28T09:15:00Z",
+        "orden":  1,
+        "publicacion_id":  28,
+        "imagen_publicacion_id":  55,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_28.jpg",
+        "es_principal":  true
+    },
+    {
+        "fecha_subida":  "2026-02-28T09:16:00Z",
+        "orden":  2,
+        "publicacion_id":  28,
+        "imagen_publicacion_id":  56,
+        "url_imagen":  "assets/imagenes_carros/vehiculo_28_2.jpg",
+        "es_principal":  false
+    }
+]

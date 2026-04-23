@@ -1,0 +1,17 @@
+﻿[
+    {
+        "estado_reserva_id":  1,
+        "descripcion":  "Reserva en curso",
+        "nombre":  "activa"
+    },
+    {
+        "estado_reserva_id":  2,
+        "descripcion":  "Reserva completada",
+        "nombre":  "finalizada"
+    },
+    {
+        "estado_reserva_id":  3,
+        "descripcion":  "Reserva cancelada",
+        "nombre":  "cancelada"
+    }
+]

@@ -1,0 +1,56 @@
+﻿[
+    {
+        "pse_id":  1,
+        "banco_id":  2,
+        "metodo_pago_id":  3,
+        "tipo_persona_id":  1
+    },
+    {
+        "pse_id":  2,
+        "banco_id":  4,
+        "metodo_pago_id":  6,
+        "tipo_persona_id":  2
+    },
+    {
+        "pse_id":  3,
+        "banco_id":  6,
+        "metodo_pago_id":  9,
+        "tipo_persona_id":  1
+    },
+    {
+        "pse_id":  4,
+        "banco_id":  8,
+        "metodo_pago_id":  12,
+        "tipo_persona_id":  2
+    },
+    {
+        "pse_id":  5,
+        "banco_id":  2,
+        "metodo_pago_id":  15,
+        "tipo_persona_id":  1
+    },
+    {
+        "pse_id":  6,
+        "banco_id":  4,
+        "metodo_pago_id":  18,
+        "tipo_persona_id":  2
+    },
+    {
+        "pse_id":  7,
+        "banco_id":  6,
+        "metodo_pago_id":  21,
+        "tipo_persona_id":  1
+    },
+    {
+        "pse_id":  8,
+        "banco_id":  8,
+        "metodo_pago_id":  24,
+        "tipo_persona_id":  2
+    },
+    {
+        "pse_id":  9,
+        "banco_id":  2,
+        "metodo_pago_id":  27,
+        "tipo_persona_id":  1
+    }
+]

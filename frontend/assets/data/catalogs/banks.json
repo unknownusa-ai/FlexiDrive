@@ -1,0 +1,43 @@
+﻿[
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  1,
+        "nombre":  "Bancolombia"
+    },
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  2,
+        "nombre":  "Davivienda"
+    },
+    {
+        "descripcion":  "Banco internacional",
+        "banco_id":  3,
+        "nombre":  "BBVA"
+    },
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  4,
+        "nombre":  "Banco de Bogotá"
+    },
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  5,
+        "nombre":  "Banco Popular"
+    },
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  6,
+        "nombre":  "Scotiabank Colpatria"
+    },
+    {
+        "descripcion":  "Banco nacional",
+        "banco_id":  7,
+        "nombre":  "Banco AV Villas"
+    },
+    {
+        "descripcion":  "Banco internacional",
+        "banco_id":  8,
+        "nombre":  "Itaú"
+    }
+]
+

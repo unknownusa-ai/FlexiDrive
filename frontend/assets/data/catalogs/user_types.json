@@ -1,0 +1,18 @@
+﻿[
+    {
+        "descripcion":  "Publica y renta vehículos",
+        "nombre":  "arrendatario",
+        "tipo_usuario_id":  1
+    },
+    {
+        "descripcion":  "Renta vehículos",
+        "nombre":  "arrendador",
+        "tipo_usuario_id":  2
+    },
+    {
+        "descripcion":  "Administrador de plataforma",
+        "nombre":  "admin",
+        "tipo_usuario_id":  3
+    }
+]
+

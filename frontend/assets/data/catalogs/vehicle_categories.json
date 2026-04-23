@@ -1,0 +1,28 @@
+﻿[
+    {
+        "descripcion":  "Vehículo familiar urbano",
+        "nombre":  "Sedán",
+        "categoria_vehiculo_id":  1
+    },
+    {
+        "descripcion":  "Vehículo deportivo utilitario",
+        "nombre":  "SUV",
+        "categoria_vehiculo_id":  2
+    },
+    {
+        "descripcion":  "Vehículo pequeño para ciudad",
+        "nombre":  "Compacto",
+        "categoria_vehiculo_id":  3
+    },
+    {
+        "descripcion":  "Vehículo de alta gama",
+        "nombre":  "Premium",
+        "categoria_vehiculo_id":  4
+    },
+    {
+        "descripcion":  "Vehículo utilitario de carga",
+        "nombre":  "Pickup",
+        "categoria_vehiculo_id":  5
+    }
+]
+

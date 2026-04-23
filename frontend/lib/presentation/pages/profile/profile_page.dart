@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
-import 'package:flexidrive/features/accounts/accounts.dart';
+import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import 'edit_profile_page.dart';
 import '../login/login_page.dart';
 import 'security_page.dart';

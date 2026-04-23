@@ -1,0 +1,110 @@
+﻿[
+    {
+        "usuario_id":  1,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  1,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  2,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  2,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  3,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  3,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  4,
+        "acceso_biometrico":  false,
+        "seguridad_usuario_id":  4,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  5,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  5,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  6,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  6,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  7,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  7,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  8,
+        "acceso_biometrico":  false,
+        "seguridad_usuario_id":  8,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  9,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  9,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  10,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  10,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  11,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  11,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  12,
+        "acceso_biometrico":  false,
+        "seguridad_usuario_id":  12,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  13,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  13,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  14,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  14,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  15,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  15,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  16,
+        "acceso_biometrico":  false,
+        "seguridad_usuario_id":  16,
+        "verificacion_dos_pasos":  true
+    },
+    {
+        "usuario_id":  17,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  17,
+        "verificacion_dos_pasos":  false
+    },
+    {
+        "usuario_id":  18,
+        "acceso_biometrico":  true,
+        "seguridad_usuario_id":  18,
+        "verificacion_dos_pasos":  true
+    }
+]

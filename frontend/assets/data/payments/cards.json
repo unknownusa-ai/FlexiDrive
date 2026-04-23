@@ -1,0 +1,164 @@
+﻿[
+    {
+        "tarjeta_id":  1,
+        "cvc":  101,
+        "numero_tarjeta":  "4111111111110001",
+        "ano_expiracion":  2029,
+        "marca_tarjeta_id":  1,
+        "mes_expiracion":  1,
+        "metodo_pago_id":  1
+    },
+    {
+        "tarjeta_id":  2,
+        "cvc":  102,
+        "numero_tarjeta":  "4111111111110002",
+        "ano_expiracion":  2030,
+        "marca_tarjeta_id":  2,
+        "mes_expiracion":  2,
+        "metodo_pago_id":  2
+    },
+    {
+        "tarjeta_id":  3,
+        "cvc":  103,
+        "numero_tarjeta":  "4111111111110003",
+        "ano_expiracion":  2031,
+        "marca_tarjeta_id":  3,
+        "mes_expiracion":  3,
+        "metodo_pago_id":  4
+    },
+    {
+        "tarjeta_id":  4,
+        "cvc":  104,
+        "numero_tarjeta":  "4111111111110004",
+        "ano_expiracion":  2028,
+        "marca_tarjeta_id":  4,
+        "mes_expiracion":  4,
+        "metodo_pago_id":  5
+    },
+    {
+        "tarjeta_id":  5,
+        "cvc":  105,
+        "numero_tarjeta":  "4111111111110005",
+        "ano_expiracion":  2029,
+        "marca_tarjeta_id":  5,
+        "mes_expiracion":  5,
+        "metodo_pago_id":  7
+    },
+    {
+        "tarjeta_id":  6,
+        "cvc":  106,
+        "numero_tarjeta":  "4111111111110006",
+        "ano_expiracion":  2030,
+        "marca_tarjeta_id":  1,
+        "mes_expiracion":  6,
+        "metodo_pago_id":  8
+    },
+    {
+        "tarjeta_id":  7,
+        "cvc":  107,
+        "numero_tarjeta":  "4111111111110007",
+        "ano_expiracion":  2031,
+        "marca_tarjeta_id":  2,
+        "mes_expiracion":  7,
+        "metodo_pago_id":  10
+    },
+    {
+        "tarjeta_id":  8,
+        "cvc":  108,
+        "numero_tarjeta":  "4111111111110008",
+        "ano_expiracion":  2028,
+        "marca_tarjeta_id":  3,
+        "mes_expiracion":  8,
+        "metodo_pago_id":  11
+    },
+    {
+        "tarjeta_id":  9,
+        "cvc":  109,
+        "numero_tarjeta":  "4111111111110009",
+        "ano_expiracion":  2029,
+        "marca_tarjeta_id":  4,
+        "mes_expiracion":  9,
+        "metodo_pago_id":  13
+    },
+    {
+        "tarjeta_id":  10,
+        "cvc":  110,
+        "numero_tarjeta":  "4111111111110010",
+        "ano_expiracion":  2030,
+        "marca_tarjeta_id":  5,
+        "mes_expiracion":  10,
+        "metodo_pago_id":  14
+    },
+    {
+        "tarjeta_id":  11,
+        "cvc":  111,
+        "numero_tarjeta":  "4111111111110011",
+        "ano_expiracion":  2031,
+        "marca_tarjeta_id":  1,
+        "mes_expiracion":  11,
+        "metodo_pago_id":  16
+    },
+    {
+        "tarjeta_id":  12,
+        "cvc":  112,
+        "numero_tarjeta":  "4111111111110012",
+        "ano_expiracion":  2028,
+        "marca_tarjeta_id":  2,
+        "mes_expiracion":  12,
+        "metodo_pago_id":  17
+    },
+    {
+        "tarjeta_id":  13,
+        "cvc":  113,
+        "numero_tarjeta":  "4111111111110013",
+        "ano_expiracion":  2029,
+        "marca_tarjeta_id":  3,
+        "mes_expiracion":  1,
+        "metodo_pago_id":  19
+    },
+    {
+        "tarjeta_id":  14,
+        "cvc":  114,
+        "numero_tarjeta":  "4111111111110014",
+        "ano_expiracion":  2030,
+        "marca_tarjeta_id":  4,
+        "mes_expiracion":  2,
+        "metodo_pago_id":  20
+    },
+    {
+        "tarjeta_id":  15,
+        "cvc":  115,
+        "numero_tarjeta":  "4111111111110015",
+        "ano_expiracion":  2031,
+        "marca_tarjeta_id":  5,
+        "mes_expiracion":  3,
+        "metodo_pago_id":  22
+    },
+    {
+        "tarjeta_id":  16,
+        "cvc":  116,
+        "numero_tarjeta":  "4111111111110016",
+        "ano_expiracion":  2028,
+        "marca_tarjeta_id":  1,
+        "mes_expiracion":  4,
+        "metodo_pago_id":  23
+    },
+    {
+        "tarjeta_id":  17,
+        "cvc":  117,
+        "numero_tarjeta":  "4111111111110017",
+        "ano_expiracion":  2029,
+        "marca_tarjeta_id":  2,
+        "mes_expiracion":  5,
+        "metodo_pago_id":  25
+    },
+    {
+        "tarjeta_id":  18,
+        "cvc":  118,
+        "numero_tarjeta":  "4111111111110018",
+        "ano_expiracion":  2030,
+        "marca_tarjeta_id":  3,
+        "mes_expiracion":  6,
+        "metodo_pago_id":  26
+    }
+]

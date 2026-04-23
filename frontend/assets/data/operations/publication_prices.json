@@ -1,0 +1,506 @@
+﻿[
+    {
+        "publicacion_id":  1,
+        "tipo_periodo_id":  1,
+        "precio":  24250,
+        "precio_publicacion_id":  1
+    },
+    {
+        "publicacion_id":  1,
+        "tipo_periodo_id":  2,
+        "precio":  164900,
+        "precio_publicacion_id":  2
+    },
+    {
+        "publicacion_id":  1,
+        "tipo_periodo_id":  3,
+        "precio":  970000,
+        "precio_publicacion_id":  3
+    },
+    {
+        "publicacion_id":  2,
+        "tipo_periodo_id":  1,
+        "precio":  30500,
+        "precio_publicacion_id":  4
+    },
+    {
+        "publicacion_id":  2,
+        "tipo_periodo_id":  2,
+        "precio":  207400,
+        "precio_publicacion_id":  5
+    },
+    {
+        "publicacion_id":  2,
+        "tipo_periodo_id":  3,
+        "precio":  1220000,
+        "precio_publicacion_id":  6
+    },
+    {
+        "publicacion_id":  3,
+        "tipo_periodo_id":  1,
+        "precio":  36750,
+        "precio_publicacion_id":  7
+    },
+    {
+        "publicacion_id":  3,
+        "tipo_periodo_id":  2,
+        "precio":  249900,
+        "precio_publicacion_id":  8
+    },
+    {
+        "publicacion_id":  3,
+        "tipo_periodo_id":  3,
+        "precio":  1470000,
+        "precio_publicacion_id":  9
+    },
+    {
+        "publicacion_id":  4,
+        "tipo_periodo_id":  1,
+        "precio":  43000,
+        "precio_publicacion_id":  10
+    },
+    {
+        "publicacion_id":  4,
+        "tipo_periodo_id":  2,
+        "precio":  292400,
+        "precio_publicacion_id":  11
+    },
+    {
+        "publicacion_id":  4,
+        "tipo_periodo_id":  3,
+        "precio":  1720000,
+        "precio_publicacion_id":  12
+    },
+    {
+        "publicacion_id":  5,
+        "tipo_periodo_id":  1,
+        "precio":  49250,
+        "precio_publicacion_id":  13
+    },
+    {
+        "publicacion_id":  5,
+        "tipo_periodo_id":  2,
+        "precio":  334900,
+        "precio_publicacion_id":  14
+    },
+    {
+        "publicacion_id":  5,
+        "tipo_periodo_id":  3,
+        "precio":  1970000,
+        "precio_publicacion_id":  15
+    },
+    {
+        "publicacion_id":  6,
+        "tipo_periodo_id":  1,
+        "precio":  25500,
+        "precio_publicacion_id":  16
+    },
+    {
+        "publicacion_id":  6,
+        "tipo_periodo_id":  2,
+        "precio":  173400,
+        "precio_publicacion_id":  17
+    },
+    {
+        "publicacion_id":  6,
+        "tipo_periodo_id":  3,
+        "precio":  1020000,
+        "precio_publicacion_id":  18
+    },
+    {
+        "publicacion_id":  7,
+        "tipo_periodo_id":  1,
+        "precio":  31750,
+        "precio_publicacion_id":  19
+    },
+    {
+        "publicacion_id":  7,
+        "tipo_periodo_id":  2,
+        "precio":  215900,
+        "precio_publicacion_id":  20
+    },
+    {
+        "publicacion_id":  7,
+        "tipo_periodo_id":  3,
+        "precio":  1270000,
+        "precio_publicacion_id":  21
+    },
+    {
+        "publicacion_id":  8,
+        "tipo_periodo_id":  1,
+        "precio":  38000,
+        "precio_publicacion_id":  22
+    },
+    {
+        "publicacion_id":  8,
+        "tipo_periodo_id":  2,
+        "precio":  258400,
+        "precio_publicacion_id":  23
+    },
+    {
+        "publicacion_id":  8,
+        "tipo_periodo_id":  3,
+        "precio":  1520000,
+        "precio_publicacion_id":  24
+    },
+    {
+        "publicacion_id":  9,
+        "tipo_periodo_id":  1,
+        "precio":  44250,
+        "precio_publicacion_id":  25
+    },
+    {
+        "publicacion_id":  9,
+        "tipo_periodo_id":  2,
+        "precio":  300900,
+        "precio_publicacion_id":  26
+    },
+    {
+        "publicacion_id":  9,
+        "tipo_periodo_id":  3,
+        "precio":  1770000,
+        "precio_publicacion_id":  27
+    },
+    {
+        "publicacion_id":  10,
+        "tipo_periodo_id":  1,
+        "precio":  50500,
+        "precio_publicacion_id":  28
+    },
+    {
+        "publicacion_id":  10,
+        "tipo_periodo_id":  2,
+        "precio":  343400,
+        "precio_publicacion_id":  29
+    },
+    {
+        "publicacion_id":  10,
+        "tipo_periodo_id":  3,
+        "precio":  2020000,
+        "precio_publicacion_id":  30
+    },
+    {
+        "publicacion_id":  11,
+        "tipo_periodo_id":  1,
+        "precio":  26750,
+        "precio_publicacion_id":  31
+    },
+    {
+        "publicacion_id":  11,
+        "tipo_periodo_id":  2,
+        "precio":  181900,
+        "precio_publicacion_id":  32
+    },
+    {
+        "publicacion_id":  11,
+        "tipo_periodo_id":  3,
+        "precio":  1070000,
+        "precio_publicacion_id":  33
+    },
+    {
+        "publicacion_id":  12,
+        "tipo_periodo_id":  1,
+        "precio":  33000,
+        "precio_publicacion_id":  34
+    },
+    {
+        "publicacion_id":  12,
+        "tipo_periodo_id":  2,
+        "precio":  224400,
+        "precio_publicacion_id":  35
+    },
+    {
+        "publicacion_id":  12,
+        "tipo_periodo_id":  3,
+        "precio":  1320000,
+        "precio_publicacion_id":  36
+    },
+    {
+        "publicacion_id":  13,
+        "tipo_periodo_id":  1,
+        "precio":  39250,
+        "precio_publicacion_id":  37
+    },
+    {
+        "publicacion_id":  13,
+        "tipo_periodo_id":  2,
+        "precio":  266900,
+        "precio_publicacion_id":  38
+    },
+    {
+        "publicacion_id":  13,
+        "tipo_periodo_id":  3,
+        "precio":  1570000,
+        "precio_publicacion_id":  39
+    },
+    {
+        "publicacion_id":  14,
+        "tipo_periodo_id":  1,
+        "precio":  45500,
+        "precio_publicacion_id":  40
+    },
+    {
+        "publicacion_id":  14,
+        "tipo_periodo_id":  2,
+        "precio":  309400,
+        "precio_publicacion_id":  41
+    },
+    {
+        "publicacion_id":  14,
+        "tipo_periodo_id":  3,
+        "precio":  1820000,
+        "precio_publicacion_id":  42
+    },
+    {
+        "publicacion_id":  15,
+        "tipo_periodo_id":  1,
+        "precio":  51750,
+        "precio_publicacion_id":  43
+    },
+    {
+        "publicacion_id":  15,
+        "tipo_periodo_id":  2,
+        "precio":  351900,
+        "precio_publicacion_id":  44
+    },
+    {
+        "publicacion_id":  15,
+        "tipo_periodo_id":  3,
+        "precio":  2070000,
+        "precio_publicacion_id":  45
+    },
+    {
+        "publicacion_id":  16,
+        "tipo_periodo_id":  1,
+        "precio":  28000,
+        "precio_publicacion_id":  46
+    },
+    {
+        "publicacion_id":  16,
+        "tipo_periodo_id":  2,
+        "precio":  190400,
+        "precio_publicacion_id":  47
+    },
+    {
+        "publicacion_id":  16,
+        "tipo_periodo_id":  3,
+        "precio":  1120000,
+        "precio_publicacion_id":  48
+    },
+    {
+        "publicacion_id":  17,
+        "tipo_periodo_id":  1,
+        "precio":  34250,
+        "precio_publicacion_id":  49
+    },
+    {
+        "publicacion_id":  17,
+        "tipo_periodo_id":  2,
+        "precio":  232900,
+        "precio_publicacion_id":  50
+    },
+    {
+        "publicacion_id":  17,
+        "tipo_periodo_id":  3,
+        "precio":  1370000,
+        "precio_publicacion_id":  51
+    },
+    {
+        "publicacion_id":  18,
+        "tipo_periodo_id":  1,
+        "precio":  40500,
+        "precio_publicacion_id":  52
+    },
+    {
+        "publicacion_id":  18,
+        "tipo_periodo_id":  2,
+        "precio":  275400,
+        "precio_publicacion_id":  53
+    },
+    {
+        "publicacion_id":  18,
+        "tipo_periodo_id":  3,
+        "precio":  1620000,
+        "precio_publicacion_id":  54
+    },
+    {
+        "publicacion_id":  19,
+        "tipo_periodo_id":  1,
+        "precio":  46750,
+        "precio_publicacion_id":  55
+    },
+    {
+        "publicacion_id":  19,
+        "tipo_periodo_id":  2,
+        "precio":  317900,
+        "precio_publicacion_id":  56
+    },
+    {
+        "publicacion_id":  19,
+        "tipo_periodo_id":  3,
+        "precio":  1870000,
+        "precio_publicacion_id":  57
+    },
+    {
+        "publicacion_id":  20,
+        "tipo_periodo_id":  1,
+        "precio":  53000,
+        "precio_publicacion_id":  58
+    },
+    {
+        "publicacion_id":  20,
+        "tipo_periodo_id":  2,
+        "precio":  360400,
+        "precio_publicacion_id":  59
+    },
+    {
+        "publicacion_id":  20,
+        "tipo_periodo_id":  3,
+        "precio":  2120000,
+        "precio_publicacion_id":  60
+    },
+    {
+        "publicacion_id":  21,
+        "tipo_periodo_id":  1,
+        "precio":  29250,
+        "precio_publicacion_id":  61
+    },
+    {
+        "publicacion_id":  21,
+        "tipo_periodo_id":  2,
+        "precio":  198900,
+        "precio_publicacion_id":  62
+    },
+    {
+        "publicacion_id":  21,
+        "tipo_periodo_id":  3,
+        "precio":  1170000,
+        "precio_publicacion_id":  63
+    },
+    {
+        "publicacion_id":  22,
+        "tipo_periodo_id":  1,
+        "precio":  35500,
+        "precio_publicacion_id":  64
+    },
+    {
+        "publicacion_id":  22,
+        "tipo_periodo_id":  2,
+        "precio":  241400,
+        "precio_publicacion_id":  65
+    },
+    {
+        "publicacion_id":  22,
+        "tipo_periodo_id":  3,
+        "precio":  1420000,
+        "precio_publicacion_id":  66
+    },
+    {
+        "publicacion_id":  23,
+        "tipo_periodo_id":  1,
+        "precio":  41750,
+        "precio_publicacion_id":  67
+    },
+    {
+        "publicacion_id":  23,
+        "tipo_periodo_id":  2,
+        "precio":  283900,
+        "precio_publicacion_id":  68
+    },
+    {
+        "publicacion_id":  23,
+        "tipo_periodo_id":  3,
+        "precio":  1670000,
+        "precio_publicacion_id":  69
+    },
+    {
+        "publicacion_id":  24,
+        "tipo_periodo_id":  1,
+        "precio":  48000,
+        "precio_publicacion_id":  70
+    },
+    {
+        "publicacion_id":  24,
+        "tipo_periodo_id":  2,
+        "precio":  326400,
+        "precio_publicacion_id":  71
+    },
+    {
+        "publicacion_id":  24,
+        "tipo_periodo_id":  3,
+        "precio":  1920000,
+        "precio_publicacion_id":  72
+    },
+    {
+        "publicacion_id":  25,
+        "tipo_periodo_id":  1,
+        "precio":  54250,
+        "precio_publicacion_id":  73
+    },
+    {
+        "publicacion_id":  25,
+        "tipo_periodo_id":  2,
+        "precio":  368900,
+        "precio_publicacion_id":  74
+    },
+    {
+        "publicacion_id":  25,
+        "tipo_periodo_id":  3,
+        "precio":  2170000,
+        "precio_publicacion_id":  75
+    },
+    {
+        "publicacion_id":  26,
+        "tipo_periodo_id":  1,
+        "precio":  30500,
+        "precio_publicacion_id":  76
+    },
+    {
+        "publicacion_id":  26,
+        "tipo_periodo_id":  2,
+        "precio":  207400,
+        "precio_publicacion_id":  77
+    },
+    {
+        "publicacion_id":  26,
+        "tipo_periodo_id":  3,
+        "precio":  1220000,
+        "precio_publicacion_id":  78
+    },
+    {
+        "publicacion_id":  27,
+        "tipo_periodo_id":  1,
+        "precio":  36750,
+        "precio_publicacion_id":  79
+    },
+    {
+        "publicacion_id":  27,
+        "tipo_periodo_id":  2,
+        "precio":  249900,
+        "precio_publicacion_id":  80
+    },
+    {
+        "publicacion_id":  27,
+        "tipo_periodo_id":  3,
+        "precio":  1470000,
+        "precio_publicacion_id":  81
+    },
+    {
+        "publicacion_id":  28,
+        "tipo_periodo_id":  1,
+        "precio":  43000,
+        "precio_publicacion_id":  82
+    },
+    {
+        "publicacion_id":  28,
+        "tipo_periodo_id":  2,
+        "precio":  292400,
+        "precio_publicacion_id":  83
+    },
+    {
+        "publicacion_id":  28,
+        "tipo_periodo_id":  3,
+        "precio":  1720000,
+        "precio_publicacion_id":  84
+    }
+]

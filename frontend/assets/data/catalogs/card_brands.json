@@ -1,0 +1,27 @@
+﻿[
+    {
+        "descripcion":  "Red Visa",
+        "nombre":  "Visa",
+        "marca_tarjeta_id":  1
+    },
+    {
+        "descripcion":  "Red Mastercard",
+        "nombre":  "Mastercard",
+        "marca_tarjeta_id":  2
+    },
+    {
+        "descripcion":  "Red AMEX",
+        "nombre":  "American Express",
+        "marca_tarjeta_id":  3
+    },
+    {
+        "descripcion":  "Red Diners",
+        "nombre":  "Diners",
+        "marca_tarjeta_id":  4
+    },
+    {
+        "descripcion":  "Red Maestro",
+        "nombre":  "Maestro",
+        "marca_tarjeta_id":  5
+    }
+]

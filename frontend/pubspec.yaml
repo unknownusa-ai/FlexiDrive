@@ -35,3 +35,10 @@ flutter:
     - assets/icons/
     - assets/imagenes_carros/
     - assets/data/
+    - assets/data/accounts/
+    - assets/data/catalogs/
+    - assets/data/legacy/
+    - assets/data/legacy/vehiculos/
+    - assets/data/operations/
+    - assets/data/payments/
+    - assets/data/security/

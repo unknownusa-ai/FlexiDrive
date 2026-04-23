@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
-import 'package:flexidrive/features/accounts/accounts.dart';
+import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../reservas/reserva_detalle_page.dart';
 import '../../../services/vehiculo_service.dart';

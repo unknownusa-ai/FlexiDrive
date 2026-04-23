@@ -1,0 +1,17 @@
+﻿[
+    {
+        "descripcion":  "En revision",
+        "estado_verificacion_documento_id":  1,
+        "nombre":  "pendiente"
+    },
+    {
+        "descripcion":  "Documento valido",
+        "estado_verificacion_documento_id":  2,
+        "nombre":  "aprobado"
+    },
+    {
+        "descripcion":  "Documento no valido",
+        "estado_verificacion_documento_id":  3,
+        "nombre":  "rechazado"
+    }
+]

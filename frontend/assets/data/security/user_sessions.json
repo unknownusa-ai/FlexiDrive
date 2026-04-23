@@ -1,0 +1,272 @@
+﻿[
+    {
+        "fecha_inicio":  "2026-04-01T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.1",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  1,
+        "sesion_usuario_id":  1
+    },
+    {
+        "fecha_inicio":  "2026-04-02T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.2",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  2,
+        "sesion_usuario_id":  2
+    },
+    {
+        "fecha_inicio":  "2026-04-03T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.3",
+        "dispositivo":  "Samsung S23",
+        "activa":  false,
+        "usuario_id":  3,
+        "sesion_usuario_id":  3
+    },
+    {
+        "fecha_inicio":  "2026-04-04T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.4",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  4,
+        "sesion_usuario_id":  4
+    },
+    {
+        "fecha_inicio":  "2026-04-05T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.5",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  5,
+        "sesion_usuario_id":  5
+    },
+    {
+        "fecha_inicio":  "2026-04-06T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.6",
+        "dispositivo":  "iPhone 14",
+        "activa":  false,
+        "usuario_id":  6,
+        "sesion_usuario_id":  6
+    },
+    {
+        "fecha_inicio":  "2026-04-07T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.7",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  7,
+        "sesion_usuario_id":  7
+    },
+    {
+        "fecha_inicio":  "2026-04-08T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.8",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  8,
+        "sesion_usuario_id":  8
+    },
+    {
+        "fecha_inicio":  "2026-04-09T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.9",
+        "dispositivo":  "Samsung S23",
+        "activa":  false,
+        "usuario_id":  9,
+        "sesion_usuario_id":  9
+    },
+    {
+        "fecha_inicio":  "2026-04-10T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.10",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  10,
+        "sesion_usuario_id":  10
+    },
+    {
+        "fecha_inicio":  "2026-04-11T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.11",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  11,
+        "sesion_usuario_id":  11
+    },
+    {
+        "fecha_inicio":  "2026-04-12T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.12",
+        "dispositivo":  "iPhone 14",
+        "activa":  false,
+        "usuario_id":  12,
+        "sesion_usuario_id":  12
+    },
+    {
+        "fecha_inicio":  "2026-04-13T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.13",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  13,
+        "sesion_usuario_id":  13
+    },
+    {
+        "fecha_inicio":  "2026-04-14T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.14",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  14,
+        "sesion_usuario_id":  14
+    },
+    {
+        "fecha_inicio":  "2026-04-15T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.15",
+        "dispositivo":  "Samsung S23",
+        "activa":  false,
+        "usuario_id":  15,
+        "sesion_usuario_id":  15
+    },
+    {
+        "fecha_inicio":  "2026-04-16T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.16",
+        "dispositivo":  "iPhone 14",
+        "activa":  true,
+        "usuario_id":  16,
+        "sesion_usuario_id":  16
+    },
+    {
+        "fecha_inicio":  "2026-04-17T08:00:00Z",
+        "sistema_operativo":  "Android",
+        "direccion_ip":  "190.24.10.17",
+        "dispositivo":  "Samsung S23",
+        "activa":  true,
+        "usuario_id":  17,
+        "sesion_usuario_id":  17
+    },
+    {
+        "fecha_inicio":  "2026-04-18T08:00:00Z",
+        "sistema_operativo":  "iOS",
+        "direccion_ip":  "190.24.10.18",
+        "dispositivo":  "iPhone 14",
+        "activa":  false,
+        "usuario_id":  18,
+        "sesion_usuario_id":  18
+    },
+    {
+        "fecha_inicio":  "2026-03-19T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.19",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  1,
+        "sesion_usuario_id":  19
+    },
+    {
+        "fecha_inicio":  "2026-03-20T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.20",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  2,
+        "sesion_usuario_id":  20
+    },
+    {
+        "fecha_inicio":  "2026-03-21T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.21",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  3,
+        "sesion_usuario_id":  21
+    },
+    {
+        "fecha_inicio":  "2026-03-22T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.22",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  4,
+        "sesion_usuario_id":  22
+    },
+    {
+        "fecha_inicio":  "2026-03-23T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.23",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  5,
+        "sesion_usuario_id":  23
+    },
+    {
+        "fecha_inicio":  "2026-03-24T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.24",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  6,
+        "sesion_usuario_id":  24
+    },
+    {
+        "fecha_inicio":  "2026-03-25T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.25",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  7,
+        "sesion_usuario_id":  25
+    },
+    {
+        "fecha_inicio":  "2026-03-26T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.26",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  8,
+        "sesion_usuario_id":  26
+    },
+    {
+        "fecha_inicio":  "2026-03-27T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.27",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  9,
+        "sesion_usuario_id":  27
+    },
+    {
+        "fecha_inicio":  "2026-03-28T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.28",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  10,
+        "sesion_usuario_id":  28
+    },
+    {
+        "fecha_inicio":  "2026-03-01T19:30:00Z",
+        "sistema_operativo":  "Windows",
+        "direccion_ip":  "181.30.20.29",
+        "dispositivo":  "Windows Laptop",
+        "activa":  false,
+        "usuario_id":  11,
+        "sesion_usuario_id":  29
+    },
+    {
+        "fecha_inicio":  "2026-03-02T19:30:00Z",
+        "sistema_operativo":  "macOS",
+        "direccion_ip":  "181.30.20.30",
+        "dispositivo":  "MacBook Pro",
+        "activa":  false,
+        "usuario_id":  12,
+        "sesion_usuario_id":  30
+    }
+]

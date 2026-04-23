@@ -1,0 +1,19 @@
+﻿[
+    {
+        "id":  1,
+        "renta_id":  1,
+        "usuario_id":  2,
+        "calificacion":  5,
+        "comentario":  "Excelente vehículo, muy bien cuidado",
+        "fecha":  "2024-03-06"
+    },
+    {
+        "id":  2,
+        "renta_id":  2,
+        "usuario_id":  3,
+        "calificacion":  4,
+        "comentario":  "Buen auto, recomendado",
+        "fecha":  "2024-03-13"
+    }
+]
+

@@ -1,0 +1,198 @@
+﻿[
+    {
+        "usuario_id":  1,
+        "publicacion_id":  1,
+        "fecha_publicacion":  "2026-02-01T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  1
+    },
+    {
+        "usuario_id":  2,
+        "publicacion_id":  2,
+        "fecha_publicacion":  "2026-02-02T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  2
+    },
+    {
+        "usuario_id":  3,
+        "publicacion_id":  3,
+        "fecha_publicacion":  "2026-02-03T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  3
+    },
+    {
+        "usuario_id":  4,
+        "publicacion_id":  4,
+        "fecha_publicacion":  "2026-02-04T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  4
+    },
+    {
+        "usuario_id":  5,
+        "publicacion_id":  5,
+        "fecha_publicacion":  "2026-02-05T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  5
+    },
+    {
+        "usuario_id":  6,
+        "publicacion_id":  6,
+        "fecha_publicacion":  "2026-02-06T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  6
+    },
+    {
+        "usuario_id":  7,
+        "publicacion_id":  7,
+        "fecha_publicacion":  "2026-02-07T09:00:00Z",
+        "activa":  false,
+        "vehiculo_id":  7
+    },
+    {
+        "usuario_id":  8,
+        "publicacion_id":  8,
+        "fecha_publicacion":  "2026-02-08T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  8
+    },
+    {
+        "usuario_id":  9,
+        "publicacion_id":  9,
+        "fecha_publicacion":  "2026-02-09T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  9
+    },
+    {
+        "usuario_id":  10,
+        "publicacion_id":  10,
+        "fecha_publicacion":  "2026-02-10T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  10
+    },
+    {
+        "usuario_id":  11,
+        "publicacion_id":  11,
+        "fecha_publicacion":  "2026-02-11T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  11
+    },
+    {
+        "usuario_id":  12,
+        "publicacion_id":  12,
+        "fecha_publicacion":  "2026-02-12T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  12
+    },
+    {
+        "usuario_id":  1,
+        "publicacion_id":  13,
+        "fecha_publicacion":  "2026-02-13T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  13
+    },
+    {
+        "usuario_id":  2,
+        "publicacion_id":  14,
+        "fecha_publicacion":  "2026-02-14T09:00:00Z",
+        "activa":  false,
+        "vehiculo_id":  14
+    },
+    {
+        "usuario_id":  3,
+        "publicacion_id":  15,
+        "fecha_publicacion":  "2026-02-15T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  15
+    },
+    {
+        "usuario_id":  4,
+        "publicacion_id":  16,
+        "fecha_publicacion":  "2026-02-16T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  16
+    },
+    {
+        "usuario_id":  5,
+        "publicacion_id":  17,
+        "fecha_publicacion":  "2026-02-17T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  17
+    },
+    {
+        "usuario_id":  6,
+        "publicacion_id":  18,
+        "fecha_publicacion":  "2026-02-18T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  18
+    },
+    {
+        "usuario_id":  7,
+        "publicacion_id":  19,
+        "fecha_publicacion":  "2026-02-19T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  19
+    },
+    {
+        "usuario_id":  8,
+        "publicacion_id":  20,
+        "fecha_publicacion":  "2026-02-20T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  20
+    },
+    {
+        "usuario_id":  9,
+        "publicacion_id":  21,
+        "fecha_publicacion":  "2026-02-21T09:00:00Z",
+        "activa":  false,
+        "vehiculo_id":  21
+    },
+    {
+        "usuario_id":  10,
+        "publicacion_id":  22,
+        "fecha_publicacion":  "2026-02-22T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  22
+    },
+    {
+        "usuario_id":  11,
+        "publicacion_id":  23,
+        "fecha_publicacion":  "2026-02-23T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  23
+    },
+    {
+        "usuario_id":  12,
+        "publicacion_id":  24,
+        "fecha_publicacion":  "2026-02-24T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  24
+    },
+    {
+        "usuario_id":  1,
+        "publicacion_id":  25,
+        "fecha_publicacion":  "2026-02-25T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  25
+    },
+    {
+        "usuario_id":  2,
+        "publicacion_id":  26,
+        "fecha_publicacion":  "2026-02-26T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  26
+    },
+    {
+        "usuario_id":  3,
+        "publicacion_id":  27,
+        "fecha_publicacion":  "2026-02-27T09:00:00Z",
+        "activa":  true,
+        "vehiculo_id":  27
+    },
+    {
+        "usuario_id":  4,
+        "publicacion_id":  28,
+        "fecha_publicacion":  "2026-02-28T09:00:00Z",
+        "activa":  false,
+        "vehiculo_id":  28
+    }
+]

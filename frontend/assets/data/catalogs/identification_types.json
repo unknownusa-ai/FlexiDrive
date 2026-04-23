@@ -1,0 +1,23 @@
+﻿[
+    {
+        "descripcion":  "Cédula de ciudadanía",
+        "nombre":  "CC",
+        "tipo_identificacion_id":  1
+    },
+    {
+        "descripcion":  "Cédula de extranjería",
+        "nombre":  "CE",
+        "tipo_identificacion_id":  2
+    },
+    {
+        "descripcion":  "Pasaporte vigente",
+        "nombre":  "PASAPORTE",
+        "tipo_identificacion_id":  3
+    },
+    {
+        "descripcion":  "Número de identificación tributaria",
+        "nombre":  "NIT",
+        "tipo_identificacion_id":  4
+    }
+]
+

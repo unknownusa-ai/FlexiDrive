@@ -1,0 +1,632 @@
+﻿[
+    {
+        "asunto":  "Notificacion 1",
+        "fecha_envio":  "2026-04-01T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 1 para seguimiento en la app",
+        "notificacion_id":  1,
+        "estado":  "no_leida",
+        "usuario_id":  1,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 2",
+        "fecha_envio":  "2026-04-02T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 2 para seguimiento en la app",
+        "notificacion_id":  2,
+        "estado":  "no_leida",
+        "usuario_id":  2,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 3",
+        "fecha_envio":  "2026-04-03T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 3 para seguimiento en la app",
+        "notificacion_id":  3,
+        "estado":  "leida",
+        "usuario_id":  3,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 4",
+        "fecha_envio":  "2026-04-04T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 4 para seguimiento en la app",
+        "notificacion_id":  4,
+        "estado":  "no_leida",
+        "usuario_id":  4,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 5",
+        "fecha_envio":  "2026-04-05T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 5 para seguimiento en la app",
+        "notificacion_id":  5,
+        "estado":  "no_leida",
+        "usuario_id":  5,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 6",
+        "fecha_envio":  "2026-04-06T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 6 para seguimiento en la app",
+        "notificacion_id":  6,
+        "estado":  "leida",
+        "usuario_id":  6,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 7",
+        "fecha_envio":  "2026-04-07T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 7 para seguimiento en la app",
+        "notificacion_id":  7,
+        "estado":  "no_leida",
+        "usuario_id":  7,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 8",
+        "fecha_envio":  "2026-04-08T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 8 para seguimiento en la app",
+        "notificacion_id":  8,
+        "estado":  "no_leida",
+        "usuario_id":  8,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 9",
+        "fecha_envio":  "2026-04-09T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 9 para seguimiento en la app",
+        "notificacion_id":  9,
+        "estado":  "leida",
+        "usuario_id":  9,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 10",
+        "fecha_envio":  "2026-04-10T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 10 para seguimiento en la app",
+        "notificacion_id":  10,
+        "estado":  "no_leida",
+        "usuario_id":  10,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 11",
+        "fecha_envio":  "2026-04-11T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 11 para seguimiento en la app",
+        "notificacion_id":  11,
+        "estado":  "no_leida",
+        "usuario_id":  11,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 12",
+        "fecha_envio":  "2026-04-12T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 12 para seguimiento en la app",
+        "notificacion_id":  12,
+        "estado":  "leida",
+        "usuario_id":  12,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 13",
+        "fecha_envio":  "2026-04-13T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 13 para seguimiento en la app",
+        "notificacion_id":  13,
+        "estado":  "no_leida",
+        "usuario_id":  13,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 14",
+        "fecha_envio":  "2026-04-14T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 14 para seguimiento en la app",
+        "notificacion_id":  14,
+        "estado":  "no_leida",
+        "usuario_id":  14,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 15",
+        "fecha_envio":  "2026-04-15T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 15 para seguimiento en la app",
+        "notificacion_id":  15,
+        "estado":  "leida",
+        "usuario_id":  15,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 16",
+        "fecha_envio":  "2026-04-16T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 16 para seguimiento en la app",
+        "notificacion_id":  16,
+        "estado":  "no_leida",
+        "usuario_id":  16,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 17",
+        "fecha_envio":  "2026-04-17T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 17 para seguimiento en la app",
+        "notificacion_id":  17,
+        "estado":  "no_leida",
+        "usuario_id":  17,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 18",
+        "fecha_envio":  "2026-04-18T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 18 para seguimiento en la app",
+        "notificacion_id":  18,
+        "estado":  "leida",
+        "usuario_id":  18,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 19",
+        "fecha_envio":  "2026-04-19T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 19 para seguimiento en la app",
+        "notificacion_id":  19,
+        "estado":  "no_leida",
+        "usuario_id":  1,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 20",
+        "fecha_envio":  "2026-04-20T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 20 para seguimiento en la app",
+        "notificacion_id":  20,
+        "estado":  "no_leida",
+        "usuario_id":  2,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 21",
+        "fecha_envio":  "2026-04-21T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 21 para seguimiento en la app",
+        "notificacion_id":  21,
+        "estado":  "leida",
+        "usuario_id":  3,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 22",
+        "fecha_envio":  "2026-04-22T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 22 para seguimiento en la app",
+        "notificacion_id":  22,
+        "estado":  "no_leida",
+        "usuario_id":  4,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 23",
+        "fecha_envio":  "2026-04-23T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 23 para seguimiento en la app",
+        "notificacion_id":  23,
+        "estado":  "no_leida",
+        "usuario_id":  5,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 24",
+        "fecha_envio":  "2026-04-24T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 24 para seguimiento en la app",
+        "notificacion_id":  24,
+        "estado":  "leida",
+        "usuario_id":  6,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 25",
+        "fecha_envio":  "2026-04-25T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 25 para seguimiento en la app",
+        "notificacion_id":  25,
+        "estado":  "no_leida",
+        "usuario_id":  7,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 26",
+        "fecha_envio":  "2026-04-26T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 26 para seguimiento en la app",
+        "notificacion_id":  26,
+        "estado":  "no_leida",
+        "usuario_id":  8,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 27",
+        "fecha_envio":  "2026-04-27T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 27 para seguimiento en la app",
+        "notificacion_id":  27,
+        "estado":  "leida",
+        "usuario_id":  9,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 28",
+        "fecha_envio":  "2026-04-28T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 28 para seguimiento en la app",
+        "notificacion_id":  28,
+        "estado":  "no_leida",
+        "usuario_id":  10,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 29",
+        "fecha_envio":  "2026-04-01T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 29 para seguimiento en la app",
+        "notificacion_id":  29,
+        "estado":  "no_leida",
+        "usuario_id":  11,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 30",
+        "fecha_envio":  "2026-04-02T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 30 para seguimiento en la app",
+        "notificacion_id":  30,
+        "estado":  "leida",
+        "usuario_id":  12,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 31",
+        "fecha_envio":  "2026-04-03T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 31 para seguimiento en la app",
+        "notificacion_id":  31,
+        "estado":  "no_leida",
+        "usuario_id":  13,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 32",
+        "fecha_envio":  "2026-04-04T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 32 para seguimiento en la app",
+        "notificacion_id":  32,
+        "estado":  "no_leida",
+        "usuario_id":  14,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 33",
+        "fecha_envio":  "2026-04-05T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 33 para seguimiento en la app",
+        "notificacion_id":  33,
+        "estado":  "leida",
+        "usuario_id":  15,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 34",
+        "fecha_envio":  "2026-04-06T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 34 para seguimiento en la app",
+        "notificacion_id":  34,
+        "estado":  "no_leida",
+        "usuario_id":  16,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 35",
+        "fecha_envio":  "2026-04-07T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 35 para seguimiento en la app",
+        "notificacion_id":  35,
+        "estado":  "no_leida",
+        "usuario_id":  17,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 36",
+        "fecha_envio":  "2026-04-08T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 36 para seguimiento en la app",
+        "notificacion_id":  36,
+        "estado":  "leida",
+        "usuario_id":  18,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 37",
+        "fecha_envio":  "2026-04-09T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 37 para seguimiento en la app",
+        "notificacion_id":  37,
+        "estado":  "no_leida",
+        "usuario_id":  1,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 38",
+        "fecha_envio":  "2026-04-10T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 38 para seguimiento en la app",
+        "notificacion_id":  38,
+        "estado":  "no_leida",
+        "usuario_id":  2,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 39",
+        "fecha_envio":  "2026-04-11T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 39 para seguimiento en la app",
+        "notificacion_id":  39,
+        "estado":  "leida",
+        "usuario_id":  3,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 40",
+        "fecha_envio":  "2026-04-12T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 40 para seguimiento en la app",
+        "notificacion_id":  40,
+        "estado":  "no_leida",
+        "usuario_id":  4,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 41",
+        "fecha_envio":  "2026-04-13T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 41 para seguimiento en la app",
+        "notificacion_id":  41,
+        "estado":  "no_leida",
+        "usuario_id":  5,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 42",
+        "fecha_envio":  "2026-04-14T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 42 para seguimiento en la app",
+        "notificacion_id":  42,
+        "estado":  "leida",
+        "usuario_id":  6,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 43",
+        "fecha_envio":  "2026-04-15T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 43 para seguimiento en la app",
+        "notificacion_id":  43,
+        "estado":  "no_leida",
+        "usuario_id":  7,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 44",
+        "fecha_envio":  "2026-04-16T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 44 para seguimiento en la app",
+        "notificacion_id":  44,
+        "estado":  "no_leida",
+        "usuario_id":  8,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 45",
+        "fecha_envio":  "2026-04-17T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 45 para seguimiento en la app",
+        "notificacion_id":  45,
+        "estado":  "leida",
+        "usuario_id":  9,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 46",
+        "fecha_envio":  "2026-04-18T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 46 para seguimiento en la app",
+        "notificacion_id":  46,
+        "estado":  "no_leida",
+        "usuario_id":  10,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 47",
+        "fecha_envio":  "2026-04-19T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 47 para seguimiento en la app",
+        "notificacion_id":  47,
+        "estado":  "no_leida",
+        "usuario_id":  11,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 48",
+        "fecha_envio":  "2026-04-20T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 48 para seguimiento en la app",
+        "notificacion_id":  48,
+        "estado":  "leida",
+        "usuario_id":  12,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 49",
+        "fecha_envio":  "2026-04-21T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 49 para seguimiento en la app",
+        "notificacion_id":  49,
+        "estado":  "no_leida",
+        "usuario_id":  13,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 50",
+        "fecha_envio":  "2026-04-22T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 50 para seguimiento en la app",
+        "notificacion_id":  50,
+        "estado":  "no_leida",
+        "usuario_id":  14,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 51",
+        "fecha_envio":  "2026-04-23T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 51 para seguimiento en la app",
+        "notificacion_id":  51,
+        "estado":  "leida",
+        "usuario_id":  15,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 52",
+        "fecha_envio":  "2026-04-24T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 52 para seguimiento en la app",
+        "notificacion_id":  52,
+        "estado":  "no_leida",
+        "usuario_id":  16,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 53",
+        "fecha_envio":  "2026-04-25T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 53 para seguimiento en la app",
+        "notificacion_id":  53,
+        "estado":  "no_leida",
+        "usuario_id":  17,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 54",
+        "fecha_envio":  "2026-04-26T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 54 para seguimiento en la app",
+        "notificacion_id":  54,
+        "estado":  "leida",
+        "usuario_id":  18,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 55",
+        "fecha_envio":  "2026-04-27T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 55 para seguimiento en la app",
+        "notificacion_id":  55,
+        "estado":  "no_leida",
+        "usuario_id":  1,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 56",
+        "fecha_envio":  "2026-04-28T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 56 para seguimiento en la app",
+        "notificacion_id":  56,
+        "estado":  "no_leida",
+        "usuario_id":  2,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 57",
+        "fecha_envio":  "2026-04-01T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 57 para seguimiento en la app",
+        "notificacion_id":  57,
+        "estado":  "leida",
+        "usuario_id":  3,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 58",
+        "fecha_envio":  "2026-04-02T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 58 para seguimiento en la app",
+        "notificacion_id":  58,
+        "estado":  "no_leida",
+        "usuario_id":  4,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 59",
+        "fecha_envio":  "2026-04-03T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 59 para seguimiento en la app",
+        "notificacion_id":  59,
+        "estado":  "no_leida",
+        "usuario_id":  5,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 60",
+        "fecha_envio":  "2026-04-04T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 60 para seguimiento en la app",
+        "notificacion_id":  60,
+        "estado":  "leida",
+        "usuario_id":  6,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 61",
+        "fecha_envio":  "2026-04-05T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 61 para seguimiento en la app",
+        "notificacion_id":  61,
+        "estado":  "no_leida",
+        "usuario_id":  7,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 62",
+        "fecha_envio":  "2026-04-06T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 62 para seguimiento en la app",
+        "notificacion_id":  62,
+        "estado":  "no_leida",
+        "usuario_id":  8,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 63",
+        "fecha_envio":  "2026-04-07T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 63 para seguimiento en la app",
+        "notificacion_id":  63,
+        "estado":  "leida",
+        "usuario_id":  9,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 64",
+        "fecha_envio":  "2026-04-08T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 64 para seguimiento en la app",
+        "notificacion_id":  64,
+        "estado":  "no_leida",
+        "usuario_id":  10,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 65",
+        "fecha_envio":  "2026-04-09T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 65 para seguimiento en la app",
+        "notificacion_id":  65,
+        "estado":  "no_leida",
+        "usuario_id":  11,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 66",
+        "fecha_envio":  "2026-04-10T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 66 para seguimiento en la app",
+        "notificacion_id":  66,
+        "estado":  "leida",
+        "usuario_id":  12,
+        "categoria_notificacion_id":  2
+    },
+    {
+        "asunto":  "Notificacion 67",
+        "fecha_envio":  "2026-04-11T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 67 para seguimiento en la app",
+        "notificacion_id":  67,
+        "estado":  "no_leida",
+        "usuario_id":  13,
+        "categoria_notificacion_id":  3
+    },
+    {
+        "asunto":  "Notificacion 68",
+        "fecha_envio":  "2026-04-12T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 68 para seguimiento en la app",
+        "notificacion_id":  68,
+        "estado":  "no_leida",
+        "usuario_id":  14,
+        "categoria_notificacion_id":  4
+    },
+    {
+        "asunto":  "Notificacion 69",
+        "fecha_envio":  "2026-04-13T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 69 para seguimiento en la app",
+        "notificacion_id":  69,
+        "estado":  "leida",
+        "usuario_id":  15,
+        "categoria_notificacion_id":  1
+    },
+    {
+        "asunto":  "Notificacion 70",
+        "fecha_envio":  "2026-04-14T11:30:00Z",
+        "descripcion":  "Detalle de notificacion 70 para seguimiento en la app",
+        "notificacion_id":  70,
+        "estado":  "no_leida",
+        "usuario_id":  16,
+        "categoria_notificacion_id":  2
+    }
+]

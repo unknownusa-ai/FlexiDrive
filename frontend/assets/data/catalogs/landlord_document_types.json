@@ -1,0 +1,27 @@
+﻿[
+    {
+        "descripcion":  "Documento identidad",
+        "nombre":  "cedula",
+        "tipo_documento_arrendador_id":  1
+    },
+    {
+        "descripcion":  "Registro unico tributario",
+        "nombre":  "rut",
+        "tipo_documento_arrendador_id":  2
+    },
+    {
+        "descripcion":  "Poliza vigente",
+        "nombre":  "seguro_todo_riesgo",
+        "tipo_documento_arrendador_id":  3
+    },
+    {
+        "descripcion":  "Certificado bancario",
+        "nombre":  "certificacion_bancaria",
+        "tipo_documento_arrendador_id":  4
+    },
+    {
+        "descripcion":  "Propiedad del vehiculo",
+        "nombre":  "tarjeta_propiedad",
+        "tipo_documento_arrendador_id":  5
+    }
+]

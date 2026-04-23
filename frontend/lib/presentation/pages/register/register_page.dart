@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../login/login_page.dart';
 
@@ -17,9 +18,102 @@ class _RegisterPageState extends State<RegisterPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
+  bool _isSubmitting = false;
+
+  Future<void> _showDialogMessage(String title, String message) async {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitRegister() async {
+    if (_isSubmitting) return;
+
+    final fullName = _nameController.text.trim();
+    final document = _documentController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (fullName.isEmpty ||
+        document.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      await _showDialogMessage(
+        'Campos obligatorios',
+        'Completa todos los campos para crear la cuenta.',
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      await _showDialogMessage(
+        'Contraseñas distintas',
+        'La contraseña y su confirmación deben coincidir.',
+      );
+      return;
+    }
+
+    if (!_acceptTerms) {
+      await _showDialogMessage(
+        'Términos requeridos',
+        'Debes aceptar los términos y condiciones para continuar.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await _accountRepository.register(
+        fullName: fullName,
+        identificationNumber: document,
+        email: email,
+        phone: phone,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      await _showDialogMessage(
+        'Registro exitoso',
+        'Tu cuenta fue creada correctamente. Ahora puedes iniciar sesión.',
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      await _showDialogMessage('No se pudo registrar', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -74,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 24 * scale),
                   // Title
                   Text(
-                    'Crear Cuenta 🎉',
+                    'Crear Cuenta',
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: ResponsiveUtils.fontSize(context, 32),
@@ -285,7 +379,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _acceptTerms ? () {} : null,
+                        onPressed: (_acceptTerms && !_isSubmitting)
+                            ? _submitRegister
+                            : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _acceptTerms
                               ? null
@@ -315,24 +411,35 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'Crear Cuenta',
-                                style: GoogleFonts.poppins(
+                              if (_isSubmitting)
+                                const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              else ...[
+                                Text(
+                                  'Crear Cuenta',
+                                  style: GoogleFonts.poppins(
+                                    color: _acceptTerms
+                                        ? Colors.white
+                                        : const Color(0xFF9CA3AF),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.chevron_right,
                                   color: _acceptTerms
                                       ? Colors.white
                                       : const Color(0xFF9CA3AF),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                  size: 20,
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.chevron_right,
-                                color: _acceptTerms
-                                    ? Colors.white
-                                    : const Color(0xFF9CA3AF),
-                                size: 20,
-                              ),
+                              ],
                             ],
                           ),
                         ),
