@@ -37,8 +37,6 @@ flutter:
     - assets/data/
     - assets/data/accounts/
     - assets/data/catalogs/
-    - assets/data/legacy/
-    - assets/data/legacy/vehiculos/
     - assets/data/operations/
     - assets/data/payments/
     - assets/data/security/

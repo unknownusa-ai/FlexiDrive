@@ -8,7 +8,7 @@ import 'package:flexidrive/models/vehicles/vehicle_models.dart';
 import 'package:flexidrive/services/publications/local_publication_db.dart';
 import 'package:flexidrive/services/reservations/local_reservation_db.dart';
 import 'package:flexidrive/services/reviews/local_review_db.dart';
-import 'package:flexidrive/services/vehicles/local_vehicle_db.dart';
+import 'package:flexidrive/services/vehiculo_service.dart';
 
 import 'reserva_detalle_page.dart';
 import 'reservas_store.dart';
@@ -28,7 +28,7 @@ class _ReservasPageState extends State<ReservasPage> {
 
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
   final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
-  final LocalVehicleDb _vehicleDb = LocalVehicleDb.instance;
+  final VehiculoService _vehiculoService = VehiculoService();
   final LocalReviewDb _reviewDb = LocalReviewDb.instance;
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;
 
@@ -45,7 +45,7 @@ class _ReservasPageState extends State<ReservasPage> {
       _sessionStore.init(),
       _reservationDb.loadIfNeeded(),
       _publicationDb.loadIfNeeded(),
-      _vehicleDb.loadIfNeeded(),
+      _vehiculoService.init(),
       _reviewDb.loadIfNeeded(),
     ]);
 
@@ -61,7 +61,7 @@ class _ReservasPageState extends State<ReservasPage> {
         publication.id: publication,
     };
     final vehiclesById = {
-      for (final vehicle in _vehicleDb.vehicles) vehicle.id: vehicle,
+      for (final vehicle in _vehiculoService.getVehiculos()) vehicle['id']: vehicle,
     };
     final opinionsById = {
       for (final opinion in _reviewDb.opinions) opinion.id: opinion.rating,
@@ -102,7 +102,7 @@ class _ReservasPageState extends State<ReservasPage> {
       return _ReservaCardData(
         vehicleName: vehicle == null
             ? 'Reserva ${reservation.code}'
-            : '${vehicle.line} ${vehicle.model}',
+            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
         code: reservation.code,
         price: '\$ ${_formatAmount(reservation.totalValue.round())}',
         startDate: _formatDate(reservation.startDate),
@@ -120,7 +120,7 @@ class _ReservasPageState extends State<ReservasPage> {
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
             ? '2024 • Negro Jet'
-            : '${vehicle.model} • ${vehicle.color}',
+            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
         vehicleRating: rating,
         vehicleReviews: reviewsForPublication.length,
         vehiclePrice: pubPrices[reservation.periodTypeId] ??
@@ -870,6 +870,7 @@ class _ReservasPageState extends State<ReservasPage> {
       context,
       MaterialPageRoute(
         builder: (_) => ReservaDetallePage(
+          vehicleId: 0, // Default value since we don't have vehicleId in this context
           vehicleName: vehicleName,
           vehicleSpecs: vehicleSpecs,
           vehicleRating: vehicleRating,

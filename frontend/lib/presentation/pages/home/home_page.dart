@@ -6,6 +6,12 @@ import 'package:flexidrive/services/accounts/local_account_db.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../reservas/reserva_detalle_page.dart';
 import '../../../services/vehiculo_service.dart';
+import '../../../services/publications/local_publication_db.dart';
+import '../../../services/reviews/local_review_db.dart';
+import '../../../services/reservations/local_reservation_db.dart';
+import '../../../models/publications/publication_models.dart';
+import '../../../models/reviews/review_models.dart';
+import '../../../models/reservations/reservation_models.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +23,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final LocalAccountDb _accountDb = LocalAccountDb.instance;
+  final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
+  final LocalReviewDb _reviewDb = LocalReviewDb.instance;
+  final LocalReservationDb _reservationDb = LocalReservationDb.instance;
 
   String _selectedCategory = 'Todos';
   String _selectedCity = 'Bogotá';
@@ -28,7 +37,9 @@ class _HomePageState extends State<HomePage> {
 
   // Fechas de renta
   DateTime _fechaDesde = DateTime(2026, 4, 23);
-  DateTime _fechaHasta = DateTime(2026, 4, 24);
+  DateTime _fechaHasta = DateTime(2026, 4, 30);
+  DateTime? _rentalStartDate;
+  DateTime? _rentalEndDate;
 
   // Servicio para cargar datos desde JSON
   final VehiculoService _vehiculoService = VehiculoService();
@@ -37,6 +48,9 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   bool _isLoadingCities = true;
   List<String> _cities = [];
+
+  // Caché de calificaciones calculadas: vehicleId -> {rating, count}
+  Map<int, Map<String, dynamic>> _vehicleRatings = {};
 
   // Iconos por ciudad
   final Map<String, IconData> _cityIcons = {
@@ -92,6 +106,52 @@ class _HomePageState extends State<HomePage> {
     return _vehiculos.where((v) => v['ubicacion'] == city).length;
   }
 
+  /// Verifica si un vehículo está disponible en el rango de fechas seleccionado
+  bool _isVehicleAvailable(int vehicleId) {
+    // Si no hay fechas seleccionadas, mostrar todos los vehículos
+    if (_rentalStartDate == null || _rentalEndDate == null) {
+      return true;
+    }
+
+    // Buscar la publicación de este vehículo
+    final publication = _publicationDb.publications
+        .where((p) => p.vehicleId == vehicleId)
+        .firstOrNull;
+    
+    if (publication == null) return true;
+
+    // Buscar reservas para esta publicación
+    final reservations = _reservationDb.reservations
+        .where((r) => r.publicationId == publication.id && r.statusId == 1) // Solo reservas activas
+        .toList();
+
+    // Verificar si alguna reserva se cruza con las fechas seleccionadas
+    for (var reservation in reservations) {
+      if (_datesOverlap(
+        _rentalStartDate!,
+        _rentalEndDate!,
+        reservation.startDate,
+        reservation.endDate,
+      )) {
+        return false; // Vehículo no disponible
+      }
+    }
+
+    return true; // Vehículo disponible
+  }
+
+  /// Verifica si dos rangos de fechas se cruzan
+  bool _datesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2) {
+    // Si el rango 1 termina antes de que comience el rango 2
+    if (end1.isBefore(start2)) return false;
+    
+    // Si el rango 1 comienza después de que termine el rango 2
+    if (start1.isAfter(end2)) return false;
+    
+    // Hay cruce de fechas
+    return true;
+  }
+
   void _filtrarVehiculos() {
     var filtrados = _vehiculos.where((v) {
       // Filtro por ciudad
@@ -114,7 +174,10 @@ class _HomePageState extends State<HomePage> {
             precioDia.contains(query);
       }
 
-      return matchesCity && matchesSearch;
+      // Filtro por disponibilidad de fechas
+      final isAvailable = _isVehicleAvailable(v['id'] as int);
+
+      return matchesCity && matchesSearch && isAvailable;
     }).toList();
 
     // Filtro por categoría
@@ -147,10 +210,13 @@ class _HomePageState extends State<HomePage> {
     if (picked != null && picked != _fechaDesde) {
       setState(() {
         _fechaDesde = picked;
+        _rentalStartDate = picked;
         if (_fechaHasta.isBefore(_fechaDesde)) {
           _fechaHasta = _fechaDesde.add(const Duration(days: 1));
+          _rentalEndDate = _fechaHasta;
         }
       });
+      _filtrarVehiculos(); // Filtrar vehicles cuando cambian las fechas
     }
   }
 
@@ -174,7 +240,9 @@ class _HomePageState extends State<HomePage> {
     if (picked != null && picked != _fechaHasta) {
       setState(() {
         _fechaHasta = picked;
+        _rentalEndDate = picked;
       });
+      _filtrarVehiculos(); // Filtrar vehicles cuando cambian las fechas
     }
   }
 
@@ -191,15 +259,102 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  /// Carga vehículos desde el JSON usando dart:convert
+  /// Carga vehículos desde el JSON usando dart:convert y calcula ratings reales
   Future<void> _cargarVehiculos() async {
+    print('DEBUG: Iniciando carga de vehículos...');
+    
     await _vehiculoService.init();
+    print('DEBUG: VehiculoService inicializado');
+    
+    await _publicationDb.loadIfNeeded();
+    print('DEBUG: PublicationDb cargado');
+    
+    await _reviewDb.loadIfNeeded();
+    print('DEBUG: ReviewDb cargado');
+    
+    await _reservationDb.loadIfNeeded();
+    print('DEBUG: ReservationDb cargado');
+
+    final vehiculos = _vehiculoService.getVehiculos();
+    print('DEBUG: Cargados ${vehiculos.length} vehículos');
+    
+    if (vehiculos.isEmpty) {
+      print('DEBUG: ERROR - No se cargaron vehículos');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Calificar ratings reales para cada vehículo
+    for (var v in vehiculos) {
+      final vehicleId = v['id'] as int;
+      final ratingData = _calcularRatingVehiculo(vehicleId);
+      _vehicleRatings[vehicleId] = ratingData;
+    }
+    print('DEBUG: Ratings calculados para ${_vehicleRatings.length} vehículos');
+
     setState(() {
-      _vehiculos = _vehiculoService.getVehiculos();
-      _vehiculosFiltrados = _vehiculos;
+      _vehiculos = vehiculos;
+      _vehiculosFiltrados = vehiculos;
       _isLoading = false;
     });
+    print('DEBUG: Estado actualizado con ${_vehiculos.length} vehículos');
     _filtrarVehiculos();
+    print('DEBUG: Vehículos filtrados: ${_vehiculosFiltrados.length}');
+  }
+
+  /// Calcula el rating real de un vehículo desde las reseñas de la BD
+  /// Si no tiene reseñas: rating = 5.0, count = 0
+  Map<String, dynamic> _calcularRatingVehiculo(int vehicleId) {
+    // Buscar publicación del vehículo
+    final publication = _publicationDb.publications.firstWhere(
+      (p) => p.vehicleId == vehicleId,
+      orElse: () => PublicationModel(
+        id: 0,
+        userId: 0,
+        vehicleId: 0,
+        publishDate: DateTime.now(),
+        active: false,
+      ),
+    );
+
+    if (publication.id == 0) {
+      // Sin publicación = sin reseñas = 5.0 por defecto
+      return {'rating': 5.0, 'count': 0};
+    }
+
+    // Obtener reseñas de esta publicación
+    final reviews = _reviewDb.reviews
+        .where((r) => r.publicationId == publication.id)
+        .toList();
+
+    if (reviews.isEmpty) {
+      // Sin reseñas = 5.0 por defecto
+      return {'rating': 5.0, 'count': 0};
+    }
+
+    // Calcular promedio de calificaciones
+    double totalRating = 0;
+    int validOpinions = 0;
+
+    for (var review in reviews) {
+      final opinion = _reviewDb.opinions.firstWhere(
+        (o) => o.id == review.opinionId,
+        orElse: () => OpinionModel(id: 0, rating: 0),
+      );
+      if (opinion.id != 0) {
+        totalRating += opinion.rating;
+        validOpinions++;
+      }
+    }
+
+    if (validOpinions == 0) {
+      return {'rating': 5.0, 'count': 0};
+    }
+
+    final averageRating = totalRating / validOpinions;
+    return {'rating': averageRating, 'count': validOpinions};
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -787,18 +942,28 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: destacados.map((v) {
                 final typeColor = _getTypeColor(v['categoria']);
+                final vehicleId = v['id'] as int;
+                final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
                 return Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: _buildFeaturedCard(
+                    vehicleId: vehicleId,
                     title: '${v['marca']} ${v['modelo']} ${v['anio']}',
                     type: v['categoria'],
                     typeColor: typeColor,
-                    rating: v['calificacion'],
-                    reviews: v['resenas'],
+                    rating: ratingData['rating'],
+                    reviews: ratingData['count'],
                     price: v['precio_hora'],
                     precioDia: v['precio_dia'],
                     precioSemana: v['precio_semana'],
                     image: v['imagen'],
+                    location: v['ubicacion'],
+                    year: v['anio'],
+                    transmission: v['transmision'],
+                    seats: v['puertos'],
+                    description: v['descripcion'],
+                    fuelType: v['combustible'] ?? 'Gasolina',
+                    hasAC: v['aire_acondicionado'] ?? true,
                   ),
                 );
               }).toList(),
@@ -824,6 +989,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeaturedCard({
+    required int vehicleId,
     required String title,
     required String type,
     required Color typeColor,
@@ -833,6 +999,13 @@ class _HomePageState extends State<HomePage> {
     required int precioDia,
     required int precioSemana,
     required String image,
+    required String location,
+    required int year,
+    required String transmission,
+    required int seats,
+    required String description,
+    required String fuelType,
+    required bool hasAC,
   }) {
     return Container(
       width: 210,
@@ -961,13 +1134,17 @@ class _HomePageState extends State<HomePage> {
                     ])),
                     GestureDetector(
                       onTap: () {
-                        final specs = '$type • 2024 • Automático • 5 puestos';
+                        final specs = '$year • $transmission • $seats puestos • $location';
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => ReservaDetallePage(
+                                    vehicleId: vehicleId,
                                     vehicleName: title,
                                     vehicleSpecs: specs,
+                                    vehicleDescription: description,
+                                    fuelType: fuelType,
+                                    hasAC: hasAC,
                                     vehicleRating: rating,
                                     vehicleReviews: reviews,
                                     vehiclePrice: price,
@@ -1086,11 +1263,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildVehicleListItem(Map<String, dynamic> v, bool isSmallPhone) {
+    final vehicleId = v['id'] as int;
     final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
     final specs =
-        '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos';
-    final rating = v['calificacion'] as double;
-    final reviews = v['resenas'] as int;
+        '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
+    final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
+    final rating = ratingData['rating'] as double;
+    final reviews = ratingData['count'] as int;
     final price = v['precio_hora'] as int;
     final precioDia = v['precio_dia'] as int;
     final precioSemana = v['precio_semana'] as int;
@@ -1197,8 +1376,12 @@ class _HomePageState extends State<HomePage> {
                       context,
                       MaterialPageRoute(
                           builder: (_) => ReservaDetallePage(
+                                vehicleId: vehicleId,
                                 vehicleName: name,
                                 vehicleSpecs: specs,
+                                vehicleDescription: 'Descripción del vehículo',
+                                fuelType: 'Gasolina',
+                                hasAC: true,
                                 vehicleRating: rating,
                                 vehicleReviews: reviews,
                                 vehiclePrice: price,
@@ -1466,11 +1649,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHorizontalCardFromJson(Map<String, dynamic> v) {
+    final vehicleId = v['id'] as int;
     final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
     final specs =
-        '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos';
-    final rating = v['calificacion'] as double;
-    final reviews = v['resenas'] as int;
+        '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
+    final ratingData = _vehicleRatings[vehicleId] ?? {'rating': 5.0, 'count': 0};
+    final rating = ratingData['rating'] as double;
+    final reviews = ratingData['count'] as int;
     final price = v['precio_hora'] as int;
     final precioDia = v['precio_dia'] as int;
     final precioSemana = v['precio_semana'] as int;
@@ -1552,21 +1737,27 @@ class _HomePageState extends State<HomePage> {
                             GoogleFonts.inter(color: _textSub, fontSize: 12)),
                   ])),
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => ReservaDetallePage(
-                                vehicleName: name,
-                                vehicleSpecs: specs,
-                                vehicleRating: rating,
-                                vehicleReviews: reviews,
-                                vehiclePrice: price,
-                                vehicleImage: image,
-                                precioHora: price,
-                                precioDia: precioDia,
-                                precioSemana: precioSemana,
-                              )),
-                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ReservaDetallePage(
+                                  vehicleId: vehicleId,
+                                  vehicleName: name,
+                                  vehicleSpecs: specs,
+                                  vehicleDescription: 'Descripción del vehículo',
+                                  fuelType: 'Gasolina',
+                                  hasAC: true,
+                                  vehicleRating: rating,
+                                  vehicleReviews: reviews,
+                                  vehiclePrice: price,
+                                  vehicleImage: image,
+                                  precioHora: price,
+                                  precioDia: precioDia,
+                                  precioSemana: precioSemana,
+                                )),
+                      );
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),

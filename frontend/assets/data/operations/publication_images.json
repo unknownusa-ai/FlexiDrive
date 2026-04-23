@@ -4,7 +4,7 @@
         "orden":  1,
         "publicacion_id":  1,
         "imagen_publicacion_id":  1,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_1.jpg",
+        "url_imagen":  "assets/imagenes_carros/mazda3.jpg.jpeg",
         "es_principal":  true
     },
     {
@@ -20,7 +20,7 @@
         "orden":  1,
         "publicacion_id":  2,
         "imagen_publicacion_id":  3,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_2.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -36,7 +36,7 @@
         "orden":  1,
         "publicacion_id":  3,
         "imagen_publicacion_id":  5,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_3.jpg",
+        "url_imagen":  "assets/imagenes_carros/Renault-Sandero.jpg",
         "es_principal":  true
     },
     {
@@ -52,7 +52,7 @@
         "orden":  1,
         "publicacion_id":  4,
         "imagen_publicacion_id":  7,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_4.jpg",
+        "url_imagen":  "assets/imagenes_carros/onix.jpeg",
         "es_principal":  true
     },
     {
@@ -68,7 +68,7 @@
         "orden":  1,
         "publicacion_id":  5,
         "imagen_publicacion_id":  9,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_5.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -84,7 +84,7 @@
         "orden":  1,
         "publicacion_id":  6,
         "imagen_publicacion_id":  11,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_6.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -100,7 +100,7 @@
         "orden":  1,
         "publicacion_id":  7,
         "imagen_publicacion_id":  13,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_7.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -116,7 +116,7 @@
         "orden":  1,
         "publicacion_id":  8,
         "imagen_publicacion_id":  15,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_8.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -132,7 +132,7 @@
         "orden":  1,
         "publicacion_id":  9,
         "imagen_publicacion_id":  17,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_9.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -148,7 +148,7 @@
         "orden":  1,
         "publicacion_id":  10,
         "imagen_publicacion_id":  19,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_10.jpg",
+        "url_imagen":  "assets/imagenes_carros/mercedes.jpg",
         "es_principal":  true
     },
     {
@@ -164,7 +164,7 @@
         "orden":  1,
         "publicacion_id":  11,
         "imagen_publicacion_id":  21,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_11.jpg",
+        "url_imagen":  "assets/imagenes_carros/tesla.jpg",
         "es_principal":  true
     },
     {
@@ -180,7 +180,7 @@
         "orden":  1,
         "publicacion_id":  12,
         "imagen_publicacion_id":  23,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_12.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -196,7 +196,7 @@
         "orden":  1,
         "publicacion_id":  13,
         "imagen_publicacion_id":  25,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_13.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -212,7 +212,7 @@
         "orden":  1,
         "publicacion_id":  14,
         "imagen_publicacion_id":  27,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_14.jpg",
+        "url_imagen":  "assets/imagenes_carros/onix.jpeg",
         "es_principal":  true
     },
     {
@@ -228,7 +228,7 @@
         "orden":  1,
         "publicacion_id":  15,
         "imagen_publicacion_id":  29,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_15.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -244,7 +244,7 @@
         "orden":  1,
         "publicacion_id":  16,
         "imagen_publicacion_id":  31,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_16.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -260,7 +260,7 @@
         "orden":  1,
         "publicacion_id":  17,
         "imagen_publicacion_id":  33,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_17.jpg",
+        "url_imagen":  "assets/imagenes_carros/Renault-Sandero.jpg",
         "es_principal":  true
     },
     {
@@ -276,7 +276,7 @@
         "orden":  1,
         "publicacion_id":  18,
         "imagen_publicacion_id":  35,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_18.jpg",
+        "url_imagen":  "assets/imagenes_carros/onix.jpeg",
         "es_principal":  true
     },
     {
@@ -292,7 +292,7 @@
         "orden":  1,
         "publicacion_id":  19,
         "imagen_publicacion_id":  37,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_19.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -308,7 +308,7 @@
         "orden":  1,
         "publicacion_id":  20,
         "imagen_publicacion_id":  39,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_20.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -324,7 +324,7 @@
         "orden":  1,
         "publicacion_id":  21,
         "imagen_publicacion_id":  41,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_21.jpg",
+        "url_imagen":  "assets/imagenes_carros/Renault-Sandero.jpg",
         "es_principal":  true
     },
     {
@@ -340,7 +340,7 @@
         "orden":  1,
         "publicacion_id":  22,
         "imagen_publicacion_id":  43,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_22.jpg",
+        "url_imagen":  "assets/imagenes_carros/mercedes.jpg",
         "es_principal":  true
     },
     {
@@ -356,7 +356,7 @@
         "orden":  1,
         "publicacion_id":  23,
         "imagen_publicacion_id":  45,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_23.jpg",
+        "url_imagen":  "assets/imagenes_carros/tesla.jpg",
         "es_principal":  true
     },
     {
@@ -372,7 +372,7 @@
         "orden":  1,
         "publicacion_id":  24,
         "imagen_publicacion_id":  47,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_24.jpg",
+        "url_imagen":  "assets/imagenes_carros/onix.jpeg",
         "es_principal":  true
     },
     {
@@ -388,7 +388,7 @@
         "orden":  1,
         "publicacion_id":  25,
         "imagen_publicacion_id":  49,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_25.jpg",
+        "url_imagen":  "assets/imagenes_carros/cx5.jpg",
         "es_principal":  true
     },
     {
@@ -404,7 +404,7 @@
         "orden":  1,
         "publicacion_id":  26,
         "imagen_publicacion_id":  51,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_26.jpg",
+        "url_imagen":  "assets/imagenes_carros/corolla.jpg",
         "es_principal":  true
     },
     {
@@ -420,7 +420,7 @@
         "orden":  1,
         "publicacion_id":  27,
         "imagen_publicacion_id":  53,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_27.jpg",
+        "url_imagen":  "assets/imagenes_carros/Renault-Sandero.jpg",
         "es_principal":  true
     },
     {
@@ -436,7 +436,7 @@
         "orden":  1,
         "publicacion_id":  28,
         "imagen_publicacion_id":  55,
-        "url_imagen":  "assets/imagenes_carros/vehiculo_28.jpg",
+        "url_imagen":  "assets/imagenes_carros/porsche.jpg",
         "es_principal":  true
     },
     {
