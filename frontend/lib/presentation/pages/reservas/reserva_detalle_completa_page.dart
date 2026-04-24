@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/responsive_utils.dart';
-import '../../../core/session/local_session_store.dart';
-import '../../../services/payments/local_payment_db.dart';
-import '../../../services/catalogs/local_catalog_db.dart';
 import '../../../services/reservations/local_reservation_db.dart';
 import '../../../services/publications/local_publication_db.dart';
 import '../../../services/vehiculo_service.dart';
@@ -31,17 +28,12 @@ class ReservaDetalleCompletaPage extends StatefulWidget {
 
 class _ReservaDetalleCompletaPageState
     extends State<ReservaDetalleCompletaPage> {
-  final LocalSessionStore _sessionStore = LocalSessionStore.instance;
-  final LocalPaymentDb _paymentDb = LocalPaymentDb.instance;
-  final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
   final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
   final VehiculoService _vehiculoService = VehiculoService();
 
   Map<String, dynamic>? _reserva;
   Map<String, dynamic>? _vehiculo;
-  Map<String, dynamic>? _paymentMethod;
-  Map<String, dynamic>? _paymentDetails;
   bool _isLoading = true;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
@@ -62,9 +54,6 @@ class _ReservaDetalleCompletaPageState
 
   Future<void> _loadReservaDetails() async {
     await Future.wait([
-      _sessionStore.init(),
-      _paymentDb.loadIfNeeded(),
-      _catalogDb.loadIfNeeded(),
       _reservationDb.loadIfNeeded(),
       _publicationDb.loadIfNeeded(),
       _vehiculoService.init(),
@@ -89,47 +78,6 @@ class _ReservaDetalleCompletaPageState
       orElse: () => vehiculos.first,
     );
 
-    // Get payment method details
-    final paymentMethod =
-        _paymentDb.getPaymentMethodById(reserva.paymentMethodId);
-    Map<String, dynamic>? paymentDetails;
-
-    if (paymentMethod != null) {
-      if (paymentMethod.paymentMethodTypeId == 1) {
-        // Tarjeta
-        final card = _paymentDb.getCardByPaymentMethodId(paymentMethod.id);
-        final cardBrand = _catalogDb.cardBrands.firstWhere(
-            (brand) => brand.id == card?.cardBrandId,
-            orElse: () => _catalogDb.cardBrands.first);
-
-        paymentDetails = {
-          'type': 'Tarjeta',
-          'brand': cardBrand.name,
-          'last4':
-              card?.cardNumber.substring(card.cardNumber.length - 4) ?? '****',
-          'expiryMonth': card?.expirationMonth,
-          'expiryYear': card?.expirationYear,
-        };
-      } else if (paymentMethod.paymentMethodTypeId == 2) {
-        // PSE
-        final pse = _paymentDb.getPseByPaymentMethodId(paymentMethod.id);
-        final bank = _catalogDb.banks.firstWhere(
-            (bank) => bank.id == pse?.bankId,
-            orElse: () => _catalogDb.banks.first);
-
-        paymentDetails = {
-          'type': 'PSE',
-          'bank': bank.name,
-          'personType': pse?.personTypeId == 1 ? 'Natural' : 'Jurídica',
-        };
-      } else {
-        // Efectivo
-        paymentDetails = {
-          'type': 'Efectivo',
-        };
-      }
-    }
-
     setState(() {
       _reserva = {
         'id': reserva.id,
@@ -140,18 +88,10 @@ class _ReservaDetalleCompletaPageState
         'totalValue': reserva.totalValue,
         'pickupLocation': reserva.pickupLocation,
         'returnLocation': reserva.returnLocation,
-        'paymentMethodId': reserva.paymentMethodId,
         'periodCount': reserva.periodCount,
+        'publicationId': reserva.publicationId,
       };
       _vehiculo = vehiculo;
-      _paymentMethod = paymentMethod != null
-          ? {
-              'id': paymentMethod.id,
-              'typeId': paymentMethod.paymentMethodTypeId,
-              'isDefault': paymentMethod.isDefault,
-            }
-          : null;
-      _paymentDetails = paymentDetails;
       _isLoading = false;
     });
   }
@@ -175,50 +115,14 @@ class _ReservaDetalleCompletaPageState
   }
 
   String _formatAmount(int amount) {
-    final digits = amount.toString();
-    final buffer = StringBuffer();
-
-    for (int i = 0; i < digits.length; i++) {
-      final reverseIndex = digits.length - i;
-      buffer.write(digits[i]);
-      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
-        buffer.write('.');
-      }
-    }
-
-    return buffer.toString().split('').reversed.join('');
+    // Formato simple: separar miles con puntos
+    return amount.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
   }
 
-  String _getStatusLabel(int statusId) {
-    switch (statusId) {
-      case 1:
-        return 'Pendiente';
-      case 2:
-        return 'Finalizada';
-      case 3:
-        return 'Cancelada';
-      case 4:
-        return 'Activa';
-      default:
-        return 'Pendiente';
-    }
-  }
-
-  Color _getStatusColor(int statusId) {
-    switch (statusId) {
-      case 1:
-        return const Color(0xFFF59E0B);
-      case 2:
-        return const Color(0xFF3B82F6);
-      case 3:
-        return const Color(0xFFEF4444);
-      case 4:
-        return const Color(0xFF06B6D4);
-      default:
-        return const Color(0xFFF59E0B);
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -242,8 +146,6 @@ class _ReservaDetalleCompletaPageState
                 _buildVehicleInfo(isSmallPhone),
                 const SizedBox(height: 20),
                 _buildReservationInfo(isSmallPhone),
-                const SizedBox(height: 20),
-                _buildPaymentInfo(isSmallPhone),
                 const SizedBox(height: 20),
                 _buildPricingInfo(isSmallPhone),
                 const SizedBox(height: 40),
@@ -337,13 +239,13 @@ class _ReservaDetalleCompletaPageState
           const SizedBox(height: 8),
           _buildInfoRow(
             'Transmisión',
-            _vehiculo!['tipo_transmision']?.toString() ?? 'No especificado',
+            _vehiculo!['transmision']?.toString() ?? 'No especificado',
             Icons.settings_outlined,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             'Combustible',
-            _vehiculo!['tipo_combustible']?.toString() ?? 'No especificado',
+            _vehiculo!['combustible']?.toString() ?? 'No especificado',
             Icons.local_gas_station_outlined,
           ),
           const SizedBox(height: 8),
@@ -366,9 +268,6 @@ class _ReservaDetalleCompletaPageState
   }
 
   Widget _buildReservationInfo(bool isSmallPhone) {
-    final status = _getStatusLabel(_reserva!['statusId']);
-    final statusColor = _getStatusColor(_reserva!['statusId']);
-
     return _buildInfoCard(
       title: 'Información de la Reserva',
       child: Column(
@@ -389,29 +288,6 @@ class _ReservaDetalleCompletaPageState
                   fontSize: isSmallPhone ? 16 : 18,
                   fontWeight: FontWeight.bold,
                   color: _textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallPhone ? 8 : 12,
-                  vertical: isSmallPhone ? 4 : 6,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: GoogleFonts.poppins(
-                    fontSize: isSmallPhone ? 12 : 14,
-                    fontWeight: FontWeight.w600,
-                    color: statusColor,
-                  ),
                 ),
               ),
             ],
@@ -445,138 +321,48 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
-  Widget _buildPaymentInfo(bool isSmallPhone) {
-    if (_paymentDetails == null) {
-      return _buildInfoCard(
-        title: 'Información de Pago',
-        child: Text(
-          'Método de pago no disponible',
-          style: GoogleFonts.poppins(
-            fontSize: isSmallPhone ? 14 : 16,
-            color: _textSecondary,
-          ),
-        ),
-      );
-    }
-
-    return _buildInfoCard(
-      title: 'Información de Pago',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                _paymentDetails!['type'] == 'Tarjeta'
-                    ? Icons.credit_card
-                    : _paymentDetails!['type'] == 'PSE'
-                        ? Icons.account_balance
-                        : Icons.attach_money,
-                color: const Color(0xFF6366F1),
-                size: isSmallPhone ? 20 : 24,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _paymentDetails!['type'],
-                style: GoogleFonts.poppins(
-                  fontSize: isSmallPhone ? 16 : 18,
-                  fontWeight: FontWeight.bold,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_paymentDetails!['type'] == 'Tarjeta') ...[
-            _buildInfoRow(
-              'Banco',
-              _paymentDetails!['brand'],
-              Icons.credit_card,
-            ),
-            const SizedBox(height: 8),
-            _buildInfoRow(
-              'Número',
-              '•••• ${_paymentDetails!['last4']}',
-              Icons.numbers,
-            ),
-            const SizedBox(height: 8),
-            _buildInfoRow(
-              'Vencimiento',
-              '${_paymentDetails!['expiryMonth']}/${_paymentDetails!['expiryYear']}',
-              Icons.date_range,
-            ),
-          ] else if (_paymentDetails!['type'] == 'PSE') ...[
-            _buildInfoRow(
-              'Banco',
-              _paymentDetails!['bank'],
-              Icons.account_balance,
-            ),
-            const SizedBox(height: 8),
-            _buildInfoRow(
-              'Tipo de persona',
-              _paymentDetails!['personType'],
-              Icons.person_outline,
-            ),
-          ] else ...[
-            _buildInfoRow(
-              'Método',
-              'Pago en efectivo',
-              Icons.attach_money,
-            ),
-          ],
-          if (_paymentMethod?['isDefault'] == true) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isSmallPhone ? 8 : 12,
-                vertical: isSmallPhone ? 4 : 6,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.star,
-                    color: const Color(0xFF10B981),
-                    size: isSmallPhone ? 16 : 20,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Método predeterminado',
-                    style: GoogleFonts.poppins(
-                      fontSize: isSmallPhone ? 12 : 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF10B981),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _buildPricingInfo(bool isSmallPhone) {
     // Calculate actual values based on reservation data
-    final totalValue = _reserva!['totalValue'] as double;
+    final totalValue = (_reserva!['totalValue'] as num).toDouble();
     final periodCount = _reserva!['periodCount'] as int;
 
-    // Get publication price to find the actual rate
-    final publicationPrice = _publicationDb.publicationPrices.firstWhere(
-        (p) => p.publicationId == _reserva!['publicationId'],
-        orElse: () => _publicationDb.publicationPrices.first);
-    final dailyRate = publicationPrice.price;
+    // Try to get publication prices
+    final publicationId = _reserva!['publicationId'] as int?;
+    double vehicleRental;
+    double insurance;
 
-    // Calculate vehicle rental (based on actual rate)
-    final vehicleRental = dailyRate * periodCount;
-
-    // Calculate insurance (remaining amount)
-    final insurance = totalValue - vehicleRental;
+    if (publicationId != null) {
+      final publicationPrices = _publicationDb.publicationPrices
+          .where((p) => p.publicationId == publicationId)
+          .toList();
+      
+      if (publicationPrices.isNotEmpty) {
+        // Find daily rate (periodTypeId 2 = daily)
+        final dailyPrice = publicationPrices
+            .firstWhere((p) => p.periodTypeId == 2, 
+                orElse: () => publicationPrices.first);
+        final dailyRate = dailyPrice.price;
+        
+        // Calculate vehicle rental (daily rate * days)
+        vehicleRental = dailyRate * periodCount;
+        
+        // Ensure vehicle rental doesn't exceed total
+        if (vehicleRental > totalValue) {
+          vehicleRental = totalValue * 0.85; // 85% for vehicle
+        }
+        
+        // Calculate insurance and service fee (remaining amount)
+        insurance = totalValue - vehicleRental;
+      } else {
+        // No prices found, use default split: 85% vehicle, 15% insurance
+        vehicleRental = totalValue * 0.85;
+        insurance = totalValue * 0.15;
+      }
+    } else {
+      // No publication info, use default split
+      vehicleRental = totalValue * 0.85;
+      insurance = totalValue * 0.15;
+    }
 
     return _buildInfoCard(
       title: 'Desglose de Precios',

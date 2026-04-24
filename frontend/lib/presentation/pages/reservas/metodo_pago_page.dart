@@ -26,6 +26,7 @@ class MetodoPagoPage extends StatefulWidget {
     this.vehiculoBrand = 'Mazda CX-5 2024',
     this.vehiculoImage = '',
     this.lugarRecogida = 'Av. El Dorado, Bogotá',
+    this.publicationId = 1, // ID de la publicación
   });
 
   final int total;
@@ -37,6 +38,7 @@ class MetodoPagoPage extends StatefulWidget {
   final String vehiculoBrand;
   final String vehiculoImage;
   final String lugarRecogida;
+  final int publicationId;
 
   @override
   State<MetodoPagoPage> createState() => _MetodoPagoPageState();
@@ -1321,8 +1323,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 id: _reservationDb.reservations.length + 1, // Generate new ID
                 code: codigoReserva,
                 userId: currentUserId,
-                publicationId:
-                    1, // Default publication ID - should come from widget
+                publicationId: widget.publicationId, // Use the publication ID from widget
                 paymentMethodId: paymentMethodId,
                 periodTypeId:
                     1, // Default period type - should come from widget
@@ -1336,8 +1337,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 reservationDate: DateTime.now(),
               );
 
-              // Add to database (this will persist to JSON)
-              _reservationDb.reservations.add(newReservation);
+              // Add to database (this will persist to memory)
+              _reservationDb.addReservation(newReservation);
 
               // Also add to store for UI
               ReservasStore.addActiva(

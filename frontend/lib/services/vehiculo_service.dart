@@ -85,7 +85,8 @@ class VehiculoService {
       'anio': v['modelo'],
       'categoria': categoryName,
       'transmision': v['tipo_transmision'],
-      'puertos': v['asientos'],
+      'asientos': v['asientos'],
+      'puertos': v['asientos'], // Compatibilidad legacy
       'precio_hora': 15000 + (vehicleId * 1000), // Precio determinista
       'precio_dia': 120000 + (vehicleId * 10000), // Precio determinista
       'precio_semana': 750000 + (vehicleId * 50000), // Precio determinista
@@ -97,6 +98,7 @@ class VehiculoService {
       'resenas': vehicleId * 5, // Reseñas simuladas
       'disponible': true,
       'combustible': v['tipo_combustible'],
+      'color': v['color'], // Color del vehículo
       'aire_acondicionado': v['aire_acondicionado'] ?? true,
     };
   }

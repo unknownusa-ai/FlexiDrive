@@ -86,6 +86,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   bool _isLoadingReviews = true;
   int _totalOpinions = 0;
   double _averageRating = 0.0;
+  int _publicationId = 1; // Default publication ID
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -111,6 +112,11 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
         active: false,
       ),
     );
+
+    // Store publication ID for later use
+    if (publication.id != 0) {
+      _publicationId = publication.id;
+    }
 
     if (publication.id != 0) {
       // Obtener reseñas de esta publicación
@@ -1250,6 +1256,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                               conductor: 'Carlos Rodríguez',
                               tarifaServicio: 1900,
                               seguroBasico: 15000,
+                              publicationId: _publicationId,
                             ),
                           ),
                         );
@@ -1343,6 +1350,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
                                 conductor: 'Carlos Rodríguez',
                                 tarifaServicio: 1900,
                                 seguroBasico: 15000,
+                                publicationId: _publicationId,
                               ),
                             ),
                           );

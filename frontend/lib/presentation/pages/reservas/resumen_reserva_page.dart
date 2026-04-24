@@ -21,6 +21,7 @@ class ResumenReservaPage extends StatefulWidget {
     this.conductor = 'Carlos Rodríguez', // Nombre del conductor
     this.tarifaServicio = 1900, // Tarifa de servicio
     this.seguroBasico = 15000, // Seguro básico
+    this.publicationId = 1, // ID de la publicación
   });
 
   final String vehiculoBrand;
@@ -34,6 +35,7 @@ class ResumenReservaPage extends StatefulWidget {
   final String conductor;
   final int tarifaServicio;
   final int seguroBasico;
+  final int publicationId;
 
   @override
   State<ResumenReservaPage> createState() => _ResumenReservaPageState();
@@ -235,6 +237,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
                                   vehiculoBrand: widget.vehiculoBrand,
                                   vehiculoImage: widget.vehiculoImage,
                                   lugarRecogida: widget.lugarRecogida,
+                                  publicationId: widget.publicationId,
                                 ),
                               ),
                             );
@@ -351,27 +354,34 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.vehiculoBrand,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: isSmallPhone ? 16 : 18,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.vehiculoBrand,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: isSmallPhone ? 16 : 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      SizedBox(height: isSmallPhone ? 2 : 4),
-                      Text(
-                        widget.vehiculoColor,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white70,
-                          fontSize: isSmallPhone ? 12 : 14,
+                        SizedBox(height: isSmallPhone ? 2 : 4),
+                        Text(
+                          widget.vehiculoColor,
+                          style: GoogleFonts.poppins(
+                            color: Colors.white70,
+                            fontSize: isSmallPhone ? 12 : 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,

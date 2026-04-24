@@ -22,7 +22,11 @@ class LocalReservationDb {
   // Carga los datos solo si es necesario
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
+    await forceReload();
+  }
 
+  // Recarga forzada desde el JSON (ignora el estado de carga)
+  Future<void> forceReload() async {
     reservations
       ..clear()
       ..addAll(
@@ -46,5 +50,10 @@ class LocalReservationDb {
   Future<List<dynamic>> _loadList(String assetPath) async {
     final rawJson = await rootBundle.loadString(assetPath);
     return (json.decode(rawJson) as List<dynamic>? ?? const []);
+  }
+
+  // Agrega una nueva reserva a la lista en memoria
+  void addReservation(ReservationModel reservation) {
+    reservations.add(reservation);
   }
 }

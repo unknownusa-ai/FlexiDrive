@@ -28,7 +28,7 @@ class ReservasPage extends StatefulWidget {
 }
 
 // Estado de la pagina de reservas
-class _ReservasPageState extends State<ReservasPage> {
+class _ReservasPageState extends State<ReservasPage> with WidgetsBindingObserver {
   // Filtro seleccionado: Activas, Pendientes, Historial
   String _selectedFilter = 'Activas';
   // Contador de reservas finalizadas
@@ -59,12 +59,36 @@ class _ReservasPageState extends State<ReservasPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadHistoryReservations(); // Carga historial de reservas
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Recargar reservas cuando la app vuelve a primer plano
+      _refreshReservations();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Recargar reservas cuando se regresa a esta página
+    _refreshReservations();
   }
 
   // Refresca todas las reservas
   Future<void> _refreshReservations() async {
     setState(() => _isLoadingHistory = true);
+    // Small delay to ensure new reservation is properly saved
+    await Future.delayed(const Duration(milliseconds: 100));
     await _loadHistoryReservations();
   }
 
@@ -86,18 +110,23 @@ class _ReservasPageState extends State<ReservasPage> {
             .where((reservation) => reservation.userId == currentUserId)
             .toList();
 
+
     // Separar reservas por estado
     final pendingReservations = userReservations
         .where((reservation) => reservation.statusId == 1)
-        .toList(); // statusId = 1 (Pendiente)
+        .toList()
+      ..sort((a, b) => b.reservationDate.compareTo(a.reservationDate)); // statusId = 1 (Pendiente)
 
     final activeReservations = userReservations
         .where((reservation) => reservation.statusId == 4)
-        .toList(); // statusId = 4 (Activa)
+        .toList()
+      ..sort((a, b) => b.reservationDate.compareTo(a.reservationDate)); // statusId = 4 (Activa)
 
     final finalizedReservations = userReservations
         .where((reservation) => reservation.statusId == 2)
-        .toList(); // statusId = 2 (Finalizada)
+        .toList()
+      ..sort((a, b) => b.reservationDate.compareTo(a.reservationDate)); // statusId = 2 (Finalizada)
+
 
     final publicationsById = {
       for (final publication in _publicationDb.publications)
@@ -107,6 +136,7 @@ class _ReservasPageState extends State<ReservasPage> {
       for (final vehicle in _vehiculoService.getVehiculos())
         vehicle['id']: vehicle,
     };
+    
     final opinionsById = {
       for (final opinion in _reviewDb.opinions) opinion.id: opinion.rating,
     };
@@ -270,7 +300,9 @@ class _ReservasPageState extends State<ReservasPage> {
                 ? 0.0
                 : 1.0,
         status: status,
-        imageUrl: vehicle == null ? null : vehicle['imagen'],
+        imageUrl: vehicle == null || vehicle['imagen'] == null
+            ? 'assets/imagenes_carros/cx5.jpg'
+            : vehicle['imagen'] as String,
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
             ? '2024 • Negro Jet'
@@ -301,6 +333,7 @@ class _ReservasPageState extends State<ReservasPage> {
 
     if (!mounted) return;
 
+
     setState(() {
       _activeReservations = activeReservationData;
       _pendingReservations = pendingReservationData;
@@ -310,12 +343,14 @@ class _ReservasPageState extends State<ReservasPage> {
       _canceladasCount = canceladas;
       _isLoadingHistory = false;
     });
+
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final activasCount = _activeReservations.length;
+    
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
