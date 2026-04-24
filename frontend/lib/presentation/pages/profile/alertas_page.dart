@@ -293,22 +293,27 @@ class _AlertasPageState extends State<AlertasPage> {
     ];
 
     if (tabIndex == 0) return allNotifications;
-    if (tabIndex == 1)
+    if (tabIndex == 1) {
       return allNotifications
           .where((n) => n.title.contains('solicitud'))
           .toList();
-    if (tabIndex == 2)
+    }
+    if (tabIndex == 2) {
       return allNotifications.where((n) => n.title.contains('Pago')).toList();
-    if (tabIndex == 3)
+    }
+    if (tabIndex == 3) {
       return allNotifications.where((n) => n.title.contains('reseña')).toList();
-    if (tabIndex == 4)
+    }
+    if (tabIndex == 4) {
       return allNotifications
           .where((n) => n.title.contains('finalizar'))
           .toList();
-    if (tabIndex == 5)
+    }
+    if (tabIndex == 5) {
       return allNotifications
           .where((n) => n.title.contains('ganancias'))
           .toList();
+    }
     return allNotifications;
   }
 
