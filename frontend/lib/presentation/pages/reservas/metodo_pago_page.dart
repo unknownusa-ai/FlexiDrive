@@ -131,8 +131,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         'last4': card.cardNumber.substring(card.cardNumber.length - 4),
         'cardBrandId': card.cardBrandId,
         'brand': cardBrand.name,
-        'expirationMonth': card.expirationMonth,
-        'expirationYear': card.expirationYear,
+        'expiryMonth': card.expirationMonth,
+        'expiryYear': card.expirationYear,
         'isDefault': paymentMethod.isDefault,
         'type': 'Tarjeta',
       };

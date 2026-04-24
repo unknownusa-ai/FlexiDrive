@@ -4,7 +4,7 @@
         "orden":  1,
         "publicacion_id":  1,
         "imagen_publicacion_id":  1,
-        "url_imagen":  "assets/imagenes_carros/mazda3.jpg.jpeg",
+        "url_imagen":  "assets/imagenes_carros/mazda3.jpg",
         "es_principal":  true
     },
     {

@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import 'package:flexidrive/services/accounts/user_preference_service.dart';
+import 'package:flexidrive/services/reservations/local_reservation_db.dart';
+import 'package:flexidrive/services/reviews/local_review_db.dart';
 import 'edit_profile_page.dart';
 import '../login/login_page.dart';
 import 'security_page.dart';
@@ -22,10 +25,20 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final UserPreferenceService _preferenceService = UserPreferenceService();
+  final LocalReservationDb _reservationDb = LocalReservationDb.instance;
+  final LocalReviewDb _reviewDb = LocalReviewDb.instance;
   bool _isModoArrendatarioActive = false;
   int? _currentUserId;
   String _profileName = 'Invitado';
   String _profileEmail = 'sin_sesion@flexidrive.local';
+  
+  // Dynamic profile data
+  double _rating = 4.9;
+  int _trips = 0;
+  double _totalSpent = 0;
+  int _points = 0;
+  int _totalReservations = 0;
+  int _totalReviews = 0;
 
   @override
   void initState() {
@@ -44,6 +57,9 @@ class _ProfilePageState extends State<ProfilePage> {
       userId: currentUser.id,
       defaultValue: false,
     );
+
+    // Load data for dynamic profile stats
+    await _calculateProfileStats();
 
     setState(() {
       _profileName = currentUser.fullName;
@@ -198,7 +214,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           const Icon(Icons.star,
                               color: Color(0xFFFBBF24), size: 12),
                           const SizedBox(width: 2),
-                          Text('4.9',
+                          Text(_rating.toStringAsFixed(1),
                               style: GoogleFonts.inter(
                                   fontWeight: FontWeight.bold,
                                   fontSize: isSmallPhone ? 11 : 13,
@@ -230,19 +246,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.directions_car_outlined,
-                          value: '2',
+                          value: _trips.toString(),
                           label: isSmallPhone ? 'Viajes' : 'Viajes')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.account_balance_wallet_outlined,
-                          value: isSmallPhone ? '\$1.3M' : '\$1.3M',
+                          value: _formatCurrency(_totalSpent),
                           label: isSmallPhone ? 'Gasto' : 'Gastado')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.star_outline,
-                          value: '1,240',
+                          value: _points.toString(),
                           label: isSmallPhone ? 'Pts' : 'Puntos')),
                 ]),
               ]),
@@ -526,7 +542,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 iconColor: const Color(0xFFEF4444),
                 iconBgColor: const Color(0xFFFFF4E6),
                 title: 'Historial',
-                subtitle: '4 reservas totales',
+                subtitle: '$_totalReservations reservas totales',
                 onTap: () => MainPage.of(context).setIndex(1)),
             Divider(
                 height: 1,
@@ -550,7 +566,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 iconColor: const Color(0xFFFBBF24),
                 iconBgColor: const Color(0xFFFEF3C7),
                 title: 'Mis reseñas',
-                subtitle: '3 reseñas escritas',
+                subtitle: '$_totalReviews reseñas escritas',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -948,6 +964,60 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+
+  String _formatCurrency(double amount) {
+    if (amount >= 1000000) {
+      return '\$${(amount / 1000000).toStringAsFixed(1)}M';
+    } else if (amount >= 1000) {
+      return '\$${(amount / 1000).toStringAsFixed(1)}K';
+    } else {
+      return '\$${amount.toStringAsFixed(0)}';
+    }
+  }
+
+  Future<void> _calculateProfileStats() async {
+    try {
+      // Load reservations and reviews data
+      await _reservationDb.loadIfNeeded();
+      await _reviewDb.loadIfNeeded();
+      
+      // Calculate completed trips (reservations with status 2 or 3)
+      if (_currentUserId != null) {
+        final userReservations = _reservationDb.reservations
+            .where((r) => r.userId == _currentUserId)
+            .toList();
+        
+        // Total reservations (all statuses)
+        _totalReservations = userReservations.length;
+        
+        final completedReservations = userReservations
+            .where((r) => r.statusId == 2 || r.statusId == 3)
+            .toList();
+        
+        _trips = completedReservations.length;
+        
+        // Calculate total spent
+        _totalSpent = completedReservations.fold(0.0, (sum, reservation) {
+          return sum + reservation.totalValue;
+        });
+        
+        // Calculate points (10 points per completed trip + bonus based on spending)
+        _points = (_trips * 10) + (_totalSpent / 10000).floor();
+        
+        // Count reviews
+        final userReviews = _reviewDb.reviews
+            .where((r) => r.userId == _currentUserId)
+            .toList();
+        
+        _totalReviews = userReviews.length;
+        
+        // Rating is kept at default 4.9 since ReviewModel doesn't contain rating directly
+        // (rating is in OpinionModel referenced by opinionId)
+      }
+    } catch (e) {
+      print('Error calculating profile stats: $e');
+    }
   }
 
   Widget _buildFeatureItem(IconData icon, String text, bool isSmallPhone) {

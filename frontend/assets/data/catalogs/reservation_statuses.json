@@ -1,16 +1,21 @@
 ﻿[
     {
         "estado_reserva_id":  1,
+        "descripcion":  "Reserva pendiente de aprobación",
+        "nombre":  "pendiente"
+    },
+    {
+        "estado_reserva_id":  2,
         "descripcion":  "Reserva en curso",
         "nombre":  "activa"
     },
     {
-        "estado_reserva_id":  2,
+        "estado_reserva_id":  3,
         "descripcion":  "Reserva completada",
         "nombre":  "finalizada"
     },
     {
-        "estado_reserva_id":  3,
+        "estado_reserva_id":  4,
         "descripcion":  "Reserva cancelada",
         "nombre":  "cancelada"
     }

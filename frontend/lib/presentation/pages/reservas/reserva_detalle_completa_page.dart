@@ -313,25 +313,25 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
           const SizedBox(height: 12),
           _buildInfoRow(
             'Color',
-            _vehiculo!['color'] ?? 'N/A',
+            _vehiculo!['color']?.toString() ?? 'No especificado',
             Icons.palette_outlined,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             'Transmisión',
-            _vehiculo!['tipo_transmision'] ?? 'N/A',
+            _vehiculo!['tipo_transmision']?.toString() ?? 'No especificado',
             Icons.settings_outlined,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             'Combustible',
-            _vehiculo!['tipo_combustible'] ?? 'N/A',
+            _vehiculo!['tipo_combustible']?.toString() ?? 'No especificado',
             Icons.local_gas_station_outlined,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             'Asientos',
-            '${_vehiculo!['asientos'] ?? 'N/A'}',
+            '${_vehiculo!['asientos']?.toString() ?? 'No especificado'}',
             Icons.airline_seat_recline_normal_outlined,
           ),
           if (_vehiculo!['aire_acondicionado'] == true) ...[
@@ -544,6 +544,22 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
   }
 
   Widget _buildPricingInfo(bool isSmallPhone) {
+    // Calculate actual values based on reservation data
+    final totalValue = _reserva!['totalValue'] as double;
+    final periodCount = _reserva!['periodCount'] as int;
+    
+    // Get publication price to find the actual rate
+    final publicationPrice = _publicationDb.publicationPrices
+        .firstWhere((p) => p.publicationId == _reserva!['publicationId'],
+        orElse: () => _publicationDb.publicationPrices.first);
+    final dailyRate = publicationPrice.price;
+    
+    // Calculate vehicle rental (based on actual rate)
+    final vehicleRental = dailyRate * periodCount;
+    
+    // Calculate insurance (remaining amount)
+    final insurance = totalValue - vehicleRental;
+    
     return _buildInfoCard(
       title: 'Desglose de Precios',
       child: Column(
@@ -551,19 +567,19 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
         children: [
           _buildPricingRow(
             'Alquiler del vehículo',
-            '\$ ${_formatAmount((_reserva!['totalValue'] * 0.8).round())}',
+            '\$ ${_formatAmount(vehicleRental.round())}',
             isSmallPhone,
           ),
           const SizedBox(height: 8),
           _buildPricingRow(
             'Seguro',
-            '\$ ${_formatAmount((_reserva!['totalValue'] * 0.2).round())}',
+            '\$ ${_formatAmount(insurance.round())}',
             isSmallPhone,
           ),
           Divider(height: 20, color: _borderColor),
           _buildPricingRow(
             'Total',
-            '\$ ${_formatAmount(_reserva!['totalValue'])}',
+            '\$ ${_formatAmount(totalValue.round())}',
             isSmallPhone,
             isTotal: true,
           ),

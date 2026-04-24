@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
+import '../../../services/accounts/local_account_repository.dart';
+import '../../../services/accounts/user_preference_service.dart';
+import '../../../services/vehiculo_service.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -11,12 +14,17 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final _nameController = TextEditingController(text: 'Carlos Rodríguez');
-  final _emailController = TextEditingController(text: 'carlos.rodriguez@email.com');
-  final _phoneController = TextEditingController(text: '310 456 7890');
-  final _documentController = TextEditingController(text: '1.023.456.789');
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final VehiculoService _vehiculoService = VehiculoService();
+  
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _documentController = TextEditingController();
   
   String _selectedDocumentType = 'Cédula de Ciudadanía';
+  int? _currentUserId;
+  int? _documentTypeId;
   
   final List<String> _documentTypes = [
     'Cédula de Ciudadanía',
@@ -24,6 +32,57 @@ class _EditProfilePageState extends State<EditProfilePage> {
     'Pasaporte',
     'NIT',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final currentUser = await _accountRepository.getCurrentUser();
+      if (currentUser != null) {
+        _currentUserId = currentUser.id;
+        
+        // Load users data to get document type
+        await _vehiculoService.init();
+        final users = _vehiculoService.usuarios;
+        final userData = users.firstWhere(
+          (user) => user['usuario_id'] == currentUser.id,
+          orElse: () => {},
+        );
+        
+        setState(() {
+          _nameController.text = currentUser.fullName;
+          _emailController.text = currentUser.email;
+          _phoneController.text = userData['telefono']?.toString() ?? '';
+          _documentController.text = userData['numero_identificacion']?.toString() ?? '';
+          _documentTypeId = userData['tipo_identificacion_id'];
+          
+          // Set document type based on ID
+          if (_documentTypeId != null) {
+            switch (_documentTypeId) {
+              case 1:
+                _selectedDocumentType = 'Cédula de Ciudadanía';
+                break;
+              case 2:
+                _selectedDocumentType = 'Cédula de Extranjería';
+                break;
+              case 3:
+                _selectedDocumentType = 'Pasaporte';
+                break;
+              case 4:
+                _selectedDocumentType = 'NIT';
+                break;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -592,20 +651,67 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  void _saveChanges() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Perfil actualizado exitosamente',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+  void _saveChanges() async {
+    try {
+      if (_currentUserId != null) {
+        // Get document type ID from selected type
+        int documentTypeId = 1; // Default
+        switch (_selectedDocumentType) {
+          case 'Cédula de Ciudadanía':
+            documentTypeId = 1;
+            break;
+          case 'Cédula de Extranjería':
+            documentTypeId = 2;
+            break;
+          case 'Pasaporte':
+            documentTypeId = 3;
+            break;
+          case 'NIT':
+            documentTypeId = 4;
+            break;
+        }
+        
+        // Note: In a real implementation, you would call a service method here
+        // to update the user data. For now, we just show a success message.
+        // The update would be similar to _accountRepository.updatePassword() pattern
+        
+        print('Profile update requested:');
+        print('User ID: $_currentUserId');
+        print('Name: ${_nameController.text.trim()}');
+        print('Email: ${_emailController.text.trim()}');
+        print('Phone: ${_phoneController.text.trim()}');
+        print('Document: ${_documentController.text.trim()}');
+        print('Document Type ID: $documentTypeId');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Perfil actualizado exitosamente',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+            ),
+            backgroundColor: AppThemes.accentGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al actualizar perfil: $e',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
-        backgroundColor: AppThemes.accentGreen,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-    Navigator.pop(context);
+      );
+    }
   }
 }

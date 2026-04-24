@@ -68,7 +68,7 @@
         "descripcion": "Obtén 20% de descuento en tu próxima renta con el código FLEX20",
         "notificacion_id": 8,
         "estado": "no_leida",
-        "usuario_id": 3,
+        "usuario_id": 1,
         "categoria_notificacion_id": 5
     },
     {
@@ -77,7 +77,7 @@
         "descripcion": "Juan Pérez quiere rentar tu Renault Sandero del 18 al 20 de marzo",
         "notificacion_id": 9,
         "estado": "no_leida",
-        "usuario_id": 3,
+        "usuario_id": 1,
         "categoria_notificacion_id": 1
     },
     {
@@ -86,7 +86,7 @@
         "descripcion": "Has recibido $450.000 por la renta de tu Kia Sportage a Laura Torres",
         "notificacion_id": 10,
         "estado": "leida",
-        "usuario_id": 4,
+        "usuario_id": 2,
         "categoria_notificacion_id": 2
     },
     {
@@ -95,7 +95,7 @@
         "descripcion": "Tu reserva del BMW X3 para el fin de semana ha sido confirmada",
         "notificacion_id": 11,
         "estado": "no_leida",
-        "usuario_id": 5,
+        "usuario_id": 1,
         "categoria_notificacion_id": 1
     },
     {
@@ -104,7 +104,7 @@
         "descripcion": "Tu Ford Ranger necesita mantenimiento pronto. Agenda una cita.",
         "notificacion_id": 12,
         "estado": "leida",
-        "usuario_id": 6,
+        "usuario_id": 2,
         "categoria_notificacion_id": 5
     },
     {
@@ -113,7 +113,7 @@
         "descripcion": "Tu solicitud para rentar el Mercedes GLA fue rechazada. Intenta con otras fechas.",
         "notificacion_id": 13,
         "estado": "no_leida",
-        "usuario_id": 7,
+        "usuario_id": 1,
         "categoria_notificacion_id": 1
     },
     {
@@ -122,7 +122,7 @@
         "descripcion": "Pedro Ramírez dejó una reseña de 4 estrellas para tu Tesla Model 3",
         "notificacion_id": 14,
         "estado": "no_leida",
-        "usuario_id": 8,
+        "usuario_id": 2,
         "categoria_notificacion_id": 3
     },
     {
@@ -131,7 +131,7 @@
         "descripcion": "Tu pago de $320.000 por la renta del Audi A4 ha sido procesado",
         "notificacion_id": 15,
         "estado": "leida",
-        "usuario_id": 9,
+        "usuario_id": 1,
         "categoria_notificacion_id": 2
     },
     {
@@ -140,7 +140,7 @@
         "descripcion": "Ana Martínez quiere rentar tu Hyundai Tucson del 25 al 28 de marzo",
         "notificacion_id": 16,
         "estado": "no_leida",
-        "usuario_id": 10,
+        "usuario_id": 2,
         "categoria_notificacion_id": 1
     },
     {
@@ -149,7 +149,7 @@
         "descripcion": "La renta de tu Nissan Sentra ha finalizado. Califica a tu arrendatario.",
         "notificacion_id": 17,
         "estado": "leida",
-        "usuario_id": 11,
+        "usuario_id": 1,
         "categoria_notificacion_id": 4
     },
     {
@@ -158,7 +158,7 @@
         "descripcion": "Tu perfil de arrendatario ha sido verificado. ¡Ya puedes publicar vehículos!",
         "notificacion_id": 18,
         "estado": "no_leida",
-        "usuario_id": 12,
+        "usuario_id": 2,
         "categoria_notificacion_id": 5
     },
     {
@@ -167,7 +167,7 @@
         "descripcion": "Rentas de fin de semana con 15% de descuento. Válido hasta el 30 de abril.",
         "notificacion_id": 19,
         "estado": "leida",
-        "usuario_id": 13,
+        "usuario_id": 1,
         "categoria_notificacion_id": 5
     },
     {
@@ -176,7 +176,7 @@
         "descripcion": "Tu pago de $180.000 vence mañana. Realízalo para confirmar tu reserva.",
         "notificacion_id": 20,
         "estado": "no_leida",
-        "usuario_id": 14,
+        "usuario_id": 2,
         "categoria_notificacion_id": 2
     },
     {
@@ -185,7 +185,7 @@
         "descripcion": "Diego Castro quiere rentar tu Mazda CX-5 del 15 al 18 de abril",
         "notificacion_id": 21,
         "estado": "no_leida",
-        "usuario_id": 15,
+        "usuario_id": 1,
         "categoria_notificacion_id": 1
     },
     {
@@ -194,7 +194,7 @@
         "descripcion": "Has ganado $1.2M este mes con tus vehículos. ¡Sigue así!",
         "notificacion_id": 22,
         "estado": "leida",
-        "usuario_id": 16,
+        "usuario_id": 2,
         "categoria_notificacion_id": 5
     },
     {
@@ -203,7 +203,7 @@
         "descripcion": "Tu reserva del Chevrolet Tracker fue cancelada por el propietario.",
         "notificacion_id": 23,
         "estado": "no_leida",
-        "usuario_id": 17,
+        "usuario_id": 1,
         "categoria_notificacion_id": 1
     },
     {
@@ -212,7 +212,7 @@
         "descripcion": "Carolina Vega dejó una reseña de 5 estrellas para tu Toyota Hilux",
         "notificacion_id": 24,
         "estado": "leida",
-        "usuario_id": 18,
+        "usuario_id": 2,
         "categoria_notificacion_id": 3
     },
     {
@@ -239,7 +239,7 @@
         "descripcion": "El seguro de tu renta del Hyundai Tucson está activo desde hoy hasta el 20 de abril.",
         "notificacion_id": 27,
         "estado": "leida",
-        "usuario_id": 3,
+        "usuario_id": 1,
         "categoria_notificacion_id": 5
     },
     {
@@ -248,7 +248,7 @@
         "descripcion": "Tu reembolso de $150.000 por cancelación ha sido procesado. Verás el saldo en 3-5 días.",
         "notificacion_id": 28,
         "estado": "no_leida",
-        "usuario_id": 4,
+        "usuario_id": 2,
         "categoria_notificacion_id": 2
     },
     {
@@ -257,7 +257,7 @@
         "descripcion": "Has excedido el límite de kilometraje en tu renta. Se aplicarán cargos adicionales de $50.000.",
         "notificacion_id": 29,
         "estado": "no_leida",
-        "usuario_id": 5,
+        "usuario_id": 1,
         "categoria_notificacion_id": 4
     },
     {
@@ -266,7 +266,7 @@
         "descripcion": "Tu solicitud de extender la renta del BMW X3 por 2 días más ha sido aprobada.",
         "notificacion_id": 30,
         "estado": "leida",
-        "usuario_id": 6,
+        "usuario_id": 2,
         "categoria_notificacion_id": 1
     },
     {
@@ -275,7 +275,7 @@
         "descripcion": "Tu recogida del Ford Ranger está confirmada para mañana a las 8:00 AM en la dirección indicada.",
         "notificacion_id": 31,
         "estado": "no_leida",
-        "usuario_id": 7,
+        "usuario_id": 1,
         "categoria_notificacion_id": 4
     },
     {
@@ -284,7 +284,7 @@
         "descripcion": "El propietario reportó un rayón menor. Se evaluará el costo de reparación.",
         "notificacion_id": 32,
         "estado": "no_leida",
-        "usuario_id": 8,
+        "usuario_id": 2,
         "categoria_notificacion_id": 4
     },
     {
@@ -293,7 +293,7 @@
         "descripcion": "Tu renta del Tesla Model 3 ha finalizado. Esperamos que hayas tenido una buena experiencia.",
         "notificacion_id": 33,
         "estado": "leida",
-        "usuario_id": 9,
+        "usuario_id": 1,
         "categoria_notificacion_id": 4
     }
 ]

@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import 'package:flexidrive/services/accounts/user_preference_service.dart';
+import 'package:flexidrive/services/reservations/local_reservation_db.dart';
 import 'arrendatario_main_page.dart';
 import 'alertas_page.dart';
 import 'edit_profile_page.dart';
@@ -13,6 +15,7 @@ import 'my_reviews_page.dart';
 import 'help_center_page.dart';
 import 'principal_arrendatario_page.dart';
 import 'mi_saldo_page.dart';
+import '../login/login_page.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 class ProfileArrendatarioPage extends StatefulWidget {
@@ -26,8 +29,15 @@ class ProfileArrendatarioPage extends StatefulWidget {
 class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final UserPreferenceService _preferenceService = UserPreferenceService();
+  final LocalReservationDb _reservationDb = LocalReservationDb.instance;
 
   int? _currentUserId;
+  
+  // Dynamic statistics
+  int _totalVehicles = 0;
+  int _activeVehicles = 0;
+  double _totalEarnings = 0;
+  double _availableBalance = 1440000; // Default saldo
 
   @override
   void initState() {
@@ -40,6 +50,10 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     if (!mounted || currentUser == null) return;
 
     _currentUserId = currentUser.id;
+    
+    // Load arrendatario statistics
+    await _loadArrendatarioStats();
+    
     await _preferenceService.setArrendatarioMode(
       userId: currentUser.id,
       enabled: true,
@@ -224,20 +238,20 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.directions_car_outlined,
-                          value: '2',
+                          value: '$_totalVehicles',
                           label: isSmallPhone ? 'Vehic' : 'Vehículos')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
                           icon: Icons.account_balance_wallet_outlined,
-                          value: isSmallPhone ? '\$1.4M' : '\$1.44M',
+                          value: isSmallPhone ? _formatCurrencyShort(_totalEarnings) : _formatCurrencyShort(_totalEarnings),
                           label: isSmallPhone ? 'Gananc' : 'Ganancias')),
                   SizedBox(width: isSmallPhone ? 6 : 10),
                   Expanded(
                       child: _buildStatCard(
-                          icon: Icons.star_outline,
-                          value: '1,240',
-                          label: isSmallPhone ? 'Pts' : 'Puntos')),
+                          icon: Icons.local_activity_outlined,
+                          value: '$_activeVehicles',
+                          label: isSmallPhone ? 'Activ' : 'Activos')),
                 ]),
               ]),
             ),
@@ -363,7 +377,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 iconColor: const Color(0xFF10B981),
                 iconBgColor: const Color(0xFFD1FAE5),
                 title: 'Mi saldo',
-                subtitle: '\$ 1.440.000 disponible',
+                subtitle: '\$ ${_formatCurrency(_availableBalance)} disponible',
                 trailingIcon: Icons.lock,
                 onTap: () {
                   Navigator.push(
@@ -746,6 +760,59 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  Future<void> _loadArrendatarioStats() async {
+    try {
+      // Load vehicles data
+      final String vehiclesData = await DefaultAssetBundle.of(context).loadString('assets/data/operations/vehicles.json');
+      final List<dynamic> vehiclesJson = json.decode(vehiclesData);
+      final allVehicles = vehiclesJson.cast<Map<String, dynamic>>();
+      
+      // Load publications data to know which vehicles are published
+      final String publicationsData = await DefaultAssetBundle.of(context).loadString('assets/data/operations/publications.json');
+      final List<dynamic> publicationsJson = json.decode(publicationsData);
+      final allPublications = publicationsJson.cast<Map<String, dynamic>>();
+      
+      // Load reservations
+      await _reservationDb.loadIfNeeded();
+      
+      // Get user publications
+      final userPublications = allPublications
+          .where((pub) => pub['arrendatario_id'] == _currentUserId)
+          .toList();
+      
+      // Count total vehicles (vehicles that have publications)
+      final userVehicleIds = userPublications
+          .map((pub) => pub['vehiculo_id'] as int)
+          .toSet()
+          .toList();
+      
+      _totalVehicles = userVehicleIds.length;
+      
+      // Count active vehicles (with active reservations - status 2)
+      final activeReservations = _reservationDb.reservations
+          .where((r) => r.statusId == 2 && userPublications.any((pub) => pub['publicacion_id'] == r.publicationId))
+          .toList();
+      
+      _activeVehicles = activeReservations.length;
+      
+      // Calculate total earnings from completed reservations (status 3)
+      final completedReservations = _reservationDb.reservations
+          .where((r) => r.statusId == 3 && userPublications.any((pub) => pub['publicacion_id'] == r.publicationId))
+          .toList();
+      
+      _totalEarnings = completedReservations.fold(0.0, (sum, r) => sum + r.totalValue);
+      
+      // Update available balance (70% of earnings - platform commission 30%)
+      _availableBalance = _totalEarnings * 0.7;
+      
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error loading arrendatario stats: $e');
+    }
+  }
+
   void _showSwitchToArrendadorDialog(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -904,7 +971,12 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushReplacementNamed('/login'),
+      onTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+      },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: isSmallPhone ? 8 : 11),
         decoration: BoxDecoration(
@@ -934,6 +1006,23 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       const SizedBox(width: 4),
       const Text('🇨🇴', style: TextStyle(fontSize: 11)),
     ]);
+  }
+
+  String _formatCurrency(double amount) {
+    return amount.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
+  }
+
+  String _formatCurrencyShort(double amount) {
+    if (amount >= 1000000) {
+      return '\$${(amount / 1000000).toStringAsFixed(1)}M';
+    } else if (amount >= 1000) {
+      return '\$${(amount / 1000).toStringAsFixed(1)}K';
+    } else {
+      return '\$${amount.toStringAsFixed(0)}';
+    }
   }
 }
 

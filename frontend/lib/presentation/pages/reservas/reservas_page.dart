@@ -40,6 +40,11 @@ class _ReservasPageState extends State<ReservasPage> {
     _loadHistoryReservations();
   }
 
+  Future<void> _refreshReservations() async {
+    setState(() => _isLoadingHistory = true);
+    await _loadHistoryReservations();
+  }
+
   Future<void> _loadHistoryReservations() async {
     await Future.wait([
       _sessionStore.init(),
@@ -1006,35 +1011,14 @@ class _ReservasPageState extends State<ReservasPage> {
     );
 
     if (shouldCancel == true) {
-      setState(() {
-        _canceladasCount += 1;
-        // Remove from active reservations
-        _activeReservations.removeWhere((r) => r.code == reserva.code);
-        // Add to history as cancelled
-        _historyReservations.add(_ReservaCardData(
-          vehicleName: reserva.vehicleName,
-          code: reserva.code,
-          price: reserva.price,
-          startDate: reserva.startDate,
-          endDate: reserva.endDate,
-          location: reserva.location,
-          progress: 0.0,
-          status: 'Cancelada',
-          imageUrl: reserva.imageUrl,
-          showEnCurso: false,
-          vehicleSpecs: reserva.vehicleSpecs,
-          vehicleRating: reserva.vehicleRating,
-          vehicleReviews: reserva.vehicleReviews,
-          vehiclePrice: reserva.vehiclePrice,
-          precioDia: reserva.precioDia,
-          precioSemana: reserva.precioSemana,
-          statusColor: const Color(0xFFEF4444),
-          secondaryActionLabel: 'Calificar',
-          secondaryActionIcon: Icons.star_rounded,
-          secondaryButtonColor: const Color(0xFFFCD34D),
-          secondaryTextColor: const Color(0xFF111827),
-        ));
-      });
+      // Remove from database permanently
+      final reservationIndex = _reservationDb.reservations.indexWhere((r) => r.code == reserva.code);
+      if (reservationIndex != -1) {
+        _reservationDb.reservations.removeAt(reservationIndex);
+      }
+      
+      // Refresh all reservations to update lists
+      await _refreshReservations();
     }
   }
 

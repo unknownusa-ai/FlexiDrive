@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
+import '../../../services/accounts/local_account_repository.dart';
+import '../../../services/vehiculo_service.dart';
 
 class PaymentMethodsPage extends StatefulWidget {
   const PaymentMethodsPage({super.key});
@@ -11,26 +14,11 @@ class PaymentMethodsPage extends StatefulWidget {
 }
 
 class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
-  final List<Map<String, dynamic>> _paymentMethods = [
-    {
-      'id': '1',
-      'type': 'card',
-      'brand': 'visa',
-      'last4': '4521',
-      'expiry': '12/26',
-      'isDefault': true,
-      'name': 'Carlos Rodríguez',
-    },
-    {
-      'id': '2',
-      'type': 'card',
-      'brand': 'mastercard',
-      'last4': '8834',
-      'expiry': '08/25',
-      'isDefault': false,
-      'name': 'Carlos Rodríguez',
-    },
-  ];
+  final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final VehiculoService _vehiculoService = VehiculoService();
+  List<Map<String, dynamic>> _paymentMethods = [];
+  int? _currentUserId;
+  bool _isLoading = true;
 
   final List<Map<String, dynamic>> _otherMethods = [
     {
@@ -52,6 +40,39 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
       'isActive': false,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPaymentMethods();
+  }
+
+  Future<void> _loadPaymentMethods() async {
+    try {
+      final currentUser = await _accountRepository.getCurrentUser();
+      if (currentUser != null) {
+        _currentUserId = currentUser.id;
+        
+        // Load payment methods from JSON
+        final String paymentMethodsData = await DefaultAssetBundle.of(context).loadString('assets/data/payments/payment_methods.json');
+        final List<dynamic> paymentMethodsJson = json.decode(paymentMethodsData);
+        final allPaymentMethods = paymentMethodsJson.cast<Map<String, dynamic>>();
+        
+        // Filter payment methods for current user
+        final userPaymentMethods = allPaymentMethods
+            .where((method) => method['usuario_id'] == _currentUserId)
+            .toList();
+        
+        setState(() {
+          _paymentMethods = userPaymentMethods;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading payment methods: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +236,11 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   }
 
   Widget _buildGradientCard(Map<String, dynamic> method, bool isSmallPhone, bool isDark) {
-    final bool isDefault = method['isDefault'] as bool;
-    final bool isVisa = method['brand'] == 'visa';
+    final bool isDefault = (method['predeterminado'] as bool?) ?? false;
+    final int methodId = method['metodo_pago_id'] as int? ?? 0;
+    final int paymentTypeId = method['tipo_metodo_pago_id'] as int? ?? 1;
+    final bool isCard = paymentTypeId == 1; // 1 = Tarjeta de crédito/débito
+    final bool isVisa = methodId % 2 == 1; // Alternar entre Visa y Mastercard para visualización
 
     final List<Color> gradientColors = isDefault
         ? [const Color(0xFF4F46E5), const Color(0xFF6D28D9)]
@@ -276,7 +300,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '····  ····  ····  ${method['last4']}',
+                      isCard 
+                        ? '····  ····  ····  ${(methodId * 1234).toString().padLeft(4, '0').substring(0, 4)}'
+                        : 'Método de pago #$methodId',
                       style: GoogleFonts.inter(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: isSmallPhone ? 13 : 14,
@@ -305,7 +331,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 SizedBox(height: isSmallPhone ? 8 : 10),
                 // Cardholder name
                 Text(
-                  method['name'],
+                  isCard ? 'Tarjeta de crédito' : 'Método de pago ${isCard ? '' : 'alternativo'}',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: isSmallPhone ? 14 : 16,
@@ -314,7 +340,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 ),
                 SizedBox(height: isSmallPhone ? 2 : 3),
                 Text(
-                  '${isVisa ? 'Visa' : 'Mastercard'} · ${method['expiry']}',
+                  isCard 
+                    ? '${isVisa ? 'Visa' : 'Mastercard'} · Expira 12/28'
+                    : 'Tipo: ${paymentTypeId == 2 ? 'PSE' : 'Otro'}',
                   style: GoogleFonts.inter(
                     color: Colors.white.withValues(alpha: 0.75),
                     fontSize: isSmallPhone ? 11 : 12,
@@ -383,8 +411,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           ),
                         ),
                       ),
-                    // Brand logo
-                    _buildBrandLogo(isVisa, isSmallPhone),
+                    // Brand logo (solo para tarjetas)
+                    if (isCard) _buildBrandLogo(isVisa, isSmallPhone),
                   ],
                 ),
               ],

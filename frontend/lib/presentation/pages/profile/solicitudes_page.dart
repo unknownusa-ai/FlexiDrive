@@ -1,6 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../services/reservations/local_reservation_db.dart';
+import '../../../services/vehiculo_service.dart';
+import '../../../services/notifications/local_notification_db.dart';
+import '../../../models/reservations/reservation_models.dart';
 
 class SolicitudesPage extends StatefulWidget {
   final int initialTab;
@@ -14,6 +19,16 @@ class SolicitudesPageState extends State<SolicitudesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedTabIndex = 1;
+  
+  // Data management
+  List<ReservationModel> _allReservations = [];
+  List<Map<String, dynamic>> _vehicles = [];
+  List<Map<String, dynamic>> _users = [];
+  List<Map<String, dynamic>> _publications = [];
+  bool _isLoading = true;
+  
+  // Current user ID (arrendatario = 1, arrendador = 2)
+  final int _currentUserId = 1; // Arrendatario sees requests for his vehicles
 
   @override
   void initState() {
@@ -31,6 +46,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
         });
       }
     });
+    _loadData();
   }
 
   @override
@@ -50,6 +66,83 @@ class SolicitudesPageState extends State<SolicitudesPage>
   void setTab(int index) {
     if (index >= 0 && index < 3) {
       _tabController.animateTo(index);
+    }
+  }
+
+  Future<void> _loadData() async {
+    try {
+      setState(() => _isLoading = true);
+      
+      // Load reservations
+      await LocalReservationDb.instance.loadIfNeeded();
+      _allReservations = List.from(LocalReservationDb.instance.reservations);
+      
+      // Load vehicles and users
+      final vehiculoService = VehiculoService();
+      await vehiculoService.init();
+      _vehicles = vehiculoService.vehiculos;
+      _users = vehiculoService.usuarios;
+      
+      // Load publications
+      _publications = await _loadPublications();
+      
+      setState(() => _isLoading = false);
+    } catch (e) {
+      print('Error loading data: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadPublications() async {
+    try {
+      final String publicationsData = await DefaultAssetBundle.of(context).loadString('assets/data/operations/publications.json');
+      final List<dynamic> publicationsJson = json.decode(publicationsData);
+      return publicationsJson.cast<Map<String, dynamic>>();
+    } catch (e) {
+      print('Error loading publications: $e');
+      return [];
+    }
+  }
+
+  // Get reservations filtered by status for current user's vehicles
+  List<ReservationModel> _getReservationsByStatus(int statusId) {
+    return _allReservations.where((reservation) {
+      // For arrendatario (user 1), show reservations for his vehicles
+      if (_currentUserId == 1) {
+        // Find the publication to check if it belongs to current user
+        final publication = _findPublicationById(reservation.publicationId);
+        return publication != null && 
+               publication['usuario_id'] == _currentUserId && 
+               reservation.statusId == statusId;
+      }
+      return false;
+    }).toList();
+  }
+
+  // Find publication by ID
+  Map<String, dynamic>? _findPublicationById(int publicationId) {
+    try {
+      return _publications.firstWhere((p) => p['publicacion_id'] == publicationId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Get vehicle info
+  Map<String, dynamic>? _getVehicleById(int vehicleId) {
+    try {
+      return _vehicles.firstWhere((v) => v['vehiculo_id'] == vehicleId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Get user info
+  Map<String, dynamic>? _getUserById(int userId) {
+    try {
+      return _users.firstWhere((u) => u['usuario_id'] == userId);
+    } catch (e) {
+      return null;
     }
   }
 
@@ -169,6 +262,10 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
   Widget _buildTabBar(bool isSmallPhone) {
     final theme = Theme.of(context);
+    final pendingCount = _getReservationsByStatus(1).length; // status_id 1 = pendiente
+    final activeCount = _getReservationsByStatus(2).length;   // status_id 2 = activa
+    final completedCount = _getReservationsByStatus(3).length; // status_id 3 = completada
+    
     return Container(
       color: theme.cardTheme.color,
       padding: EdgeInsets.symmetric(
@@ -180,7 +277,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           Expanded(
             child: _buildCustomTab(
               label: 'Pendientes',
-              count: '1',
+              count: '$pendingCount',
               isActive: _selectedTabIndex == 0,
               onTap: () {
                 setState(() => _selectedTabIndex = 0);
@@ -194,7 +291,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           Expanded(
             child: _buildCustomTab(
               label: 'Activas',
-              count: '1',
+              count: '$activeCount',
               isActive: _selectedTabIndex == 1,
               onTap: () {
                 setState(() => _selectedTabIndex = 1);
@@ -207,7 +304,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           Expanded(
             child: _buildCustomTab(
               label: 'Completadas',
-              count: '2',
+              count: '$completedCount',
               isActive: _selectedTabIndex == 2,
               onTap: () {
                 setState(() => _selectedTabIndex = 2);
@@ -280,83 +377,155 @@ class SolicitudesPageState extends State<SolicitudesPage>
   }
 
   Widget _buildPendientesList(bool isSmallPhone) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    
+    final pendingReservations = _getReservationsByStatus(1);
+    
+    if (pendingReservations.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
+            SizedBox(height: 16),
+            Text(
+              'No hay solicitudes pendientes',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return ListView(
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
-      children: [
-        _buildRequestCard(
+      children: pendingReservations.map((reservation) {
+        final user = _getUserById(reservation.userId);
+        final vehicle = _getVehicleById(reservation.publicationId); // This needs adjustment
+        
+        return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: 'María López',
-          userImage: 'https://i.pravatar.cc/150?img=5',
-          userRating: '4.9',
-          userType: 'Arrendatario',
-          vehicleName: 'Chevrolet Onix Turbo',
-          vehicleImage: 'assets/imagenes_carros/onix.jpeg',
-          startDate: '2026-03-12',
-          endDate: '2026-03-14',
-          location: 'Cl 72 #10-34, Bogotá',
-          totalPrice: '\$240.000',
+          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
+          userRating: '4.8', // Default rating
+          userType: 'Arrendador',
+          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          vehicleImage: vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          startDate: '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
+          endDate: '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
+          location: reservation.pickupLocation,
+          totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'pending',
-        ),
-      ],
+          reservation: reservation,
+        );
+      }).toList(),
     );
   }
 
   Widget _buildActivasList(bool isSmallPhone) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    
+    final activeReservations = _getReservationsByStatus(2);
+    
+    if (activeReservations.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
+            SizedBox(height: 16),
+            Text(
+              'No hay rentas activas',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return ListView(
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
-      children: [
-        _buildRequestCard(
+      children: activeReservations.map((reservation) {
+        final user = _getUserById(reservation.userId);
+        final vehicle = _getVehicleById(reservation.publicationId);
+        
+        return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: 'Carlos Mendoza',
-          userImage: 'https://i.pravatar.cc/150?img=12',
+          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
           userRating: '4.8',
-          userType: 'Arrendatario',
-          vehicleName: 'Mazda 3 Grand Touring',
-          vehicleImage: 'assets/imagenes_carros/mazda3.jpg',
-          startDate: '2026-03-08',
-          endDate: '2026-03-15',
-          location: 'Cra 15 #85-20, Bogotá',
-          totalPrice: '\$1.260.000',
+          userType: 'Arrendador',
+          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          vehicleImage: vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          startDate: '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
+          endDate: '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
+          location: reservation.pickupLocation,
+          totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'active',
-        ),
-      ],
+          reservation: reservation,
+        );
+      }).toList(),
     );
   }
 
   Widget _buildCompletadasList(bool isSmallPhone) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    
+    final completedReservations = _getReservationsByStatus(3);
+    
+    if (completedReservations.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
+            SizedBox(height: 16),
+            Text(
+              'No hay rentas completadas',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return ListView(
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
-      children: [
-        _buildRequestCard(
+      children: completedReservations.map((reservation) {
+        final user = _getUserById(reservation.userId);
+        final vehicle = _getVehicleById(reservation.publicationId);
+        
+        return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: 'Andrea López',
-          userImage: 'https://i.pravatar.cc/150?img=9',
+          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
           userRating: '4.8',
-          userType: 'Arrendatario',
-          vehicleName: 'Chevrolet Onix Turbo',
-          vehicleImage: 'assets/imagenes_carros/onix.jpeg',
-          startDate: '2026-02-12',
-          endDate: '2026-02-14',
-          location: 'Cra 7 #32-16, Bogotá',
-          totalPrice: '\$240.000',
+          userType: 'Arrendador',
+          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          vehicleImage: vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          startDate: '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
+          endDate: '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
+          location: reservation.pickupLocation,
+          totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'completed',
-        ),
-        SizedBox(height: isSmallPhone ? 12 : 14),
-        _buildRequestCard(
-          isSmallPhone: isSmallPhone,
-          userName: 'Roberto Silva',
-          userImage: 'https://i.pravatar.cc/150?img=13',
-          userRating: '4.6',
-          userType: 'Arrendatario',
-          vehicleName: 'Mazda 3 Grand Touring',
-          vehicleImage: 'assets/imagenes_carros/mazda3.jpg',
-          startDate: '2026-02-05',
-          endDate: '2026-02-08',
-          location: 'Cl 100 #18-90, Bogotá',
-          totalPrice: '\$540.000',
-          status: 'completed',
-        ),
-      ],
+          reservation: reservation,
+        );
+      }).toList(),
     );
   }
 
@@ -373,6 +542,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     required String location,
     required String totalPrice,
     required String status,
+    ReservationModel? reservation,
   }) {
     Color statusColor;
     Color statusBgColor;
@@ -562,13 +732,13 @@ class SolicitudesPageState extends State<SolicitudesPage>
           ),
 
           // Botones solo para pendientes
-          if (status == 'pending') ...[
+          if (status == 'pending' && reservation != null) ...[
             const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _showRejectDialog(),
+                    onPressed: () => _showRejectDialog(reservation),
                     icon: const Icon(Icons.cancel_outlined, size: 18),
                     label: Text(
                       'Rechazar',
@@ -594,7 +764,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _showAcceptDialog(),
+                    onPressed: () => _showAcceptDialog(reservation),
                     icon: const Icon(Icons.check_circle_outline, size: 18),
                     label: Text(
                       'Aprobar',
@@ -671,7 +841,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
-  void _showAcceptDialog() {
+  void _showAcceptDialog(ReservationModel reservation) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -726,7 +896,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _showSuccessSnackBar('Solicitud aprobada correctamente');
+              _approveReservation(reservation);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF10B981),
@@ -753,7 +923,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
-  void _showRejectDialog() {
+  void _showRejectDialog(ReservationModel reservation) {
     String? selectedReason;
     final reasons = [
       'Fechas no disponibles',
@@ -840,7 +1010,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
               onPressed: selectedReason != null
                   ? () {
                       Navigator.pop(context);
-                      _showSuccessSnackBar('Solicitud rechazada');
+                      _rejectReservation(reservation, selectedReason!);
                     }
                   : null,
               style: ElevatedButton.styleFrom(
@@ -870,29 +1040,137 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 12),
-            Text(
-              message,
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF10B981),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        margin: const EdgeInsets.all(16),
-      ),
+  Future<void> _approveReservation(ReservationModel reservation) async {
+  try {
+    // Update reservation status from pending (1) to active (2)
+    final updatedReservation = ReservationModel(
+      id: reservation.id,
+      code: reservation.code,
+      userId: reservation.userId,
+      publicationId: reservation.publicationId,
+      paymentMethodId: reservation.paymentMethodId,
+      periodTypeId: reservation.periodTypeId,
+      periodCount: reservation.periodCount,
+      startDate: reservation.startDate,
+      endDate: reservation.endDate,
+      pickupLocation: reservation.pickupLocation,
+      returnLocation: reservation.returnLocation,
+      totalValue: reservation.totalValue,
+      statusId: 2, // Change to active
+      reservationDate: reservation.reservationDate,
     );
+
+    // Update the reservation in the local database
+    final index = _allReservations.indexWhere((r) => r.id == reservation.id);
+    if (index != -1) {
+      _allReservations[index] = updatedReservation;
+      LocalReservationDb.instance.reservations[index] = updatedReservation;
+    }
+
+    setState(() {});
+    
+    // Create notification for the user
+    await _createApprovalNotification(reservation);
+    
+    _showSuccessSnackBar('Solicitud aprobada correctamente');
+  } catch (e) {
+    _showErrorSnackBar('Error al aprobar solicitud: $e');
   }
+}
+
+Future<void> _rejectReservation(ReservationModel reservation, String reason) async {
+  try {
+    // Remove the reservation from the list when rejected
+    final index = _allReservations.indexWhere((r) => r.id == reservation.id);
+    if (index != -1) {
+      _allReservations.removeAt(index);
+      LocalReservationDb.instance.reservations.removeAt(index);
+    }
+
+    setState(() {});
+    _showSuccessSnackBar('Solicitud rechazada y eliminada');
+  } catch (e) {
+    _showErrorSnackBar('Error al rechazar solicitud: $e');
+  }
+}
+
+void _showSuccessSnackBar(String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          const Icon(Icons.check_circle, color: Colors.white),
+          const SizedBox(width: 12),
+          Text(
+            message,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF10B981),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.all(16),
+    ),
+  );
+}
+
+Future<void> _createApprovalNotification(ReservationModel reservation) async {
+    try {
+      // Get user and vehicle info for the notification
+      final user = _getUserById(reservation.userId);
+      final vehicle = _getVehicleById(reservation.publicationId);
+      
+      final userName = user?['nombre_completo'] ?? 'Usuario';
+      final vehicleName = vehicle?['nombre'] ?? 'Vehículo';
+      
+      // Create notification
+      final notification = {
+        'notificacion_id': DateTime.now().millisecondsSinceEpoch,
+        'asunto': 'Solicitud de renta aprobada',
+        'descripcion': 'Tu solicitud para rentar el $vehicleName ha sido aprobada por el arrendatario.',
+        'fecha_envio': DateTime.now().toIso8601String(),
+        'estado': 'no_leida',
+        'usuario_id': reservation.userId,
+        'categoria_notificacion_id': 1,
+      };
+      
+      // Add to notifications (in a real app, this would save to the database)
+      print('Notification created: $notification');
+      
+    } catch (e) {
+      print('Error creating notification: $e');
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          const Icon(Icons.error, color: Colors.white),
+          const SizedBox(width: 12),
+          Text(
+            message,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFFEF4444),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.all(16),
+    ),
+  );
+}
 }
