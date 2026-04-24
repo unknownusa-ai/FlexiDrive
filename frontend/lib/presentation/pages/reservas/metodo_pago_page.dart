@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/session/local_session_store.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../models/reservations/reservation_models.dart';
 import '../../../services/payments/local_payment_db.dart';
 import '../../../services/reservations/local_reservation_db.dart';
 import '../../../services/catalogs/local_catalog_db.dart';
+import '../../../services/notifications/local_notification_db.dart';
 import 'reserva_confirmada_page.dart';
 import 'reservas_store.dart';
 
@@ -39,6 +40,8 @@ class MetodoPagoPage extends StatefulWidget {
 }
 
 class _MetodoPagoPageState extends State<MetodoPagoPage> {
+  static const _reservaCategoryId = 1;
+
   String _metodoPago = 'Tarjeta';
   final _numeroTarjetaCtrl = TextEditingController();
   final _titularCtrl = TextEditingController();
@@ -49,6 +52,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   final LocalPaymentDb _paymentDb = LocalPaymentDb.instance;
   final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
+  final LocalNotificationDb _notificationDb = LocalNotificationDb.instance;
 
   List<dynamic> _userCards = [];
   List<dynamic> _userPseAccounts = [];
@@ -64,6 +68,23 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   Color get _borderColor =>
       _isDark ? const Color(0xFF2E3355) : const Color(0xFFE2E8F0);
   Color get _cardBgColor => _isDark ? const Color(0xFF1A1F35) : Colors.white;
+
+  Future<void> _crearNotificacionReserva({
+    required String codigoReserva,
+    required DateTime fechaInicio,
+  }) async {
+    await _sessionStore.init();
+    final currentUserId = _sessionStore.userId;
+    if (currentUserId == null) return;
+
+    await _notificationDb.addNotification(
+      userId: currentUserId,
+      categoryId: _reservaCategoryId,
+      subject: 'Reserva confirmada',
+      description:
+          'Tu reserva $codigoReserva de ${widget.vehiculoBrand} fue confirmada para ${_formatearFechaCorta(fechaInicio)} en ${widget.lugarRecogida}.',
+    );
+  }
 
   @override
   void initState() {
@@ -1312,7 +1333,13 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 ),
               );
 
+              await _crearNotificacionReserva(
+                codigoReserva: codigoReserva,
+                fechaInicio: fechaInicio,
+              );
+
               if (!mounted) return;
+
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
