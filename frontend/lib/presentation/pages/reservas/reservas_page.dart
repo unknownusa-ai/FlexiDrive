@@ -8,6 +8,7 @@ import 'package:flexidrive/services/reviews/local_review_db.dart';
 import 'package:flexidrive/services/vehiculo_service.dart';
 
 import 'reserva_detalle_page.dart';
+import 'reserva_detalle_completa_page.dart';
 import 'reservas_store.dart';
 import '../../../core/utils/responsive_utils.dart';
 
@@ -29,6 +30,8 @@ class _ReservasPageState extends State<ReservasPage> {
   final LocalReviewDb _reviewDb = LocalReviewDb.instance;
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;
 
+  List<_ReservaCardData> _activeReservations = [];
+  List<_ReservaCardData> _pendingReservations = [];
   List<_ReservaCardData> _historyReservations = [];
 
   @override
@@ -47,11 +50,24 @@ class _ReservasPageState extends State<ReservasPage> {
     ]);
 
     final currentUserId = _sessionStore.userId;
-    final reservations = currentUserId == null
+    final userReservations = currentUserId == null
         ? _reservationDb.reservations.take(6).toList()
         : _reservationDb.reservations
             .where((reservation) => reservation.userId == currentUserId)
             .toList();
+
+    // Separar reservas por estado
+    final pendingReservations = userReservations
+        .where((reservation) => reservation.statusId == 1)
+        .toList(); // statusId = 1 (Pendiente)
+    
+    final activeReservations = userReservations
+        .where((reservation) => reservation.statusId == 4)
+        .toList(); // statusId = 4 (Activa)
+    
+    final finalizedReservations = userReservations
+        .where((reservation) => reservation.statusId == 2)
+        .toList(); // statusId = 2 (Finalizada)
 
     final publicationsById = {
       for (final publication in _publicationDb.publications)
@@ -71,6 +87,125 @@ class _ReservasPageState extends State<ReservasPage> {
               price.publicationId, () => {})[price.periodTypeId] =
           price.price.round();
     }
+
+    final mainImagesByPublication = <int, String>{};
+    for (final image in _publicationDb.publicationImages) {
+      final current = mainImagesByPublication[image.publicationId];
+      if (current == null || image.isMain || image.order == 1) {
+        mainImagesByPublication[image.publicationId] = image.imageUrl;
+      }
+    }
+
+    // Procesar reservas pendientes
+    final pendingReservationData = pendingReservations.map((reservation) {
+      final publication = publicationsById[reservation.publicationId];
+      final vehicle =
+          publication == null ? null : vehiclesById[publication.vehicleId];
+      final pubPrices =
+          pricesByPublication[reservation.publicationId] ?? const <int, int>{};
+      final reviewsForPublication = _reviewDb.reviews
+          .where((review) => review.publicationId == reservation.publicationId)
+          .toList();
+      final rating = reviewsForPublication.isEmpty
+          ? 4.9
+          : reviewsForPublication
+                  .map((review) => opinionsById[review.opinionId] ?? 0)
+                  .fold<int>(0, (sum, current) => sum + current) /
+              reviewsForPublication.length;
+
+      final status = _statusLabel(reservation.statusId);
+      return _ReservaCardData(
+        vehicleName: vehicle == null
+            ? 'Reserva ${reservation.code}'
+            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
+        code: reservation.code,
+        price: '\$ ${_formatAmount(reservation.totalValue.round())}',
+        startDate: _formatDate(reservation.startDate),
+        endDate: _formatDate(reservation.endDate),
+        location:
+            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+        progress: 0.2, // Progress for pending reservations
+        status: status,
+        imageUrl: mainImagesByPublication[reservation.publicationId] ??
+            'assets/imagenes_carros/cx5.jpg',
+        showEnCurso: false,
+        vehicleSpecs: vehicle == null
+            ? '2024 • Negro Jet'
+            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
+        vehicleRating: rating,
+        vehicleReviews: reviewsForPublication.length,
+        vehiclePrice: pubPrices[reservation.periodTypeId] ??
+            reservation.totalValue.round(),
+        precioDia: pubPrices[2],
+        precioSemana: pubPrices[3],
+        statusColor: _statusColor(status),
+        secondaryActionLabel: 'Cancelar',
+        secondaryActionIcon: Icons.close,
+        secondaryButtonColor: const Color(0xFFFEE2E2),
+        secondaryTextColor: const Color(0xFFDC2626),
+      );
+    }).toList();
+
+    // Procesar reservas activas
+    final activeReservationData = activeReservations.map((reservation) {
+      final publication = publicationsById[reservation.publicationId];
+      final vehicle =
+          publication == null ? null : vehiclesById[publication.vehicleId];
+      final pubPrices =
+          pricesByPublication[reservation.publicationId] ?? const <int, int>{};
+      final reviewsForPublication = _reviewDb.reviews
+          .where((review) => review.publicationId == reservation.publicationId)
+          .toList();
+      final rating = reviewsForPublication.isEmpty
+          ? 4.9
+          : reviewsForPublication
+                  .map((review) => opinionsById[review.opinionId] ?? 0)
+                  .fold<int>(0, (sum, current) => sum + current) /
+              reviewsForPublication.length;
+
+      final status = _statusLabel(reservation.statusId);
+      return _ReservaCardData(
+        vehicleName: vehicle == null
+            ? 'Reserva ${reservation.code}'
+            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
+        code: reservation.code,
+        price: '\$ ${_formatAmount(reservation.totalValue.round())}',
+        startDate: _formatDate(reservation.startDate),
+        endDate: _formatDate(reservation.endDate),
+        location:
+            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+        progress: status == 'Activa'
+            ? 0.4
+            : status == 'Cancelada'
+                ? 0.0
+                : 1.0,
+        status: status,
+        imageUrl: mainImagesByPublication[reservation.publicationId] ??
+            'assets/imagenes_carros/cx5.jpg',
+        showEnCurso: status == 'Activa',
+        vehicleSpecs: vehicle == null
+            ? '2024 • Negro Jet'
+            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
+        vehicleRating: rating,
+        vehicleReviews: reviewsForPublication.length,
+        vehiclePrice: pubPrices[reservation.periodTypeId] ??
+            reservation.totalValue.round(),
+        precioDia: pubPrices[2],
+        precioSemana: pubPrices[3],
+        statusColor: _statusColor(status),
+        secondaryActionLabel: status == 'Activa' ? 'Cancelar' : 'Calificar',
+        secondaryActionIcon:
+            status == 'Activa' ? Icons.close : Icons.star_rounded,
+        secondaryButtonColor: status == 'Activa'
+            ? const Color(0xFFFEE2E2)
+            : const Color(0xFFFCD34D),
+        secondaryTextColor: status == 'Activa'
+            ? const Color(0xFFDC2626)
+            : const Color(0xFF111827),
+      );
+    }).toList();
+
+    final reservations = finalizedReservations; // Para el historial
 
     final history = reservations.map((reservation) {
       final publication = publicationsById[reservation.publicationId];
@@ -137,6 +272,8 @@ class _ReservasPageState extends State<ReservasPage> {
     if (!mounted) return;
 
     setState(() {
+      _activeReservations = activeReservationData;
+      _pendingReservations = pendingReservationData;
       _historyReservations =
           history.isNotEmpty ? history : _fallbackHistoryReservations();
       _finalizadasCount = finalizadas;
@@ -148,34 +285,26 @@ class _ReservasPageState extends State<ReservasPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DefaultTextStyle.merge(
-      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-      child: ValueListenableBuilder<List<ReservaActiva>>(
-        valueListenable: ReservasStore.activasNotifier,
-        builder: (context, activas, _) {
-          final activasCount = activas.length;
+    final activasCount = _activeReservations.length;
 
-          return Scaffold(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            body: ConstrainedContainer(
-              maxWidth: 800,
-              child: Column(children: [
-                Stack(clipBehavior: Clip.none, children: [
-                  _buildHeader(activasCount),
-                  Positioned(
-                      left: 20,
-                      right: 20,
-                      bottom: -45,
-                      child: _buildStatisticsCards(activasCount)),
-                ]),
-                const SizedBox(height: 58),
-                _buildFilterButtons(),
-                const SizedBox(height: 20),
-                Expanded(child: _buildReservationsList(activas)),
-              ]),
-            ),
-          );
-        },
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: ConstrainedContainer(
+        maxWidth: 800,
+        child: Column(children: [
+          Stack(clipBehavior: Clip.none, children: [
+            _buildHeader(activasCount),
+            Positioned(
+                left: 20,
+                right: 20,
+                bottom: -45,
+                child: _buildStatisticsCards(activasCount)),
+          ]),
+          const SizedBox(height: 58),
+          _buildFilterButtons(),
+          const SizedBox(height: 20),
+          Expanded(child: _buildReservationsList()),
+        ]),
       ),
     );
   }
@@ -303,6 +432,17 @@ class _ReservasPageState extends State<ReservasPage> {
           )),
           Expanded(
               child: _buildFilterButton(
+            label: 'Pendientes',
+            leadingWidget: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                    color: Color(0xFFF59E0B), shape: BoxShape.circle)),
+            isSelected: _selectedFilter == 'Pendientes',
+            onTap: () => setState(() => _selectedFilter = 'Pendientes'),
+          )),
+          Expanded(
+              child: _buildFilterButton(
             label: 'Historial',
             leadingWidget: Icon(Icons.description_outlined,
                 color: _selectedFilter == 'Historial'
@@ -356,40 +496,18 @@ class _ReservasPageState extends State<ReservasPage> {
     );
   }
 
-  Widget _buildReservationsList(List<ReservaActiva> activas) {
+  Widget _buildReservationsList() {
     if (_selectedFilter == 'Activas') {
-      if (activas.isEmpty) {
+      if (_activeReservations.isEmpty) {
         return _buildEmptyActiveReservations();
       }
 
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          children: activas
+          children: _activeReservations
               .map((reserva) => _buildReservationCard(
-                    data: _ReservaCardData(
-                      vehicleName: reserva.vehicleName,
-                      code: reserva.code,
-                      price: reserva.price,
-                      startDate: reserva.startDate,
-                      endDate: reserva.endDate,
-                      location: reserva.location,
-                      progress: reserva.progress,
-                      status: reserva.status,
-                      imageUrl: reserva.imageUrl,
-                      showEnCurso: true,
-                      vehicleSpecs: reserva.vehicleSpecs,
-                      vehicleRating: reserva.vehicleRating,
-                      vehicleReviews: reserva.vehicleReviews,
-                      vehiclePrice: reserva.vehiclePrice,
-                      precioDia: reserva.precioDia,
-                      precioSemana: reserva.precioSemana,
-                      statusColor: const Color(0xFF06B6D4),
-                      secondaryActionLabel: 'Cancelar',
-                      secondaryActionIcon: Icons.close,
-                      secondaryButtonColor: const Color(0xFFFEE2E2),
-                      secondaryTextColor: const Color(0xFFDC2626),
-                    ),
-                    onSecondaryAction: () => _showCancelReservationSheet(
+                    data: reserva,
+                    onSecondaryAction: () => _showCancelReservationSheetForCardData(
                       reserva: reserva,
                     ),
                     onViewDetails: () => _openReservationDetails(
@@ -401,6 +519,33 @@ class _ReservasPageState extends State<ReservasPage> {
                       vehicleImage: reserva.imageUrl,
                       precioDia: reserva.precioDia ?? 440000,
                       precioSemana: reserva.precioSemana ?? 2640000,
+                      reservaCode: reserva.code,
+                    ),
+                  ))
+              .toList());
+    } else if (_selectedFilter == 'Pendientes') {
+      if (_pendingReservations.isEmpty) {
+        return _buildEmptyPendingReservations();
+      }
+
+      return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          children: _pendingReservations
+              .map((reserva) => _buildReservationCard(
+                    data: reserva,
+                    onSecondaryAction: () => _showCancelReservationSheetForCardData(
+                      reserva: reserva,
+                    ),
+                    onViewDetails: () => _openReservationDetails(
+                      vehicleName: reserva.vehicleName,
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleRating: reserva.vehicleRating ?? 4.9,
+                      vehicleReviews: reserva.vehicleReviews ?? 128,
+                      vehiclePrice: reserva.vehiclePrice ?? 440000,
+                      vehicleImage: reserva.imageUrl,
+                      precioDia: reserva.precioDia ?? 440000,
+                      precioSemana: reserva.precioSemana ?? 2640000,
+                      reservaCode: reserva.code,
                     ),
                   ))
               .toList());
@@ -455,6 +600,44 @@ class _ReservasPageState extends State<ReservasPage> {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyPendingReservations() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.hourglass_empty_outlined,
+              size: 56,
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'No tienes reservas pendientes',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Las reservas pendientes aparecerán aquí',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -664,6 +847,197 @@ class _ReservasPageState extends State<ReservasPage> {
     }
   }
 
+  Future<void> _showCancelReservationSheetForCardData({
+    required _ReservaCardData reserva,
+  }) async {
+    final theme = Theme.of(context);
+    final shouldCancel = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFFBCFE8)),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          color: const Color(0xFFE5E7EB),
+                          child: reserva.imageUrl!.isEmpty
+                              ? _buildSmallPlaceholder()
+                              : Image.asset(
+                                  reserva.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      _buildSmallPlaceholder(),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              reserva.vehicleName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${reserva.startDate} · ${reserva.price}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.45),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '¿Estás seguro de que deseas cancelar esta reserva?',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Esta acción no se puede deshacer',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(sheetContext, false),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Mantener',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(sheetContext, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEF4444),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Si, cancelar',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (shouldCancel == true) {
+      setState(() {
+        _canceladasCount += 1;
+        // Remove from active reservations
+        _activeReservations.removeWhere((r) => r.code == reserva.code);
+        // Add to history as cancelled
+        _historyReservations.add(_ReservaCardData(
+          vehicleName: reserva.vehicleName,
+          code: reserva.code,
+          price: reserva.price,
+          startDate: reserva.startDate,
+          endDate: reserva.endDate,
+          location: reserva.location,
+          progress: 0.0,
+          status: 'Cancelada',
+          imageUrl: reserva.imageUrl,
+          showEnCurso: false,
+          vehicleSpecs: reserva.vehicleSpecs,
+          vehicleRating: reserva.vehicleRating,
+          vehicleReviews: reserva.vehicleReviews,
+          vehiclePrice: reserva.vehiclePrice,
+          precioDia: reserva.precioDia,
+          precioSemana: reserva.precioSemana,
+          statusColor: const Color(0xFFEF4444),
+          secondaryActionLabel: 'Calificar',
+          secondaryActionIcon: Icons.star_rounded,
+          secondaryButtonColor: const Color(0xFFFCD34D),
+          secondaryTextColor: const Color(0xFF111827),
+        ));
+      });
+    }
+  }
+
   Widget _buildSmallPlaceholder() => const Center(
         child: Icon(
           Icons.directions_car,
@@ -854,22 +1228,21 @@ class _ReservasPageState extends State<ReservasPage> {
     required String vehicleImage,
     int? precioDia,
     int? precioSemana,
+    String? reservaCode,
   }) {
+    // Find the reservation by code to get the ID
+    final reservas = _reservationDb.reservations;
+    final reserva = reservas.firstWhere(
+      (r) => r.code == reservaCode,
+      orElse: () => reservas.first, // Fallback
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ReservaDetallePage(
-          vehicleId:
-              0, // Default value since we don't have vehicleId in this context
-          vehicleName: vehicleName,
-          vehicleSpecs: vehicleSpecs,
-          vehicleRating: vehicleRating,
-          vehicleReviews: vehicleReviews,
-          vehiclePrice: vehiclePrice,
-          vehicleImage: vehicleImage,
-          precioHora: vehiclePrice,
-          precioDia: precioDia,
-          precioSemana: precioSemana,
+        builder: (_) => ReservaDetalleCompletaPage(
+          reservaCode: reserva.code,
+          reservaId: reserva.id,
         ),
       ),
     );
@@ -877,23 +1250,31 @@ class _ReservasPageState extends State<ReservasPage> {
 
   String _statusLabel(int statusId) {
     switch (statusId) {
+      case 1:
+        return 'Pendiente';
       case 2:
         return 'Finalizada';
       case 3:
         return 'Cancelada';
-      default:
+      case 4:
         return 'Activa';
+      default:
+        return 'Pendiente';
     }
   }
 
   Color _statusColor(String status) {
     switch (status) {
+      case 'Pendiente':
+        return const Color(0xFFF59E0B);
       case 'Finalizada':
         return const Color(0xFF3B82F6);
       case 'Cancelada':
         return const Color(0xFFEF4444);
-      default:
+      case 'Activa':
         return const Color(0xFF06B6D4);
+      default:
+        return const Color(0xFFF59E0B);
     }
   }
 

@@ -40,23 +40,7 @@ class ReservasStore {
   ReservasStore._();
 
   static final ValueNotifier<List<ReservaActiva>> activasNotifier =
-      ValueNotifier<List<ReservaActiva>>([
-    const ReservaActiva(
-      vehicleName: 'Mazda CX-5 2024',
-      code: 'FXD-2024-0089',
-      price: r'$ 440,000',
-      startDate: '22 Feb 2026',
-      endDate: '24 Feb 2026',
-      location: 'Av. El Dorado, Bogotá',
-      imageUrl: 'assets/imagenes_carros/cx5.jpg',
-      vehicleSpecs: '2024 • Negro Jet',
-      vehicleRating: 4.9,
-      vehicleReviews: 128,
-      vehiclePrice: 440000,
-      precioDia: 440000,
-      precioSemana: 2640000,
-    ),
-  ]);
+      ValueNotifier<List<ReservaActiva>>([]);
 
   static void addActiva(ReservaActiva reserva) {
     activasNotifier.value = [reserva, ...activasNotifier.value];

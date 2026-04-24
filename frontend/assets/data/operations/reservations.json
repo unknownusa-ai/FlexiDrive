@@ -878,6 +878,21 @@
         "valor_total":  4734000,
         "usuario_id":  4,
         "tipo_periodo_id":  1
+    },
+    {
+        "metodo_pago_id": 1,
+        "ubicacion_entrega":  "Punto 2 - Cali",
+        "codigo_reserva":  "FD-2026-TEST-01",
+        "cantidad_periodos":  2,
+        "publicacion_id":  1,
+        "ubicacion_recogida":  "Punto 1 - Bogotá",
+        "fecha_fin":  "2026-04-25T20:00:00Z",
+        "fecha_inicio":  "2026-04-25T08:00:00Z",
+        "estado_reserva_id":  1,
+        "reserva_id":  999,
+        "fecha_reserva":  "2026-04-23T10:00:00Z",
+        "valor_total":  880000,
+        "usuario_id":  1,
+        "tipo_periodo_id":  2
     }
 ]
-
