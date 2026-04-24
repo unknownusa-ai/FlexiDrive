@@ -1,12 +1,20 @@
-import 'dart:convert';
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Menu principal con navegacion
 import 'package:flexidrive/presentation/pages/main_page.dart';
+// Temas y colores de la app
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+// Servicios de usuarios y login
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+// Preferencias y configuraciones del usuario
 import 'package:flexidrive/services/accounts/user_preference_service.dart';
+// Base de datos de reservas
 import 'package:flexidrive/services/reservations/local_reservation_db.dart';
+// Base de datos de reseñas
 import 'package:flexidrive/services/reviews/local_review_db.dart';
+// Paginas del perfil
 import 'edit_profile_page.dart';
 import '../login/login_page.dart';
 import 'security_page.dart';
@@ -14,51 +22,68 @@ import 'payment_methods_page.dart';
 import 'my_reviews_page.dart';
 import 'help_center_page.dart';
 import 'arrendatario_main_page.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
 
+// Pagina principal del perfil del usuario
+// Muestra info personal, estadisticas y opciones
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
+// Estado de la pagina de perfil
 class _ProfilePageState extends State<ProfilePage> {
+  // Repositorio para manejar usuarios
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  // Servicio de preferencias del usuario
   final UserPreferenceService _preferenceService = UserPreferenceService();
+  // Base de datos de reservas
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
+  // Base de datos de reseñas
   final LocalReviewDb _reviewDb = LocalReviewDb.instance;
+  // Esta activo el modo arrendatario?
   bool _isModoArrendatarioActive = false;
+  // ID del usuario actual
   int? _currentUserId;
+  // Nombre del usuario (si no hay, "Invitado")
   String _profileName = 'Invitado';
+  // Email del usuario (si no hay, email por defecto)
   String _profileEmail = 'sin_sesion@flexidrive.local';
-  
-  // Dynamic profile data
-  double _rating = 4.9;
-  int _trips = 0;
-  double _totalSpent = 0;
-  int _points = 0;
-  int _totalReservations = 0;
-  int _totalReviews = 0;
+
+  // Estadisticas dinamicas del perfil
+  final double _rating = 4.9; // Calificacion promedio
+  int _trips = 0; // Viajes realizados
+  double _totalSpent = 0; // Dinero gastado total
+  int _points = 0; // Puntos acumulados
+  int _totalReservations = 0; // Total de reservas
+  int _totalReviews = 0; // Total de reseñas
 
   @override
   void initState() {
     super.initState();
-    _cargarUsuarioPerfil();
+    _cargarUsuarioPerfil(); // Carga datos del usuario
   }
 
+  // Carga los datos del perfil desde el repositorio
   Future<void> _cargarUsuarioPerfil() async {
+    // Obtenemos el usuario actual
     final currentUser = await _accountRepository.getCurrentUser();
     if (!mounted || currentUser == null) return;
 
+    // Guardamos el ID del usuario
     _currentUserId = currentUser.id;
+    // Buscamos preferencias del usuario
     final userPreference =
         await _preferenceService.findEffectiveByUserId(currentUser.id);
+    // Verificamos si tiene activo el modo arrendatario
     final isArrendatarioActive = await _preferenceService.getArrendatarioMode(
       userId: currentUser.id,
       defaultValue: false,
     );
 
-    // Load data for dynamic profile stats
+    // Cargamos datos para las estadisticas del perfil
     await _calculateProfileStats();
 
     setState(() {
@@ -981,42 +1006,41 @@ class _ProfilePageState extends State<ProfilePage> {
       // Load reservations and reviews data
       await _reservationDb.loadIfNeeded();
       await _reviewDb.loadIfNeeded();
-      
+
       // Calculate completed trips (reservations with status 2 or 3)
       if (_currentUserId != null) {
         final userReservations = _reservationDb.reservations
             .where((r) => r.userId == _currentUserId)
             .toList();
-        
+
         // Total reservations (all statuses)
         _totalReservations = userReservations.length;
-        
+
         final completedReservations = userReservations
             .where((r) => r.statusId == 2 || r.statusId == 3)
             .toList();
-        
+
         _trips = completedReservations.length;
-        
+
         // Calculate total spent
         _totalSpent = completedReservations.fold(0.0, (sum, reservation) {
           return sum + reservation.totalValue;
         });
-        
+
         // Calculate points (10 points per completed trip + bonus based on spending)
         _points = (_trips * 10) + (_totalSpent / 10000).floor();
-        
+
         // Count reviews
-        final userReviews = _reviewDb.reviews
-            .where((r) => r.userId == _currentUserId)
-            .toList();
-        
+        final userReviews =
+            _reviewDb.reviews.where((r) => r.userId == _currentUserId).toList();
+
         _totalReviews = userReviews.length;
-        
+
         // Rating is kept at default 4.9 since ReviewModel doesn't contain rating directly
         // (rating is in OpinionModel referenced by opinionId)
       }
     } catch (e) {
-      print('Error calculating profile stats: $e');
+      // Error calculating stats - silently handle
     }
   }
 

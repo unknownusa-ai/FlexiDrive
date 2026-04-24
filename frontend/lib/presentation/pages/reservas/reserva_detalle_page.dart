@@ -1,52 +1,75 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
 
+// Utilidades y servicios
 import '../../../core/utils/responsive_utils.dart';
 import '../../../services/accounts/local_account_repository.dart';
 import '../../../services/publications/local_publication_db.dart';
 import '../../../services/reviews/local_review_db.dart';
+// Modelos de datos
 import '../../../models/accounts/account_models.dart';
 import '../../../models/publications/publication_models.dart';
 import '../../../models/reviews/review_models.dart';
+// Pagina de resumen de reserva
 import 'resumen_reserva_page.dart';
 
+// Pagina de detalle de vehiculo
+// Muestra toda la info del carro antes de reservar
 class ReservaDetallePage extends StatefulWidget {
-  final int vehicleId;
-  final String? vehicleName;
-  final String? vehicleSpecs;
-  final String? vehicleDescription;
-  final String? fuelType;
-  final bool? hasAC;
-  final double? vehicleRating;
-  final int? vehicleReviews;
-  final int? vehiclePrice;
-  final String? vehicleImage;
-  final int? precioHora;
-  final int? precioDia;
-  final int? precioSemana;
-
+  // Constructor con parámetros del vehículo
   const ReservaDetallePage({
     super.key,
-    this.vehicleId = 0,
-    this.vehicleName,
-    this.vehicleSpecs,
-    this.vehicleDescription,
-    this.fuelType,
-    this.hasAC,
-    this.vehicleRating,
-    this.vehicleReviews,
-    this.vehiclePrice,
-    this.vehicleImage,
-    this.precioHora,
-    this.precioDia,
-    this.precioSemana,
+    this.vehicleId = 0, // ID del vehículo
+    this.vehicleName, // Nombre del vehículo
+    this.vehicleSpecs, // Especificaciones
+    this.vehicleDescription, // Descripción
+    this.fuelType, // Tipo de combustible
+    this.hasAC, // Tiene aire acondicionado?
+    this.vehicleRating, // Calificacion promedio
+    this.vehicleReviews, // Cantidad de reseñas
+    this.vehiclePrice, // Precio base
+    this.vehicleImage, // URL de la imagen
+    this.precioHora, // Precio por hora
+    this.precioDia, // Precio por dia
+    this.precioSemana, // Precio por semana
   });
+
+  // ID del vehículo
+  final int vehicleId;
+  // Nombre del vehículo
+  final String? vehicleName;
+  // Especificaciones del vehículo
+  final String? vehicleSpecs;
+  // Descripción del vehículo
+  final String? vehicleDescription;
+  // Tipo de combustible
+  final String? fuelType;
+  // Tiene aire acondicionado?
+  final bool? hasAC;
+  // Calificacion promedio
+  final double? vehicleRating;
+  // Cantidad de reseñas
+  final int? vehicleReviews;
+  // Precio base
+  final int? vehiclePrice;
+  // URL de la imagen
+  final String? vehicleImage;
+  // Precio por hora
+  final int? precioHora;
+  // Precio por dia
+  final int? precioDia;
+  // Precio por semana
+  final int? precioSemana;
 
   @override
   State<ReservaDetallePage> createState() => _ReservaDetallePageState();
 }
 
+// Estado de la pagina de detalle
 class _ReservaDetallePageState extends State<ReservaDetallePage> {
+  // Periodo seleccionado para la reserva
   String _periodoSeleccionado = 'Días';
   int _cantidad = 1;
 

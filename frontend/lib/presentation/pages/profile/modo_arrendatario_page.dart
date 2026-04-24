@@ -1,8 +1,11 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import 'arrendatario_main_page.dart';
 
+// Página de modo arrendador
+// Muestra el proceso de verificación para convertirse en arrendador
 class ModoArrendatarioPage extends StatefulWidget {
   const ModoArrendatarioPage({super.key});
 
@@ -10,10 +13,15 @@ class ModoArrendatarioPage extends StatefulWidget {
   State<ModoArrendatarioPage> createState() => _ModoArrendatarioPageState();
 }
 
+// Estado de la página de modo arrendador
+// Maneja el progreso de verificación de documentos
 class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
+  // Contador de documentos completados
   int documentosCompletados = 0;
+  // Total de documentos requeridos
   final int totalDocumentos = 4;
 
+  // Lista de documentos requeridos para verificación
   final List<DocumentoVerificacion> documentos = [
     DocumentoVerificacion(
       icono: Icons.person_outline,

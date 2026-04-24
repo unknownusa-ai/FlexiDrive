@@ -1,3 +1,5 @@
+// Página de notificaciones
+// Muestra todas las notificaciones del usuario con filtros por categoría
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -6,17 +8,25 @@ import 'package:flexidrive/models/notifications/notification_models.dart';
 import 'package:flexidrive/services/catalogs/local_catalog_db.dart';
 import 'package:flexidrive/services/notifications/local_notification_db.dart';
 
+// Página que muestra las notificaciones del usuario
+// Permite filtrar por categorías y marcar como leídas
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
 
+// Estado de la página de notificaciones
+// Maneja la carga, filtrado y estado de las notificaciones
 class _NotificationsPageState extends State<NotificationsPage> {
+  // Tab seleccionada para filtrar notificaciones
   String _selectedTab = 'Todas';
+  // Contador de notificaciones no leídas
   int _unreadCount = 0;
+  // Indica si se están cargando las notificaciones
   bool _isLoading = true;
 
+  // Base de datos local de notificaciones
   final LocalNotificationDb _notificationDb = LocalNotificationDb.instance;
   final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;

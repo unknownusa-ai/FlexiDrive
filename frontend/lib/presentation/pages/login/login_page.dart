@@ -1,12 +1,21 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Para mostrar SVGs (el logo)
 import 'package:flutter_svg/flutter_svg.dart';
+// Fuentes bonitas
 import 'package:google_fonts/google_fonts.dart';
+// Servicio para validar el login
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Página de registro si no tiene cuenta
 import '../register/register_page.dart';
+// Página principal después de loguear
 import '../main_page.dart';
+// Si olvidó la contraseña
 import 'forgot_password_page.dart';
 
+// Página de login - donde el usuario entra a la app
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -14,13 +23,20 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+// Estado del login
 class _LoginPageState extends State<LoginPage> {
+  // Controlador del campo de email
   final _emailController = TextEditingController();
+  // Controlador del campo de contraseña
   final _passwordController = TextEditingController();
+  // Repositorio para validar credenciales
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  // Ocultar/mostrar contraseña
   bool _obscurePassword = true;
+  // Está enviando el formulario? (para evitar doble clic)
   bool _isSubmitting = false;
 
+  // Muestra alerta cuando hay error
   Future<void> _showErrorDialog(String title, String message) async {
     return showDialog<void>(
       context: context,
@@ -39,12 +55,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Procesa el login cuando tocan el botón
   Future<void> _submitLogin() async {
+    // Si ya está procesando, no hace nada
     if (_isSubmitting) return;
 
+    // Toma el email y limpia espacios
     final email = _emailController.text.trim();
+    // Toma la contraseña
     final password = _passwordController.text;
 
+    // Valida que no estén vacíos
     if (email.isEmpty || password.isEmpty) {
       await _showErrorDialog(
         'Campos obligatorios',

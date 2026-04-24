@@ -1,8 +1,14 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Pagina principal del arrendador (para volver)
 import 'principal_arrendatario_page.dart';
 
+// Pagina "Mi Saldo" - muestra el dinero disponible del arrendador
+// Para los dueños de carros que quieren retirar sus ganancias
 class MiSaldoPage extends StatefulWidget {
   const MiSaldoPage({super.key});
 
@@ -10,21 +16,27 @@ class MiSaldoPage extends StatefulWidget {
   State<MiSaldoPage> createState() => _MiSaldoPageState();
 }
 
+// Estado de la pagina de saldo
 class _MiSaldoPageState extends State<MiSaldoPage> {
+  // Saldo disponible para retirar (en pesos)
   int _saldoDisponible = 1440000;
+  // Saldo ya retirado
   int _saldoRetirado = 0;
 
+  // Lista de cuentas bancarias del usuario
   final List<_CuentaBancaria> _cuentas = [
     _CuentaBancaria(
-      banco: 'Bancolombia',
-      tipoCuenta: 'Ahorros',
-      numeroCuenta: '12345678',
-      titular: 'Daniel',
+      banco: 'Bancolombia', // Nombre del banco
+      tipoCuenta: 'Ahorros', // Tipo de cuenta
+      numeroCuenta: '12345678', // Numero de cuenta
+      titular: 'Daniel', // Nombre del titular
     ),
   ];
 
+  // Indice de la cuenta seleccionada
   int _cuentaSeleccionadaIndex = 0;
 
+  // Navega a la pagina principal del arrendador
   void _goToPrincipalArrendatario() {
     Navigator.push(
       context,

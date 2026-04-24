@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../services/accounts/local_account_repository.dart';
-import '../../../services/vehiculo_service.dart';
 
+// Página de métodos de pago
+// Muestra los métodos de pago del usuario y permite agregar nuevos
 class PaymentMethodsPage extends StatefulWidget {
   const PaymentMethodsPage({super.key});
 
@@ -13,11 +14,16 @@ class PaymentMethodsPage extends StatefulWidget {
   State<PaymentMethodsPage> createState() => _PaymentMethodsPageState();
 }
 
+// Estado de la página de métodos de pago
+// Maneja la carga y gestión de métodos de pago
 class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
+  // Repositorio para manejar cuentas de usuario
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
-  final VehiculoService _vehiculoService = VehiculoService();
+  // Lista de métodos de pago del usuario
   List<Map<String, dynamic>> _paymentMethods = [];
+  // ID del usuario actual
   int? _currentUserId;
+  // Indica si se están cargando los métodos
   bool _isLoading = true;
 
   final List<Map<String, dynamic>> _otherMethods = [
@@ -50,27 +56,32 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   Future<void> _loadPaymentMethods() async {
     try {
       final currentUser = await _accountRepository.getCurrentUser();
-      if (currentUser != null) {
-        _currentUserId = currentUser.id;
-        
-        // Load payment methods from JSON
-        final String paymentMethodsData = await DefaultAssetBundle.of(context).loadString('assets/data/payments/payment_methods.json');
-        final List<dynamic> paymentMethodsJson = json.decode(paymentMethodsData);
-        final allPaymentMethods = paymentMethodsJson.cast<Map<String, dynamic>>();
-        
-        // Filter payment methods for current user
-        final userPaymentMethods = allPaymentMethods
-            .where((method) => method['usuario_id'] == _currentUserId)
-            .toList();
-        
-        setState(() {
-          _paymentMethods = userPaymentMethods;
-          _isLoading = false;
-        });
+      if (currentUser == null || !mounted) {
+        setState(() => _isLoading = false);
+        return;
       }
+      _currentUserId = currentUser.id;
+
+      // Load payment methods from JSON
+      final String paymentMethodsData = await DefaultAssetBundle.of(context)
+          .loadString('assets/data/payments/payment_methods.json');
+      final List<dynamic> paymentMethodsJson = json.decode(paymentMethodsData);
+      final allPaymentMethods = paymentMethodsJson.cast<Map<String, dynamic>>();
+
+      // Filter payment methods for current user
+      final userPaymentMethods = allPaymentMethods
+          .where((method) => method['usuario_id'] == _currentUserId)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = userPaymentMethods;
+        _isLoading = false;
+      });
     } catch (e) {
-      print('Error loading payment methods: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -82,7 +93,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     final backgroundColor = isDark ? AppThemes.darkBg : AppThemes.lightBg;
     final cardColor = isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
     final textColor = isDark ? AppThemes.darkText : AppThemes.lightText;
-    final secondaryTextColor = isDark ? AppThemes.darkTextSub : AppThemes.lightTextSub;
+    final secondaryTextColor =
+        isDark ? AppThemes.darkTextSub : AppThemes.lightTextSub;
     final dividerColor = isDark ? AppThemes.darkDivider : AppThemes.lightBorder;
 
     return Scaffold(
@@ -91,25 +103,33 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         children: [
           _buildGradientHeader(isSmallPhone, isDark),
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: isSmallPhone ? 16 : 20,
-                vertical: isSmallPhone ? 16 : 20,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSavedCardsSection(isSmallPhone, isDark),
-                  SizedBox(height: isSmallPhone ? 12 : 16),
-                  _buildAddCardButton(isSmallPhone, isDark, cardColor),
-                  SizedBox(height: isSmallPhone ? 16 : 20),
-                  _buildOtherMethodsSection(isSmallPhone, isDark, cardColor, textColor, secondaryTextColor, dividerColor),
-                  SizedBox(height: isSmallPhone ? 12 : 16),
-                  _buildSecurityBadge(isSmallPhone, isDark),
-                  SizedBox(height: isSmallPhone ? 20 : 24),
-                ],
-              ),
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallPhone ? 16 : 20,
+                      vertical: isSmallPhone ? 16 : 20,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSavedCardsSection(isSmallPhone, isDark),
+                        SizedBox(height: isSmallPhone ? 12 : 16),
+                        _buildAddCardButton(isSmallPhone, isDark, cardColor),
+                        SizedBox(height: isSmallPhone ? 16 : 20),
+                        _buildOtherMethodsSection(
+                            isSmallPhone,
+                            isDark,
+                            cardColor,
+                            textColor,
+                            secondaryTextColor,
+                            dividerColor),
+                        SizedBox(height: isSmallPhone ? 12 : 16),
+                        _buildSecurityBadge(isSmallPhone, isDark),
+                        SizedBox(height: isSmallPhone ? 20 : 24),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
@@ -147,7 +167,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           width: isSmallPhone ? 36 : 40,
                           height: isSmallPhone ? 36 : 40,
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.2),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.15)
+                                : Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -194,7 +216,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             width: 130,
             height: 130,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -206,7 +230,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.06),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : Colors.white.withValues(alpha: 0.06),
               shape: BoxShape.circle,
             ),
           ),
@@ -235,12 +261,14 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
-  Widget _buildGradientCard(Map<String, dynamic> method, bool isSmallPhone, bool isDark) {
+  Widget _buildGradientCard(
+      Map<String, dynamic> method, bool isSmallPhone, bool isDark) {
     final bool isDefault = (method['predeterminado'] as bool?) ?? false;
     final int methodId = method['metodo_pago_id'] as int? ?? 0;
     final int paymentTypeId = method['tipo_metodo_pago_id'] as int? ?? 1;
     final bool isCard = paymentTypeId == 1; // 1 = Tarjeta de crédito/débito
-    final bool isVisa = methodId % 2 == 1; // Alternar entre Visa y Mastercard para visualización
+    final bool isVisa = methodId % 2 ==
+        1; // Alternar entre Visa y Mastercard para visualización
 
     final List<Color> gradientColors = isDefault
         ? [const Color(0xFF4F46E5), const Color(0xFF6D28D9)]
@@ -300,9 +328,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isCard 
-                        ? '····  ····  ····  ${(methodId * 1234).toString().padLeft(4, '0').substring(0, 4)}'
-                        : 'Método de pago #$methodId',
+                      isCard
+                          ? '····  ····  ····  ${(methodId * 1234).toString().padLeft(4, '0').substring(0, 4)}'
+                          : 'Método de pago #$methodId',
                       style: GoogleFonts.inter(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: isSmallPhone ? 13 : 14,
@@ -331,7 +359,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 SizedBox(height: isSmallPhone ? 8 : 10),
                 // Cardholder name
                 Text(
-                  isCard ? 'Tarjeta de crédito' : 'Método de pago ${isCard ? '' : 'alternativo'}',
+                  isCard
+                      ? 'Tarjeta de crédito'
+                      : 'Método de pago ${isCard ? '' : 'alternativo'}',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: isSmallPhone ? 14 : 16,
@@ -340,9 +370,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 ),
                 SizedBox(height: isSmallPhone ? 2 : 3),
                 Text(
-                  isCard 
-                    ? '${isVisa ? 'Visa' : 'Mastercard'} · Expira 12/28'
-                    : 'Tipo: ${paymentTypeId == 2 ? 'PSE' : 'Otro'}',
+                  isCard
+                      ? '${isVisa ? 'Visa' : 'Mastercard'} · Expira 12/28'
+                      : 'Tipo: ${paymentTypeId == 2 ? 'PSE' : 'Otro'}',
                   style: GoogleFonts.inter(
                     color: Colors.white.withValues(alpha: 0.75),
                     fontSize: isSmallPhone ? 11 : 12,
@@ -483,12 +513,15 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           color: isDark ? cardColor : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppThemes.primaryIndigo.withValues(alpha: isDark ? 0.5 : 0.35),
+            color:
+                AppThemes.primaryIndigo.withValues(alpha: isDark ? 0.5 : 0.35),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -517,7 +550,13 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
-  Widget _buildOtherMethodsSection(bool isSmallPhone, bool isDark, Color cardColor, Color textColor, Color secondaryTextColor, Color dividerColor) {
+  Widget _buildOtherMethodsSection(
+      bool isSmallPhone,
+      bool isDark,
+      Color cardColor,
+      Color textColor,
+      Color secondaryTextColor,
+      Color dividerColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -537,7 +576,9 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -548,7 +589,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
               final index = entry.key;
               final method = entry.value;
               final isLast = index == _otherMethods.length - 1;
-              return _buildOtherMethodRow(method, isSmallPhone, isLast, isDark, textColor, secondaryTextColor, dividerColor);
+              return _buildOtherMethodRow(method, isSmallPhone, isLast, isDark,
+                  textColor, secondaryTextColor, dividerColor);
             }).toList(),
           ),
         ),
@@ -557,7 +599,13 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   }
 
   Widget _buildOtherMethodRow(
-      Map<String, dynamic> method, bool isSmallPhone, bool isLast, bool isDark, Color textColor, Color secondaryTextColor, Color dividerColor) {
+      Map<String, dynamic> method,
+      bool isSmallPhone,
+      bool isLast,
+      bool isDark,
+      Color textColor,
+      Color secondaryTextColor,
+      Color dividerColor) {
     final bool isActive = method['isActive'] as bool;
     // Keep original icon backgrounds in both light and dark mode
     final iconBg = method['iconBg'] as Color;
@@ -619,8 +667,11 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 ),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppThemes.accentGreen.withValues(alpha: isDark ? 0.2 : 0.15)
-                      : isDark ? AppThemes.darkSurfaceEl : AppThemes.lightBg,
+                      ? AppThemes.accentGreen
+                          .withValues(alpha: isDark ? 0.2 : 0.15)
+                      : isDark
+                          ? AppThemes.darkSurfaceEl
+                          : AppThemes.lightBg,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -628,9 +679,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   style: GoogleFonts.inter(
                     fontSize: isSmallPhone ? 9 : 10,
                     fontWeight: FontWeight.w700,
-                    color: isActive
-                        ? AppThemes.accentGreen
-                        : secondaryTextColor,
+                    color:
+                        isActive ? AppThemes.accentGreen : secondaryTextColor,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -660,9 +710,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         color: AppThemes.accentGreen.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppThemes.accentGreen.withValues(alpha: isDark ? 0.3 : 0.2), 
-          width: 1
-        ),
+            color: AppThemes.accentGreen.withValues(alpha: isDark ? 0.3 : 0.2),
+            width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -712,7 +761,11 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
         ),
         content: Text(
           '¿Deseas eliminar la tarjeta terminada en ${method['last4']}?',
-          style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).brightness == Brightness.dark ? AppThemes.darkTextSub : AppThemes.lightTextSub),
+          style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppThemes.darkTextSub
+                  : AppThemes.lightTextSub),
         ),
         actions: [
           TextButton(
@@ -762,7 +815,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.credit_card, color: AppThemes.primaryIndigo),
+              leading:
+                  const Icon(Icons.credit_card, color: AppThemes.primaryIndigo),
               title: Text(
                 'Tarjeta de crédito/débito',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w500),
@@ -773,8 +827,8 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
               },
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.account_balance, color: AppThemes.primaryPurple),
+              leading: const Icon(Icons.account_balance,
+                  color: AppThemes.primaryPurple),
               title: Text(
                 'PSE',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w500),

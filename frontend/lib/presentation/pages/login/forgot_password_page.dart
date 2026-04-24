@@ -1,9 +1,16 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Servicio para manejar usuarios y recuperación
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Pagina de login (despues de recuperar)
 import 'login_page.dart';
 
+// Pagina de recuperación de contraseña
+// Flujo de 2 pasos: 1) verificar email, 2) cambiar contraseña
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -11,18 +18,25 @@ class ForgotPasswordPage extends StatefulWidget {
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
+// Estado de la pagina de recuperación
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  final _emailController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  // Controladores de los campos
+  final _emailController = TextEditingController(); // Email del usuario
+  final _newPasswordController = TextEditingController(); // Nueva contraseña
+  final _confirmPasswordController =
+      TextEditingController(); // Confirmar contraseña
+
+  // Servicio para manejar usuarios
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
 
-  bool _isLoading = false;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
-  int _currentStep = 1;
-  int? _userId;
+  // Estados de la UI
+  bool _isLoading = false; // Esta procesando?
+  bool _obscureNewPassword = true; // Ocultar nueva contraseña
+  bool _obscureConfirmPassword = true; // Ocultar confirmacion
+  int _currentStep = 1; // Paso actual (1 o 2)
+  int? _userId; // ID del usuario encontrado
 
+  // Muestra dialogo de error
   Future<void> _showErrorDialog(String title, String message) async {
     return showDialog<void>(
       context: context,
@@ -41,10 +55,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  // Muestra dialogo de exito
   Future<void> _showSuccessDialog(String message) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: false, // No se puede cerrar tocando fuera
       builder: (context) {
         return AlertDialog(
           title: const Icon(
@@ -252,13 +267,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               children: [
                                 Icon(
                                   Icons.arrow_back_ios,
-                                  color: Colors.white.withAlpha((0.9 * 255).round()),
+                                  color: Colors.white
+                                      .withAlpha((0.9 * 255).round()),
                                   size: 18,
                                 ),
                                 Text(
                                   'Atrás',
                                   style: GoogleFonts.poppins(
-                                    color: Colors.white.withAlpha((0.9 * 255).round()),
+                                    color: Colors.white
+                                        .withAlpha((0.9 * 255).round()),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -271,8 +288,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               Container(
                                 padding: EdgeInsets.all(8 * scale),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha((0.2 * 255).round()),
-                                  borderRadius: BorderRadius.circular(12 * scale),
+                                  color: Colors.white
+                                      .withAlpha((0.2 * 255).round()),
+                                  borderRadius:
+                                      BorderRadius.circular(12 * scale),
                                 ),
                                 child: Icon(
                                   Icons.lock_reset,
@@ -285,7 +304,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 'Recuperar Contraseña',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
-                                  fontSize: ResponsiveUtils.fontSize(context, 22),
+                                  fontSize:
+                                      ResponsiveUtils.fontSize(context, 22),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -309,7 +329,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ? 'No te preocupes, te ayudaremos a recuperarla'
                                 : 'Ingresa tu nueva contraseña',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withAlpha((0.8 * 255).round()),
+                              color:
+                                  Colors.white.withAlpha((0.8 * 255).round()),
                               fontSize: ResponsiveUtils.fontSize(context, 14),
                             ),
                           ),

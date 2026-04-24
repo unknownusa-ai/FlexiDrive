@@ -1,7 +1,10 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
+// Página de onboarding - tutorial del mapa
+// Muestra cómo usar la función de mapa para encontrar vehículos cercanos
 class OnboardingPageMap extends StatefulWidget {
   const OnboardingPageMap({super.key});
 
@@ -9,9 +12,13 @@ class OnboardingPageMap extends StatefulWidget {
   State<OnboardingPageMap> createState() => _OnboardingPageMapState();
 }
 
+// Estado de la página de onboarding del mapa
+// Maneja las animaciones de los pines y la interacción con el usuario
 class _OnboardingPageMapState extends State<OnboardingPageMap>
     with SingleTickerProviderStateMixin {
+  // Controlador de animaciones
   late AnimationController _controller;
+  // Animaciones para los pines en el mapa
   late Animation<double> _pin1Animation;
   late Animation<double> _pin2Animation;
   late Animation<double> _pin3Animation;
@@ -65,7 +72,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    
+
     return Container(
       color: const Color(0xFFE8F5E9),
       child: SafeArea(
@@ -75,7 +82,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 40),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 40),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -99,7 +107,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(0, _pin1Animation.value),
-                                  child: _buildPin(const Color(0xFF2563EB), isSmallPhone: isSmallPhone),
+                                  child: _buildPin(const Color(0xFF2563EB),
+                                      isSmallPhone: isSmallPhone),
                                 );
                               },
                             ),
@@ -112,7 +121,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(0, _pin2Animation.value),
-                                  child: _buildPin(const Color(0xFF7C3AED), isSmallPhone: isSmallPhone),
+                                  child: _buildPin(const Color(0xFF7C3AED),
+                                      isSmallPhone: isSmallPhone),
                                 );
                               },
                             ),
@@ -125,7 +135,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(0, _pin3Animation.value),
-                                  child: _buildPin(const Color(0xFFEF4444), isSmallPhone: isSmallPhone),
+                                  child: _buildPin(const Color(0xFFEF4444),
+                                      isSmallPhone: isSmallPhone),
                                 );
                               },
                             ),
@@ -138,7 +149,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(0, _pin4Animation.value),
-                                  child: _buildPin(const Color(0xFF10B981), isSmallPhone: isSmallPhone),
+                                  child: _buildPin(const Color(0xFF10B981),
+                                      isSmallPhone: isSmallPhone),
                                 );
                               },
                             ),
@@ -201,7 +213,8 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
             Expanded(
               flex: 1,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -1,7 +1,10 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
+// Página de alertas y notificaciones del usuario
+// Muestra diferentes tipos de alertas organizadas por categorías
 class AlertasPage extends StatefulWidget {
   const AlertasPage({super.key});
 
@@ -9,9 +12,13 @@ class AlertasPage extends StatefulWidget {
   State<AlertasPage> createState() => _AlertasPageState();
 }
 
+// Estado de la página de alertas
+// Maneja las pestañas y muestra diferentes tipos de alertas
 class _AlertasPageState extends State<AlertasPage> {
+  // Índice de la pestaña seleccionada
   int _selectedTab = 0;
 
+  // Lista de categorías de alertas
   final List<String> _tabs = [
     'Todas',
     'Solicitudes',
@@ -76,7 +83,8 @@ class _AlertasPageState extends State<AlertasPage> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
                     borderRadius: BorderRadius.circular(12),
@@ -147,17 +155,22 @@ class _AlertasPageState extends State<AlertasPage> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    gradient: isSelected ? const LinearGradient(
-                      colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ) : null,
+                    gradient: isSelected
+                        ? const LinearGradient(
+                            colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          )
+                        : null,
                     color: isSelected ? null : theme.cardTheme.color,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFFF59E0B) : theme.dividerColor,
+                      color: isSelected
+                          ? const Color(0xFFF59E0B)
+                          : theme.dividerColor,
                       width: 1.5,
                     ),
                   ),
@@ -170,8 +183,12 @@ class _AlertasPageState extends State<AlertasPage> {
                         _tabs[index],
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -186,7 +203,9 @@ class _AlertasPageState extends State<AlertasPage> {
   }
 
   Widget _getTabIcon(int index, bool isSelected, ThemeData theme) {
-    final color = isSelected ? Colors.white : theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final color = isSelected
+        ? Colors.white
+        : theme.colorScheme.onSurface.withValues(alpha: 0.6);
     switch (index) {
       case 0:
         return const SizedBox.shrink();
@@ -226,7 +245,8 @@ class _AlertasPageState extends State<AlertasPage> {
         icon: '🚗',
         iconBgColor: const Color(0xFFFFF5F5),
         title: 'Nueva solicitud de renta',
-        subtitle: 'María López quiere rentar tu Chevrolet Onix del 12 al 14 de marzo',
+        subtitle:
+            'María López quiere rentar tu Chevrolet Onix del 12 al 14 de marzo',
         time: 'Hace 5 minutos',
         isUnread: true,
         action: 'Marcar leído',
@@ -235,7 +255,8 @@ class _AlertasPageState extends State<AlertasPage> {
         icon: '💰',
         iconBgColor: const Color(0xFFF0FDF4),
         title: 'Pago recibido',
-        subtitle: 'Has recibido \$900.000 por la renta de tu Mazda 3 a Carlos Mendoza',
+        subtitle:
+            'Has recibido \$900.000 por la renta de tu Mazda 3 a Carlos Mendoza',
         time: 'Hace 2 horas',
         isUnread: true,
         action: 'Marcar leído',
@@ -253,7 +274,8 @@ class _AlertasPageState extends State<AlertasPage> {
         icon: '⏰',
         iconBgColor: const Color(0xFFFEF2F2),
         title: 'Renta por finalizar',
-        subtitle: 'La renta de tu Mazda 3 a Carlos Mendoza finaliza mañana (15 marzo)',
+        subtitle:
+            'La renta de tu Mazda 3 a Carlos Mendoza finaliza mañana (15 marzo)',
         time: 'Hace 1 día',
         isUnread: false,
         action: 'No leído',
@@ -262,7 +284,8 @@ class _AlertasPageState extends State<AlertasPage> {
         icon: '📈',
         iconBgColor: const Color(0xFFF0F9FF),
         title: 'Optimiza tus ganancias',
-        subtitle: 'Ajusta el precio de tu Chevrolet Onix según la demanda de la temporada',
+        subtitle:
+            'Ajusta el precio de tu Chevrolet Onix según la demanda de la temporada',
         time: 'Hace 2 días',
         isUnread: false,
         action: 'No leído',
@@ -270,11 +293,22 @@ class _AlertasPageState extends State<AlertasPage> {
     ];
 
     if (tabIndex == 0) return allNotifications;
-    if (tabIndex == 1) return allNotifications.where((n) => n.title.contains('solicitud')).toList();
-    if (tabIndex == 2) return allNotifications.where((n) => n.title.contains('Pago')).toList();
-    if (tabIndex == 3) return allNotifications.where((n) => n.title.contains('reseña')).toList();
-    if (tabIndex == 4) return allNotifications.where((n) => n.title.contains('finalizar')).toList();
-    if (tabIndex == 5) return allNotifications.where((n) => n.title.contains('ganancias')).toList();
+    if (tabIndex == 1)
+      return allNotifications
+          .where((n) => n.title.contains('solicitud'))
+          .toList();
+    if (tabIndex == 2)
+      return allNotifications.where((n) => n.title.contains('Pago')).toList();
+    if (tabIndex == 3)
+      return allNotifications.where((n) => n.title.contains('reseña')).toList();
+    if (tabIndex == 4)
+      return allNotifications
+          .where((n) => n.title.contains('finalizar'))
+          .toList();
+    if (tabIndex == 5)
+      return allNotifications
+          .where((n) => n.title.contains('ganancias'))
+          .toList();
     return allNotifications;
   }
 
@@ -288,12 +322,12 @@ class _AlertasPageState extends State<AlertasPage> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
       decoration: BoxDecoration(
-        color: notification.isUnread 
+        color: notification.isUnread
             ? theme.colorScheme.primary.withValues(alpha: 0.1)
             : theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: notification.isUnread 
+          color: notification.isUnread
               ? theme.colorScheme.primary.withValues(alpha: 0.3)
               : theme.dividerColor,
           width: 1,
@@ -352,7 +386,8 @@ class _AlertasPageState extends State<AlertasPage> {
                       notification.subtitle,
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 12 : 13,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         height: 1.4,
                       ),
                     ),

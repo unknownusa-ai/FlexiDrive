@@ -1,12 +1,21 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Utilidades para pantallas pequeñas/grandes
 import '../../../core/utils/responsive_utils.dart';
+// Base de datos de reseñas
 import '../../../services/reviews/local_review_db.dart';
+// Repositorio de usuarios
 import '../../../services/accounts/local_account_repository.dart';
+// Base de datos local de cuentas
 import '../../../services/accounts/local_account_db.dart';
+// Base de datos de vehiculos
 import '../../../services/vehicles/local_vehicle_db.dart';
+// Base de datos de publicaciones
 import '../../../services/publications/local_publication_db.dart';
 
+// Pagina "Mis Reseñas" - muestra las reseñas que hizo el usuario
 class MyReviewsPage extends StatefulWidget {
   const MyReviewsPage({super.key});
 
@@ -14,10 +23,15 @@ class MyReviewsPage extends StatefulWidget {
   State<MyReviewsPage> createState() => _MyReviewsPageState();
 }
 
+// Estado de la pagina de reseñas
 class _MyReviewsPageState extends State<MyReviewsPage> {
+  // Lista de reseñas del usuario
   List<Map<String, dynamic>> _reviews = [];
+  // Esta cargando las reseñas?
   bool _isLoading = true;
 
+  // Funcion helper para buscar un elemento o retornar null
+  // Como firstWhereOrNull pero implementado aqui
   T? _firstWhereOrNull<T>(Iterable<T> items, bool Function(T) test) {
     for (final item in items) {
       if (test(item)) return item;
@@ -28,15 +42,18 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
   @override
   void initState() {
     super.initState();
-    _loadReviews();
+    _loadReviews(); // Carga las reseñas del usuario
   }
 
+  // Carga las reseñas que el usuario ha escrito
   Future<void> _loadReviews() async {
     final accountRepository = LocalAccountRepository();
+    // Aseguramos que las bases de datos esten cargadas
     await LocalReviewDb.instance.loadIfNeeded();
     await LocalVehicleDb.instance.loadIfNeeded();
     await LocalPublicationDb.instance.loadIfNeeded();
 
+    // Obtenemos el usuario actual
     final currentUser = await accountRepository.getCurrentUser();
     if (currentUser == null) {
       setState(() {
@@ -45,7 +62,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
       return;
     }
 
-    // Get reviews where current user is the author (usuario_id matches)
+    // Filtramos las reseñas donde el usuario actual es el autor
     final userReviews = LocalReviewDb.instance.reviews
         .where((r) => r.userId == currentUser.id)
         .toList();

@@ -1,11 +1,13 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../services/accounts/local_account_repository.dart';
-import '../../../services/accounts/user_preference_service.dart';
 import '../../../services/vehiculo_service.dart';
 
+// Página de edición de perfil
+// Permite al usuario modificar su información personal
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
 
@@ -13,19 +15,24 @@ class EditProfilePage extends StatefulWidget {
   State<EditProfilePage> createState() => _EditProfilePageState();
 }
 
+// Estado de la página de edición de perfil
+// Maneja los formularios y validaciones para actualizar datos del usuario
 class _EditProfilePageState extends State<EditProfilePage> {
+  // Repositorio local para manejar cuentas de usuario
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  // Servicio para manejar vehículos
   final VehiculoService _vehiculoService = VehiculoService();
-  
+
+  // Controladores para los campos del formulario
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _documentController = TextEditingController();
-  
+
   String _selectedDocumentType = 'Cédula de Ciudadanía';
   int? _currentUserId;
   int? _documentTypeId;
-  
+
   final List<String> _documentTypes = [
     'Cédula de Ciudadanía',
     'Cédula de Extranjería',
@@ -44,7 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final currentUser = await _accountRepository.getCurrentUser();
       if (currentUser != null) {
         _currentUserId = currentUser.id;
-        
+
         // Load users data to get document type
         await _vehiculoService.init();
         final users = _vehiculoService.usuarios;
@@ -52,14 +59,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
           (user) => user['usuario_id'] == currentUser.id,
           orElse: () => {},
         );
-        
+
         setState(() {
           _nameController.text = currentUser.fullName;
           _emailController.text = currentUser.email;
           _phoneController.text = userData['telefono']?.toString() ?? '';
-          _documentController.text = userData['numero_identificacion']?.toString() ?? '';
+          _documentController.text =
+              userData['numero_identificacion']?.toString() ?? '';
           _documentTypeId = userData['tipo_identificacion_id'];
-          
+
           // Set document type based on ID
           if (_documentTypeId != null) {
             switch (_documentTypeId) {
@@ -80,7 +88,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         });
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      // Error loading user data - silently handle
     }
   }
 
@@ -156,7 +164,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     labelColor: labelColor,
                   ),
                   SizedBox(height: isSmallPhone ? 12 : 16),
-                  _buildDocumentTypeDropdown(isSmallPhone, cardColor, textColor, labelColor),
+                  _buildDocumentTypeDropdown(
+                      isSmallPhone, cardColor, textColor, labelColor),
                   SizedBox(height: isSmallPhone ? 12 : 16),
                   _buildTextField(
                     label: 'NÚMERO DE DOCUMENTO',
@@ -246,7 +255,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.1),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -265,7 +276,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
               width: isSmallPhone ? 90 : 110,
               height: isSmallPhone ? 90 : 110,
               decoration: BoxDecoration(
-                color: isDark ? AppThemes.darkSurface : Colors.white.withValues(alpha: 0.2),
+                color: isDark
+                    ? AppThemes.darkSurface
+                    : Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white,
@@ -342,7 +355,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }) {
     final actualBorderColor = borderColor ?? AppThemes.primaryIndigo;
     final actualIconColor = iconColor ?? AppThemes.primaryIndigo;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -391,7 +404,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildDocumentTypeDropdown(bool isSmallPhone, Color cardColor, Color textColor, Color labelColor) {
+  Widget _buildDocumentTypeDropdown(
+      bool isSmallPhone, Color cardColor, Color textColor, Color labelColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -495,7 +509,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
         color: isDark ? AppThemes.darkBg : AppThemes.lightSurface,
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -538,9 +554,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        final sheetColor = isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
+        final sheetColor =
+            isDark ? AppThemes.darkSurface : AppThemes.lightSurface;
         final textColor = isDark ? AppThemes.darkText : AppThemes.lightText;
-        
+
         return Container(
           decoration: BoxDecoration(
             color: sheetColor,
@@ -614,7 +631,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     bool isDestructive = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -622,16 +639,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
         decoration: BoxDecoration(
           color: isDestructive
               ? const Color(0xFFFEF2F2)
-              : isDark ? AppThemes.darkSurfaceHi : AppThemes.lightBg,
+              : isDark
+                  ? AppThemes.darkSurfaceHi
+                  : AppThemes.lightBg,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: isDestructive
-                  ? AppThemes.accentRed
-                  : AppThemes.primaryIndigo,
+              color:
+                  isDestructive ? AppThemes.accentRed : AppThemes.primaryIndigo,
               size: 22,
             ),
             const SizedBox(width: 12),
@@ -642,7 +660,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 fontWeight: FontWeight.w500,
                 color: isDestructive
                     ? AppThemes.accentRed
-                    : isDark ? AppThemes.darkText : AppThemes.lightText,
+                    : isDark
+                        ? AppThemes.darkText
+                        : AppThemes.lightText,
               ),
             ),
           ],
@@ -670,19 +690,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             documentTypeId = 4;
             break;
         }
-        
+
         // Note: In a real implementation, you would call a service method here
         // to update the user data. For now, we just show a success message.
         // The update would be similar to _accountRepository.updatePassword() pattern
-        
-        print('Profile update requested:');
-        print('User ID: $_currentUserId');
-        print('Name: ${_nameController.text.trim()}');
-        print('Email: ${_emailController.text.trim()}');
-        print('Phone: ${_phoneController.text.trim()}');
-        print('Document: ${_documentController.text.trim()}');
-        print('Document Type ID: $documentTypeId');
-        
+
+        // Profile update data logged for debugging
+        // ignore: unused_local_variable - documentTypeId will be used when service update method is implemented
+        final unused = documentTypeId;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

@@ -1,51 +1,76 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
 
+// Sesion del usuario actual
 import 'package:flexidrive/core/session/local_session_store.dart';
+// Base de datos de publicaciones
 import 'package:flexidrive/services/publications/local_publication_db.dart';
+// Base de datos de reservas
 import 'package:flexidrive/services/reservations/local_reservation_db.dart';
+// Base de datos de reseñas
 import 'package:flexidrive/services/reviews/local_review_db.dart';
+// Servicio de vehiculos
 import 'package:flexidrive/services/vehiculo_service.dart';
 
-import 'reserva_detalle_page.dart';
+// Pagina de detalle de reserva
 import 'reserva_detalle_completa_page.dart';
-import 'reservas_store.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
 
+// Página de reservas del usuario
+// Muestra todas las reservas activas y pasadas
 class ReservasPage extends StatefulWidget {
   const ReservasPage({super.key});
   @override
   State<ReservasPage> createState() => _ReservasPageState();
 }
 
+// Estado de la pagina de reservas
 class _ReservasPageState extends State<ReservasPage> {
+  // Filtro seleccionado: Activas, Pendientes, Historial
   String _selectedFilter = 'Activas';
+  // Contador de reservas finalizadas
   int _finalizadasCount = 0;
+  // Contador de reservas canceladas
   int _canceladasCount = 0;
+  // Esta cargando el historial?
   bool _isLoadingHistory = true;
 
+  // Base de datos de reservas
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
+  // Base de datos de publicaciones
   final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
+  // Servicio de vehiculos
   final VehiculoService _vehiculoService = VehiculoService();
+  // Base de datos de reseñas
   final LocalReviewDb _reviewDb = LocalReviewDb.instance;
+  // Sesion del usuario
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;
 
+  // Lista de reservas activas
   List<_ReservaCardData> _activeReservations = [];
+  // Lista de reservas pendientes
   List<_ReservaCardData> _pendingReservations = [];
+  // Lista de historial de reservas
   List<_ReservaCardData> _historyReservations = [];
 
   @override
   void initState() {
     super.initState();
-    _loadHistoryReservations();
+    _loadHistoryReservations(); // Carga historial de reservas
   }
 
+  // Refresca todas las reservas
   Future<void> _refreshReservations() async {
     setState(() => _isLoadingHistory = true);
     await _loadHistoryReservations();
   }
 
+  // Carga el historial de reservas del usuario
   Future<void> _loadHistoryReservations() async {
+    // Espera que todo cargue en paralelo
     await Future.wait([
       _sessionStore.init(),
       _reservationDb.loadIfNeeded(),
@@ -65,11 +90,11 @@ class _ReservasPageState extends State<ReservasPage> {
     final pendingReservations = userReservations
         .where((reservation) => reservation.statusId == 1)
         .toList(); // statusId = 1 (Pendiente)
-    
+
     final activeReservations = userReservations
         .where((reservation) => reservation.statusId == 4)
         .toList(); // statusId = 4 (Activa)
-    
+
     final finalizedReservations = userReservations
         .where((reservation) => reservation.statusId == 2)
         .toList(); // statusId = 2 (Finalizada)
@@ -512,7 +537,8 @@ class _ReservasPageState extends State<ReservasPage> {
           children: _activeReservations
               .map((reserva) => _buildReservationCard(
                     data: reserva,
-                    onSecondaryAction: () => _showCancelReservationSheetForCardData(
+                    onSecondaryAction: () =>
+                        _showCancelReservationSheetForCardData(
                       reserva: reserva,
                     ),
                     onViewDetails: () => _openReservationDetails(
@@ -538,7 +564,8 @@ class _ReservasPageState extends State<ReservasPage> {
           children: _pendingReservations
               .map((reserva) => _buildReservationCard(
                     data: reserva,
-                    onSecondaryAction: () => _showCancelReservationSheetForCardData(
+                    onSecondaryAction: () =>
+                        _showCancelReservationSheetForCardData(
                       reserva: reserva,
                     ),
                     onViewDetails: () => _openReservationDetails(
@@ -651,207 +678,6 @@ class _ReservasPageState extends State<ReservasPage> {
     );
   }
 
-  Future<void> _showCancelReservationSheet({
-    required ReservaActiva reserva,
-  }) async {
-    final theme = Theme.of(context);
-    final shouldCancel = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.cardTheme.color,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  width: 76,
-                  height: 76,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEE2E2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Icon(
-                    Icons.warning_amber_rounded,
-                    color: Color(0xFFEF4444),
-                    size: 42,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '¿Cancelar reserva?',
-                  style: GoogleFonts.poppins(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Se cancelará la reserva de ${reserva.vehicleName}.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.52),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1F2),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFFBCFE8)),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          color: const Color(0xFFE5E7EB),
-                          child: reserva.imageUrl.isEmpty
-                              ? _buildSmallPlaceholder()
-                              : Image.asset(
-                                  reserva.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _buildSmallPlaceholder(),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              reserva.vehicleName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${reserva.startDate} · ${reserva.price}',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.45),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBEB),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFFDE68A)),
-                  ),
-                  child: Text(
-                    '⚠ Reembolso sujeto a politica de cancelacion. Puede aplicar cargo del 10%.',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFB45309),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(sheetContext, false),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.08),
-                          foregroundColor: theme.colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: Text(
-                          'Mantener',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(sheetContext, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEF4444),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: Text(
-                          'Si, cancelar',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (shouldCancel == true) {
-      setState(() {
-        _canceladasCount += 1;
-      });
-      ReservasStore.removeActivaByCode(reserva.code);
-    }
-  }
-
   Future<void> _showCancelReservationSheetForCardData({
     required _ReservaCardData reserva,
   }) async {
@@ -896,10 +722,10 @@ class _ReservasPageState extends State<ReservasPage> {
                           width: 60,
                           height: 60,
                           color: const Color(0xFFE5E7EB),
-                          child: reserva.imageUrl!.isEmpty
+                          child: reserva.imageUrl.isEmpty
                               ? _buildSmallPlaceholder()
                               : Image.asset(
-                                  reserva.imageUrl!,
+                                  reserva.imageUrl,
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, __, ___) =>
                                       _buildSmallPlaceholder(),
@@ -965,7 +791,8 @@ class _ReservasPageState extends State<ReservasPage> {
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           side: BorderSide(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.2)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -1012,11 +839,12 @@ class _ReservasPageState extends State<ReservasPage> {
 
     if (shouldCancel == true) {
       // Remove from database permanently
-      final reservationIndex = _reservationDb.reservations.indexWhere((r) => r.code == reserva.code);
+      final reservationIndex =
+          _reservationDb.reservations.indexWhere((r) => r.code == reserva.code);
       if (reservationIndex != -1) {
         _reservationDb.reservations.removeAt(reservationIndex);
       }
-      
+
       // Refresh all reservations to update lists
       await _refreshReservations();
     }

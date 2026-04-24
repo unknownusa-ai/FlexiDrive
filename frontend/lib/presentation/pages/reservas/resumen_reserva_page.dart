@@ -4,20 +4,23 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import 'metodo_pago_page.dart';
 
+// Página de resumen de reserva
+// Muestra el detalle de la reserva antes de confirmar
 class ResumenReservaPage extends StatefulWidget {
+  // Constructor con parámetros opcionales para la reserva
   const ResumenReservaPage({
     super.key,
-    this.vehiculoBrand = 'Mazda CX-5 2024',
-    this.vehiculoColor = 'Negro Jet',
-    this.vehiculoImage = '',
-    this.periodo = 'Semanas',
-    this.cantidad = 1,
-    this.precioUnitario = 1300000,
-    this.fechaInicio = '22 Feb 2026, 8:00 AM',
-    this.lugarRecogida = 'Av. El Dorado, Bogotá',
-    this.conductor = 'Carlos Rodríguez',
-    this.tarifaServicio = 1900,
-    this.seguroBasico = 15000,
+    this.vehiculoBrand = 'Mazda CX-5 2024', // Marca del vehículo
+    this.vehiculoColor = 'Negro Jet', // Color del vehículo
+    this.vehiculoImage = '', // URL de la imagen
+    this.periodo = 'Semanas', // Período de renta
+    this.cantidad = 1, // Cantidad de períodos
+    this.precioUnitario = 1300000, // Precio por unidad
+    this.fechaInicio = '22 Feb 2026, 8:00 AM', // Fecha de inicio
+    this.lugarRecogida = 'Av. El Dorado, Bogotá', // Lugar de recogida
+    this.conductor = 'Carlos Rodríguez', // Nombre del conductor
+    this.tarifaServicio = 1900, // Tarifa de servicio
+    this.seguroBasico = 15000, // Seguro básico
   });
 
   final String vehiculoBrand;

@@ -4,6 +4,8 @@ import '../../../core/utils/responsive_utils.dart';
 import '../../../services/vehiculo_service.dart';
 import 'publicar_vehiculo_page.dart';
 
+// Página principal del arrendador
+// Dashboard que muestra los vehículos del arrendador y estadísticas
 class PrincipalArrendatarioPage extends StatefulWidget {
   const PrincipalArrendatarioPage({super.key});
 
@@ -12,9 +14,14 @@ class PrincipalArrendatarioPage extends StatefulWidget {
       _PrincipalArrendatarioPageState();
 }
 
+// Estado de la página principal del arrendador
+// Maneja la carga de vehículos y métricas
 class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
+  // Servicio para manejar vehículos
   final VehiculoService _service = VehiculoService();
+  // Lista de vehículos del arrendador
   List<Map<String, dynamic>> _misVehiculos = [];
+  // Indica si se están cargando los vehículos
   bool _isLoading = true;
 
   @override

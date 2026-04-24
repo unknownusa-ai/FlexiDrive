@@ -1,7 +1,10 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
+// Página de onboarding - tutorial de pagos
+// Muestra cómo funciona el sistema de pagos y métodos de pago disponibles
 class OnboardingPagePayment extends StatefulWidget {
   const OnboardingPagePayment({super.key});
 
@@ -9,14 +12,21 @@ class OnboardingPagePayment extends StatefulWidget {
   State<OnboardingPagePayment> createState() => _OnboardingPagePaymentState();
 }
 
+// Estado de la página de onboarding de pagos
+// Maneja las animaciones de tarjetas y métodos de pago
 class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
     with SingleTickerProviderStateMixin {
+  // Controlador de animaciones
   late AnimationController _controller;
+  // Animación de la tarjeta de crédito
   late Animation<double> _cardAnimation;
+  // Animación de etiquetas de precio
   late Animation<double> _tagAnimation;
+  // Animaciones para los métodos de pago
   late Animation<double> _method1Animation;
   late Animation<double> _method2Animation;
   late Animation<double> _method3Animation;
+  // Animación flotante
   late Animation<double> _floatAnimation;
 
   @override
@@ -81,7 +91,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    
+
     return Container(
       color: const Color(0xFFF5F3FF),
       child: SafeArea(
@@ -91,7 +101,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 40),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 40),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -108,7 +119,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                                   0,
                                   -5 + (_floatAnimation.value * 10),
                                 ),
-                                child: _buildCreditCard(_tagAnimation, isSmallPhone: isSmallPhone),
+                                child: _buildCreditCard(_tagAnimation,
+                                    isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -124,7 +136,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method1Animation.value),
-                                child: _buildPaymentMethod('💳 Tarjeta', isSmallPhone: isSmallPhone),
+                                child: _buildPaymentMethod('💳 Tarjeta',
+                                    isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -134,7 +147,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method2Animation.value),
-                                child: _buildPaymentMethod('🏦 PSE', isSmallPhone: isSmallPhone),
+                                child: _buildPaymentMethod('🏦 PSE',
+                                    isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -144,7 +158,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
                             builder: (context, child) {
                               return Transform.translate(
                                 offset: Offset(0, _method3Animation.value),
-                                child: _buildPaymentMethod('💵 Efectivo', isSmallPhone: isSmallPhone),
+                                child: _buildPaymentMethod('💵 Efectivo',
+                                    isSmallPhone: isSmallPhone),
                               );
                             },
                           ),
@@ -158,7 +173,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
             Expanded(
               flex: 1,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -191,7 +207,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
     );
   }
 
-  Widget _buildCreditCard(Animation<double> tagAnimation, {required bool isSmallPhone}) {
+  Widget _buildCreditCard(Animation<double> tagAnimation,
+      {required bool isSmallPhone}) {
     return Container(
       width: isSmallPhone ? 190 : 260,
       height: isSmallPhone ? 115 : 160,
@@ -367,7 +384,8 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
 
   Widget _buildPaymentMethod(String text, {required bool isSmallPhone}) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 8 : 14, vertical: isSmallPhone ? 5 : 10),
+      padding: EdgeInsets.symmetric(
+          horizontal: isSmallPhone ? 8 : 14, vertical: isSmallPhone ? 5 : 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),

@@ -1,16 +1,24 @@
+// Utilidades para convertir JSON
 import 'package:flexidrive/utils/json_utils.dart';
 
+// Modelo de tipo de identificacion
+// Para el formulario de registro (CC, CE, Pasaporte, etc)
 class IdentificationTypeModel {
+  // Constructor con datos del tipo de documento
   const IdentificationTypeModel({
-    required this.id,
-    required this.name,
-    this.description,
+    required this.id, // ID unico
+    required this.name, // Nombre ej: "Cédula de Ciudadanía"
+    this.description, // Descripcion opcional
   });
 
+  // ID del tipo de identificacion
   final int id;
+  // Nombre legible para el usuario
   final String name;
+  // Descripcion detallada (opcional)
   final String? description;
 
+  // Crea IdentificationTypeModel desde JSON
   factory IdentificationTypeModel.fromJson(Map<String, dynamic> json) {
     return IdentificationTypeModel(
       id: JsonUtils.asInt(json['tipo_identificacion_id']),
@@ -19,24 +27,32 @@ class IdentificationTypeModel {
     );
   }
 
+  // Convierte a JSON para guardar
   Map<String, dynamic> toJson() => {
-    'tipo_identificacion_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_identificacion_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
+// Modelo de tipo de usuario
+// Define si es arrendador o arrendatario
 class UserTypeModel {
+  // Constructor con datos del tipo de usuario
   const UserTypeModel({
-    required this.id,
-    required this.name,
-    this.description,
+    required this.id, // ID unico
+    required this.name, // Nombre ej: "Arrendador"
+    this.description, // Descripcion opcional
   });
 
+  // ID del tipo de usuario
   final int id;
+  // Nombre legible para el usuario
   final String name;
+  // Descripcion detallada (opcional)
   final String? description;
 
+  // Crea UserTypeModel desde JSON
   factory UserTypeModel.fromJson(Map<String, dynamic> json) {
     return UserTypeModel(
       id: JsonUtils.asInt(json['tipo_usuario_id']),
@@ -45,18 +61,22 @@ class UserTypeModel {
     );
   }
 
+  // Convierte a JSON para guardar
   Map<String, dynamic> toJson() => {
-    'tipo_usuario_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_usuario_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
+// Modelo de metodo de pago
+// Para las formas de pago (tarjeta, efectivo, etc)
 class PaymentMethodTypeModel {
+  // Constructor con datos del metodo de pago
   const PaymentMethodTypeModel({
-    required this.id,
-    required this.name,
-    this.description,
+    required this.id, // ID unico
+    required this.name, // Nombre ej: "Tarjeta de Crédito"
+    this.description, // Descripcion opcional
   });
 
   final int id;
@@ -72,10 +92,10 @@ class PaymentMethodTypeModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'tipo_metodo_pago_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_metodo_pago_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class BankModel {
@@ -98,10 +118,10 @@ class BankModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'banco_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'banco_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class CardBrandModel {
@@ -124,10 +144,10 @@ class CardBrandModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'marca_tarjeta_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'marca_tarjeta_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class PersonTypeModel {
@@ -150,10 +170,10 @@ class PersonTypeModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'tipo_persona_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_persona_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class VehicleCategoryModel {
@@ -176,10 +196,10 @@ class VehicleCategoryModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'categoria_vehiculo_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'categoria_vehiculo_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class PeriodTypeModel {
@@ -202,10 +222,10 @@ class PeriodTypeModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'tipo_periodo_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_periodo_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class ReservationStatusModel {
@@ -228,10 +248,10 @@ class ReservationStatusModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'estado_reserva_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'estado_reserva_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class NotificationCategoryModel {
@@ -254,10 +274,10 @@ class NotificationCategoryModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'categoria_notificacion_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'categoria_notificacion_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class LandlordDocumentTypeModel {
@@ -280,10 +300,10 @@ class LandlordDocumentTypeModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'tipo_documento_arrendador_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'tipo_documento_arrendador_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }
 
 class DocumentVerificationStatusModel {
@@ -306,8 +326,8 @@ class DocumentVerificationStatusModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'estado_verificacion_documento_id': id,
-    'nombre': name,
-    'descripcion': description,
-  };
+        'estado_verificacion_documento_id': id,
+        'nombre': name,
+        'descripcion': description,
+      };
 }

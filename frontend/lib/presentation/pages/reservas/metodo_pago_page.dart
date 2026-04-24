@@ -11,13 +11,16 @@ import '../../../services/notifications/local_notification_db.dart';
 import 'reserva_confirmada_page.dart';
 import 'reservas_store.dart';
 
+// Página de método de pago
+// Permite al usuario seleccionar el método de pago para la reserva
 class MetodoPagoPage extends StatefulWidget {
+  // Constructor con parámetros de la reserva
   const MetodoPagoPage({
     super.key,
-    this.total = 54900,
-    this.alquilerVehiculo = 38000,
-    this.servicioSeguro = 16900,
-    this.periodo = 'Semanas',
+    this.total = 54900, // Total a pagar
+    this.alquilerVehiculo = 38000, // Costo del alquiler
+    this.servicioSeguro = 16900, // Costo del seguro
+    this.periodo = 'Semanas', // Período de renta
     this.cantidad = 1,
     this.precioUnitario = 38000,
     this.vehiculoBrand = 'Mazda CX-5 2024',
@@ -171,7 +174,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     final padding = isSmallPhone ? 12.0 : 20.0;
 
     return Scaffold(
-      backgroundColor: _isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor:
+          _isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -200,7 +204,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                   children: [
                     _buildMetodoSeleccion(isSmallPhone),
                     SizedBox(height: isSmallPhone ? 16 : 24),
-                    if (_metodoPago == 'Tarjeta' || _metodoPago == 'Tarjeta Nueva') ...[
+                    if (_metodoPago == 'Tarjeta' ||
+                        _metodoPago == 'Tarjeta Nueva') ...[
                       _buildTarjetaCard(isSmallPhone),
                       SizedBox(height: isSmallPhone ? 16 : 20),
                       if (_metodoPago == 'Tarjeta Nueva')
@@ -230,7 +235,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   Widget _buildMetodoSeleccion(bool isSmallPhone) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,18 +256,20 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           ),
         ),
         const SizedBox(height: 20),
-        
+
         // Payment type selection
         Row(
           children: [
             Expanded(
               flex: 1,
-              child: _buildMetodoBoton('Tarjeta', Icons.credit_card, isSmallPhone),
+              child:
+                  _buildMetodoBoton('Tarjeta', Icons.credit_card, isSmallPhone),
             ),
             const SizedBox(width: 8),
             Expanded(
               flex: 1,
-              child: _buildMetodoBoton('PSE', Icons.account_balance, isSmallPhone),
+              child:
+                  _buildMetodoBoton('PSE', Icons.account_balance, isSmallPhone),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -271,7 +278,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             ),
           ],
         ),
-        
+
         // Show payment options based on selection
         if (_metodoPago == 'Tarjeta') ...[
           const SizedBox(height: 20),
@@ -303,14 +310,13 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         if (!isAddingNewCard) ...[
           // Show saved cards
           ..._userCards.map((card) => _buildSavedCard(card, isSmallPhone)),
-          
+
           // Add new card button
           _buildAddNewCardButton(isSmallPhone),
         ],
-        
+
         // Show card form only when adding new card
-        if (isAddingNewCard)
-          _buildAddNewCardButton(isSmallPhone),
+        if (isAddingNewCard) _buildAddNewCardButton(isSmallPhone),
       ],
     );
   }
@@ -333,10 +339,11 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Show user's PSE accounts
         if (_userPseAccounts.isNotEmpty) ...[
-          ..._userPseAccounts.map((pse) => _buildSavedPseAccount(pse, isSmallPhone)),
+          ..._userPseAccounts
+              .map((pse) => _buildSavedPseAccount(pse, isSmallPhone)),
           const SizedBox(height: 16),
         ],
       ],
@@ -344,8 +351,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   }
 
   Widget _buildSavedCard(Map<String, dynamic> card, bool isSmallPhone) {
-    final selected = _selectedPaymentMethod?['id'] == card['id'] && _selectedPaymentMethod?['type'] == 'Tarjeta';
-    
+    final selected = _selectedPaymentMethod?['id'] == card['id'] &&
+        _selectedPaymentMethod?['type'] == 'Tarjeta';
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -440,8 +448,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   }
 
   Widget _buildSavedPseAccount(Map<String, dynamic> pse, bool isSmallPhone) {
-    final selected = _selectedPaymentMethod?['id'] == pse['id'] && _selectedPaymentMethod?['type'] == 'PSE';
-    
+    final selected = _selectedPaymentMethod?['id'] == pse['id'] &&
+        _selectedPaymentMethod?['type'] == 'PSE';
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -560,7 +569,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   Widget _buildAddNewCardButton(bool isSmallPhone) {
     final isAddingNewCard = _metodoPago == 'Tarjeta Nueva';
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -579,25 +588,27 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             width: isAddingNewCard ? 2 : 1,
           ),
         ),
-        child: isAddingNewCard ? _buildNewCardForm(isSmallPhone) : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_circle_outline,
-              color: const Color(0xFF6366F1),
-              size: isSmallPhone ? 20 : 24,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Otra tarjeta',
-              style: GoogleFonts.poppins(
-                fontSize: isSmallPhone ? 14 : 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF6366F1),
+        child: isAddingNewCard
+            ? _buildNewCardForm(isSmallPhone)
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    color: const Color(0xFF6366F1),
+                    size: isSmallPhone ? 20 : 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Otra tarjeta',
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallPhone ? 14 : 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF6366F1),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -1001,7 +1012,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
-  Widget _buildInputField(String hint, TextEditingController controller, {bool obscureText = false, String? hintText}) {
+  Widget _buildInputField(String hint, TextEditingController controller,
+      {bool obscureText = false, String? hintText}) {
     return TextField(
       controller: controller,
       style: GoogleFonts.poppins(
@@ -1036,7 +1048,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   Widget _buildResumenCobro(bool isSmallPhone) {
     final totalFormateado = _formatearPrecio(widget.total);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1208,7 +1220,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   Widget _buildBotonPagar(bool isSmallPhone) {
     final totalFormateado = _formatearPrecio(widget.total);
-    
+
     return Container(
       padding: EdgeInsets.fromLTRB(
           isSmallPhone ? 12 : 20,
@@ -1237,14 +1249,15 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Por favor completa todos los campos de la tarjeta'),
+                      content: Text(
+                          'Por favor completa todos los campos de la tarjeta'),
                       backgroundColor: Colors.red,
                     ),
                   );
                   return;
                 }
               }
-              
+
               // Validate payment method selection
               if (_metodoPago == 'Tarjeta' && _selectedPaymentMethod == null) {
                 if (!mounted) return;
@@ -1256,34 +1269,37 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 );
                 return;
               }
-              
+
               final codigoReserva = _generarCodigoReserva();
               final fechaInicio = DateTime.now();
               final fechaFin = _calcularFechaFin(fechaInicio);
-              
+
               // Get current user ID
               await _sessionStore.init();
               final currentUserId = _sessionStore.userId;
-              
+
               if (currentUserId == null) {
                 // Show error if no user is logged in
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Debes iniciar sesión para hacer una reserva'),
+                    content:
+                        Text('Debes iniciar sesión para hacer una reserva'),
                     backgroundColor: Colors.red,
                   ),
                 );
                 return;
               }
-              
+
               // Get payment method ID
               int paymentMethodId = 3; // Default to Efectivo
               if (_selectedPaymentMethod != null) {
                 paymentMethodId = _selectedPaymentMethod!['paymentMethodId'];
-              } else if (_metodoPago == 'Tarjeta' || _metodoPago == 'Tarjeta Nueva') {
+              } else if (_metodoPago == 'Tarjeta' ||
+                  _metodoPago == 'Tarjeta Nueva') {
                 // Find first card payment method
-                final userMethods = _paymentDb.getUserPaymentMethods(currentUserId);
+                final userMethods =
+                    _paymentDb.getUserPaymentMethods(currentUserId);
                 final cardMethod = userMethods.firstWhere(
                   (method) => method.paymentMethodTypeId == 1,
                   orElse: () => userMethods.first,
@@ -1291,22 +1307,25 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 paymentMethodId = cardMethod.id;
               } else if (_metodoPago == 'PSE') {
                 // Find first PSE payment method
-                final userMethods = _paymentDb.getUserPaymentMethods(currentUserId);
+                final userMethods =
+                    _paymentDb.getUserPaymentMethods(currentUserId);
                 final pseMethod = userMethods.firstWhere(
                   (method) => method.paymentMethodTypeId == 2,
                   orElse: () => userMethods.first,
                 );
                 paymentMethodId = pseMethod.id;
               }
-              
+
               // Create new reservation with status 1 (Pendiente)
               final newReservation = ReservationModel(
                 id: _reservationDb.reservations.length + 1, // Generate new ID
                 code: codigoReserva,
                 userId: currentUserId,
-                publicationId: 1, // Default publication ID - should come from widget
+                publicationId:
+                    1, // Default publication ID - should come from widget
                 paymentMethodId: paymentMethodId,
-                periodTypeId: 1, // Default period type - should come from widget
+                periodTypeId:
+                    1, // Default period type - should come from widget
                 periodCount: widget.cantidad,
                 startDate: fechaInicio,
                 endDate: fechaFin,
@@ -1316,10 +1335,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 statusId: 1, // 1 = Pendiente
                 reservationDate: DateTime.now(),
               );
-              
+
               // Add to database (this will persist to JSON)
               _reservationDb.reservations.add(newReservation);
-              
+
               // Also add to store for UI
               ReservasStore.addActiva(
                 ReservaActiva(

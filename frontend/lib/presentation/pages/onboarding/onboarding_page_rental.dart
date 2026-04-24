@@ -1,7 +1,10 @@
+// Flutter framework
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 
+// Página de onboarding - tutorial de renta
+// Muestra cómo funciona el proceso de rentar un vehículo
 class OnboardingPageRental extends StatefulWidget {
   const OnboardingPageRental({super.key});
 
@@ -9,10 +12,15 @@ class OnboardingPageRental extends StatefulWidget {
   State<OnboardingPageRental> createState() => _OnboardingPageRentalState();
 }
 
+// Estado de la página de onboarding de renta
+// Maneja las animaciones del coche y etiquetas informativas
 class _OnboardingPageRentalState extends State<OnboardingPageRental>
     with SingleTickerProviderStateMixin {
+  // Controlador de animaciones
   late AnimationController _controller;
+  // Animación de rebote del coche
   late Animation<double> _carBounceAnimation;
+  // Animaciones para etiquetas informativas
   late Animation<double> _tag1Animation;
   late Animation<double> _tag2Animation;
   late Animation<double> _tag3Animation;
@@ -65,7 +73,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    
+
     return Container(
       color: const Color(0xFFF0F4FF),
       child: SafeArea(
@@ -75,7 +83,8 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 40),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 40),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -133,7 +142,8 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                       animation: _carBounceAnimation,
                       builder: (context, child) {
                         return Transform.scale(
-                          scale: (isSmallPhone ? 0.65 : 0.8) + (_carBounceAnimation.value * 0.2),
+                          scale: (isSmallPhone ? 0.65 : 0.8) +
+                              (_carBounceAnimation.value * 0.2),
                           child: Transform.translate(
                             offset: Offset(0, -_carBounceAnimation.value * 10),
                             child: Container(
@@ -141,14 +151,18 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                               height: isSmallPhone ? 72 : 100,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                                  colors: [
+                                    Color(0xFF4F46E5),
+                                    Color(0xFF7C3AED)
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                              ),
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
+                                    color: const Color(0xFF4F46E5)
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -157,7 +171,8 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
                               child: Center(
                                 child: Text(
                                   '🚗',
-                                  style: TextStyle(fontSize: isSmallPhone ? 32 : 50),
+                                  style: TextStyle(
+                                      fontSize: isSmallPhone ? 32 : 50),
                                 ),
                               ),
                             ),
@@ -172,7 +187,8 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
             Expanded(
               flex: 1,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -207,7 +223,8 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
 
   Widget _buildTag(String text, Color color, {required bool isSmallPhone}) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 8 : 16, vertical: isSmallPhone ? 4 : 10),
+      padding: EdgeInsets.symmetric(
+          horizontal: isSmallPhone ? 8 : 16, vertical: isSmallPhone ? 4 : 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),

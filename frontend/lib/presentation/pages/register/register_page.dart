@@ -1,11 +1,19 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Servicios para manejar usuarios y catalogos
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import 'package:flexidrive/services/catalogs/local_catalog_db.dart';
+// Modelos de catalogos (tipos de documento, etc)
 import 'package:flexidrive/models/catalogs/catalog_models.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Pagina de login (si ya tiene cuenta)
 import '../login/login_page.dart';
 
+// Pagina de registro de nuevos usuarios
+// Formulario para crear una cuenta en FlexiDrive
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -13,25 +21,33 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+// Estado de la pagina de registro
 class _RegisterPageState extends State<RegisterPage> {
-  final _nameController = TextEditingController();
-  final _documentController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  // Controladores de los campos del formulario
+  final _nameController = TextEditingController(); // Nombre completo
+  final _documentController = TextEditingController(); // Numero de documento
+  final _emailController = TextEditingController(); // Email
+  final _phoneController = TextEditingController(); // Telefono
+  final _passwordController = TextEditingController(); // Contraseña
+  final _confirmPasswordController =
+      TextEditingController(); // Confirmar contraseña
+
+  // Servicios para registro y catalogos
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
 
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _acceptTerms = false;
-  bool _isSubmitting = false;
-  bool _isLoadingCatalogs = true;
+  // Estados de la UI
+  bool _obscurePassword = true; // Ocultar contraseña
+  bool _obscureConfirmPassword = true; // Ocultar confirmacion
+  bool _acceptTerms = false; // Acepta terminos y condiciones
+  bool _isSubmitting = false; // Esta enviando el formulario?
+  bool _isLoadingCatalogs = true; // Cargando tipos de documento?
 
+  // Catalogo de tipos de documento (CC, CE, Pasaporte, etc)
   List<IdentificationTypeModel> _identificationTypes = [];
-  IdentificationTypeModel? _selectedIdentificationType;
+  IdentificationTypeModel? _selectedIdentificationType; // Tipo seleccionado
 
+  // Muestra un dialogo con mensaje
   Future<void> _showDialogMessage(String title, String message) async {
     return showDialog<void>(
       context: context,
@@ -158,440 +174,450 @@ class _RegisterPageState extends State<RegisterPage> {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
     final scale = ResponsiveUtils.scale(context, 1.0);
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
       body: ConstrainedContainer(
         maxWidth: 600,
         child: Column(
-        children: [
-          // Header Section
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16 * scale),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Back button
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.arrow_back_ios,
-                          color: Colors.white.withAlpha((0.9 * 255).round()),
-                          size: 18,
-                        ),
-                        Text(
-                          'Atrás',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withAlpha((0.9 * 255).round()),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 24 * scale),
-                  // Title
-                  Text(
-                    'Crear Cuenta',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: ResponsiveUtils.fontSize(context, 32),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8 * scale),
-                  Text(
-                    'Únete a miles de usuarios FlexiDrive',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white.withAlpha((0.8 * 255).round()),
-                      fontSize: ResponsiveUtils.fontSize(context, 14),
-                    ),
-                  ),
-                  SizedBox(height: 24 * scale),
-                ],
-              ),
-            ),
-          ),
-          // White Card Section
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(24 * scale),
+          children: [
+            // Header Section
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding, vertical: 16 * scale),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nombre Completo
-                    _buildLabel('NOMBRE COMPLETO'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _nameController,
-                      hintText: 'Tu nombre completo',
-                      prefixIcon: Icons.person_outline,
-                    ),
-                    const SizedBox(height: 16),
-                    // Tipo de Identificación
-                    _buildLabel('TIPO DE IDENTIFICACIÓN'),
-                    const SizedBox(height: 8),
-                    _isLoadingCatalogs
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F7FA),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.badge_outlined,
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'Cargando...',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.grey.withValues(alpha: 0.6),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F7FA),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<IdentificationTypeModel>(
-                                value: _selectedIdentificationType,
-                                isExpanded: true,
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: Colors.grey,
-                                ),
-                                style: GoogleFonts.poppins(
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                ),
-                                dropdownColor: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                items: _identificationTypes.map((type) {
-                                  return DropdownMenuItem<IdentificationTypeModel>(
-                                    value: type,
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.badge_outlined,
-                                          color: const Color(0xFF9CA3AF),
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          '${type.name} - ${type.description}',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedIdentificationType = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                    const SizedBox(height: 16),
-                    // Documento
-                    _buildLabel('NÚMERO DE IDENTIFICACIÓN'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _documentController,
-                      hintText: 'Número de documento',
-                      prefixIcon: Icons.numbers_outlined,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
-                    // Correo Electrónico
-                    _buildLabel('CORREO ELECTRÓNICO'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _emailController,
-                      hintText: 'tu@email.com',
-                      prefixIcon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    // Teléfono
-                    _buildLabel('TELÉFONO'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _phoneController,
-                      hintText: '+57 300 000 0000',
-                      prefixIcon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 16),
-                    // Contraseña
-                    _buildLabel('CONTRASEÑA'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _passwordController,
-                      hintText: 'Mínimo 8 caracteres',
-                      prefixIcon: Icons.lock_outline,
-                      obscureText: _obscurePassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Confirmar Contraseña
-                    _buildLabel('CONFIRMAR CONTRASEÑA'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _confirmPasswordController,
-                      hintText: 'Repite tu contraseña',
-                      prefixIcon: Icons.lock_outline,
-                      obscureText: _obscureConfirmPassword,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Terms and Conditions - Toggle Style
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F7FA),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    // Back button
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Toggle Switch
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _acceptTerms = !_acceptTerms;
-                              });
-                            },
-                            child: Container(
-                              width: 44,
-                              height: 24,
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: _acceptTerms
-                                    ? const Color(0xFF2563EB)
-                                    : const Color(0xFFD1D5DB),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: AnimatedAlign(
-                                duration: const Duration(milliseconds: 200),
-                                alignment: _acceptTerms
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            ),
+                          Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white.withAlpha((0.9 * 255).round()),
+                            size: 18,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: GoogleFonts.poppins(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12,
-                                  height: 1.4,
-                                ),
-                                children: [
-                                  const TextSpan(
-                                    text: 'Acepto los ',
-                                  ),
-                                  TextSpan(
-                                    text: 'Términos y Condiciones',
-                                    style: GoogleFonts.poppins(
-                                      color: const Color(0xFF2563EB),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const TextSpan(
-                                    text: ' y la ',
-                                  ),
-                                  TextSpan(
-                                    text: 'Política de Privacidad',
-                                    style: GoogleFonts.poppins(
-                                      color: const Color(0xFF2563EB),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const TextSpan(
-                                    text: ' de FlexiDrive.',
-                                  ),
-                                ],
-                              ),
+                          Text(
+                            'Atrás',
+                            style: GoogleFonts.poppins(
+                              color:
+                                  Colors.white.withAlpha((0.9 * 255).round()),
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    // Create Account Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: (_acceptTerms && !_isSubmitting)
-                            ? _submitRegister
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _acceptTerms
-                              ? null
-                              : const Color(0xFFE8ECF4),
-                          foregroundColor: _acceptTerms ? Colors.white : const Color(0xFF9CA3AF),
-                          disabledBackgroundColor: const Color(0xFFE8ECF4),
-                          disabledForegroundColor: const Color(0xFF9CA3AF),
-                          elevation: 0,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: _acceptTerms
-                              ? BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                )
-                              : null,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (_isSubmitting)
-                                const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              else ...[
-                                Text(
-                                  'Crear Cuenta',
-                                  style: GoogleFonts.poppins(
-                                    color: _acceptTerms
-                                        ? Colors.white
-                                        : const Color(0xFF9CA3AF),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.chevron_right,
-                                  color: _acceptTerms
-                                      ? Colors.white
-                                      : const Color(0xFF9CA3AF),
-                                  size: 20,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
+                    SizedBox(height: 24 * scale),
+                    // Title
+                    Text(
+                      'Crear Cuenta',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: ResponsiveUtils.fontSize(context, 32),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 32),
-                    // Login Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '¿Ya tienes cuenta? ',
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey.withValues(alpha: 0.8),
-                            fontSize: 14,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const LoginPage(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'Inicia sesión',
-                            style: GoogleFonts.poppins(
-                              color: const Color(0xFF2563EB),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+                    SizedBox(height: 8 * scale),
+                    Text(
+                      'Únete a miles de usuarios FlexiDrive',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white.withAlpha((0.8 * 255).round()),
+                        fontSize: ResponsiveUtils.fontSize(context, 14),
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 24 * scale),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+            // White Card Section
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(24 * scale),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Nombre Completo
+                      _buildLabel('NOMBRE COMPLETO'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _nameController,
+                        hintText: 'Tu nombre completo',
+                        prefixIcon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: 16),
+                      // Tipo de Identificación
+                      _buildLabel('TIPO DE IDENTIFICACIÓN'),
+                      const SizedBox(height: 8),
+                      _isLoadingCatalogs
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F7FA),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.badge_outlined,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Cargando...',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.withValues(alpha: 0.6),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F7FA),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<IdentificationTypeModel>(
+                                  value: _selectedIdentificationType,
+                                  isExpanded: true,
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: Colors.grey,
+                                  ),
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black87,
+                                    fontSize: 14,
+                                  ),
+                                  dropdownColor: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  items: _identificationTypes.map((type) {
+                                    return DropdownMenuItem<
+                                        IdentificationTypeModel>(
+                                      value: type,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.badge_outlined,
+                                            color: const Color(0xFF9CA3AF),
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            '${type.name} - ${type.description}',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedIdentificationType = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                      const SizedBox(height: 16),
+                      // Documento
+                      _buildLabel('NÚMERO DE IDENTIFICACIÓN'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _documentController,
+                        hintText: 'Número de documento',
+                        prefixIcon: Icons.numbers_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      // Correo Electrónico
+                      _buildLabel('CORREO ELECTRÓNICO'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: 'tu@email.com',
+                        prefixIcon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+                      // Teléfono
+                      _buildLabel('TELÉFONO'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _phoneController,
+                        hintText: '+57 300 000 0000',
+                        prefixIcon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 16),
+                      // Contraseña
+                      _buildLabel('CONTRASEÑA'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _passwordController,
+                        hintText: 'Mínimo 8 caracteres',
+                        prefixIcon: Icons.lock_outline,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Confirmar Contraseña
+                      _buildLabel('CONFIRMAR CONTRASEÑA'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _confirmPasswordController,
+                        hintText: 'Repite tu contraseña',
+                        prefixIcon: Icons.lock_outline,
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Terms and Conditions - Toggle Style
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F7FA),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Toggle Switch
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _acceptTerms = !_acceptTerms;
+                                });
+                              },
+                              child: Container(
+                                width: 44,
+                                height: 24,
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: _acceptTerms
+                                      ? const Color(0xFF2563EB)
+                                      : const Color(0xFFD1D5DB),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: AnimatedAlign(
+                                  duration: const Duration(milliseconds: 200),
+                                  alignment: _acceptTerms
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 12,
+                                    height: 1.4,
+                                  ),
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Acepto los ',
+                                    ),
+                                    TextSpan(
+                                      text: 'Términos y Condiciones',
+                                      style: GoogleFonts.poppins(
+                                        color: const Color(0xFF2563EB),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: ' y la ',
+                                    ),
+                                    TextSpan(
+                                      text: 'Política de Privacidad',
+                                      style: GoogleFonts.poppins(
+                                        color: const Color(0xFF2563EB),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: ' de FlexiDrive.',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Create Account Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: (_acceptTerms && !_isSubmitting)
+                              ? _submitRegister
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _acceptTerms ? null : const Color(0xFFE8ECF4),
+                            foregroundColor: _acceptTerms
+                                ? Colors.white
+                                : const Color(0xFF9CA3AF),
+                            disabledBackgroundColor: const Color(0xFFE8ECF4),
+                            disabledForegroundColor: const Color(0xFF9CA3AF),
+                            elevation: 0,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: _acceptTerms
+                                ? BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF2563EB),
+                                        Color(0xFF7C3AED)
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  )
+                                : null,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_isSubmitting)
+                                  const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                else ...[
+                                  Text(
+                                    'Crear Cuenta',
+                                    style: GoogleFonts.poppins(
+                                      color: _acceptTerms
+                                          ? Colors.white
+                                          : const Color(0xFF9CA3AF),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: _acceptTerms
+                                        ? Colors.white
+                                        : const Color(0xFF9CA3AF),
+                                    size: 20,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      // Login Link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '¿Ya tienes cuenta? ',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey.withValues(alpha: 0.8),
+                              fontSize: 14,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginPage(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Inicia sesión',
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF2563EB),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildLabel(String text) {
     return Text(

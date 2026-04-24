@@ -1,12 +1,22 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Sesion del usuario actual
 import 'package:flexidrive/core/session/local_session_store.dart';
+// Modelos de seguridad (sesiones, etc)
 import 'package:flexidrive/models/security/security_models.dart';
+// Servicios de usuarios
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+// Base de datos de seguridad
 import 'package:flexidrive/services/security/local_security_db.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Temas y colores de la app
 import '../../../core/theme/app_themes.dart';
 
+// Pagina de seguridad del perfil
+// Para cambiar contraseña, ver sesiones activas, etc
 class SecurityPage extends StatefulWidget {
   const SecurityPage({super.key});
 
@@ -14,38 +24,49 @@ class SecurityPage extends StatefulWidget {
   State<SecurityPage> createState() => _SecurityPageState();
 }
 
+// Estado de la pagina de seguridad
 class _SecurityPageState extends State<SecurityPage> {
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  // Controladores de los campos de contraseña
+  final _currentPasswordController =
+      TextEditingController(); // Contraseña actual
+  final _newPasswordController = TextEditingController(); // Nueva contraseña
+  final _confirmPasswordController =
+      TextEditingController(); // Confirmar nueva contraseña
+
+  // Servicios para manejar seguridad
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;
   final LocalSecurityDb _securityDb = LocalSecurityDb.instance;
-  bool _obscureCurrentPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _isTwoFactorEnabled = false;
-  bool _isBiometricEnabled = false;
-  bool _isUpdatingPassword = false;
-  bool _isLoadingSecurityData = true;
-  int? _currentUserId;
-  List<UserSessionModel> _sessions = [];
+
+  // Estados de la UI
+  bool _obscureCurrentPassword = true; // Ocultar contraseña actual
+  bool _obscureNewPassword = true; // Ocultar nueva contraseña
+  bool _obscureConfirmPassword = true; // Ocultar confirmacion
+  bool _isTwoFactorEnabled = false; // Autenticacion en 2 pasos activa?
+  bool _isBiometricEnabled = false; // Huella/face ID activo?
+  bool _isUpdatingPassword = false; // Esta cambiando contraseña?
+  bool _isLoadingSecurityData = true; // Cargando datos de seguridad?
+  int? _currentUserId; // ID del usuario actual
+  List<UserSessionModel> _sessions = []; // Sesiones activas
 
   @override
   void initState() {
     super.initState();
-    _loadSecurityData();
+    _loadSecurityData(); // Carga datos de seguridad al iniciar
   }
 
   @override
   void dispose() {
+    // Liberamos los controladores para evitar memory leaks
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  // Carga los datos de seguridad del usuario
   Future<void> _loadSecurityData() async {
+    // Cargamos todo en paralelo para mayor velocidad
     await Future.wait([
       _sessionStore.init(),
       _securityDb.loadIfNeeded(),

@@ -4,15 +4,22 @@ import 'package:flutter/services.dart';
 
 import 'package:flexidrive/models/reservations/reservation_models.dart';
 
+// Base de datos local para reservas
+// Maneja el almacenamiento local de datos de reservas
 class LocalReservationDb {
+  // Constructor privado para patrón singleton
   LocalReservationDb._();
 
+  // Instancia única de la clase (patrón singleton)
   static final LocalReservationDb instance = LocalReservationDb._();
 
+  // Indica si los datos ya fueron cargados
   bool? _loaded = false;
 
+  // Lista de reservas almacenadas localmente
   final List<ReservationModel> reservations = [];
 
+  // Carga los datos solo si es necesario
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
 

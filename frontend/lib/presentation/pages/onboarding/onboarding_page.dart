@@ -1,10 +1,16 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Paginas del onboarding
 import 'onboarding_page_rental.dart';
 import 'onboarding_page_map.dart';
 import 'onboarding_page_payment.dart';
+// Pagina de login (despues del onboarding)
 import '../login/login_page.dart';
 
+// Pagina de Onboarding - tutorial para nuevos usuarios
+// Muestra 3 pantallas explicando como usar la app
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -12,35 +18,44 @@ class OnboardingPage extends StatefulWidget {
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
+// Estado de la pagina de onboarding
 class _OnboardingPageState extends State<OnboardingPage> {
+  // Controlador del PageView (para swipe entre paginas)
   final PageController _pageController = PageController();
+  // Pagina actual que se muestra
   int _currentPage = 0;
 
+  // Lista de paginas del tutorial
   final List<Widget> _pages = const [
-    OnboardingPageRental(),
-    OnboardingPageMap(),
-    OnboardingPagePayment(),
+    OnboardingPageRental(), // Pagina 1: Como rentar carros
+    OnboardingPageMap(), // Pagina 2: Mapa y ubicaciones
+    OnboardingPagePayment(), // Pagina 3: Metodos de pago
   ];
 
   @override
   void dispose() {
+    // Liberamos el controlador para evitar memory leaks
     _pageController.dispose();
     super.dispose();
   }
 
+  // Avanza a la siguiente pagina o va al login
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
+      // Si no es la ultima, avanza con animacion
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
+      // Si es la ultima, va al login
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     }
   }
 
+  // Salta el tutorial y va directo al login
   void _skip() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const LoginPage()),

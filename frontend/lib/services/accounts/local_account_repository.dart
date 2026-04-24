@@ -1,51 +1,67 @@
+// Almacenamiento de la sesión actual (quién está logueado)
 import 'package:flexidrive/core/session/local_session_store.dart';
+// Modelos de usuarios
 import 'package:flexidrive/models/accounts/account_models.dart';
-
+// Base de datos local de cuentas
 import 'local_account_db.dart';
 
+// Repositorio que maneja login, registro y sesion de usuarios
+// Es como el backend pero local con JSON
 class LocalAccountRepository {
+  // Constructor - puede recibir DB y sesión personalizadas (para tests)
   LocalAccountRepository({
     LocalAccountDb? db,
     LocalSessionStore? session,
-  })  : _db = db ?? LocalAccountDb.instance,
-        _session = session ?? LocalSessionStore.instance;
+  })  : _db = db ?? LocalAccountDb.instance, // Usa la instancia por defecto
+        _session = session ?? LocalSessionStore.instance; // Sesión por defecto
 
+  // Base de datos de cuentas
   final LocalAccountDb _db;
+  // Almacenamiento de sesión (guarda quién está logueado)
   final LocalSessionStore _session;
 
+  // Inicializa todo (carga JSON en memoria)
   Future<void> init() async {
-    await _db.loadIfNeeded();
-    await _session.init();
+    await _db.loadIfNeeded(); // Carga usuarios si no estan cargados
+    await _session.init(); // Inicializa sesion
   }
 
+  // Hace login validando email y contraseña
   Future<UserModel?> login({
     required String email,
     required String password,
   }) async {
-    await init();
+    await init(); // Aseguramos que todo esté cargado
 
+    // Normalizamos el email (minusculas, sin espacios)
     final normalizedEmail = email.trim().toLowerCase();
 
+    // Buscamos el usuario en la lista
     UserModel? user;
     for (final candidate in _db.users) {
+      // Comparamos email y contrasena
       if (candidate.email.trim().toLowerCase() == normalizedEmail &&
           candidate.password == password) {
-        user = candidate;
+        user = candidate; // Encontrado
         break;
       }
     }
 
+    // Si no encontramos, retornamos null
     if (user == null) return null;
 
+    // Guardamos el ID en la sesion (asi sabemos quien esta logueado)
     await _session.setUserId(user.id);
     return user;
   }
 
+  // Obtiene todos los usuarios (solo lectura)
   Future<List<UserModel>> getUsers() async {
     await init();
     return List<UserModel>.unmodifiable(_db.users);
   }
 
+  // Registra un usuario nuevo
   Future<UserModel> register({
     required String fullName,
     required String identificationNumber,

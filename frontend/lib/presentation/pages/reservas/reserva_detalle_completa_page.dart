@@ -9,21 +9,28 @@ import '../../../services/reservations/local_reservation_db.dart';
 import '../../../services/publications/local_publication_db.dart';
 import '../../../services/vehiculo_service.dart';
 
+// Página de detalle completo de reserva
+// Muestra toda la información detallada de una reserva específica
 class ReservaDetalleCompletaPage extends StatefulWidget {
+  // Constructor con código e ID de la reserva
   const ReservaDetalleCompletaPage({
     super.key,
-    required this.reservaCode,
-    required this.reservaId,
+    required this.reservaCode, // Código de la reserva
+    required this.reservaId, // ID de la reserva
   });
 
+  // Código único de la reserva
   final String reservaCode;
+  // ID de la reserva en la base de datos
   final int reservaId;
 
   @override
-  State<ReservaDetalleCompletaPage> createState() => _ReservaDetalleCompletaPageState();
+  State<ReservaDetalleCompletaPage> createState() =>
+      _ReservaDetalleCompletaPageState();
 }
 
-class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage> {
+class _ReservaDetalleCompletaPageState
+    extends State<ReservaDetalleCompletaPage> {
   final LocalSessionStore _sessionStore = LocalSessionStore.instance;
   final LocalPaymentDb _paymentDb = LocalPaymentDb.instance;
   final LocalCatalogDb _catalogDb = LocalCatalogDb.instance;
@@ -33,7 +40,6 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
 
   Map<String, dynamic>? _reserva;
   Map<String, dynamic>? _vehiculo;
-  Map<String, dynamic>? _publicacion;
   Map<String, dynamic>? _paymentMethod;
   Map<String, dynamic>? _paymentDetails;
   bool _isLoading = true;
@@ -84,29 +90,33 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
     );
 
     // Get payment method details
-    final paymentMethod = _paymentDb.getPaymentMethodById(reserva.paymentMethodId);
+    final paymentMethod =
+        _paymentDb.getPaymentMethodById(reserva.paymentMethodId);
     Map<String, dynamic>? paymentDetails;
 
     if (paymentMethod != null) {
       if (paymentMethod.paymentMethodTypeId == 1) {
         // Tarjeta
         final card = _paymentDb.getCardByPaymentMethodId(paymentMethod.id);
-        final cardBrand = _catalogDb.cardBrands
-            .firstWhere((brand) => brand.id == card?.cardBrandId, orElse: () => _catalogDb.cardBrands.first);
-        
+        final cardBrand = _catalogDb.cardBrands.firstWhere(
+            (brand) => brand.id == card?.cardBrandId,
+            orElse: () => _catalogDb.cardBrands.first);
+
         paymentDetails = {
           'type': 'Tarjeta',
           'brand': cardBrand.name,
-          'last4': card?.cardNumber.substring(card!.cardNumber.length - 4) ?? '****',
+          'last4':
+              card?.cardNumber.substring(card.cardNumber.length - 4) ?? '****',
           'expiryMonth': card?.expirationMonth,
           'expiryYear': card?.expirationYear,
         };
       } else if (paymentMethod.paymentMethodTypeId == 2) {
         // PSE
         final pse = _paymentDb.getPseByPaymentMethodId(paymentMethod.id);
-        final bank = _catalogDb.banks
-            .firstWhere((bank) => bank.id == pse?.bankId, orElse: () => _catalogDb.banks.first);
-        
+        final bank = _catalogDb.banks.firstWhere(
+            (bank) => bank.id == pse?.bankId,
+            orElse: () => _catalogDb.banks.first);
+
         paymentDetails = {
           'type': 'PSE',
           'bank': bank.name,
@@ -134,15 +144,13 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
         'periodCount': reserva.periodCount,
       };
       _vehiculo = vehiculo;
-      _publicacion = {
-        'id': publicacion.id,
-        'vehicleId': publicacion.vehicleId,
-      };
-      _paymentMethod = paymentMethod != null ? {
-        'id': paymentMethod.id,
-        'typeId': paymentMethod.paymentMethodTypeId,
-        'isDefault': paymentMethod.isDefault,
-      } : null;
+      _paymentMethod = paymentMethod != null
+          ? {
+              'id': paymentMethod.id,
+              'typeId': paymentMethod.paymentMethodTypeId,
+              'isDefault': paymentMethod.isDefault,
+            }
+          : null;
       _paymentDetails = paymentDetails;
       _isLoading = false;
     });
@@ -150,8 +158,18 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
 
   String _formatDate(DateTime date) {
     final months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -331,7 +349,7 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
           const SizedBox(height: 8),
           _buildInfoRow(
             'Asientos',
-            '${_vehiculo!['asientos']?.toString() ?? 'No especificado'}',
+            _vehiculo!['asientos']?.toString() ?? 'No especificado',
             Icons.airline_seat_recline_normal_outlined,
           ),
           if (_vehiculo!['aire_acondicionado'] == true) ...[
@@ -547,19 +565,19 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
     // Calculate actual values based on reservation data
     final totalValue = _reserva!['totalValue'] as double;
     final periodCount = _reserva!['periodCount'] as int;
-    
+
     // Get publication price to find the actual rate
-    final publicationPrice = _publicationDb.publicationPrices
-        .firstWhere((p) => p.publicationId == _reserva!['publicationId'],
+    final publicationPrice = _publicationDb.publicationPrices.firstWhere(
+        (p) => p.publicationId == _reserva!['publicationId'],
         orElse: () => _publicationDb.publicationPrices.first);
     final dailyRate = publicationPrice.price;
-    
+
     // Calculate vehicle rental (based on actual rate)
     final vehicleRental = dailyRate * periodCount;
-    
+
     // Calculate insurance (remaining amount)
     final insurance = totalValue - vehicleRental;
-    
+
     return _buildInfoCard(
       title: 'Desglose de Precios',
       child: Column(
@@ -655,7 +673,8 @@ class _ReservaDetalleCompletaPageState extends State<ReservaDetalleCompletaPage>
     );
   }
 
-  Widget _buildPricingRow(String label, String value, bool isSmallPhone, {bool isTotal = false}) {
+  Widget _buildPricingRow(String label, String value, bool isSmallPhone,
+      {bool isTotal = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

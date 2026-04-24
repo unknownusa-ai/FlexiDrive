@@ -1,48 +1,59 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
-
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Pagina principal (para volver)
 import '../main_page.dart';
 
+// Pagina de Factura Digital
+// Muestra el comprobante de pago de una reserva
 class FacturaDigitalPage extends StatelessWidget {
+  // Constructor con parámetros de la factura
   const FacturaDigitalPage({
     super.key,
-    this.empresa = 'FlexiDrive',
-    this.nit = '901.234.567-8',
-    this.numeroFactura = 'FXD-INV-2026-25393',
-    this.fecha = '22 Feb 2026',
-    this.clienteNombre = 'Carlos Rodríguez',
-    this.clienteEmail = 'carlos.rodriguez@email.com',
-    this.descripcionServicio = 'Renta Vehículo',
-    this.cantidad = 1,
-    this.periodoUnidad = 'día',
-    this.tarifaServicio = 0,
-    this.seguroBasico = 0,
+    this.empresa = 'FlexiDrive', // Nombre de la empresa
+    this.nit = '901.234.567-8', // NIT de la empresa
+    this.numeroFactura = 'FXD-INV-2026-25393', // Numero unico de factura
+    this.fecha = '22 Feb 2026', // Fecha de emision
+    this.clienteNombre = 'Carlos Rodríguez', // Nombre del cliente
+    this.clienteEmail = 'carlos.rodriguez@email.com', // Email del cliente
+    this.descripcionServicio = 'Renta Vehículo', // Descripcion del servicio
+    this.cantidad = 1, // Cantidad de servicios
+    this.periodoUnidad = 'día', // Unidad de tiempo
+    this.tarifaServicio = 0, // Valor del servicio
+    this.seguroBasico = 0, // Valor del seguro
   });
 
-  final String empresa;
-  final String nit;
-  final String numeroFactura;
-  final String fecha;
-  final String clienteNombre;
-  final String clienteEmail;
-  final String descripcionServicio;
-  final int cantidad;
-  final String periodoUnidad;
-  final int tarifaServicio;
-  final int seguroBasico;
+  // Datos de la factura
+  final String empresa; // Nombre de la empresa
+  final String nit; // NIT de la empresa
+  final String numeroFactura; // Numero de factura
+  final String fecha; // Fecha de emision
+  final String clienteNombre; // Nombre del cliente
+  final String clienteEmail; // Email del cliente
+  final String descripcionServicio; // Descripcion del servicio
+  final int cantidad; // Cantidad de dias/horas
+  final String periodoUnidad; // Tipo de periodo (dia/hora/semana)
+  final int tarifaServicio; // Tarifa del servicio
+  final int seguroBasico; // Costo del seguro basico
 
-  int get subtotal => tarifaServicio + seguroBasico;
-  int get iva => 0;
-  int get total => subtotal + iva;
+  // Calculos de la factura
+  int get subtotal => tarifaServicio + seguroBasico; // Subtotal sin IVA
+  int get iva => 0; // IVA (0% en este caso)
+  int get total => subtotal + iva; // Total a pagar
 
+  // Formatea un numero como precio colombiano (con puntos)
   String _price(int value) {
     final asString = value.toString();
     final buffer = StringBuffer();
 
+    // Recorremos el string al reves para agregar puntos
     for (int i = 0; i < asString.length; i++) {
       final reverseIndex = asString.length - i;
       buffer.write(asString[i]);
+      // Agregamos punto cada 3 digitos (de derecha a izquierda)
       if (reverseIndex > 1 && reverseIndex % 3 == 1) {
         buffer.write('.');
       }
@@ -210,7 +221,8 @@ class FacturaDigitalPage extends StatelessWidget {
                         color: const Color(0xFF22C55E).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                            color: const Color(0xFF22C55E).withValues(alpha: 0.35)),
+                            color: const Color(0xFF22C55E)
+                                .withValues(alpha: 0.35)),
                       ),
                       child: Text(
                         '✅ PAGADO',

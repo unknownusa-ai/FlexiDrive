@@ -5,18 +5,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flexidrive/models/accounts/account_models.dart';
 
+// Base de datos local para cuentas de usuario
+// Maneja el almacenamiento local de usuarios y preferencias
 class LocalAccountDb {
+  // Constructor privado para patrón singleton
   LocalAccountDb._();
 
+  // Instancia única de la clase (patrón singleton)
   static final LocalAccountDb instance = LocalAccountDb._();
+  // Key para guardar overrides de usuarios en SharedPreferences
   static const _usersOverridesKey = 'accounts_users_overrides_v1';
 
+  // Indica si los datos ya fueron cargados
   bool? _loaded = false;
 
+  // Lista de usuarios almacenados localmente
   final List<UserModel> users = [];
+  // Lista de preferencias de usuario
   final List<UserPreferenceModel> preferences = [];
+  // Lista de ciudades de referencia
   final List<String> referenceCities = [];
 
+  // Getter para verificar si los datos están cargados
   bool get isLoaded => _loaded == true;
 
   Future<void> loadIfNeeded() async {

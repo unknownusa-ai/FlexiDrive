@@ -1,7 +1,12 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
 
+// Pagina de centro de ayuda
+// Chatbot con respuestas predefinidas y FAQs
 class HelpCenterPage extends StatefulWidget {
   const HelpCenterPage({super.key});
 
@@ -9,26 +14,43 @@ class HelpCenterPage extends StatefulWidget {
   State<HelpCenterPage> createState() => _HelpCenterPageState();
 }
 
+// Estado de la pagina de ayuda
 class _HelpCenterPageState extends State<HelpCenterPage> {
-  final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _chatController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  bool _isChatOpen = false;
-  final List<Map<String, dynamic>> _chatMessages = [];
+  // Controladores de los campos
+  final TextEditingController _searchController =
+      TextEditingController(); // Buscar FAQs
+  final TextEditingController _chatController =
+      TextEditingController(); // Escribir al bot
+  final ScrollController _scrollController =
+      ScrollController(); // Scroll del chat
 
+  // Estados de la UI
+  bool _isChatOpen = false; // Esta abierto el chat del bot?
+  final List<Map<String, dynamic>> _chatMessages = []; // Mensajes del chat
+
+  // Respuestas predefinidas del bot Ana
   final Map<String, String> _botResponses = {
-    'hola': '¡Hola! Soy Ana, tu asistente FlexiDrive 👋 ¿En qué puedo ayudarte hoy?',
-    'cancelar': 'Para cancelar una reserva, ve a "Mis Reservas", selecciona la reserva y presiona "Cancelar". El reembolso depende de la política de cancelación.',
-    'documentos': 'Necesitas: 1) Licencia de conducir válida, 2) Cédula de identidad, 3) Tarjeta de crédito como garantía.',
-    'seguro': 'Todos los vehículos incluyen seguro básico. Puedes agregar cobertura adicional al momento de reservar.',
-    'extender': 'Sí, puedes extender tu reserva desde "Mis Reservas" si el vehículo está disponible.',
-    'daño': 'Documenta el daño con fotos y repórtalo inmediatamente a través de la app o llamando al soporte 24/7.',
-    'precio': 'Los precios varían según el vehículo. Por ejemplo: Toyota Corolla \$25.000/h, Mazda CX-5 \$38.000/h.',
-    'pago': 'Aceptamos tarjetas de crédito/débito (Visa, Mastercard), PSE y efectivo.',
+    'hola':
+        '¡Hola! Soy Ana, tu asistente FlexiDrive 👋 ¿En qué puedo ayudarte hoy?',
+    'cancelar':
+        'Para cancelar una reserva, ve a "Mis Reservas", selecciona la reserva y presiona "Cancelar". El reembolso depende de la política de cancelación.',
+    'documentos':
+        'Necesitas: 1) Licencia de conducir válida, 2) Cédula de identidad, 3) Tarjeta de crédito como garantía.',
+    'seguro':
+        'Todos los vehículos incluyen seguro básico. Puedes agregar cobertura adicional al momento de reservar.',
+    'extender':
+        'Sí, puedes extender tu reserva desde "Mis Reservas" si el vehículo está disponible.',
+    'daño':
+        'Documenta el daño con fotos y repórtalo inmediatamente a través de la app o llamando al soporte 24/7.',
+    'precio':
+        'Los precios varían según el vehículo. Por ejemplo: Toyota Corolla "\$25.000/h", Mazda CX-5 "\$38.000/h".',
+    'pago':
+        'Aceptamos tarjetas de crédito/débito (Visa, Mastercard), PSE y efectivo.',
     'gracias': '¡Con gusto! 😊 Estoy aquí para ayudarte cuando lo necesites.',
     'adios': '¡Hasta luego! 👋 Que tengas un excelente día.',
   };
 
+  // Opciones de contacto
   final List<Map<String, dynamic>> _contactOptions = [
     {
       'icon': Icons.phone_outlined,
@@ -63,27 +85,32 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   final List<Map<String, dynamic>> _faqs = [
     {
       'question': '¿Cómo cancelo una reserva?',
-      'answer': 'Puedes cancelar tu reserva desde la sección "Mis Reservas". Selecciona la reserva que deseas cancelar y haz clic en "Cancelar Reserva". Recuerda revisar la política de cancelación.',
+      'answer':
+          'Puedes cancelar tu reserva desde la sección "Mis Reservas". Selecciona la reserva que deseas cancelar y haz clic en "Cancelar Reserva". Recuerda revisar la política de cancelación.',
       'isExpanded': false,
     },
     {
       'question': '¿Qué documentos necesito para rentar?',
-      'answer': 'Necesitas licencia de conducir válida, cédula de identidad, y una tarjeta de crédito como garantía. Los documentos deben estar vigentes.',
+      'answer':
+          'Necesitas licencia de conducir válida, cédula de identidad, y una tarjeta de crédito como garantía. Los documentos deben estar vigentes.',
       'isExpanded': false,
     },
     {
       'question': '¿Cómo funciona el seguro incluido?',
-      'answer': 'Todos los vehículos incluyen seguro básico. Puedes adquirir cobertura adicional al momento de hacer tu reserva para mayor tranquilidad.',
+      'answer':
+          'Todos los vehículos incluyen seguro básico. Puedes adquirir cobertura adicional al momento de hacer tu reserva para mayor tranquilidad.',
       'isExpanded': false,
     },
     {
       'question': '¿Puedo extender mi reserva activa?',
-      'answer': 'Sí, puedes extender tu reserva desde la sección "Mis Reservas" siempre que el vehículo esté disponible para las fechas adicionales.',
+      'answer':
+          'Sí, puedes extender tu reserva desde la sección "Mis Reservas" siempre que el vehículo esté disponible para las fechas adicionales.',
       'isExpanded': false,
     },
     {
       'question': '¿Qué hago si el vehículo tiene algún daño?',
-      'answer': 'Documenta el daño con fotos antes de usar el vehículo y repórtalo de inmediato a través de la app o llamando a nuestro soporte 24/7.',
+      'answer':
+          'Documenta el daño con fotos antes de usar el vehículo y repórtalo de inmediato a través de la app o llamando a nuestro soporte 24/7.',
       'isExpanded': false,
     },
   ];
@@ -136,7 +163,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 350),
             curve: Curves.easeOutCubic,
-            bottom: _isChatOpen ? 0 : -(MediaQuery.of(context).size.height * 0.72),
+            bottom:
+                _isChatOpen ? 0 : -(MediaQuery.of(context).size.height * 0.72),
             left: 0,
             right: 0,
             height: MediaQuery.of(context).size.height * 0.72,
@@ -237,11 +265,17 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                         hintStyle: GoogleFonts.inter(
                           fontSize: isSmallPhone ? 13 : 14,
                           fontWeight: FontWeight.w400,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5),
                         ),
                         prefixIcon: Icon(
                           Icons.search_rounded,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5),
                           size: isSmallPhone ? 20 : 22,
                         ),
                         border: InputBorder.none,
@@ -285,7 +319,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
         final isLast = entry.key == _contactOptions.length - 1;
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: isLast ? 0 : (isSmallPhone ? 8 : 10)),
+            padding:
+                EdgeInsets.only(right: isLast ? 0 : (isSmallPhone ? 8 : 10)),
             child: _buildContactCard(entry.value, isSmallPhone),
           ),
         );
@@ -590,7 +625,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   Widget _buildChatHeader(bool isSmallPhone) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isSmallPhone ? 16 : 20,
@@ -643,7 +678,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF10B981),
                     shape: BoxShape.circle,
-                    border: Border.all(color: theme.colorScheme.surface, width: 2),
+                    border:
+                        Border.all(color: theme.colorScheme.surface, width: 2),
                   ),
                 ),
               ),
@@ -770,10 +806,10 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                 vertical: isSmallPhone ? 10 : 12,
               ),
               decoration: BoxDecoration(
-                color: isUser 
-                    ? const Color(0xFF4F46E5) 
-                    : isDark 
-                        ? const Color(0xFF1F2235)  // dark surface elevated
+                color: isUser
+                    ? const Color(0xFF4F46E5)
+                    : isDark
+                        ? const Color(0xFF1F2235) // dark surface elevated
                         : Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
@@ -802,10 +838,10 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                     style: GoogleFonts.inter(
                       fontSize: isSmallPhone ? 13 : 14,
                       fontWeight: FontWeight.w400,
-                      color: isUser 
-                          ? Colors.white 
-                          : isDark 
-                              ? const Color(0xFFF1F3FF)  // dark text primary
+                      color: isUser
+                          ? Colors.white
+                          : isDark
+                              ? const Color(0xFFF1F3FF) // dark text primary
                               : const Color(0xFF1A1A1A),
                       height: 1.45,
                     ),
@@ -818,8 +854,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                       fontWeight: FontWeight.w400,
                       color: isUser
                           ? Colors.white.withValues(alpha: 0.65)
-                          : isDark 
-                              ? const Color(0xFF8B93B8)  // dark text secondary
+                          : isDark
+                              ? const Color(0xFF8B93B8) // dark text secondary
                               : Colors.grey.shade500,
                     ),
                   ),
@@ -835,7 +871,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   Widget _buildChatInput(bool isSmallPhone) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       color: theme.colorScheme.surface,
       padding: EdgeInsets.fromLTRB(
@@ -853,20 +889,27 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                 hintText: 'Escribe tu mensaje...',
                 hintStyle: GoogleFonts.inter(
                   fontSize: isSmallPhone ? 14 : 15,
-                  color: isDark ? const Color(0xFF8B93B8) : Colors.grey.shade400,
+                  color:
+                      isDark ? const Color(0xFF8B93B8) : Colors.grey.shade400,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: isDark ? const Color(0xFF2E3355) : Colors.grey.shade200),
+                  borderSide: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF2E3355)
+                          : Colors.grey.shade200),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: isDark ? const Color(0xFF2E3355) : Colors.grey.shade200),
+                  borderSide: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF2E3355)
+                          : Colors.grey.shade200),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(
-                      color: Color(0xFF4F46E5), width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF4F46E5), width: 1.5),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -913,7 +956,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
       if (_chatMessages.isEmpty) {
         _chatMessages.add({
           'isUser': false,
-          'message': '¡Hola! Soy Ana, tu asistente FlexiDrive 👋 ¿En qué puedo ayudarte hoy?',
+          'message':
+              '¡Hola! Soy Ana, tu asistente FlexiDrive 👋 ¿En qué puedo ayudarte hoy?',
           'time': _getCurrentTime(),
         });
       }

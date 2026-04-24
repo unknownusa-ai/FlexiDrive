@@ -1,40 +1,53 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
 
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
+// Pagina de factura digital
 import 'factura_digital_page.dart';
+// Pagina principal (para volver)
 import '../main_page.dart';
 
+// Pagina de Reserva Confirmada
+// Muestra el comprobante de que la reserva fue exitosa
 class ReservaConfirmadaPage extends StatelessWidget {
+  // Constructor con parámetros de la reserva confirmada
   const ReservaConfirmadaPage({
     super.key,
-    this.vehiculoBrand = 'Mazda CX-5 2024',
-    this.vehiculoImage = '',
-    this.periodo = 'Días',
-    this.cantidad = 1,
-    this.lugarRecogida = 'Av. El Dorado, Bogotá',
-    this.totalPagado = 0,
-    this.codigoReserva = 'FXD-2026-9038',
+    this.vehiculoBrand = 'Mazda CX-5 2024', // Marca y modelo del carro
+    this.vehiculoImage = '', // URL de la imagen
+    this.periodo = 'Días', // Tipo de periodo
+    this.cantidad = 1, // Cantidad de dias
+    this.lugarRecogida = 'Av. El Dorado, Bogotá', // Donde recoger el carro
+    this.totalPagado = 0, // Total pagado
+    this.codigoReserva = 'FXD-2026-9038', // Codigo unico
   });
 
-  final String vehiculoBrand;
-  final String vehiculoImage;
-  final String periodo;
-  final int cantidad;
-  final String lugarRecogida;
-  final int totalPagado;
-  final String codigoReserva;
+  // Datos de la reserva confirmada
+  final String vehiculoBrand; // Marca y modelo del vehiculo
+  final String vehiculoImage; // URL de la imagen del vehiculo
+  final String periodo; // Tipo de periodo (dias/horas/semanas)
+  final int cantidad; // Cantidad del periodo
+  final String lugarRecogida; // Lugar de recogida
+  final int totalPagado; // Valor total pagado
+  final String codigoReserva; // Codigo de reserva
 
+  // Verifica si esta en modo oscuro
   bool _isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
 
+  // Formatea un numero como precio colombiano (con puntos)
   String _formatearPrecio(int precio) {
     final asString = precio.toString();
     final buffer = StringBuffer();
 
+    // Recorremos el string al reves para agregar puntos
     for (int i = 0; i < asString.length; i++) {
       final reverseIndex = asString.length - i;
       buffer.write(asString[i]);
+      // Agregamos punto cada 3 digitos (de derecha a izquierda)
       if (reverseIndex > 1 && reverseIndex % 3 == 1) {
         buffer.write('.');
       }
@@ -43,6 +56,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
     return buffer.toString();
   }
 
+  // Retorna la unidad del periodo en singular
   String _unidadPeriodo() {
     final periodoLower = periodo.toLowerCase();
     if (cantidad == 1) {

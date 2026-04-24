@@ -1,16 +1,24 @@
+// Utilidades para convertir JSON
 import 'package:flexidrive/utils/json_utils.dart';
 
+// Modelo de método de pago
+// Representa un método de pago asociado a un usuario
 class PaymentMethodModel {
+  // Constructor con todos los datos del método de pago
   const PaymentMethodModel({
-    required this.id,
-    required this.userId,
-    required this.paymentMethodTypeId,
-    required this.isDefault,
+    required this.id, // ID único del método de pago
+    required this.userId, // ID del usuario dueño del método
+    required this.paymentMethodTypeId, // Tipo de método (tarjeta, PSE, etc)
+    required this.isDefault, // Si es el método predeterminado
   });
 
+  // ID en la base de datos
   final int id;
+  // ID del usuario dueño del método de pago
   final int userId;
+  // ID del tipo de método de pago
   final int paymentMethodTypeId;
+  // True si es el método predeterminado
   final bool isDefault;
 
   factory PaymentMethodModel.fromJson(Map<String, dynamic> json) {
@@ -23,11 +31,11 @@ class PaymentMethodModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'metodo_pago_id': id,
-    'usuario_id': userId,
-    'tipo_metodo_pago_id': paymentMethodTypeId,
-    'predeterminado': isDefault,
-  };
+        'metodo_pago_id': id,
+        'usuario_id': userId,
+        'tipo_metodo_pago_id': paymentMethodTypeId,
+        'predeterminado': isDefault,
+      };
 }
 
 class CardModel {
@@ -62,14 +70,14 @@ class CardModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'tarjeta_id': id,
-    'metodo_pago_id': paymentMethodId,
-    'numero_tarjeta': cardNumber,
-    'marca_tarjeta_id': cardBrandId,
-    'mes_expiracion': expirationMonth,
-    'ano_expiracion': expirationYear,
-    'cvc': cvc,
-  };
+        'tarjeta_id': id,
+        'metodo_pago_id': paymentMethodId,
+        'numero_tarjeta': cardNumber,
+        'marca_tarjeta_id': cardBrandId,
+        'mes_expiracion': expirationMonth,
+        'ano_expiracion': expirationYear,
+        'cvc': cvc,
+      };
 }
 
 class PseModel {
@@ -95,9 +103,9 @@ class PseModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'pse_id': id,
-    'metodo_pago_id': paymentMethodId,
-    'banco_id': bankId,
-    'tipo_persona_id': personTypeId,
-  };
+        'pse_id': id,
+        'metodo_pago_id': paymentMethodId,
+        'banco_id': bankId,
+        'tipo_persona_id': personTypeId,
+      };
 }

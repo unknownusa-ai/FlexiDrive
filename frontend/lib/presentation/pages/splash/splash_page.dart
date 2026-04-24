@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../onboarding/onboarding_page.dart';
 import '../login/login_page.dart';
 
+// Página de bienvenida (splash)
+// Pantalla inicial que muestra el logo y redirige al onboarding o login
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -10,9 +12,13 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
+// Estado de la página splash
+// Maneja la animación de carga y redirección inicial
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
+  // Controlador de animación
   late AnimationController _controller;
+  // Animación del progreso de carga
   late Animation<double> _progressAnimation;
 
   @override
@@ -23,12 +29,12 @@ class _SplashPageState extends State<SplashPage>
       duration: const Duration(seconds: 5),
     );
     _progressAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
-    
+
     _progressAnimation.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         final prefs = await SharedPreferences.getInstance();
         final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-        
+
         if (mounted) {
           if (hasSeenOnboarding) {
             Navigator.of(context).pushReplacement(
@@ -45,7 +51,7 @@ class _SplashPageState extends State<SplashPage>
         }
       }
     });
-    
+
     _controller.forward();
   }
 
@@ -199,8 +205,8 @@ class _SplashPageState extends State<SplashPage>
                         return LinearProgressIndicator(
                           value: _progressAnimation.value,
                           backgroundColor: Colors.white.withValues(alpha: 0.22),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              Colors.white),
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(Colors.white),
                           minHeight: 3,
                           borderRadius: BorderRadius.circular(2),
                         );

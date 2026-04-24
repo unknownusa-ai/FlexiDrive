@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'package:flexidrive/models/payments/payment_models.dart';
-import 'package:flexidrive/core/session/local_session_store.dart';
 
 class LocalPaymentDb {
   LocalPaymentDb._();
@@ -30,12 +29,14 @@ class LocalPaymentDb {
     cards
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/payments/cards.json'), CardModel.fromJson),
+        _parseList(await _loadList('assets/data/payments/cards.json'),
+            CardModel.fromJson),
       );
     pses
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/payments/pses.json'), PseModel.fromJson),
+        _parseList(await _loadList('assets/data/payments/pses.json'),
+            PseModel.fromJson),
       );
 
     _loaded = true;
@@ -62,15 +63,21 @@ class LocalPaymentDb {
   // Get cards for the current user
   List<CardModel> getUserCards(int userId) {
     final userPaymentMethods = getUserPaymentMethods(userId);
-    final userPaymentMethodIds = userPaymentMethods.map((method) => method.id).toSet();
-    return cards.where((card) => userPaymentMethodIds.contains(card.paymentMethodId)).toList();
+    final userPaymentMethodIds =
+        userPaymentMethods.map((method) => method.id).toSet();
+    return cards
+        .where((card) => userPaymentMethodIds.contains(card.paymentMethodId))
+        .toList();
   }
 
   // Get PSE accounts for the current user
   List<PseModel> getUserPseAccounts(int userId) {
     final userPaymentMethods = getUserPaymentMethods(userId);
-    final userPaymentMethodIds = userPaymentMethods.map((method) => method.id).toSet();
-    return pses.where((pse) => userPaymentMethodIds.contains(pse.paymentMethodId)).toList();
+    final userPaymentMethodIds =
+        userPaymentMethods.map((method) => method.id).toSet();
+    return pses
+        .where((pse) => userPaymentMethodIds.contains(pse.paymentMethodId))
+        .toList();
   }
 
   // Get default payment method for user
@@ -86,7 +93,8 @@ class LocalPaymentDb {
   // Get payment method details by ID
   PaymentMethodModel? getPaymentMethodById(int paymentMethodId) {
     try {
-      return paymentMethods.firstWhere((method) => method.id == paymentMethodId);
+      return paymentMethods
+          .firstWhere((method) => method.id == paymentMethodId);
     } catch (e) {
       return null;
     }
@@ -95,7 +103,8 @@ class LocalPaymentDb {
   // Get card details by payment method ID
   CardModel? getCardByPaymentMethodId(int paymentMethodId) {
     try {
-      return cards.firstWhere((card) => card.paymentMethodId == paymentMethodId);
+      return cards
+          .firstWhere((card) => card.paymentMethodId == paymentMethodId);
     } catch (e) {
       return null;
     }

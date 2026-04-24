@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import 'principal_arrendatario_page.dart';
 
+// Página para publicar vehículo
+// Formulario para que los arrendadores publiquen sus carros
 class PublicarVehiculoPage extends StatefulWidget {
   const PublicarVehiculoPage({super.key});
 
@@ -10,11 +12,18 @@ class PublicarVehiculoPage extends StatefulWidget {
   State<PublicarVehiculoPage> createState() => _PublicarVehiculoPageState();
 }
 
+// Estado de la página de publicación de vehículo
+// Maneja el formulario de publicación paso a paso
 class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
+  // Paso actual del formulario (1-4)
   int currentStep = 1;
+  // Categoría seleccionada del vehículo
   String? selectedCategory;
+  // Tipo de transmisión seleccionada
   String? selectedTransmission;
+  // Número de asientos seleccionado
   int? selectedSeats;
+  // Controladores para los campos del formulario
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController marcaController = TextEditingController();
   final TextEditingController anoController = TextEditingController();
@@ -340,7 +349,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? theme.colorScheme.primary.withValues(alpha: 0.15)
                       : theme.cardTheme.color,
                   borderRadius: BorderRadius.circular(16),
@@ -635,7 +644,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       decoration: BoxDecoration(
         color: const Color(0xFF10B981).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+        border:
+            Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +825,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           child: Container(
             padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).cardTheme.color ??
+                  Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(32),
             ),
             child: Column(
@@ -851,7 +862,10 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   TextSpan(
                     style: GoogleFonts.inter(
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
                       height: 1.45,
                     ),
                     children: [
@@ -877,9 +891,16 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -890,7 +911,10 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                               'Precio/día',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -908,7 +932,9 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                       Container(
                         width: 1,
                         height: 56,
-                        color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.5),
                       ),
                       Expanded(
                         child: Column(
@@ -917,7 +943,10 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                               'Ubicación',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -1002,7 +1031,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        border: Border(top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.5))),
+        border: Border(
+            top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.5))),
       ),
       padding: EdgeInsets.fromLTRB(
         isSmallPhone ? 14 : 16,
@@ -1057,7 +1087,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                           },
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Theme.of(context).cardTheme.color,
-                            side: BorderSide(color: Theme.of(context).dividerColor),
+                            side: BorderSide(
+                                color: Theme.of(context).dividerColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -1123,7 +1154,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                           },
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Theme.of(context).cardTheme.color,
-                            side: BorderSide(color: Theme.of(context).dividerColor),
+                            side: BorderSide(
+                                color: Theme.of(context).dividerColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),

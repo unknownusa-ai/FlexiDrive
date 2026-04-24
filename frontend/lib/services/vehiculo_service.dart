@@ -1,45 +1,58 @@
+// Para trabajar con JSON
 import 'dart:convert';
+// Para leer archivos locales
 import 'package:flutter/services.dart';
+// Modelos de categorías de carros
 import 'package:flexidrive/models/catalogs/catalog_models.dart';
 
-/// Servicio que simula un backend para FlexiDrive
-/// Trabaja con JSON + ArrayList (List en Dart) en memoria
+// Servicio que simula un backend
+// En realidad todo está en JSON local, pero parece un backend real
 class VehiculoService {
-  // ArrayList en memoria - "Base de datos" local
+  // Lista de carros en memoria (como un ArrayList de Java)
   List<Map<String, dynamic>> vehiculos = [];
+  // Lista de usuarios
   List<Map<String, dynamic>> usuarios = [];
+  // Lista de rentas/reservas
   List<Map<String, dynamic>> rentas = [];
+  // Lista de reseñas
   List<Map<String, dynamic>> resenas = [];
+  // Categorías de vehículos (Sedán, SUV, etc)
   List<VehicleCategoryModel> categories = [];
 
-  bool loaded = false; // Controla si ya cargamos el JSON
+  // Ya cargamos los datos? (evita cargar dos veces)
+  bool loaded = false;
 
-  /// Inicializa los datos desde el archivo JSON
+  // Carga todos los datos desde los JSON
   Future<void> init() async {
+    // Si ya cargamos, no hacemos nada
     if (loaded) return;
 
-    // Cargar ArrayList de vehículos desde JSON (28 vehículos)
+    // Cargamos los carros desde el JSON (28 vehículos)
     final rawVehicles = await _loadList('assets/data/operations/vehicles.json');
 
-    // Mapear campos del nuevo JSON al formato legacy
+    // Convertimos al formato viejo que usa la app
     vehiculos = rawVehicles.map((v) => _mapVehicleToLegacyFormat(v)).toList();
 
-    // Cargar ArrayList de usuarios desde JSON consolidado
+    // Cargamos usuarios
     usuarios = await _loadList('assets/data/accounts/users.json');
 
-    // Cargar ArrayList de rentas desde JSON consolidado
+    // Cargamos rentas
     rentas = await _loadList('assets/data/operations/reservations.json');
 
-    // Cargar ArrayList de reseñas desde JSON consolidado
+    // Cargamos reseñas
     resenas = await _loadList('assets/data/operations/reviews.json');
 
+    // Marcamos como cargado
     loaded = true;
   }
 
-  /// Mapea un vehículo del formato operations al formato legacy
+  // Convierte un carro del formato nuevo al formato viejo
+  // Esto es para compatibilidad con el código anterior
   Map<String, dynamic> _mapVehicleToLegacyFormat(Map<String, dynamic> v) {
+    // Tomamos el ID de categoría
     final categoryId = v['categoria_vehiculo_id'] as int;
-    String categoryName = 'Sedán'; // Default
+    // Por defecto es Sedán
+    String categoryName = 'Sedán';
 
     // Mapeo simple de categorías sin dependencias complejas
     switch (categoryId) {

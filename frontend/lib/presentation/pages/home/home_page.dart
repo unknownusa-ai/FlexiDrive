@@ -1,17 +1,31 @@
+// Importamos Flutter - lo básico para la UI
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+// El menú principal con las pestañas
 import 'package:flexidrive/presentation/pages/main_page.dart';
+// Para saber quién está logueado
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
+// Base de datos local de usuarios
 import 'package:flexidrive/services/accounts/local_account_db.dart';
+// Utilidades para pantallas pequeñas/grandes
 import '../../../core/utils/responsive_utils.dart';
+// Página de detalle cuando tocan un carro
 import '../reservas/reserva_detalle_page.dart';
+// Servicio que carga los carros desde JSON
 import '../../../services/vehiculo_service.dart';
+// Publicaciones de renta
 import '../../../services/publications/local_publication_db.dart';
+// Sistema de reseñas y calificaciones
 import '../../../services/reviews/local_review_db.dart';
+// Reservas que hacen los usuarios
 import '../../../services/reservations/local_reservation_db.dart';
+// Modelos de datos de publicaciones
 import '../../../models/publications/publication_models.dart';
+// Modelos de reseñas
 import '../../../models/reviews/review_models.dart';
 
+// Página principal - lo primero que ve el usuario
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -19,39 +33,55 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// Estado de la página principal
 class _HomePageState extends State<HomePage> {
+  // Repositorio para manejar usuarios
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  // DB local de cuentas
   final LocalAccountDb _accountDb = LocalAccountDb.instance;
+  // DB de publicaciones
   final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
+  // DB de reseñas
   final LocalReviewDb _reviewDb = LocalReviewDb.instance;
+  // DB de reservas
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
 
+  // Filtro por categoría de carro
   String _selectedCategory = 'Todos';
+  // Ciudad seleccionada para buscar carros
   String _selectedCity = 'Bogotá';
+  // Nombre del usuario que está usando la app
   String _currentUserName = 'Invitado';
 
-  // Filtros de búsqueda
+  // Controlador del campo de búsqueda
   final TextEditingController _searchController = TextEditingController();
+  // Texto que escribe el usuario en la búsqueda
   String _searchQuery = '';
 
-  // Fechas de renta
-  DateTime _fechaDesde = DateTime(2026, 4, 23);
-  DateTime _fechaHasta = DateTime(2026, 4, 30);
-  DateTime? _rentalStartDate;
-  DateTime? _rentalEndDate;
+  // Fechas del período de renta
+  DateTime _fechaDesde = DateTime(2026, 4, 23); // Fecha inicio por defecto
+  DateTime _fechaHasta = DateTime(2026, 4, 30); // Fecha fin por defecto
+  DateTime? _rentalStartDate; // Fecha que escoge el usuario
+  DateTime? _rentalEndDate; // Fecha fin que escoge el usuario
 
-  // Servicio para cargar datos desde JSON
+  // Servicio que trae los datos de carros
   final VehiculoService _vehiculoService = VehiculoService();
+  // Lista de todos los carros disponibles
   List<Map<String, dynamic>> _vehiculos = [];
+  // Lista de carros después de aplicar filtros
   List<Map<String, dynamic>> _vehiculosFiltrados = [];
+  // Está cargando los carros?
   bool _isLoading = true;
+  // Está cargando las ciudades?
   bool _isLoadingCities = true;
+  // Lista de ciudades disponibles
   List<String> _cities = [];
 
-  // Caché de calificaciones calculadas: vehicleId -> {rating, count}
+  // Caché de calificaciones: vehicleId -> {rating, count}
+  // Guardamos esto para no calcular todo el tiempo
   final Map<int, Map<String, dynamic>> _vehicleRatings = {};
 
-  // Iconos por ciudad
+  // Iconos que representan cada ciudad
   final Map<String, IconData> _cityIcons = {
     'Bogotá': Icons.account_balance, // Capital, gobierno
     'Medellín': Icons.forest, // Ciudad de la eterna primavera

@@ -1,3 +1,5 @@
+// Página principal de la aplicación
+// Contiene la navegación inferior entre las secciones principales
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home/home_page.dart';
@@ -5,11 +7,16 @@ import 'reservas/reservas_page.dart';
 import 'notifications/notifications_page.dart';
 import 'profile/profile_page.dart';
 
+// Widget principal que maneja la navegación por tabs
+// Proporciona acceso a las 4 secciones principales de la app
 class MainPage extends StatefulWidget {
+  // Constructor con índice inicial opcional
   const MainPage({super.key, this.initialIndex = 0});
 
+  // Índice de la página a mostrar al iniciar
   final int initialIndex;
 
+  // Método estático para acceder al estado desde cualquier widget
   static MainPageState of(BuildContext context) {
     final state = context.findAncestorStateOfType<MainPageState>();
     assert(state != null, 'No MainPage found in context');

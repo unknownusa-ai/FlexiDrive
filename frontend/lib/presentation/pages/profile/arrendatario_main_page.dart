@@ -1,17 +1,25 @@
+// Flutter framework
 import 'package:flutter/material.dart';
+// Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
-import 'principal_arrendatario_page.dart';
-import 'profile_arrendatario_page.dart';
-import 'solicitudes_page.dart';
-import 'publicar_vehiculo_page.dart';
-import 'alertas_page.dart';
+// Paginas del arrendador
+import 'principal_arrendatario_page.dart'; // Dashboard principal
+import 'profile_arrendatario_page.dart'; // Perfil del arrendador
+import 'solicitudes_page.dart'; // Solicitudes de renta
+import 'publicar_vehiculo_page.dart'; // Publicar nuevo carro
+import 'alertas_page.dart'; // Notificaciones y alertas
+// Utilidades responsive
 import '../../../core/utils/responsive_utils.dart';
 
+// Pagina principal del arrendador (dueño de carros)
+// Es el menu con navegacion inferior para gestionar sus carros
 class ArrendatarioMainPage extends StatefulWidget {
+  // Indice inicial de la pagina a mostrar
   final int initialIndex;
 
   const ArrendatarioMainPage({super.key, this.initialIndex = 0});
 
+  // Metodo estatico para acceder al estado desde cualquier widget hijo
   static ArrendatarioMainPageState of(BuildContext context) {
     final state = context.findAncestorStateOfType<ArrendatarioMainPageState>();
     assert(state != null, 'No ArrendatarioMainPage found in context');
@@ -22,11 +30,13 @@ class ArrendatarioMainPage extends StatefulWidget {
   State<ArrendatarioMainPage> createState() => ArrendatarioMainPageState();
 }
 
+// Estado de la pagina principal del arrendador
 class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
-  late int _selectedIndex;
-  late PageController _pageController;
-  int _historialTabIndex = 0;
+  late int _selectedIndex; // Tab seleccionada actualmente
+  late PageController _pageController; // Controlador del PageView
+  int _historialTabIndex = 0; // Tab del historial (activas/completadas)
 
+  // Lista de paginas disponibles en el menu inferior
   List<Widget> get _pages => [
         const PrincipalArrendatarioPage(),
         SolicitudesPage(
