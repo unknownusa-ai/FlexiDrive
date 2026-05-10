@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../services/reservations/local_reservation_db.dart';
+import '../../../services/publications/local_publication_db.dart';
 import '../../../services/vehiculo_service.dart';
 import '../../../models/reservations/reservation_models.dart';
 
@@ -100,10 +100,10 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
   Future<List<Map<String, dynamic>>> _loadPublications() async {
     try {
-      final String publicationsData = await DefaultAssetBundle.of(context)
-          .loadString('assets/data/operations/publications.json');
-      final List<dynamic> publicationsJson = json.decode(publicationsData);
-      return publicationsJson.cast<Map<String, dynamic>>();
+      await LocalPublicationDb.instance.loadIfNeeded();
+      return LocalPublicationDb.instance.publications
+          .map((publication) => publication.toJson())
+          .toList();
     } catch (e) {
       return [];
     }

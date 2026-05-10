@@ -36,9 +36,6 @@ def seed_all_test_data(apps, schema_editor):
     ReservationStatus = apps.get_model("reservations", "ReservationStatus")
     Reservation = apps.get_model("reservations", "Reservation")
 
-    Opinion = apps.get_model("reviews", "Opinion")
-    Review = apps.get_model("reviews", "Review")
-
     UserSession = apps.get_model("security", "UserSession")
     LoginAttempt = apps.get_model("security", "LoginAttempt")
     RefreshToken = apps.get_model("security", "RefreshToken")
@@ -59,11 +56,6 @@ def seed_all_test_data(apps, schema_editor):
         "Carnet Diplomatico",
         "Documento Militar",
         "Licencia de Conduccion",
-        "Documento Regional",
-        "Documento Consular",
-        "Documento Mercosur",
-        "Documento Schengen",
-        "Documento Fronterizo",
     ]
     identification_types = [
         IdentificationType.objects.create(name=name, description=f"Tipo de identificacion {name}")
@@ -95,7 +87,7 @@ def seed_all_test_data(apps, schema_editor):
     users = []
     for i in range(15):
         user = User.objects.create(
-            identification_type=identification_types[i % 15],
+            identification_type=identification_types[i % len(identification_types)],
             identification_number=f"DOC-{100000 + i}",
             user_type=user_types[0],
             full_name=f"Usuario Prueba {i + 1}",
@@ -392,23 +384,6 @@ def seed_all_test_data(apps, schema_editor):
                 status=reservation_statuses[i],
                 reservation_date=now - timedelta(days=i),
             )
-        )
-
-    opinions = []
-    for i in range(15):
-        opinions.append(
-            Opinion.objects.create(
-                rating=(i % 5) + 1,
-                description=f"Opinion de prueba {i + 1}: servicio confiable y puntual.",
-            )
-        )
-
-    for i in range(15):
-        Review.objects.create(
-            user=users[i],
-            publication=publications[i],
-            opinion=opinions[i],
-            review_date=now - timedelta(days=i),
         )
 
     notification_category_names = [

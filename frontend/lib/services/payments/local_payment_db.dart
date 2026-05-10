@@ -1,7 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/payments/payment_models.dart';
 
 class LocalPaymentDb {
@@ -22,21 +19,19 @@ class LocalPaymentDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/payments/payment_methods.json'),
+          await _loadList('payment-methods'),
           PaymentMethodModel.fromJson,
         ),
       );
     cards
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/payments/cards.json'),
-            CardModel.fromJson),
+        _parseList(await _loadList('cards'), CardModel.fromJson),
       );
     pses
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/payments/pses.json'),
-            PseModel.fromJson),
+        _parseList(await _loadList('pses'), PseModel.fromJson),
       );
 
     _loaded = true;
@@ -50,10 +45,8 @@ class LocalPaymentDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 
   // Get payment methods for the current user
   List<PaymentMethodModel> getUserPaymentMethods(int userId) {

@@ -1,7 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/reservations/reservation_models.dart';
 
 // Base de datos local para reservas
@@ -31,7 +28,7 @@ class LocalReservationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/reservations.json'),
+          await _loadList('reservations'),
           ReservationModel.fromJson,
         ),
       );
@@ -47,13 +44,17 @@ class LocalReservationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 
   // Agrega una nueva reserva a la lista en memoria
-  void addReservation(ReservationModel reservation) {
+  Future<void> addReservation(ReservationModel reservation) async {
+    final created =
+        await ApiClient.instance.postMap('reservations', reservation.toJson());
+    reservations.add(ReservationModel.fromJson(created));
+  }
+
+  void addReservationLocally(ReservationModel reservation) {
     reservations.add(reservation);
   }
 }

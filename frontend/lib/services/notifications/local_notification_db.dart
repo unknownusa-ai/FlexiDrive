@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/notifications/notification_models.dart';
 
 class LocalNotificationDb {
@@ -22,7 +20,7 @@ class LocalNotificationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/notifications.json'),
+          await _loadList('notifications'),
           NotificationModel.fromJson,
         ),
       );
@@ -40,26 +38,20 @@ class LocalNotificationDb {
   }) async {
     await loadIfNeeded();
 
-    final notification = NotificationModel(
-      id: _nextNotificationId(),
-      userId: userId,
-      categoryId: categoryId,
-      subject: subject,
-      description: description,
-      status: status,
-      sentAt: sentAt ?? DateTime.now(),
+    final notification = NotificationModel.fromJson(
+      await ApiClient.instance.postMap('notifications', {
+        'usuario_id': userId,
+        'categoria_notificacion_id': categoryId,
+        'asunto': subject,
+        'descripcion': description,
+        'estado': status,
+        'fecha_envio': (sentAt ?? DateTime.now()).toIso8601String(),
+      }),
     );
 
     notifications.add(notification);
     changes.value = changes.value + 1;
     return notification;
-  }
-
-  int _nextNotificationId() {
-    if (notifications.isEmpty) return 1;
-    final maxId =
-        notifications.map((n) => n.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
   }
 
   List<T> _parseList<T>(
@@ -70,8 +62,6 @@ class LocalNotificationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 }

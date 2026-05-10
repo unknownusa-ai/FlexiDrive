@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/security/security_models.dart';
 
 class LocalSecurityDb {
@@ -23,7 +23,7 @@ class LocalSecurityDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/security/user_security.json'),
+          await _loadList('user-security'),
           UserSecurityModel.fromJson,
         ),
       );
@@ -43,7 +43,7 @@ class LocalSecurityDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/security/user_sessions.json'),
+          await _loadList('user-sessions'),
           UserSessionModel.fromJson,
         ),
       );
@@ -59,10 +59,8 @@ class LocalSecurityDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 
   Future<void> upsertUserSecurity({
     required int userId,
@@ -73,11 +71,16 @@ class LocalSecurityDb {
 
     final current =
         userSecurities.where((item) => item.userId == userId).toList();
-    final updated = UserSecurityModel(
-      id: current.isEmpty ? _nextSecurityId() : current.first.id,
-      userId: userId,
-      twoFactorVerification: twoFactorVerification,
-      biometricAccess: biometricAccess,
+    final payload = {
+      'usuario_id': userId,
+      'verificacion_dos_pasos': twoFactorVerification,
+      'acceso_biometrico': biometricAccess,
+    };
+    final updated = UserSecurityModel.fromJson(
+      current.isEmpty
+          ? await ApiClient.instance.postMap('user-security', payload)
+          : await ApiClient.instance
+              .patchMap('user-security/${current.first.id}', payload),
     );
 
     final index = userSecurities.indexWhere((item) => item.userId == userId);
@@ -100,13 +103,6 @@ class LocalSecurityDb {
       _securityOverridesKey,
       jsonEncode(overrides.map((item) => item.toJson()).toList()),
     );
-  }
-
-  int _nextSecurityId() {
-    if (userSecurities.isEmpty) return 1;
-    final maxId =
-        userSecurities.map((item) => item.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
   }
 
   Future<List<UserSecurityModel>> _loadSecurityOverrides() async {

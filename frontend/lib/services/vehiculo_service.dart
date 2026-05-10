@@ -1,7 +1,4 @@
-// Para trabajar con JSON
-import 'dart:convert';
-// Para leer archivos locales
-import 'package:flutter/services.dart';
+import 'package:flexidrive/core/api/api_client.dart';
 // Modelos de categorías de carros
 import 'package:flexidrive/models/catalogs/catalog_models.dart';
 
@@ -28,19 +25,19 @@ class VehiculoService {
     if (loaded) return;
 
     // Cargamos los carros desde el JSON (28 vehículos)
-    final rawVehicles = await _loadList('assets/data/operations/vehicles.json');
+    final rawVehicles = await _loadList('vehicles');
 
     // Convertimos al formato viejo que usa la app
     vehiculos = rawVehicles.map((v) => _mapVehicleToLegacyFormat(v)).toList();
 
     // Cargamos usuarios
-    usuarios = await _loadList('assets/data/accounts/users.json');
+    usuarios = await _loadList('users');
 
     // Cargamos rentas
-    rentas = await _loadList('assets/data/operations/reservations.json');
+    rentas = await _loadList('reservations');
 
     // Cargamos reseñas
-    resenas = await _loadList('assets/data/operations/reviews.json');
+    resenas = await _loadList('reviews');
 
     // Marcamos como cargado
     loaded = true;
@@ -80,6 +77,7 @@ class VehiculoService {
 
     return {
       'id': vehicleId,
+      'vehiculo_id': vehicleId,
       'marca': _extractBrandFromLine(v['linea'] ?? ''),
       'modelo': v['linea'] ?? '',
       'anio': v['modelo'],
@@ -92,7 +90,7 @@ class VehiculoService {
       'precio_semana': 750000 + (vehicleId * 50000), // Precio determinista
       'ubicacion': ciudad, // Ciudad asignada correctamente
       'propietario_id': 1,
-      'imagen': v['imagen'], // Imagen siempre viene del JSON
+      'imagen': _imageForVehicle(vehicleId),
       'descripcion': v['descripcion'],
       'calificacion': 4.5 + (vehicleId % 5) * 0.1, // Rating entre 4.5-4.9
       'resenas': vehicleId * 5, // Reseñas simuladas
@@ -125,9 +123,20 @@ class VehiculoService {
     return parts.isNotEmpty ? parts.first : 'Toyota';
   }
 
-  Future<List<Map<String, dynamic>>> _loadList(String assetPath) async {
-    final response = await rootBundle.loadString(assetPath);
-    final decoded = json.decode(response) as List<dynamic>? ?? const [];
+  String _imageForVehicle(int vehicleId) {
+    const images = [
+      'assets/imagenes_carros/mazda3.jpg',
+      'assets/imagenes_carros/corolla.jpg',
+      'assets/imagenes_carros/Renault-Sandero.jpg',
+      'assets/imagenes_carros/onix.jpeg',
+      'assets/imagenes_carros/cx5.jpg',
+      'assets/imagenes_carros/tesla.jpg',
+    ];
+    return images[(vehicleId - 1) % images.length];
+  }
+
+  Future<List<Map<String, dynamic>>> _loadList(String endpoint) async {
+    final decoded = await ApiClient.instance.getList(endpoint);
     return List<Map<String, dynamic>>.from(decoded);
   }
 

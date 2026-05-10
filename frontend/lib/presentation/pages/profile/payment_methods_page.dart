@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../services/accounts/local_account_repository.dart';
+import '../../../services/payments/local_payment_db.dart';
 
 // Página de métodos de pago
 // Muestra los métodos de pago del usuario y permite agregar nuevos
@@ -19,6 +19,7 @@ class PaymentMethodsPage extends StatefulWidget {
 class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   // Repositorio para manejar cuentas de usuario
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
+  final LocalPaymentDb _paymentDb = LocalPaymentDb.instance;
   // Lista de métodos de pago del usuario
   List<Map<String, dynamic>> _paymentMethods = [];
   // ID del usuario actual
@@ -62,15 +63,10 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
       }
       _currentUserId = currentUser.id;
 
-      // Load payment methods from JSON
-      final String paymentMethodsData = await DefaultAssetBundle.of(context)
-          .loadString('assets/data/payments/payment_methods.json');
-      final List<dynamic> paymentMethodsJson = json.decode(paymentMethodsData);
-      final allPaymentMethods = paymentMethodsJson.cast<Map<String, dynamic>>();
-
-      // Filter payment methods for current user
-      final userPaymentMethods = allPaymentMethods
-          .where((method) => method['usuario_id'] == _currentUserId)
+      await _paymentDb.loadIfNeeded();
+      final userPaymentMethods = _paymentDb
+          .getUserPaymentMethods(_currentUserId!)
+          .map((method) => method.toJson())
           .toList();
 
       if (!mounted) return;

@@ -49,17 +49,102 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // Muestra un dialogo con mensaje
   Future<void> _showDialogMessage(String title, String message) async {
+    final isSuccess = title.toLowerCase().contains('exitoso');
+    final accentColor =
+        isSuccess ? const Color(0xFF2563EB) : const Color(0xFFEF4444);
+    final secondAccentColor =
+        isSuccess ? const Color(0xFF7C3AED) : const Color(0xFFF97316);
+    final icon =
+        isSuccess ? Icons.check_circle_outline : Icons.info_outline_rounded;
+
     return showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Aceptar'),
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.18),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [accentColor, secondAccentColor],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF111827),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                message,
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF4B5563),
+                  fontSize: 14,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: accentColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Aceptar',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -73,7 +158,17 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _loadIdentificationTypes() async {
     await _catalogDb.loadIfNeeded();
     setState(() {
-      _identificationTypes = _catalogDb.identificationTypes;
+      _identificationTypes = _catalogDb.identificationTypes
+          .where(
+            (type) => !{
+              'Documento Regional',
+              'Documento Consular',
+              'Documento Mercosur',
+              'Documento Schengen',
+              'Documento Fronterizo',
+            }.contains(type.name),
+          )
+          .toList();
       if (_identificationTypes.isNotEmpty) {
         _selectedIdentificationType = _identificationTypes.first;
       }
@@ -307,26 +402,20 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   dropdownColor: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
+                                  selectedItemBuilder: (context) {
+                                    return _identificationTypes.map((type) {
+                                      return _buildIdentificationTypeOption(
+                                        type,
+                                        selected: true,
+                                      );
+                                    }).toList();
+                                  },
                                   items: _identificationTypes.map((type) {
                                     return DropdownMenuItem<
                                         IdentificationTypeModel>(
                                       value: type,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.badge_outlined,
-                                            color: const Color(0xFF9CA3AF),
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            '${type.name} - ${type.description}',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      child:
+                                          _buildIdentificationTypeOption(type),
                                     );
                                   }).toList(),
                                   onChanged: (value) {
@@ -616,6 +705,33 @@ class _RegisterPageState extends State<RegisterPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildIdentificationTypeOption(
+    IdentificationTypeModel type, {
+    bool selected = false,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          Icons.badge_outlined,
+          color: const Color(0xFF9CA3AF),
+          size: 20,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            type.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              color: selected ? Colors.black87 : null,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

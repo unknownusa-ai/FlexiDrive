@@ -27,7 +27,23 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-us$rf=7t=tf3y3rax2t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if host.strip()
+]
+
+if DEBUG:
+    ALLOWED_HOSTS = sorted(
+        set(ALLOWED_HOSTS)
+        | {
+            'localhost',
+            '127.0.0.1',
+            '0.0.0.0',
+            '10.0.2.2',
+            'web',
+        }
+    )
 
 
 # Application definition
@@ -54,6 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'apps.api.middleware.DevCorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -1302,6 +1302,17 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 // Find first card payment method
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
+                if (userMethods.isEmpty) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('No hay métodos de pago de tarjeta disponibles'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
                 final cardMethod = userMethods.firstWhere(
                   (method) => method.paymentMethodTypeId == 1,
                   orElse: () => userMethods.first,
@@ -1311,6 +1322,16 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 // Find first PSE payment method
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
+                if (userMethods.isEmpty) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('No hay métodos de pago PSE disponibles'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
                 final pseMethod = userMethods.firstWhere(
                   (method) => method.paymentMethodTypeId == 2,
                   orElse: () => userMethods.first,
@@ -1323,7 +1344,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 id: _reservationDb.reservations.length + 1, // Generate new ID
                 code: codigoReserva,
                 userId: currentUserId,
-                publicationId: widget.publicationId, // Use the publication ID from widget
+                publicationId:
+                    widget.publicationId, // Use the publication ID from widget
                 paymentMethodId: paymentMethodId,
                 periodTypeId:
                     1, // Default period type - should come from widget
@@ -1337,8 +1359,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 reservationDate: DateTime.now(),
               );
 
-              // Add to database (this will persist to memory)
-              _reservationDb.addReservation(newReservation);
+              await _reservationDb.addReservation(newReservation);
 
               // Also add to store for UI
               ReservasStore.addActiva(

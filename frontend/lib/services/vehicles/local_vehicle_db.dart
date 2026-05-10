@@ -1,7 +1,4 @@
-// Para trabajar con JSON
-import 'dart:convert';
-// Para leer archivos locales (assets)
-import 'package:flutter/services.dart';
+import 'package:flexidrive/core/api/api_client.dart';
 // Modelos de vehiculos
 import 'package:flexidrive/models/vehicles/vehicle_models.dart';
 
@@ -29,8 +26,7 @@ class LocalVehicleDb {
     vehicles
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/operations/vehicles.json'),
-            VehicleModel.fromJson),
+        _parseList(await _loadList('vehicles'), VehicleModel.fromJson),
       );
 
     // Marcamos como cargado
@@ -49,10 +45,6 @@ class LocalVehicleDb {
   }
 
   // Carga un archivo JSON desde assets
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    // Leemos el archivo como texto
-    final rawJson = await rootBundle.loadString(assetPath);
-    // Decodificamos el JSON y retornamos la lista
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 }

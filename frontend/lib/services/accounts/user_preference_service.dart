@@ -1,6 +1,7 @@
 // Para trabajar con JSON
 import 'dart:convert';
 // Modelo de preferencias de usuario
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/accounts/user_preference_model.dart';
 // Para guardar preferencias en el dispositivo
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,18 +68,27 @@ class UserPreferenceService {
       profileImage: basePreference.profileImage,
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    final items = await _readPreferenceOverrides();
-    final index = items.indexWhere((item) => item.userId == userId);
+    final existingIndex =
+        _db.preferences.indexWhere((item) => item.userId == userId);
+    final saved = existingIndex == -1
+        ? await ApiClient.instance.postMap(
+            'user-preferences',
+            updatedPreference.toJson(),
+          )
+        : await ApiClient.instance.patchMap(
+            'user-preferences/${_db.preferences[existingIndex].id}',
+            updatedPreference.toJson(),
+          );
+    final savedPreference = UserPreferenceModel.fromJson(saved);
 
-    if (index == -1) {
-      items.add(updatedPreference);
+    if (existingIndex == -1) {
+      _db.preferences.add(savedPreference);
     } else {
-      items[index] = updatedPreference;
+      _db.preferences[existingIndex] = savedPreference;
     }
 
-    final encoded = jsonEncode(items.map((item) => item.toJson()).toList());
-    await prefs.setString(_preferencesOverridesKey, encoded);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_preferencesOverridesKey);
   }
 
   Future<bool> getArrendatarioMode({

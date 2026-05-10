@@ -1,7 +1,4 @@
-// Para trabajar con JSON
-import 'dart:convert';
-// Para leer archivos locales (assets)
-import 'package:flutter/services.dart';
+import 'package:flexidrive/core/api/api_client.dart';
 // Modelos de publicaciones
 import 'package:flexidrive/models/publications/publication_models.dart';
 
@@ -34,7 +31,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/publications.json'),
+          await _loadList('publications'),
           PublicationModel.fromJson,
         ),
       );
@@ -44,7 +41,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/publication_prices.json'),
+          await _loadList('publication-prices'),
           PublicationPriceModel.fromJson,
         ),
       );
@@ -54,7 +51,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/publication_images.json'),
+          await _loadList('publication-images'),
           PublicationImageModel.fromJson,
         ),
       );
@@ -72,8 +69,6 @@ class LocalPublicationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 }

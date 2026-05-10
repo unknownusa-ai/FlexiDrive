@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/accounts/account_models.dart';
 
 // Base de datos local para cuentas de usuario
@@ -31,13 +31,13 @@ class LocalAccountDb {
 
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
+    await reload();
+  }
 
-    final rawUsers = await _loadList('assets/data/accounts/users.json');
-    final rawPreferences = await _loadList(
-      'assets/data/accounts/user_preferences.json',
-    );
-    final rawCities =
-        await _loadList('assets/data/accounts/reference_cities.json');
+  Future<void> reload() async {
+    final rawUsers = await _loadList('users');
+    final rawPreferences = await _loadList('user-preferences');
+    final rawCities = await _loadList('reference-cities');
 
     users
       ..clear()
@@ -73,10 +73,7 @@ class LocalAccountDb {
   }
 
   Future<List<dynamic>> _loadList(String assetPath) async {
-    final sanitizedPath =
-        assetPath.trim().replaceAll('"', '').replaceAll("'", '');
-    final rawJson = await rootBundle.loadString(sanitizedPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
+    return ApiClient.instance.getList(assetPath);
   }
 
   Future<void> saveUserOverride(UserModel user) async {
@@ -91,11 +88,9 @@ class LocalAccountDb {
       overrides[index] = user;
     }
 
+    await ApiClient.instance.patchMap('users/${user.id}', user.toJson());
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _usersOverridesKey,
-      jsonEncode(overrides.map((item) => item.toJson()).toList()),
-    );
+    await prefs.setString(_usersOverridesKey, jsonEncode(<dynamic>[]));
   }
 
   Future<List<UserModel>> _loadUserOverrides() async {

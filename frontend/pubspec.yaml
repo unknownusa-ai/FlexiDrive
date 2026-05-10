@@ -14,6 +14,7 @@ dependencies:
   cupertino_icons: ^1.0.9
   flutter_svg: ^2.2.4
   google_fonts: ^8.0.2
+  http: ^1.2.2
   shared_preferences: ^2.5.5
 
 dev_dependencies:
@@ -34,9 +35,3 @@ flutter:
   assets:
     - assets/icons/
     - assets/imagenes_carros/
-    - assets/data/
-    - assets/data/accounts/
-    - assets/data/catalogs/
-    - assets/data/operations/
-    - assets/data/payments/
-    - assets/data/security/

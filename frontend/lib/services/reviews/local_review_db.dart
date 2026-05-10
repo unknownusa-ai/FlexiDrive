@@ -1,7 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/reviews/review_models.dart';
 
 class LocalReviewDb {
@@ -21,15 +18,23 @@ class LocalReviewDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/operations/opinions.json'),
+          await _loadList('opinions'),
           OpinionModel.fromJson,
+        ).where(
+          (opinion) =>
+              opinion.description != null &&
+              !opinion.description!.startsWith('Opinion de prueba'),
         ),
       );
     reviews
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/operations/reviews.json'), ReviewModel.fromJson),
+        _parseList(await _loadList('reviews'), ReviewModel.fromJson),
       );
+    final visibleOpinionIds = opinions.map((opinion) => opinion.id).toSet();
+    reviews.removeWhere(
+      (review) => !visibleOpinionIds.contains(review.opinionId),
+    );
 
     _loaded = true;
   }
@@ -42,8 +47,6 @@ class LocalReviewDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 }

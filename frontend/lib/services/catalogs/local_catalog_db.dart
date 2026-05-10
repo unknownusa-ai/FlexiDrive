@@ -1,13 +1,17 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/models/catalogs/catalog_models.dart';
 
 class LocalCatalogDb {
   LocalCatalogDb._();
 
   static final LocalCatalogDb instance = LocalCatalogDb._();
+  static const _hiddenIdentificationTypeNames = {
+    'Documento Regional',
+    'Documento Consular',
+    'Documento Mercosur',
+    'Documento Schengen',
+    'Documento Fronterizo',
+  };
 
   bool? _loaded = false;
 
@@ -31,54 +35,56 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/identification_types.json'),
+          await _loadList('identification-types'),
           IdentificationTypeModel.fromJson,
+        ).where(
+          (type) => !_hiddenIdentificationTypeNames.contains(type.name),
         ),
       );
     userTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/catalogs/user_types.json'), UserTypeModel.fromJson),
+        _parseList(await _loadList('user-types'), UserTypeModel.fromJson),
       );
     paymentMethodTypes
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/payment_method_types.json'),
+          await _loadList('payment-method-types'),
           PaymentMethodTypeModel.fromJson,
         ),
       );
     banks
       ..clear()
-      ..addAll(_parseList(await _loadList('assets/data/catalogs/banks.json'), BankModel.fromJson));
+      ..addAll(_parseList(await _loadList('banks'), BankModel.fromJson));
     cardBrands
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/catalogs/card_brands.json'), CardBrandModel.fromJson),
+        _parseList(await _loadList('card-brands'), CardBrandModel.fromJson),
       );
     personTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/catalogs/person_types.json'), PersonTypeModel.fromJson),
+        _parseList(await _loadList('person-types'), PersonTypeModel.fromJson),
       );
     vehicleCategories
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/vehicle_categories.json'),
+          await _loadList('vehicle-categories'),
           VehicleCategoryModel.fromJson,
         ),
       );
     periodTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('assets/data/catalogs/period_types.json'), PeriodTypeModel.fromJson),
+        _parseList(await _loadList('period-types'), PeriodTypeModel.fromJson),
       );
     reservationStatuses
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/reservation_statuses.json'),
+          await _loadList('reservation-statuses'),
           ReservationStatusModel.fromJson,
         ),
       );
@@ -86,7 +92,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/notification_categories.json'),
+          await _loadList('notification-categories'),
           NotificationCategoryModel.fromJson,
         ),
       );
@@ -94,7 +100,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/landlord_document_types.json'),
+          await _loadList('landlord-document-types'),
           LandlordDocumentTypeModel.fromJson,
         ),
       );
@@ -102,7 +108,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('assets/data/catalogs/document_verification_statuses.json'),
+          await _loadList('document-verification-statuses'),
           DocumentVerificationStatusModel.fromJson,
         ),
       );
@@ -118,8 +124,6 @@ class LocalCatalogDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<dynamic>> _loadList(String assetPath) async {
-    final rawJson = await rootBundle.loadString(assetPath);
-    return (json.decode(rawJson) as List<dynamic>? ?? const []);
-  }
+  Future<List<dynamic>> _loadList(String endpoint) =>
+      ApiClient.instance.getList(endpoint);
 }

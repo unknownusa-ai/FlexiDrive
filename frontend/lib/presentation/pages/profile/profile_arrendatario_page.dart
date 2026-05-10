@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
 import 'package:flexidrive/services/accounts/local_account_repository.dart';
 import 'package:flexidrive/services/accounts/user_preference_service.dart';
+import 'package:flexidrive/services/publications/local_publication_db.dart';
 import 'package:flexidrive/services/reservations/local_reservation_db.dart';
 import 'arrendatario_main_page.dart';
 import 'alertas_page.dart';
@@ -31,6 +31,7 @@ class ProfileArrendatarioPage extends StatefulWidget {
 class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   final LocalAccountRepository _accountRepository = LocalAccountRepository();
   final UserPreferenceService _preferenceService = UserPreferenceService();
+  final LocalPublicationDb _publicationDb = LocalPublicationDb.instance;
   final LocalReservationDb _reservationDb = LocalReservationDb.instance;
 
   int? _currentUserId;
@@ -766,25 +767,19 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
 
   Future<void> _loadArrendatarioStats() async {
     try {
-      // Load publications data to know which vehicles are published
-      final String publicationsData = await DefaultAssetBundle.of(context)
-          .loadString('assets/data/operations/publications.json');
-      final List<dynamic> publicationsJson = json.decode(publicationsData);
-      final allPublications = publicationsJson.cast<Map<String, dynamic>>();
-
-      // Load reservations
-      await _reservationDb.loadIfNeeded();
+      await Future.wait([
+        _publicationDb.loadIfNeeded(),
+        _reservationDb.loadIfNeeded(),
+      ]);
 
       // Get user publications
-      final userPublications = allPublications
-          .where((pub) => pub['arrendatario_id'] == _currentUserId)
+      final userPublications = _publicationDb.publications
+          .where((pub) => pub.userId == _currentUserId)
           .toList();
 
       // Count total vehicles (vehicles that have publications)
-      final userVehicleIds = userPublications
-          .map((pub) => pub['vehiculo_id'] as int)
-          .toSet()
-          .toList();
+      final userVehicleIds =
+          userPublications.map((pub) => pub.vehicleId).toSet().toList();
 
       _totalVehicles = userVehicleIds.length;
 
@@ -792,8 +787,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       final activeReservations = _reservationDb.reservations
           .where((r) =>
               r.statusId == 2 &&
-              userPublications
-                  .any((pub) => pub['publicacion_id'] == r.publicationId))
+              userPublications.any((pub) => pub.id == r.publicationId))
           .toList();
 
       _activeVehicles = activeReservations.length;
@@ -802,8 +796,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       final completedReservations = _reservationDb.reservations
           .where((r) =>
               r.statusId == 3 &&
-              userPublications
-                  .any((pub) => pub['publicacion_id'] == r.publicationId))
+              userPublications.any((pub) => pub.id == r.publicationId))
           .toList();
 
       _totalEarnings =

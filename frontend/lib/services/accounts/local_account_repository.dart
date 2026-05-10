@@ -1,67 +1,60 @@
-// Almacenamiento de la sesión actual (quién está logueado)
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/core/session/local_session_store.dart';
-// Modelos de usuarios
 import 'package:flexidrive/models/accounts/account_models.dart';
-// Base de datos local de cuentas
+
 import 'local_account_db.dart';
 
-// Repositorio que maneja login, registro y sesion de usuarios
-// Es como el backend pero local con JSON
 class LocalAccountRepository {
-  // Constructor - puede recibir DB y sesión personalizadas (para tests)
   LocalAccountRepository({
     LocalAccountDb? db,
     LocalSessionStore? session,
-  })  : _db = db ?? LocalAccountDb.instance, // Usa la instancia por defecto
-        _session = session ?? LocalSessionStore.instance; // Sesión por defecto
+  })  : _db = db ?? LocalAccountDb.instance,
+        _session = session ?? LocalSessionStore.instance;
 
-  // Base de datos de cuentas
   final LocalAccountDb _db;
-  // Almacenamiento de sesión (guarda quién está logueado)
   final LocalSessionStore _session;
 
-  // Inicializa todo (carga JSON en memoria)
   Future<void> init() async {
-    await _db.loadIfNeeded(); // Carga usuarios si no estan cargados
-    await _session.init(); // Inicializa sesion
+    await _db.loadIfNeeded();
+    await _session.init();
   }
 
-  // Hace login validando email y contraseña
   Future<UserModel?> login({
     required String email,
     required String password,
   }) async {
-    await init(); // Aseguramos que todo esté cargado
+    await init();
 
-    // Normalizamos el email (minusculas, sin espacios)
-    final normalizedEmail = email.trim().toLowerCase();
-
-    // Buscamos el usuario en la lista
-    UserModel? user;
-    for (final candidate in _db.users) {
-      // Comparamos email y contrasena
-      if (candidate.email.trim().toLowerCase() == normalizedEmail &&
-          candidate.password == password) {
-        user = candidate; // Encontrado
-        break;
-      }
+    Map<String, dynamic> response;
+    try {
+      response = await ApiClient.instance.postMap('auth/login', {
+        'correo': email.trim().toLowerCase(),
+        'contrasena': password,
+      });
+    } catch (_) {
+      return null;
     }
 
-    // Si no encontramos, retornamos null
-    if (user == null) return null;
+    final rawUser = response['user'];
+    final userMap = rawUser is Map ? rawUser : const {};
+    final userId = int.tryParse('${userMap['usuario_id'] ?? ''}');
+    if (userId == null) return null;
 
-    // Guardamos el ID en la sesion (asi sabemos quien esta logueado)
-    await _session.setUserId(user.id);
-    return user;
+    await _db.reload();
+    for (final user in _db.users) {
+      if (user.id == userId) {
+        await _session.setUserId(user.id);
+        return user;
+      }
+    }
+    return null;
   }
 
-  // Obtiene todos los usuarios (solo lectura)
   Future<List<UserModel>> getUsers() async {
     await init();
     return List<UserModel>.unmodifiable(_db.users);
   }
 
-  // Registra un usuario nuevo
   Future<UserModel> register({
     required String fullName,
     required String identificationNumber,
@@ -75,41 +68,32 @@ class LocalAccountRepository {
     await init();
 
     final normalizedEmail = email.trim().toLowerCase();
+    final response = await ApiClient.instance.postMap('auth/register', {
+      'tipo_identificacion_id': identificationTypeId,
+      'numero_identificacion': identificationNumber.trim(),
+      'nombre_completo': fullName.trim(),
+      'correo': normalizedEmail,
+      'telefono': phone.trim(),
+      'contrasena': password,
+    });
+    final userId = int.tryParse('${response['usuario_id'] ?? ''}');
 
-    for (final existing in _db.users) {
-      if (existing.email.trim().toLowerCase() == normalizedEmail) {
-        throw Exception('El correo ya está registrado');
-      }
-
-      if (existing.identificationNumber.trim() == identificationNumber.trim()) {
-        throw Exception('El número de documento ya está registrado');
-      }
+    await _db.reload();
+    for (final user in _db.users) {
+      if (user.id == userId) return user;
     }
 
-    final newUser = UserModel(
-      id: _db.nextUserId(),
+    return UserModel(
+      id: userId ?? _db.nextUserId(),
       identificationTypeId: identificationTypeId,
       identificationNumber: identificationNumber.trim(),
       userTypeId: userTypeId,
       fullName: fullName.trim(),
       email: normalizedEmail,
       phone: phone.trim(),
-      password: password,
+      password: '',
       canPublish: canPublish,
     );
-
-    _db.users.add(newUser);
-
-    final newPreference = UserPreferenceModel(
-      id: _db.nextPreferenceId(),
-      userId: newUser.id,
-      darkMode: false,
-      language: 'es',
-      profileImage: null,
-    );
-    _db.preferences.add(newPreference);
-
-    return newUser;
   }
 
   Future<void> logout() async {
@@ -126,7 +110,6 @@ class LocalAccountRepository {
     for (final user in _db.users) {
       if (user.id == currentId) return user;
     }
-
     return null;
   }
 
@@ -137,33 +120,35 @@ class LocalAccountRepository {
     for (final preference in _db.preferences) {
       if (preference.userId == currentUser.id) return preference;
     }
-
     return null;
   }
 
   Future<void> updatePreference(UserPreferenceModel newPreference) async {
     await init();
-
     final index = _db.preferences.indexWhere((p) => p.id == newPreference.id);
+    final payload = newPreference.toJson();
+
     if (index == -1) {
-      _db.preferences.add(newPreference);
+      final created =
+          await ApiClient.instance.postMap('user-preferences', payload);
+      _db.preferences.add(UserPreferenceModel.fromJson(created));
       return;
     }
 
-    _db.preferences[index] = newPreference;
+    final updated = await ApiClient.instance.patchMap(
+      'user-preferences/${newPreference.id}',
+      payload,
+    );
+    _db.preferences[index] = UserPreferenceModel.fromJson(updated);
   }
 
   Future<UserModel?> findUserByEmail(String email) async {
     await init();
 
     final normalizedEmail = email.trim().toLowerCase();
-
     for (final user in _db.users) {
-      if (user.email.trim().toLowerCase() == normalizedEmail) {
-        return user;
-      }
+      if (user.email.trim().toLowerCase() == normalizedEmail) return user;
     }
-
     return null;
   }
 
@@ -188,7 +173,7 @@ class LocalAccountRepository {
       canPublish: user.canPublish,
     );
 
-    _db.users[index] = updatedUser;
     await _db.saveUserOverride(updatedUser);
+    await _db.reload();
   }
 }
