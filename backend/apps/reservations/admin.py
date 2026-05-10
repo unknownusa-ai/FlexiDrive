@@ -1,5 +1,4 @@
-from django.contrib import admin
-from .models import Reservation, ReservationStatus
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(ReservationStatus)
-admin.site.register(Reservation)
+from .infrastructure.admin import *  # noqa: F401,F403
+

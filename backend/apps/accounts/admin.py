@@ -1,8 +1,4 @@
-from django.contrib import admin
-from .models import IdentificationType, User, UserPreference, UserSecurity, UserType
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(IdentificationType)
-admin.site.register(UserType)
-admin.site.register(User)
-admin.site.register(UserPreference)
-admin.site.register(UserSecurity)
+from .infrastructure.admin import *  # noqa: F401,F403
+

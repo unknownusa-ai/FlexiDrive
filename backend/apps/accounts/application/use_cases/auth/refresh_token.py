@@ -1,55 +1,58 @@
-from django.conf import settings
 from django.utils import timezone
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import User
-from apps.security.models import RefreshToken as StoredRefreshToken
+from apps.accounts.domain.ports.auth_ports import (
+    AccountsAuthRepositoryPort,
+    JwtTokenServicePort,
+    RefreshTokenRepositoryPort,
+)
+from apps.accounts.infrastructure.dependencies import (
+    get_accounts_auth_repository,
+    get_jwt_token_service,
+    get_refresh_token_repository,
+)
 
 
-def refresh_access_token(refresh_token: str) -> dict:
-    token_row = StoredRefreshToken.objects.filter(token=refresh_token, is_revoked=False).first()
+def refresh_access_token(
+    refresh_token: str,
+    auth_repository: AccountsAuthRepositoryPort | None = None,
+    refresh_token_repository: RefreshTokenRepositoryPort | None = None,
+    token_service: JwtTokenServicePort | None = None,
+) -> dict:
+    auth_repository = auth_repository or get_accounts_auth_repository()
+    refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
+    token_service = token_service or get_jwt_token_service()
+
+    token_row = refresh_token_repository.find_not_revoked(refresh_token)
     if not token_row:
         raise AuthenticationFailed(detail="Sesion no valida", code="token_not_valid")
 
     if token_row.expires_at <= timezone.now():
-        token_row.is_revoked = True
-        token_row.last_used_at = timezone.now()
-        token_row.save(update_fields=["is_revoked", "last_used_at", "updated_at"])
+        refresh_token_repository.revoke(refresh_token, at=timezone.now())
         raise AuthenticationFailed(detail="Token is expired", code="token_not_valid")
 
     try:
-        old_token = RefreshToken(refresh_token)
+        user_id = token_service.get_user_id_from_refresh_token(refresh_token)
     except TokenError as exc:
-        token_row.is_revoked = True
-        token_row.last_used_at = timezone.now()
-        token_row.save(update_fields=["is_revoked", "last_used_at", "updated_at"])
+        refresh_token_repository.revoke(refresh_token, at=timezone.now())
         raise AuthenticationFailed(detail=str(exc), code="token_not_valid")
 
-    user_id = old_token.get("user_id")
-    user = User.objects.filter(id=user_id, is_active=True).first()
+    user = auth_repository.find_active_user_by_id(user_id)
     if not user:
         raise AuthenticationFailed(detail="Usuario no encontrado", code="token_not_valid")
 
-    new_refresh = RefreshToken.for_user(user)
-    new_refresh["email"] = user.email
-    new_refresh["auth_provider"] = user.auth_provider
+    issued_tokens = token_service.issue_tokens(user)
 
     now = timezone.now()
-    token_row.is_revoked = True
-    token_row.last_used_at = now
-    token_row.save(update_fields=["is_revoked", "last_used_at", "updated_at"])
-
-    new_refresh_value = str(new_refresh)
-    StoredRefreshToken.objects.create(
-        user=user,
-        token=new_refresh_value,
-        is_revoked=False,
-        expires_at=now + settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
+    refresh_token_repository.revoke(refresh_token, at=now)
+    refresh_token_repository.store(
+        user_id=user.id,
+        refresh_token=issued_tokens.refresh_token,
+        expires_at=issued_tokens.refresh_expires_at,
     )
 
     return {
-        "access_token": str(new_refresh.access_token),
-        "refresh_token": new_refresh_value,
+        "access_token": issued_tokens.access_token,
+        "refresh_token": issued_tokens.refresh_token,
     }

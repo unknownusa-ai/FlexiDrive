@@ -1,14 +1,17 @@
 from django.utils import timezone
 
-from apps.security.models import RefreshToken as StoredRefreshToken
+from apps.accounts.domain.ports.auth_ports import RefreshTokenRepositoryPort
+from apps.accounts.infrastructure.dependencies import get_refresh_token_repository
 
 
-def logout_user(refresh_token: str) -> dict:
-    token_row = StoredRefreshToken.objects.filter(token=refresh_token, is_revoked=False).first()
+def logout_user(
+    refresh_token: str,
+    refresh_token_repository: RefreshTokenRepositoryPort | None = None,
+) -> dict:
+    refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
+    token_row = refresh_token_repository.find_not_revoked(refresh_token)
 
     if token_row:
-        token_row.is_revoked = True
-        token_row.last_used_at = timezone.now()
-        token_row.save(update_fields=["is_revoked", "last_used_at", "updated_at"])
+        refresh_token_repository.revoke(refresh_token, at=timezone.now())
 
     return {"message": "Sesion cerrada correctamente"}

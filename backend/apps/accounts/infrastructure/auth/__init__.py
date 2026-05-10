@@ -1,1 +1,0 @@
-from apps.accounts.infrastructure.auth.jwt_authentication import AccountsJWTAuthentication

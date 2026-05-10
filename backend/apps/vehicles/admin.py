@@ -1,5 +1,4 @@
-from django.contrib import admin
-from .models import Vehicle, VehicleCategory
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(VehicleCategory)
-admin.site.register(Vehicle)
+from .infrastructure.admin import *  # noqa: F401,F403
+

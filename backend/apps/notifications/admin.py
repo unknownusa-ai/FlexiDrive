@@ -1,5 +1,4 @@
-from django.contrib import admin
-from .models import Notification, NotificationCategory
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(NotificationCategory)
-admin.site.register(Notification)
+from .infrastructure.admin import *  # noqa: F401,F403
+

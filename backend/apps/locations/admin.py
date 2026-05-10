@@ -1,3 +1,4 @@
-from django.contrib import admin
+"""Backward-compatible module path for hexagonal layering."""
 
-# Register your models here.
+from .infrastructure.admin import *  # noqa: F401,F403
+

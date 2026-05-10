@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'theme_provider.dart';
 import 'app_themes.dart';
-import '../../presentation/pages/splash/splash_page.dart';
+import 'package:flexidrive/features/splash/presentation/pages/splash/splash_page.dart';
 
 // Widget principal de la aplicación
 // Gestiona el estado del tema y proporciona acceso global al estado

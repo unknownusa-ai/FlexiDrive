@@ -1,3 +1,4 @@
-from django.db import models
+"""Backward-compatible module path for hexagonal layering."""
 
-# Create your models here.
+from .domain.models import *  # noqa: F401,F403
+

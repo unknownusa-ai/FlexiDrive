@@ -1,6 +1,4 @@
-from django.contrib import admin
-from .models import LoginAttempt, RefreshToken, UserSession
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(UserSession)
-admin.site.register(LoginAttempt)
-admin.site.register(RefreshToken)
+from .infrastructure.admin import *  # noqa: F401,F403
+

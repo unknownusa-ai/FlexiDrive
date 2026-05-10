@@ -1,0 +1,410 @@
+// Flutter framework
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flexidrive/core/utils/responsive_utils.dart';
+
+// Página de onboarding - tutorial de pagos
+// Muestra cómo funciona el sistema de pagos y métodos de pago disponibles
+class OnboardingPagePayment extends StatefulWidget {
+  const OnboardingPagePayment({super.key});
+
+  @override
+  State<OnboardingPagePayment> createState() => _OnboardingPagePaymentState();
+}
+
+// Estado de la página de onboarding de pagos
+// Maneja las animaciones de tarjetas y métodos de pago
+class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
+    with SingleTickerProviderStateMixin {
+  // Controlador de animaciones
+  late AnimationController _controller;
+  // Animación de la tarjeta de crédito
+  late Animation<double> _cardAnimation;
+  // Animación de etiquetas de precio
+  late Animation<double> _tagAnimation;
+  // Animaciones para los métodos de pago
+  late Animation<double> _method1Animation;
+  late Animation<double> _method2Animation;
+  late Animation<double> _method3Animation;
+  // Animación flotante
+  late Animation<double> _floatAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+
+    _cardAnimation = Tween<double>(begin: -200, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _tagAnimation = Tween<double>(begin: 100, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.3, 0.7, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _method1Animation = Tween<double>(begin: 20, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.75, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _method2Animation = Tween<double>(begin: 20, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.5, 0.8, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _method3Animation = Tween<double>(begin: 20, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.6, 0.85, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _floatAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.6, 1.0, curve: Curves.easeInOut),
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+
+    return Container(
+      color: const Color(0xFFF5F3FF),
+      child: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: isSmallPhone ? 30 : 80),
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 40),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _cardAnimation,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(0, _cardAnimation.value),
+                          child: AnimatedBuilder(
+                            animation: _floatAnimation,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(
+                                  0,
+                                  -5 + (_floatAnimation.value * 10),
+                                ),
+                                child: _buildCreditCard(_tagAnimation,
+                                    isSmallPhone: isSmallPhone),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      bottom: isSmallPhone ? 35 : 75,
+                      child: Row(
+                        children: [
+                          AnimatedBuilder(
+                            animation: _method1Animation,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(0, _method1Animation.value),
+                                child: _buildPaymentMethod('💳 Tarjeta',
+                                    isSmallPhone: isSmallPhone),
+                              );
+                            },
+                          ),
+                          SizedBox(width: isSmallPhone ? 2 : 8),
+                          AnimatedBuilder(
+                            animation: _method2Animation,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(0, _method2Animation.value),
+                                child: _buildPaymentMethod('🏦 PSE',
+                                    isSmallPhone: isSmallPhone),
+                              );
+                            },
+                          ),
+                          SizedBox(width: isSmallPhone ? 2 : 8),
+                          AnimatedBuilder(
+                            animation: _method3Animation,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(0, _method3Animation.value),
+                                child: _buildPaymentMethod('💵 Efectivo',
+                                    isSmallPhone: isSmallPhone),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: isSmallPhone ? 12 : 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Paga fácil\ny seguro',
+                      style: GoogleFonts.poppins(
+                        fontSize: isSmallPhone ? 18 : 28,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1F2937),
+                        height: 1.2,
+                      ),
+                    ),
+                    SizedBox(height: isSmallPhone ? 6 : 16),
+                    Text(
+                      'Múltiples métodos de pago: tarjeta, PSE o efectivo. Tus datos siempre protegidos.',
+                      style: GoogleFonts.poppins(
+                        fontSize: isSmallPhone ? 12 : 16,
+                        color: const Color(0xFF6B7280),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: isSmallPhone ? 100 : 180),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreditCard(Animation<double> tagAnimation,
+      {required bool isSmallPhone}) {
+    return Container(
+      width: isSmallPhone ? 190 : 260,
+      height: isSmallPhone ? 115 : 160,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: -15,
+            right: 20,
+            child: AnimatedBuilder(
+              animation: tagAnimation,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(tagAnimation.value, 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF22C55E),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.lock,
+                          size: isSmallPhone ? 7 : 10,
+                          color: const Color(0xFF16A34A),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'SEGURO',
+                          style: GoogleFonts.poppins(
+                            fontSize: isSmallPhone ? 7 : 10,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF16A34A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 20,
+            left: 20,
+            child: Container(
+              width: isSmallPhone ? 35 : 50,
+              height: isSmallPhone ? 24 : 35,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFACC15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Text(
+              'FLEXIDRIVE',
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 9 : 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.8),
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          Positioned(
+            top: isSmallPhone ? 50 : 70,
+            left: 20,
+            child: Row(
+              children: [
+                Text(
+                  '•••• •••• ••••',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 12 : 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '4821',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 12 : 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TITULAR',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 7 : 9,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Carlos R.',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 9 : 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'VENCE',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 7 : 9,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '12/28',
+                  style: GoogleFonts.poppins(
+                    fontSize: isSmallPhone ? 9 : 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethod(String text, {required bool isSmallPhone}) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: isSmallPhone ? 8 : 14, vertical: isSmallPhone ? 5 : 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: isSmallPhone ? 9 : 12,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF4B5563),
+        ),
+      ),
+    );
+  }
+}

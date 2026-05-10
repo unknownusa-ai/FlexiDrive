@@ -1,7 +1,4 @@
-from django.contrib import admin
-from .models import PeriodType, Publication, PublicationImage, PublicationPrice
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(PeriodType)
-admin.site.register(Publication)
-admin.site.register(PublicationPrice)
-admin.site.register(PublicationImage)
+from .infrastructure.admin import *  # noqa: F401,F403
+

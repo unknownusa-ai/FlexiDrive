@@ -1,6 +1,4 @@
-from django.contrib import admin
-from .models import DocumentVerificationStatus, OwnerDocument, OwnerDocumentType
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(OwnerDocumentType)
-admin.site.register(DocumentVerificationStatus)
-admin.site.register(OwnerDocument)
+from .infrastructure.admin import *  # noqa: F401,F403
+

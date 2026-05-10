@@ -1,5 +1,4 @@
-from django.contrib import admin
-from .models import Opinion, Review
+"""Backward-compatible module path for hexagonal layering."""
 
-admin.site.register(Opinion)
-admin.site.register(Review)
+from .infrastructure.admin import *  # noqa: F401,F403
+

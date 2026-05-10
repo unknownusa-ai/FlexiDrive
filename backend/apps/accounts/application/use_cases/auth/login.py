@@ -1,18 +1,33 @@
-from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.application.use_cases.auth.errors import AuthUnauthorizedError
-from apps.accounts.models import User
-from apps.security.models import RefreshToken as StoredRefreshToken
+from apps.accounts.domain.ports.auth_ports import (
+    AccountsAuthRepositoryPort,
+    JwtTokenServicePort,
+    RefreshTokenRepositoryPort,
+)
+from apps.accounts.infrastructure.dependencies import (
+    get_accounts_auth_repository,
+    get_jwt_token_service,
+    get_refresh_token_repository,
+)
 
 
-def login_user(data: dict) -> dict:
+def login_user(
+    data: dict,
+    auth_repository: AccountsAuthRepositoryPort | None = None,
+    refresh_token_repository: RefreshTokenRepositoryPort | None = None,
+    token_service: JwtTokenServicePort | None = None,
+) -> dict:
+    auth_repository = auth_repository or get_accounts_auth_repository()
+    refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
+    token_service = token_service or get_jwt_token_service()
+
     correo = data["correo"].strip().lower()
     contrasena = data["contrasena"]
 
-    user = User.objects.filter(email=correo).first()
+    user = auth_repository.find_user_by_email(correo)
     if not user:
         raise AuthUnauthorizedError()
 
@@ -22,32 +37,24 @@ def login_user(data: dict) -> dict:
     if not user.is_active:
         raise AuthUnauthorizedError(detail="Usuario inactivo")
 
-    refresh = RefreshToken.for_user(user)
-    refresh["email"] = user.email
-    refresh["auth_provider"] = user.auth_provider
-
-    refresh_token_value = str(refresh)
-    StoredRefreshToken.objects.create(
-        user=user,
-        token=refresh_token_value,
-        is_revoked=False,
-        expires_at=timezone.now() + settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
+    issued_tokens = token_service.issue_tokens(user)
+    refresh_token_repository.store(
+        user_id=user.id,
+        refresh_token=issued_tokens.refresh_token,
+        expires_at=issued_tokens.refresh_expires_at,
     )
 
-    user.last_login = timezone.now()
-    user.failed_login_attempts = 0
-    user.save(update_fields=["last_login", "failed_login_attempts", "updated_at"])
+    auth_repository.mark_login_success(user.id, at=timezone.now())
 
-    profile_photo_url = user.profile_photo.url if user.profile_photo else None
     ubicacion = user.city or user.address or ""
 
     return {
-        "access_token": str(refresh.access_token),
-        "refresh_token": refresh_token_value,
+        "access_token": issued_tokens.access_token,
+        "refresh_token": issued_tokens.refresh_token,
         "user": {
             "usuario_id": user.id,
             "nombre_completo": user.full_name,
-            "foto_perfil": profile_photo_url,
+            "foto_perfil": user.profile_photo_url,
             "ubicacion": ubicacion,
         },
     }
