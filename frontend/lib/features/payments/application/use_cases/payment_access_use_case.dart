@@ -35,4 +35,32 @@ class PaymentAccessUseCase {
   PseModel? getPseByPaymentMethodId(int paymentMethodId) {
     return _repository.obtenerPsePorMetodoPagoId(paymentMethodId);
   }
+
+  Future<PaymentMethodModel> createPaymentMethod({
+    required int userId,
+    required int paymentMethodTypeId,
+    bool isDefault = false,
+  }) {
+    return _repository.crearMetodoPago(
+      userId: userId,
+      paymentMethodTypeId: paymentMethodTypeId,
+      isDefault: isDefault,
+    );
+  }
+
+  Future<CardModel> createCard({
+    required int paymentMethodId,
+    required int cardBrandId,
+    required int expirationMonth,
+    required int expirationYear,
+    String? last4,
+  }) {
+    return _repository.crearTarjeta(
+      paymentMethodId: paymentMethodId,
+      cardBrandId: cardBrandId,
+      expirationMonth: expirationMonth,
+      expirationYear: expirationYear,
+      last4: last4,
+    );
+  }
 }

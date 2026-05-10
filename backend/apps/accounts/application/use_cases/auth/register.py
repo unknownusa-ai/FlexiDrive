@@ -14,6 +14,7 @@ def register_user(
     correo = data["correo"].strip().lower()
     numero_identificacion = data["numero_identificacion"].strip()
     tipo_identificacion_id = data["tipo_identificacion_id"]
+    tipo_usuario_id = data.get("tipo_usuario_id")
 
     if auth_repository.email_exists(correo):
         raise AuthServiceError(detail="El correo ya existe")
@@ -24,10 +25,15 @@ def register_user(
     if not auth_repository.identification_type_exists(tipo_identificacion_id):
         raise AuthServiceError(detail="El tipo de identificacion no existe")
 
-    user_type_id = auth_repository.get_default_arrendador_user_type_id()
+    if tipo_usuario_id is not None:
+        if not auth_repository.user_type_exists(tipo_usuario_id):
+            raise AuthServiceError(detail="El tipo de usuario no existe")
+        user_type_id = tipo_usuario_id
+    else:
+        user_type_id = auth_repository.get_default_arrendador_user_type_id()
     if user_type_id is None:
         raise AuthServiceError(
-            detail="No existe el tipo de usuario por defecto Arrendador"
+            detail="No existe un tipo de usuario por defecto configurado"
         )
 
     user = auth_repository.create_local_user(

@@ -110,7 +110,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     setState(() {
       _notifications
         ..clear()
-        ..addAll(loaded.isNotEmpty ? loaded : _fallbackNotifications());
+        ..addAll(loaded);
       _unreadCount = _notifications.where((n) => n['unread'] == true).length;
       _isLoading = false;
     });
@@ -126,62 +126,42 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Map<String, dynamic> _toNotificationCard(
       NotificationModel item, String type) {
-    final defaults = _defaultsByType(type);
-    final isGenericSubject =
-        item.subject.trim().toLowerCase().startsWith('notificacion');
-    final isGenericDescription = item.description
-        .trim()
-        .toLowerCase()
-        .startsWith('detalle de notificacion');
-
     return {
       'id': item.id,
       'type': type,
-      'title': isGenericSubject ? defaults['title'] : item.subject,
-      'titleEmoji': defaults['titleEmoji'],
-      'description':
-          isGenericDescription ? defaults['description'] : item.description,
+      'title': item.subject,
+      'titleEmoji': _titleEmojiByType(type),
+      'description': item.description,
       'time': _timeAgo(item.sentAt),
       'unread': item.status == 'no_leida',
-      'emoji': defaults['emoji'],
+      'emoji': _iconEmojiByType(type),
       'sentAt': item.sentAt,
     };
   }
 
-  Map<String, String> _defaultsByType(String type) {
+  String _titleEmojiByType(String type) {
     switch (type) {
       case 'reserva':
-        return {
-          'title': '¡Reserva Confirmada!',
-          'titleEmoji': '🎉',
-          'description':
-              'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
-          'emoji': '✅',
-        };
+        return '🎉';
       case 'recordatorio':
-        return {
-          'title': 'Recordatorio de Devolución',
-          'titleEmoji': '⏰',
-          'description':
-              'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
-          'emoji': '⏰',
-        };
+        return '⏰';
       case 'auto':
-        return {
-          'title': 'Nuevo Vehículo Disponible',
-          'titleEmoji': '🚗',
-          'description':
-              'El Porsche 718 Cayman ahora está disponible en tu zona. ¡Sé el primero en reservarlo!',
-          'emoji': '🆕',
-        };
+        return '🚗';
       default:
-        return {
-          'title': '¡Oferta Exclusiva!',
-          'titleEmoji': '🔥',
-          'description':
-              '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
-          'emoji': '🎁',
-        };
+        return '🔔';
+    }
+  }
+
+  String _iconEmojiByType(String type) {
+    switch (type) {
+      case 'reserva':
+        return '✅';
+      case 'recordatorio':
+        return '⏰';
+      case 'auto':
+        return '🚗';
+      default:
+        return '🔔';
     }
   }
 
@@ -197,58 +177,27 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return '${sentAt.day.toString().padLeft(2, '0')}/${sentAt.month.toString().padLeft(2, '0')}/${sentAt.year}';
   }
 
-  List<Map<String, dynamic>> _fallbackNotifications() => [
-        {
-          'type': 'reserva',
-          'title': '¡Reserva Confirmada!',
-          'titleEmoji': '🎉',
-          'description':
-              'Tu Mazda CX-5 está listo. Recógelo el 22 Feb a las 8:00 AM en Av. El Dorado.',
-          'time': 'Hace 2 horas',
-          'unread': true,
-          'emoji': '✅',
-          'sentAt': DateTime.now(),
-        },
-        {
-          'type': 'recordatorio',
-          'title': 'Recordatorio de Devolución',
-          'titleEmoji': '⏰',
-          'description':
-              'Tu Tesla Model 3 debe ser devuelto mañana a las 6:00 PM. No olvides revisar el estado del vehículo.',
-          'time': 'Ayer, 3:00 PM',
-          'unread': true,
-          'emoji': '⏰',
-          'sentAt': DateTime.now().subtract(const Duration(hours: 20)),
-        },
-        {
-          'type': 'promo',
-          'title': '¡Oferta Exclusiva!',
-          'titleEmoji': '🔥',
-          'description':
-              '30% de descuento en alquileres de más de 3 días este fin de semana. Usa el código FLEXIWEEK.',
-          'time': 'Hace 2 días',
-          'unread': false,
-          'emoji': '🎁',
-          'sentAt': DateTime.now().subtract(const Duration(days: 2)),
-        },
-      ];
+  Future<void> _markAllAsRead() async {
+    final unreadIds = _notifications
+        .where((n) => n['unread'] == true)
+        .map<int>((n) => n['id'] as int)
+        .toList();
+    for (final id in unreadIds) {
+      await _notificationDb.markAsRead(id);
+    }
+    await _loadNotifications();
+  }
 
-  void _markAllAsRead() => setState(() {
-        for (var n in _notifications) {
-          n['unread'] = false;
-        }
-        _unreadCount = 0;
-      });
-  void _markAsRead(Map<String, dynamic> n) => setState(() {
-        if (n['unread'] == true) {
-          n['unread'] = false;
-          if (_unreadCount > 0) _unreadCount--;
-        }
-      });
-  void _deleteNotification(Map<String, dynamic> n) => setState(() {
-        if (n['unread'] == true && _unreadCount > 0) _unreadCount--;
-        _notifications.remove(n);
-      });
+  Future<void> _markAsRead(Map<String, dynamic> n) async {
+    if (n['unread'] != true) return;
+    await _notificationDb.markAsRead(n['id'] as int);
+    await _loadNotifications();
+  }
+
+  Future<void> _deleteNotification(Map<String, dynamic> n) async {
+    await _notificationDb.deleteNotification(n['id'] as int);
+    await _loadNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +264,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ]),
               if (_unreadCount > 0)
                 GestureDetector(
-                  onTap: _markAllAsRead,
+                  onTap: () => _markAllAsRead(),
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 9),

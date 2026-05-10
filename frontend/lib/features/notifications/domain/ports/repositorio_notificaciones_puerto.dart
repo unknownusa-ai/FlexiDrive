@@ -13,4 +13,6 @@ abstract class RepositorioNotificacionesPuerto {
     String status,
     DateTime? sentAt,
   });
+  Future<void> marcarComoLeida(int notificationId);
+  Future<void> eliminarNotificacion(int notificationId);
 }

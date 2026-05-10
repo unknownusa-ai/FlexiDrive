@@ -32,9 +32,19 @@ class DjangoAccountsAuthRepository(AccountsAuthRepositoryPort):
     def identification_type_exists(self, identification_type_id: int) -> bool:
         return IdentificationType.objects.filter(id=identification_type_id).exists()
 
+    def user_type_exists(self, user_type_id: int) -> bool:
+        return UserType.objects.filter(id=user_type_id).exists()
+
     def get_default_arrendador_user_type_id(self) -> int | None:
         user_type = UserType.objects.filter(name__iexact="Arrendador").first()
-        return user_type.id if user_type else None
+        if user_type:
+            return user_type.id
+
+        created = UserType.objects.create(
+            name="Arrendador",
+            description="Tipo de usuario predeterminado para registros",
+        )
+        return created.id
 
     def create_local_user(
         self,

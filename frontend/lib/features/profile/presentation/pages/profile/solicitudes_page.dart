@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
@@ -32,6 +33,8 @@ class SolicitudesPageState extends State<SolicitudesPage>
       InjectionContainer.instance.publicationAccessUseCase;
   final VehicleInventoryUseCase _vehiculoService =
       InjectionContainer.instance.vehicleInventoryUseCase;
+  final AccountAccessUseCase _accountRepository =
+      InjectionContainer.instance.accountAccessUseCase;
 
   // Data management
   List<ReservationModel> _allReservations = [];
@@ -40,8 +43,8 @@ class SolicitudesPageState extends State<SolicitudesPage>
   List<Map<String, dynamic>> _publications = [];
   bool _isLoading = true;
 
-  // Current user ID (arrendatario = 1, arrendador = 2)
-  final int _currentUserId = 1; // Arrendatario sees requests for his vehicles
+  // Current user ID in session
+  int? _currentUserId;
 
   @override
   void initState() {
@@ -86,6 +89,9 @@ class SolicitudesPageState extends State<SolicitudesPage>
     try {
       setState(() => _isLoading = true);
 
+      final currentUser = await _accountRepository.getCurrentUser();
+      _currentUserId = currentUser?.id;
+
       // Load reservations
       await _reservationDb.loadIfNeeded();
       _allReservations = List.from(_reservationDb.reservations);
@@ -118,15 +124,13 @@ class SolicitudesPageState extends State<SolicitudesPage>
   // Get reservations filtered by status for current user's vehicles
   List<ReservationModel> _getReservationsByStatus(int statusId) {
     return _allReservations.where((reservation) {
-      // For arrendatario (user 1), show reservations for his vehicles
-      if (_currentUserId == 1) {
-        // Find the publication to check if it belongs to current user
-        final publication = _findPublicationById(reservation.publicationId);
-        return publication != null &&
-            publication['usuario_id'] == _currentUserId &&
-            reservation.statusId == statusId;
-      }
-      return false;
+      final currentUserId = _currentUserId;
+      if (currentUserId == null) return false;
+
+      final publication = _findPublicationById(reservation.publicationId);
+      return publication != null &&
+          publication['usuario_id'] == currentUserId &&
+          reservation.statusId == statusId;
     }).toList();
   }
 
@@ -138,6 +142,18 @@ class SolicitudesPageState extends State<SolicitudesPage>
     } catch (e) {
       return null;
     }
+  }
+
+  Map<String, dynamic>? _getVehicleForReservation(ReservationModel reservation) {
+    final publication = _findPublicationById(reservation.publicationId);
+    if (publication == null) return null;
+
+    final rawVehicleId = publication['vehiculo_id'];
+    final vehicleId = rawVehicleId is int
+        ? rawVehicleId
+        : int.tryParse('$rawVehicleId');
+    if (vehicleId == null) return null;
+    return _getVehicleById(vehicleId);
   }
 
   // Get vehicle info
@@ -421,8 +437,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
       children: pendingReservations.map((reservation) {
         final user = _getUserById(reservation.userId);
-        final vehicle =
-            _getVehicleById(reservation.publicationId); // This needs adjustment
+        final vehicle = _getVehicleForReservation(reservation);
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
@@ -476,7 +491,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
       children: activeReservations.map((reservation) {
         final user = _getUserById(reservation.userId);
-        final vehicle = _getVehicleById(reservation.publicationId);
+        final vehicle = _getVehicleForReservation(reservation);
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
@@ -530,7 +545,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
       padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
       children: completedReservations.map((reservation) {
         final user = _getUserById(reservation.userId);
-        final vehicle = _getVehicleById(reservation.publicationId);
+        final vehicle = _getVehicleForReservation(reservation);
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
@@ -1150,7 +1165,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     try {
       // Get user and vehicle info for the notification
       final user = _getUserById(reservation.userId);
-      final vehicle = _getVehicleById(reservation.publicationId);
+      final vehicle = _getVehicleForReservation(reservation);
 
       final userName = user?['nombre_completo'] ?? 'Usuario';
       final vehicleName = vehicle?['nombre'] ?? 'Vehículo';

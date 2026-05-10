@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
+import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
+import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
+import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
-import 'arrendatario_main_page.dart';
-import 'alertas_page.dart';
-import 'edit_profile_page.dart';
-import 'security_page.dart';
-import 'payment_methods_page.dart';
-import 'my_reviews_page.dart';
-import 'help_center_page.dart';
-import 'principal_arrendatario_page.dart';
-import 'mi_saldo_page.dart';
-import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
-import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'alertas_page.dart';
+import 'arrendatario_main_page.dart';
+import 'edit_profile_page.dart';
+import 'help_center_page.dart';
+import 'mi_saldo_page.dart';
+import 'my_reviews_page.dart';
+import 'payment_methods_page.dart';
+import 'principal_arrendatario_page.dart';
+import 'security_page.dart';
 
-// Página de perfil del arrendador
-// Muestra la información del usuario y opciones de configuración
 class ProfileArrendatarioPage extends StatefulWidget {
   const ProfileArrendatarioPage({super.key});
 
@@ -38,63 +37,124 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       InjectionContainer.instance.publicationAccessUseCase;
   final ReservationAccessUseCase _reservationDb =
       InjectionContainer.instance.reservationAccessUseCase;
+  final ReviewAccessUseCase _reviewDb =
+      InjectionContainer.instance.reviewAccessUseCase;
 
   int? _currentUserId;
+  String _profileFirstName = 'Invitado';
+  String _profileEmail = 'sin_sesion@flexidrive.local';
 
-  // Dynamic statistics
   int _totalVehicles = 0;
   int _activeVehicles = 0;
+  int _totalReservations = 0;
+  int _totalReviewsReceived = 0;
   double _totalEarnings = 0;
-  double _availableBalance = 1440000; // Default saldo
+  double _availableBalance = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadPreferenceState();
+    _loadProfile();
   }
 
-  Future<void> _loadPreferenceState() async {
+  Future<void> _loadProfile() async {
     final currentUser = await _accountRepository.getCurrentUser();
     if (!mounted || currentUser == null) return;
 
     _currentUserId = currentUser.id;
+    _profileFirstName = _extractFirstName(currentUser.fullName);
+    _profileEmail = currentUser.email.trim().isEmpty
+        ? 'sin_sesion@flexidrive.local'
+        : currentUser.email.trim();
 
-    // Load arrendatario statistics
     await _loadArrendatarioStats();
-
     await _preferenceService.setArrendatarioMode(
       userId: currentUser.id,
       enabled: true,
     );
+
     final userPreference =
         await _preferenceService.findEffectiveByUserId(currentUser.id);
+    if (mounted && userPreference != null) {
+      FlexiDriveApp.of(context)?.setDarkMode(userPreference.darkMode);
+    }
 
-    if (userPreference != null) {
-      if (mounted) {
-        final appState = FlexiDriveApp.of(context);
-        appState?.setDarkMode(userPreference.darkMode);
-      }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _loadArrendatarioStats() async {
+    final currentUserId = _currentUserId;
+    if (currentUserId == null) return;
+
+    try {
+      await Future.wait([
+        _publicationDb.loadIfNeeded(),
+        _reservationDb.loadIfNeeded(),
+        _reviewDb.loadIfNeeded(),
+      ]);
+
+      final userPublications = _publicationDb.publications
+          .where((pub) => pub.userId == currentUserId && pub.active)
+          .toList();
+      final userPublicationIds = userPublications.map((pub) => pub.id).toSet();
+      final userVehicleIds = userPublications.map((pub) => pub.vehicleId).toSet();
+
+      final reservationsForOwner = _reservationDb.reservations
+          .where((reservation) =>
+              userPublicationIds.contains(reservation.publicationId))
+          .toList();
+      final activeReservations = reservationsForOwner
+          .where((reservation) => reservation.statusId == 2)
+          .toList();
+      final earnedReservations = reservationsForOwner
+          .where(
+            (reservation) =>
+                reservation.statusId == 2 || reservation.statusId == 3,
+          )
+          .toList();
+      final reviewsReceived = _reviewDb.reviews
+          .where((review) => userPublicationIds.contains(review.publicationId))
+          .toList();
+
+      final totalEarnings = earnedReservations.fold<double>(
+        0,
+        (sum, reservation) => sum + reservation.totalValue,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _totalVehicles = userVehicleIds.length;
+        _activeVehicles = activeReservations.length;
+        _totalReservations = reservationsForOwner.length;
+        _totalReviewsReceived = reviewsReceived.length;
+        _totalEarnings = totalEarnings;
+        _availableBalance = totalEarnings * 0.7;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _totalVehicles = 0;
+        _activeVehicles = 0;
+        _totalReservations = 0;
+        _totalReviewsReceived = 0;
+        _totalEarnings = 0;
+        _availableBalance = 0;
+      });
     }
   }
 
   Future<void> _persistDarkModePreference(bool isDarkMode) async {
     final userId = _currentUserId;
     if (userId == null) return;
-
-    await _preferenceService.setDarkMode(
-      userId: userId,
-      darkMode: isDarkMode,
-    );
+    await _preferenceService.setDarkMode(userId: userId, darkMode: isDarkMode);
   }
 
   Future<void> _persistArrendatarioMode(bool enabled) async {
     final userId = _currentUserId;
     if (userId == null) return;
-
-    await _preferenceService.setArrendatarioMode(
-      userId: userId,
-      enabled: enabled,
-    );
+    await _preferenceService.setArrendatarioMode(userId: userId, enabled: enabled);
   }
 
   @override
@@ -115,9 +175,12 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.fromLTRB(
-                        isSmallPhone ? 12 : 16, 8, isSmallPhone ? 12 : 16, 0),
+                      isSmallPhone ? 12 : 16,
+                      8,
+                      isSmallPhone ? 12 : 16,
+                      0,
+                    ),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildPreferencesSection(),
                         SizedBox(height: isSmallPhone ? 6 : 8),
@@ -159,115 +222,165 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(isSmallPhone ? 12 : 20, 8,
-                  isSmallPhone ? 12 : 20, isSmallPhone ? 10 : 14),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Row(
+              padding: EdgeInsets.fromLTRB(
+                isSmallPhone ? 12 : 20,
+                8,
+                isSmallPhone ? 12 : 20,
+                isSmallPhone ? 10 : 14,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Mi Perfil',
-                          style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: isSmallPhone ? 18 : 22,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        'Mi Perfil',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: isSmallPhone ? 18 : 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Container(
                         width: isSmallPhone ? 32 : 40,
                         height: isSmallPhone ? 32 : 40,
                         decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle),
-                        child: Icon(Icons.nights_stay_outlined,
-                            color: const Color(0xFFF59E0B),
-                            size: isSmallPhone ? 16 : 20),
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.nights_stay_outlined,
+                          color: const Color(0xFFF59E0B),
+                          size: isSmallPhone ? 16 : 20,
+                        ),
                       ),
-                    ]),
-                const SizedBox(height: 8),
-                Row(children: [
-                  CircleAvatar(
-                    radius: isSmallPhone ? 24 : 30,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person,
-                        color: const Color(0xFFF59E0B),
-                        size: isSmallPhone ? 26 : 32),
+                    ],
                   ),
-                  SizedBox(width: isSmallPhone ? 10 : 14),
-                  Expanded(
-                      child: Column(
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: isSmallPhone ? 24 : 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.person,
+                          color: const Color(0xFFF59E0B),
+                          size: isSmallPhone ? 26 : 32,
+                        ),
+                      ),
+                      SizedBox(width: isSmallPhone ? 10 : 14),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                        Text('Carlos Rodríguez',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: GoogleFonts.inter(
+                            Text(
+                              _profileFirstName,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: GoogleFonts.inter(
                                 fontSize: isSmallPhone ? 14 : 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white)),
-                        Text('carlos.rodriguez@email.com',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: GoogleFonts.inter(
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              _profileEmail,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: GoogleFonts.inter(
                                 fontSize: isSmallPhone ? 10 : 12,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white.withValues(alpha: 0.8))),
-                        const SizedBox(height: 2),
-                        Row(children: [
-                          const Icon(Icons.star,
-                              color: Color(0xFFFBBF24), size: 12),
-                          const SizedBox(width: 2),
-                          Text('4.9',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: isSmallPhone ? 11 : 13,
-                                  color: Colors.white)),
-                          SizedBox(width: isSmallPhone ? 6 : 10),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: isSmallPhone ? 5 : 7, vertical: 1),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFF10B981),
-                                borderRadius: BorderRadius.circular(12)),
-                            child:
-                                Row(mainAxisSize: MainAxisSize.min, children: [
-                              const Icon(Icons.check,
-                                  color: Colors.white, size: 8),
-                              const SizedBox(width: 2),
-                              Text('Verificado',
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: Color(0xFFFBBF24),
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '4.9',
                                   style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: isSmallPhone ? 9 : 10,
-                                      fontWeight: FontWeight.bold)),
-                            ]),
-                          ),
-                        ]),
-                      ])),
-                ]),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: _buildStatCard(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isSmallPhone ? 11 : 13,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: isSmallPhone ? 6 : 10),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isSmallPhone ? 5 : 7,
+                                    vertical: 1,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 8,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        'Verificado',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: isSmallPhone ? 9 : 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
                           icon: Icons.directions_car_outlined,
                           value: '$_totalVehicles',
-                          label: isSmallPhone ? 'Vehic' : 'Vehículos')),
-                  SizedBox(width: isSmallPhone ? 6 : 10),
-                  Expanded(
-                      child: _buildStatCard(
+                          label: isSmallPhone ? 'Vehic' : 'Vehículos',
+                        ),
+                      ),
+                      SizedBox(width: isSmallPhone ? 6 : 10),
+                      Expanded(
+                        child: _buildStatCard(
                           icon: Icons.account_balance_wallet_outlined,
-                          value: isSmallPhone
-                              ? _formatCurrencyShort(_totalEarnings)
-                              : _formatCurrencyShort(_totalEarnings),
-                          label: isSmallPhone ? 'Gananc' : 'Ganancias')),
-                  SizedBox(width: isSmallPhone ? 6 : 10),
-                  Expanded(
-                      child: _buildStatCard(
+                          value: _formatCurrencyShort(_totalEarnings),
+                          label: isSmallPhone ? 'Gananc' : 'Ganancias',
+                        ),
+                      ),
+                      SizedBox(width: isSmallPhone ? 6 : 10),
+                      Expanded(
+                        child: _buildStatCard(
                           icon: Icons.local_activity_outlined,
                           value: '$_activeVehicles',
-                          label: isSmallPhone ? 'Activ' : 'Activos')),
-                ]),
-              ]),
+                          label: isSmallPhone ? 'Activ' : 'Activos',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        // Decorative bubble in top-right corner
         Positioned(
           top: -60,
           right: -60,
@@ -284,394 +397,349 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
-  Widget _buildStatCard(
-      {required IconData icon, required String value, required String label}) {
+  Widget _buildStatCard({
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
-          vertical: isSmallPhone ? 6 : 10, horizontal: isSmallPhone ? 4 : 6),
+        vertical: isSmallPhone ? 6 : 10,
+        horizontal: isSmallPhone ? 4 : 6,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
-      child: Column(children: [
-        Container(
+      child: Column(
+        children: [
+          Container(
             width: isSmallPhone ? 28 : 34,
             height: isSmallPhone ? 28 : 34,
             decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                shape: BoxShape.circle),
-            child:
-                Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17)),
-        SizedBox(height: isSmallPhone ? 4 : 7),
-        Text(value,
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17),
+          ),
+          SizedBox(height: isSmallPhone ? 4 : 7),
+          Text(
+            value,
             style: GoogleFonts.poppins(
-                fontSize: isSmallPhone ? 12 : 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
-        Text(label,
+              fontSize: isSmallPhone ? 12 : 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            label,
             style: GoogleFonts.poppins(
-                fontSize: isSmallPhone ? 9 : 11,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.9))),
-      ]),
-    );
-  }
-
-  Widget _buildModoArrendatarioSection() {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2))
+              fontSize: isSmallPhone ? 9 : 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withValues(alpha: 0.9),
+            ),
+          ),
         ],
       ),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
-                child: Text('MODO ARRENDATARIO (ACTIVO)',
-                    style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF10B981),
-                        letterSpacing: 0.5))),
-            // Cambiar a modo arrendador
-            _buildMenuItem(
-                icon: Icons.swap_horiz,
-                iconColor: const Color(0xFF3B82F6),
-                iconBgColor: const Color(0xFFDBEAFE),
-                title: 'Cambiar a modo arrendador',
-                subtitle: 'Volver a buscar vehículos para rentar',
-                onTap: () {
-                  _showSwitchToArrendadorDialog(context);
-                }),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            // Gestionar modo arrendatario
-            _buildMenuItemWithCheck(
-                icon: Icons.home_outlined,
-                iconColor: const Color(0xFFF59E0B),
-                iconBgColor: const Color(0xFFFFF4E6),
-                title: 'Gestionar modo arrendatario',
-                subtitle: '✓ Verificado y activo',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const PrincipalArrendatarioPage()),
-                  );
-                }),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            // Mi saldo
-            _buildMenuItem(
-                icon: Icons.account_balance_wallet,
-                iconColor: const Color(0xFF10B981),
-                iconBgColor: const Color(0xFFD1FAE5),
-                title: 'Mi saldo',
-                subtitle: '\$ ${_formatCurrency(_availableBalance)} disponible',
-                trailingIcon: Icons.lock,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MiSaldoPage()),
-                  );
-                }),
-          ]),
-    );
-  }
-
-  Widget _buildAccountSection() {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
-                child: Text('MI CUENTA',
-                    style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5),
-                        letterSpacing: 0.5))),
-            _buildMenuItem(
-                icon: Icons.person_outline,
-                iconColor: const Color(0xFF2563EB),
-                iconBgColor: const Color(0xFFF0F4FF),
-                title: 'Editar perfil',
-                subtitle: 'Nombre, foto, documento',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const EditProfilePage()),
-                  );
-                }),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            _buildMenuItem(
-                icon: Icons.credit_card_outlined,
-                iconColor: const Color(0xFF8B5CF6),
-                iconBgColor: const Color(0xFFF3E8FF),
-                title: 'Métodos de pago',
-                subtitle: 'Tarjetas y PSE guardadas',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PaymentMethodsPage()),
-                  );
-                }),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            _buildMenuItem(
-                icon: Icons.shield_outlined,
-                iconColor: const Color(0xFF10B981),
-                iconBgColor: const Color(0xFFD1FAE5),
-                title: 'Seguridad',
-                subtitle: 'Contraseña y verificación',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SecurityPage()),
-                  );
-                }),
-          ]),
-    );
-  }
-
-  Widget _buildActivitySection() {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2))
-        ],
-      ),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
-                child: Text('ACTIVIDAD & SOPORTE',
-                    style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5),
-                        letterSpacing: 0.5))),
-            _buildMenuItem(
-                icon: Icons.description_outlined,
-                iconColor: const Color(0xFFF59E0B),
-                iconBgColor: const Color(0xFFFFF4E6),
-                title: 'Historial',
-                subtitle: '4 reservas totales',
-                onTap: () =>
-                    ArrendatarioMainPage.of(context).setHistorialTab(2)),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            _buildMenuItem(
-                icon: Icons.notifications_outlined,
-                iconColor: const Color(0xFFEF4444),
-                iconBgColor: const Color(0xFFFEE2E2),
-                title: 'Notificaciones',
-                subtitle: 'Gestionar alertas',
-                onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AlertasPage()),
-                    )),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            _buildMenuItem(
-                icon: Icons.star_border,
-                iconColor: const Color(0xFFFBBF24),
-                iconBgColor: const Color(0xFFFEF3C7),
-                title: 'Mis reseñas',
-                subtitle: '3 reseñas escritas',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MyReviewsPage()),
-                  );
-                }),
-            Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: Theme.of(context).dividerTheme.color),
-            _buildMenuItem(
-                icon: Icons.headset_outlined,
-                iconColor: const Color(0xFF3B82F6),
-                iconBgColor: const Color(0xFFDBEAFE),
-                title: 'Centro de ayuda',
-                subtitle: 'Chat en vivo 24/7',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const HelpCenterPage()),
-                  );
-                }),
-          ]),
     );
   }
 
   Widget _buildPreferencesSection() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2))
+    return _buildSectionContainer(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('PREFERENCIAS'),
+          _buildThemeToggleItem(isDarkMode),
         ],
       ),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
-                child: Text('PREFERENCIAS',
-                    style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5),
-                        letterSpacing: 0.5))),
-            _buildThemeToggleItem(isDarkMode, isSmallPhone),
-          ]),
     );
   }
 
-  Widget _buildThemeToggleItem(bool isDarkMode, bool isSmallPhone) {
+  Widget _buildThemeToggleItem(bool isDarkMode) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+
     return InkWell(
       onTap: () {
-        final appState = FlexiDriveApp.of(context);
-        appState?.toggleTheme();
+        FlexiDriveApp.of(context)?.toggleTheme();
         _persistDarkModePreference(!isDarkMode);
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
-        child: Row(children: [
-          Container(
-              width: isSmallPhone ? 32 : 36,
-              height: isSmallPhone ? 32 : 36,
-              decoration: BoxDecoration(
-                  color: const Color(0xFFFFF4E6),
-                  borderRadius: BorderRadius.circular(9)),
-              child: Icon(Icons.wb_sunny_outlined,
-                  color: const Color(0xFFF59E0B),
-                  size: isSmallPhone ? 16 : 18)),
-          SizedBox(width: isSmallPhone ? 8 : 12),
-          Expanded(
+          horizontal: isSmallPhone ? 10 : 14,
+          vertical: isSmallPhone ? 4 : 6,
+        ),
+        child: Row(
+          children: [
+            _buildLeadingIcon(
+              icon: Icons.wb_sunny_outlined,
+              iconColor: const Color(0xFFF59E0B),
+              iconBgColor: const Color(0xFFFFF4E6),
+            ),
+            SizedBox(width: isSmallPhone ? 8 : 12),
+            Expanded(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text('Modo Claro',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Modo Claro',
                     style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 12 : 13,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface)),
-                Text('Cambiar apariencia',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                      fontSize: isSmallPhone ? 12 : 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Cambiar apariencia',
                     style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 9 : 11,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6))),
-              ])),
-          Switch(
-            value: !isDarkMode,
-            onChanged: (value) {
-              final appState = FlexiDriveApp.of(context);
-              appState?.setDarkMode(!value);
-              _persistDarkModePreference(!value);
-            },
-            activeThumbColor: const Color(0xFFF59E0B),
+                      fontSize: isSmallPhone ? 9 : 11,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: !isDarkMode,
+              onChanged: (value) {
+                FlexiDriveApp.of(context)?.setDarkMode(!value);
+                _persistDarkModePreference(!value);
+              },
+              activeThumbColor: const Color(0xFFF59E0B),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountSection() {
+    final theme = Theme.of(context);
+    return _buildSectionContainer(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('MI CUENTA'),
+          _buildMenuItem(
+            icon: Icons.person_outline,
+            iconColor: const Color(0xFF2563EB),
+            iconBgColor: const Color(0xFFF0F4FF),
+            title: 'Editar perfil',
+            subtitle: 'Nombre, foto, documento',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EditProfilePage()),
+            ),
           ),
-        ]),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.credit_card_outlined,
+            iconColor: const Color(0xFF8B5CF6),
+            iconBgColor: const Color(0xFFF3E8FF),
+            title: 'Métodos de pago',
+            subtitle: 'Tarjetas y PSE guardadas',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PaymentMethodsPage()),
+            ),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.shield_outlined,
+            iconColor: const Color(0xFF10B981),
+            iconBgColor: const Color(0xFFD1FAE5),
+            title: 'Seguridad',
+            subtitle: 'Contraseña y verificación',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SecurityPage()),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildMenuItem(
-      {required IconData icon,
-      required Color iconColor,
-      required Color iconBgColor,
-      required String title,
-      required String subtitle,
-      IconData? trailingIcon,
-      required VoidCallback onTap}) {
+  Widget _buildModoArrendatarioSection() {
+    final theme = Theme.of(context);
+    return _buildSectionContainer(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
+            child: Text(
+              'MODO ARRENDATARIO (ACTIVO)',
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF10B981),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          _buildMenuItem(
+            icon: Icons.swap_horiz,
+            iconColor: const Color(0xFF3B82F6),
+            iconBgColor: const Color(0xFFDBEAFE),
+            title: 'Cambiar a modo arrendador',
+            subtitle: 'Volver a buscar vehículos para rentar',
+            onTap: () => _showSwitchToArrendadorDialog(context),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.home_outlined,
+            iconColor: const Color(0xFFF59E0B),
+            iconBgColor: const Color(0xFFFFF4E6),
+            title: 'Gestionar modo arrendatario',
+            subtitle: '✓ Verificado y activo',
+            subtitleColorOverride: const Color(0xFF10B981),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PrincipalArrendatarioPage(),
+              ),
+            ),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.account_balance_wallet,
+            iconColor: const Color(0xFF10B981),
+            iconBgColor: const Color(0xFFD1FAE5),
+            title: 'Mi saldo',
+            subtitle: '\$ ${_formatCurrency(_availableBalance)} disponible',
+            trailingIcon: Icons.lock,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MiSaldoPage()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivitySection() {
+    final theme = Theme.of(context);
+    return _buildSectionContainer(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('ACTIVIDAD & SOPORTE'),
+          _buildMenuItem(
+            icon: Icons.description_outlined,
+            iconColor: const Color(0xFFF59E0B),
+            iconBgColor: const Color(0xFFFFF4E6),
+            title: 'Historial',
+            subtitle:
+                '$_totalReservations ${_totalReservations == 1 ? 'reserva total' : 'reservas totales'}',
+            onTap: () => ArrendatarioMainPage.of(context).setHistorialTab(2),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.notifications_outlined,
+            iconColor: const Color(0xFFEF4444),
+            iconBgColor: const Color(0xFFFEE2E2),
+            title: 'Notificaciones',
+            subtitle: 'Gestionar alertas',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AlertasPage()),
+            ),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.star_border,
+            iconColor: const Color(0xFFFBBF24),
+            iconBgColor: const Color(0xFFFEF3C7),
+            title: 'Mis reseñas',
+            subtitle:
+                '$_totalReviewsReceived ${_totalReviewsReceived == 1 ? 'reseña recibida' : 'reseñas recibidas'}',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyReviewsPage()),
+            ),
+          ),
+          _divider(),
+          _buildMenuItem(
+            icon: Icons.headset_outlined,
+            iconColor: const Color(0xFF3B82F6),
+            iconBgColor: const Color(0xFFDBEAFE),
+            title: 'Centro de ayuda',
+            subtitle: 'Chat en vivo 24/7',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HelpCenterPage()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionContainer(ThemeData theme, {required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color ?? theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _divider() {
+    return Divider(
+      height: 1,
+      indent: 14,
+      endIndent: 14,
+      color: Theme.of(context).dividerTheme.color,
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required String subtitle,
+    Color? subtitleColorOverride,
+    IconData? trailingIcon,
+    required VoidCallback onTap,
+  }) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);
 
@@ -679,143 +747,77 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
-        child: Row(children: [
-          Container(
-              width: isSmallPhone ? 32 : 36,
-              height: isSmallPhone ? 32 : 36,
-              decoration: BoxDecoration(
-                  color: iconBgColor, borderRadius: BorderRadius.circular(9)),
-              child:
-                  Icon(icon, color: iconColor, size: isSmallPhone ? 16 : 18)),
-          SizedBox(width: isSmallPhone ? 8 : 12),
-          Expanded(
+          horizontal: isSmallPhone ? 10 : 14,
+          vertical: isSmallPhone ? 4 : 6,
+        ),
+        child: Row(
+          children: [
+            _buildLeadingIcon(
+              icon: icon,
+              iconColor: iconColor,
+              iconBgColor: iconBgColor,
+            ),
+            SizedBox(width: isSmallPhone ? 8 : 12),
+            Expanded(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text(title,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 12 : 13,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface)),
-                Text(subtitle,
+                      fontSize: isSmallPhone ? 12 : 13,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 9 : 11,
-                        color: theme.colorScheme.onSurface
-                            .withValues(alpha: 0.6))),
-              ])),
-          if (trailingIcon != null)
-            Icon(trailingIcon,
-                color: const Color(0xFFF59E0B), size: isSmallPhone ? 14 : 16),
-          const SizedBox(width: 4),
-          Icon(Icons.chevron_right,
+                      fontSize: isSmallPhone ? 9 : 11,
+                      color: subtitleColorOverride ??
+                          theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (trailingIcon != null)
+              Icon(
+                trailingIcon,
+                color: const Color(0xFFF59E0B),
+                size: isSmallPhone ? 14 : 16,
+              ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              size: isSmallPhone ? 16 : 18),
-        ]),
+              size: isSmallPhone ? 16 : 18,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMenuItemWithCheck(
-      {required IconData icon,
-      required Color iconColor,
-      required Color iconBgColor,
-      required String title,
-      required String subtitle,
-      required VoidCallback onTap}) {
+  Widget _buildLeadingIcon({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+  }) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
-    final theme = Theme.of(context);
-
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: isSmallPhone ? 10 : 14, vertical: isSmallPhone ? 4 : 6),
-        child: Row(children: [
-          Container(
-              width: isSmallPhone ? 32 : 36,
-              height: isSmallPhone ? 32 : 36,
-              decoration: BoxDecoration(
-                  color: iconBgColor, borderRadius: BorderRadius.circular(9)),
-              child:
-                  Icon(icon, color: iconColor, size: isSmallPhone ? 16 : 18)),
-          SizedBox(width: isSmallPhone ? 8 : 12),
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text(title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 12 : 13,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface)),
-                Text(subtitle,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 9 : 11,
-                        color: const Color(0xFF10B981))),
-              ])),
-          Icon(Icons.chevron_right,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              size: isSmallPhone ? 16 : 18),
-        ]),
+    return Container(
+      width: isSmallPhone ? 32 : 36,
+      height: isSmallPhone ? 32 : 36,
+      decoration: BoxDecoration(
+        color: iconBgColor,
+        borderRadius: BorderRadius.circular(9),
       ),
+      child: Icon(icon, color: iconColor, size: isSmallPhone ? 16 : 18),
     );
-  }
-
-  Future<void> _loadArrendatarioStats() async {
-    try {
-      await Future.wait([
-        _publicationDb.loadIfNeeded(),
-        _reservationDb.loadIfNeeded(),
-      ]);
-
-      // Get user publications
-      final userPublications = _publicationDb.publications
-          .where((pub) => pub.userId == _currentUserId)
-          .toList();
-
-      // Count total vehicles (vehicles that have publications)
-      final userVehicleIds =
-          userPublications.map((pub) => pub.vehicleId).toSet().toList();
-
-      _totalVehicles = userVehicleIds.length;
-
-      // Count active vehicles (with active reservations - status 2)
-      final activeReservations = _reservationDb.reservations
-          .where((r) =>
-              r.statusId == 2 &&
-              userPublications.any((pub) => pub.id == r.publicationId))
-          .toList();
-
-      _activeVehicles = activeReservations.length;
-
-      // Calculate total earnings from completed reservations (status 3)
-      final completedReservations = _reservationDb.reservations
-          .where((r) =>
-              r.statusId == 3 &&
-              userPublications.any((pub) => pub.id == r.publicationId))
-          .toList();
-
-      _totalEarnings =
-          completedReservations.fold(0.0, (sum, r) => sum + r.totalValue);
-
-      // Update available balance (70% of earnings - platform commission 30%)
-      _availableBalance = _totalEarnings * 0.7;
-
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      // Error loading stats - silently handle
-    }
   }
 
   void _showSwitchToArrendadorDialog(BuildContext context) {
@@ -825,9 +827,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: EdgeInsets.zero,
           content: Container(
             width: isSmallPhone ? 280 : 320,
@@ -840,7 +840,6 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icono azul con símbolo de sync
                   Container(
                     width: isSmallPhone ? 56 : 64,
                     height: isSmallPhone ? 56 : 64,
@@ -859,7 +858,6 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                     ),
                   ),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  // Título
                   Text(
                     'Cambiar a Modo Arrendador',
                     textAlign: TextAlign.center,
@@ -870,7 +868,6 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                     ),
                   ),
                   SizedBox(height: isSmallPhone ? 10 : 12),
-                  // Descripción
                   Text(
                     'Volverás a modo cliente para buscar y rentar vehículos. Tus publicaciones seguirán activas.',
                     textAlign: TextAlign.center,
@@ -884,7 +881,6 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                     ),
                   ),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  // Botón principal azul
                   SizedBox(
                     width: double.infinity,
                     child: Container(
@@ -932,13 +928,10 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                     ),
                   ),
                   SizedBox(height: isSmallPhone ? 12 : 16),
-                  // Botón cancelar
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.symmetric(
                           vertical: isSmallPhone ? 12 : 14,
@@ -976,7 +969,9 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        await _accountRepository.logout();
+        if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginPage()),
           (route) => false,
@@ -989,28 +984,45 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFFCA5A5)),
         ),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.logout,
-              color: const Color(0xFFEF4444), size: isSmallPhone ? 16 : 18),
-          SizedBox(width: isSmallPhone ? 6 : 8),
-          Text('Cerrar Sesión',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.logout,
+              color: const Color(0xFFEF4444),
+              size: isSmallPhone ? 16 : 18,
+            ),
+            SizedBox(width: isSmallPhone ? 6 : 8),
+            Text(
+              'Cerrar Sesión',
               style: GoogleFonts.poppins(
-                  color: const Color(0xFFEF4444),
-                  fontSize: isSmallPhone ? 12 : 14,
-                  fontWeight: FontWeight.bold)),
-        ]),
+                color: const Color(0xFFEF4444),
+                fontSize: isSmallPhone ? 12 : 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildVersionInfo() {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text('FlexiDrive v2.1.0 · Colombia',
-          style:
-              GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade400)),
-      const SizedBox(width: 4),
-      const Text('🇨🇴', style: TextStyle(fontSize: 11)),
-    ]);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'FlexiDrive v2.1.0 · Colombia',
+          style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade400),
+        ),
+      ],
+    );
+  }
+
+  String _extractFirstName(String fullName) {
+    final trimmed = fullName.trim();
+    if (trimmed.isEmpty) return 'Invitado';
+    return trimmed.split(' ').first;
   }
 
   String _formatCurrency(double amount) {
@@ -1023,23 +1035,23 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   String _formatCurrencyShort(double amount) {
     if (amount >= 1000000) {
       return '\$${(amount / 1000000).toStringAsFixed(1)}M';
-    } else if (amount >= 1000) {
-      return '\$${(amount / 1000).toStringAsFixed(1)}K';
-    } else {
-      return '\$${amount.toStringAsFixed(0)}';
     }
+    if (amount >= 1000) {
+      return '\$${(amount / 1000).toStringAsFixed(1)}K';
+    }
+    return '\$${amount.toStringAsFixed(0)}';
   }
 }
 
 class ConstrainedContainer extends StatelessWidget {
-  final Widget child;
-  final double maxWidth;
-
   const ConstrainedContainer({
     super.key,
     required this.child,
     required this.maxWidth,
   });
+
+  final Widget child;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {

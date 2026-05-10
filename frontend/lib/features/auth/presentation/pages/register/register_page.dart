@@ -24,6 +24,30 @@ class RegisterPage extends StatefulWidget {
 
 // Estado de la pagina de registro
 class _RegisterPageState extends State<RegisterPage> {
+  static const List<String> _preferredColombianIdentificationTypes = [
+    'Cedula de Ciudadania',
+    'Tarjeta de Identidad',
+    'Cedula de Extranjeria',
+    'Pasaporte',
+    'Permiso por Proteccion Temporal',
+    'Permiso Especial de Permanencia',
+    'Registro Civil',
+    'Numero Unico de Identificacion Personal',
+    'NIT',
+  ];
+
+  static const Map<int, String> _fallbackIdentificationNamesById = {
+    1: 'Cedula de Ciudadania',
+    2: 'Cedula de Extranjeria',
+    3: 'Pasaporte',
+    4: 'NIT',
+    5: 'Tarjeta de Identidad',
+    6: 'Registro Civil',
+    7: 'Permiso Especial de Permanencia',
+    8: 'Permiso por Proteccion Temporal',
+    9: 'Numero Unico de Identificacion Personal',
+  };
+
   // Controladores de los campos del formulario
   final _nameController = TextEditingController(); // Nombre completo
   final _documentController = TextEditingController(); // Numero de documento
@@ -159,24 +183,117 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _loadIdentificationTypes() async {
-    await _catalogDb.loadIfNeeded();
     setState(() {
-      _identificationTypes = _catalogDb.identificationTypes
-          .where(
-            (type) => !{
-              'Documento Regional',
-              'Documento Consular',
-              'Documento Mercosur',
-              'Documento Schengen',
-              'Documento Fronterizo',
-            }.contains(type.name),
-          )
-          .toList();
-      if (_identificationTypes.isNotEmpty) {
-        _selectedIdentificationType = _identificationTypes.first;
-      }
-      _isLoadingCatalogs = false;
+      _isLoadingCatalogs = true;
     });
+
+    try {
+      await _catalogDb.loadIfNeeded();
+
+      final normalizedTypes = _catalogDb.identificationTypes
+          .map((type) => IdentificationTypeModel(
+                id: type.id,
+                name: _resolveIdentificationTypeName(type),
+                description: type.description,
+              ))
+          .where((type) => type.name.trim().isNotEmpty)
+          .toList();
+
+      final selectedOrderedTypes =
+          _buildOrderedIdentificationTypes(normalizedTypes);
+
+      if (selectedOrderedTypes.isEmpty) {
+        final localTypes = _buildLocalColombianIdentificationTypes();
+        setState(() {
+          _identificationTypes = localTypes;
+          _selectedIdentificationType =
+              localTypes.isNotEmpty ? localTypes.first : null;
+          _isLoadingCatalogs = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _identificationTypes = selectedOrderedTypes;
+        if (_identificationTypes.isNotEmpty) {
+          _selectedIdentificationType = _identificationTypes.first;
+        }
+        _isLoadingCatalogs = false;
+      });
+    } catch (_) {
+      final localTypes = _buildLocalColombianIdentificationTypes();
+      setState(() {
+        _identificationTypes = localTypes;
+        _selectedIdentificationType =
+            localTypes.isNotEmpty ? localTypes.first : null;
+        _isLoadingCatalogs = false;
+      });
+    }
+  }
+
+  List<IdentificationTypeModel> _buildOrderedIdentificationTypes(
+    List<IdentificationTypeModel> normalizedTypes,
+  ) {
+    final typesByNormalizedName = <String, IdentificationTypeModel>{
+      for (final type in normalizedTypes) _normalizeText(type.name): type,
+    };
+
+    final selectedOrderedTypes = <IdentificationTypeModel>[];
+    for (final preferredName in _preferredColombianIdentificationTypes) {
+      final matched = typesByNormalizedName[_normalizeText(preferredName)];
+      if (matched != null &&
+          !selectedOrderedTypes.any((item) => item.id == matched.id)) {
+        selectedOrderedTypes.add(matched);
+      }
+    }
+
+    for (final type in normalizedTypes) {
+      if (!selectedOrderedTypes.any((item) => item.id == type.id)) {
+        selectedOrderedTypes.add(type);
+      }
+    }
+
+    return selectedOrderedTypes;
+  }
+
+  List<IdentificationTypeModel> _buildLocalColombianIdentificationTypes() {
+    return _fallbackIdentificationNamesById.entries
+        .map(
+          (entry) => IdentificationTypeModel(
+            id: entry.key,
+            name: entry.value,
+          ),
+        )
+        .toList()
+      ..sort((a, b) {
+        final indexA = _preferredColombianIdentificationTypes
+            .indexOf(_resolveIdentificationTypeName(a));
+        final indexB = _preferredColombianIdentificationTypes
+            .indexOf(_resolveIdentificationTypeName(b));
+        if (indexA == -1 && indexB == -1) return a.id.compareTo(b.id);
+        if (indexA == -1) return 1;
+        if (indexB == -1) return -1;
+        return indexA.compareTo(indexB);
+      });
+  }
+
+  String _resolveIdentificationTypeName(IdentificationTypeModel type) {
+    final rawName = type.name.trim();
+    if (rawName.isNotEmpty) return rawName;
+    return _fallbackIdentificationNamesById[type.id] ?? '';
+  }
+
+  String _normalizeText(String text) {
+    final lower = text.toLowerCase();
+    return lower
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('ñ', 'n')
+        .replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
   Future<void> _submitRegister() async {
@@ -395,13 +512,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: DropdownButton<IdentificationTypeModel>(
                                   value: _selectedIdentificationType,
                                   isExpanded: true,
+                                  style: GoogleFonts.poppins(
+                                    color: const Color(0xFF111827),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   icon: Icon(
                                     Icons.arrow_drop_down,
                                     color: Colors.grey,
-                                  ),
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.black87,
-                                    fontSize: 14,
                                   ),
                                   dropdownColor: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
@@ -729,8 +847,9 @@ class _RegisterPageState extends State<RegisterPage> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              color: selected ? Colors.black87 : null,
+              color: Colors.black87, // Siempre negro para máxima visibilidad
               fontSize: 14,
+              fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
         ),

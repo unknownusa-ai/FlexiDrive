@@ -15,7 +15,10 @@ class LocalNotificationDb {
 
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
+    await reload();
+  }
 
+  Future<void> reload() async {
     notifications
       ..clear()
       ..addAll(
@@ -26,6 +29,7 @@ class LocalNotificationDb {
       );
 
     _loaded = true;
+    changes.value = changes.value + 1;
   }
 
   Future<NotificationModel> addNotification({
@@ -52,6 +56,27 @@ class LocalNotificationDb {
     notifications.add(notification);
     changes.value = changes.value + 1;
     return notification;
+  }
+
+  Future<void> markAsRead(int notificationId) async {
+    await loadIfNeeded();
+    final updated = await ApiClient.instance.patchMap(
+      'notifications/$notificationId',
+      {'estado': 'leida'},
+    );
+    final updatedModel = NotificationModel.fromJson(updated);
+    final index = notifications.indexWhere((n) => n.id == notificationId);
+    if (index != -1) {
+      notifications[index] = updatedModel;
+    }
+    changes.value = changes.value + 1;
+  }
+
+  Future<void> deleteNotification(int notificationId) async {
+    await loadIfNeeded();
+    await ApiClient.instance.delete('notifications/$notificationId');
+    notifications.removeWhere((n) => n.id == notificationId);
+    changes.value = changes.value + 1;
   }
 
   List<T> _parseList<T>(

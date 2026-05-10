@@ -48,5 +48,35 @@ class RepositorioPagosLocal implements RepositorioPagosPuerto {
     return _origen.getPseByPaymentMethodId(paymentMethodId);
   }
 
+  @override
+  Future<PaymentMethodModel> crearMetodoPago({
+    required int userId,
+    required int paymentMethodTypeId,
+    bool isDefault = false,
+  }) {
+    return _origen.createPaymentMethod(
+      userId: userId,
+      paymentMethodTypeId: paymentMethodTypeId,
+      isDefault: isDefault,
+    );
+  }
+
+  @override
+  Future<CardModel> crearTarjeta({
+    required int paymentMethodId,
+    required int cardBrandId,
+    required int expirationMonth,
+    required int expirationYear,
+    String? last4,
+  }) {
+    return _origen.createCard(
+      paymentMethodId: paymentMethodId,
+      cardBrandId: cardBrandId,
+      expirationMonth: expirationMonth,
+      expirationYear: expirationYear,
+      last4: last4,
+    );
+  }
+
   LocalPaymentDb get origen => _origen;
 }

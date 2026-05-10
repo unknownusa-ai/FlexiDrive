@@ -40,18 +40,39 @@ class LocalAccountRepository {
     final userId = int.tryParse('${userMap['usuario_id'] ?? ''}');
     if (userId == null) return null;
 
-    await _db.reload();
-    for (final user in _db.users) {
-      if (user.id == userId) {
-        await _session.setUserId(user.id);
-        return user;
+    await _session.setUserId(userId);
+
+    try {
+      await _db.reload();
+      for (final user in _db.users) {
+        if (user.id == userId) {
+          return user;
+        }
       }
+    } catch (_) {
+      // Si falla la recarga local, mantenemos la sesion activa con datos minimos.
     }
-    return null;
+
+    return UserModel(
+      id: userId,
+      identificationTypeId: 0,
+      identificationNumber: '',
+      userTypeId: 0,
+      fullName: '${userMap['nombre_completo'] ?? ''}'.trim(),
+      email: email.trim().toLowerCase(),
+      phone: '',
+      password: '',
+      canPublish: false,
+    );
   }
 
   Future<List<UserModel>> getUsers() async {
     await init();
+    try {
+      await _db.reload();
+    } catch (_) {
+      // Keep existing cached list if refresh fails.
+    }
     return List<UserModel>.unmodifiable(_db.users);
   }
 
@@ -67,20 +88,24 @@ class LocalAccountRepository {
     required String phone,
     required String password,
     int identificationTypeId = 1,
-    int userTypeId = 2,
+    int? userTypeId,
     bool canPublish = false,
   }) async {
     await init();
 
     final normalizedEmail = email.trim().toLowerCase();
-    final response = await ApiClient.instance.postMap('auth/register', {
+    final payload = <String, dynamic>{
       'tipo_identificacion_id': identificationTypeId,
       'numero_identificacion': identificationNumber.trim(),
       'nombre_completo': fullName.trim(),
       'correo': normalizedEmail,
       'telefono': phone.trim(),
       'contrasena': password,
-    });
+    };
+    if (userTypeId != null) {
+      payload['tipo_usuario_id'] = userTypeId;
+    }
+    final response = await ApiClient.instance.postMap('auth/register', payload);
     final userId = int.tryParse('${response['usuario_id'] ?? ''}');
 
     await _db.reload();
@@ -92,7 +117,7 @@ class LocalAccountRepository {
       id: userId ?? _db.nextUserId(),
       identificationTypeId: identificationTypeId,
       identificationNumber: identificationNumber.trim(),
-      userTypeId: userTypeId,
+      userTypeId: userTypeId ?? 0,
       fullName: fullName.trim(),
       email: normalizedEmail,
       phone: phone.trim(),
@@ -115,7 +140,13 @@ class LocalAccountRepository {
     for (final user in _db.users) {
       if (user.id == currentId) return user;
     }
-    return null;
+
+    try {
+      final response = await ApiClient.instance.getMap('users/$currentId');
+      return UserModel.fromJson(response);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<UserPreferenceModel?> getCurrentUserPreference() async {

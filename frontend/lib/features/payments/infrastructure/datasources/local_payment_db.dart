@@ -111,4 +111,39 @@ class LocalPaymentDb {
       return null;
     }
   }
+
+  Future<PaymentMethodModel> createPaymentMethod({
+    required int userId,
+    required int paymentMethodTypeId,
+    bool isDefault = false,
+  }) async {
+    await loadIfNeeded();
+    final created = await ApiClient.instance.postMap('payment-methods', {
+      'usuario_id': userId,
+      'tipo_metodo_pago_id': paymentMethodTypeId,
+      'predeterminado': isDefault,
+    });
+    final model = PaymentMethodModel.fromJson(created);
+    paymentMethods.add(model);
+    return model;
+  }
+
+  Future<CardModel> createCard({
+    required int paymentMethodId,
+    required int cardBrandId,
+    required int expirationMonth,
+    required int expirationYear,
+    String? last4,
+  }) async {
+    await loadIfNeeded();
+    final created = await ApiClient.instance.postMap('cards', {
+      'metodo_pago_id': paymentMethodId,
+      'marca_tarjeta_id': cardBrandId,
+      'mes_expiracion': expirationMonth,
+      'ano_expiracion': expirationYear,
+    });
+    final model = CardModel.fromJson(created);
+    cards.add(model);
+    return model;
+  }
 }

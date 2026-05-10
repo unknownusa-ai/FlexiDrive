@@ -22,7 +22,7 @@ class AccountAccessUseCase {
     required String phone,
     required String password,
     int identificationTypeId = 1,
-    int userTypeId = 2,
+    int? userTypeId,
     bool canPublish = false,
   }) {
     return _repository.register(

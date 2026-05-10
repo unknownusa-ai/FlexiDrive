@@ -32,4 +32,12 @@ class NotificationAccessUseCase {
       sentAt: sentAt,
     );
   }
+
+  Future<void> markAsRead(int notificationId) {
+    return _repository.marcarComoLeida(notificationId);
+  }
+
+  Future<void> deleteNotification(int notificationId) {
+    return _repository.eliminarNotificacion(notificationId);
+  }
 }

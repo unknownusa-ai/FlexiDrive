@@ -40,5 +40,15 @@ class RepositorioNotificacionesLocal
     );
   }
 
+  @override
+  Future<void> marcarComoLeida(int notificationId) {
+    return _origen.markAsRead(notificationId);
+  }
+
+  @override
+  Future<void> eliminarNotificacion(int notificationId) {
+    return _origen.deleteNotification(notificationId);
+  }
+
   LocalNotificationDb get origen => _origen;
 }

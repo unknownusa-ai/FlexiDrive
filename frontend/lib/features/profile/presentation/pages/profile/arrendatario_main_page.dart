@@ -2,12 +2,16 @@
 import 'package:flutter/material.dart';
 // Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
+import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 // Paginas del arrendador
 import 'principal_arrendatario_page.dart'; // Dashboard principal
 import 'profile_arrendatario_page.dart'; // Perfil del arrendador
 import 'solicitudes_page.dart'; // Solicitudes de renta
 import 'publicar_vehiculo_page.dart'; // Publicar nuevo carro
 import 'alertas_page.dart'; // Notificaciones y alertas
+import 'package:flexidrive/injection_container.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 
@@ -32,9 +36,17 @@ class ArrendatarioMainPage extends StatefulWidget {
 
 // Estado de la pagina principal del arrendador
 class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
+  final AccountAccessUseCase _accountRepository =
+      InjectionContainer.instance.accountAccessUseCase;
+  final UserPreferencesUseCase _preferenceService =
+      InjectionContainer.instance.userPreferencesUseCase;
+  final NotificationAccessUseCase _notificationDb =
+      InjectionContainer.instance.notificationAccessUseCase;
+
   late int _selectedIndex; // Tab seleccionada actualmente
   late PageController _pageController; // Controlador del PageView
   int _historialTabIndex = 0; // Tab del historial (activas/completadas)
+  bool _hasUnreadAlerts = false;
 
   // Lista de paginas disponibles en el menu inferior
   List<Widget> get _pages => [
@@ -52,10 +64,14 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     super.initState();
     _selectedIndex = widget.initialIndex.clamp(0, _pages.length - 1);
     _pageController = PageController(initialPage: _selectedIndex);
+    _markArrendatarioModeAsActive();
+    _notificationDb.changes.addListener(_onNotificationsChanged);
+    _loadUnreadAlerts();
   }
 
   @override
   void dispose() {
+    _notificationDb.changes.removeListener(_onNotificationsChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -91,6 +107,44 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  Future<void> _markArrendatarioModeAsActive() async {
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (currentUser == null) return;
+    await _preferenceService.setArrendatarioMode(
+      userId: currentUser.id,
+      enabled: true,
+    );
+  }
+
+  void _onNotificationsChanged() {
+    _loadUnreadAlerts();
+  }
+
+  Future<void> _loadUnreadAlerts() async {
+    await _notificationDb.loadIfNeeded();
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (!mounted) return;
+
+    if (currentUser == null) {
+      setState(() {
+        _hasUnreadAlerts = false;
+      });
+      return;
+    }
+
+    final unreadCount = _notificationDb.notifications
+        .where(
+          (notification) =>
+              notification.userId == currentUser.id &&
+              notification.status == 'no_leida',
+        )
+        .length;
+
+    setState(() {
+      _hasUnreadAlerts = unreadCount > 0;
+    });
   }
 
   @override
@@ -183,7 +237,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
                 icon: Icons.notifications_none,
                 label: 'Alertas',
                 index: 2,
-                dot: true,
+                dot: _hasUnreadAlerts,
               ),
               _buildNavItem(
                 icon: Icons.person_outline,

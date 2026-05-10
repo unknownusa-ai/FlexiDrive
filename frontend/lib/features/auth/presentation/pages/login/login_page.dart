@@ -6,8 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 // Caso de uso para autenticacion
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
-// Auth feature - Hexagonal Architecture
-import 'package:flexidrive/features/auth/application/use_cases/auth_use_cases.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/injection_container.dart';
@@ -15,6 +14,7 @@ import 'package:flexidrive/injection_container.dart';
 import '../register/register_page.dart';
 // Página principal después de loguear
 import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
+import 'package:flexidrive/features/profile/presentation/pages/profile/arrendatario_main_page.dart';
 // Si olvidó la contraseña
 import 'forgot_password_page.dart';
 
@@ -35,9 +35,8 @@ class _LoginPageState extends State<LoginPage> {
   // Repositorio para validar credenciales
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
-  // Auth hexagonal use case (para migración futura)
-  final LoginUseCase _authLoginUseCase =
-      InjectionContainer.instance.authLoginUseCase;
+  final UserPreferencesUseCase _preferenceService =
+      InjectionContainer.instance.userPreferencesUseCase;
   // Ocultar/mostrar contraseña
   bool _obscurePassword = true;
   // Está enviando el formulario? (para evitar doble clic)
@@ -91,9 +90,6 @@ class _LoginPageState extends State<LoginPage> {
           .login(email: email, password: password)
           .timeout(const Duration(seconds: 10));
 
-      // También ejecutamos el nuevo use case hexagonal (para migración)
-      await _authLoginUseCase.execute(email: email, password: password);
-
       if (!mounted) return;
 
       if (user == null) {
@@ -104,8 +100,18 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
+      final isArrendatarioMode = await _preferenceService.getArrendatarioMode(
+        userId: user.id,
+        defaultValue: false,
+      );
+
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainPage()),
+        MaterialPageRoute(
+          builder: (_) => isArrendatarioMode
+              ? const ArrendatarioMainPage()
+              : const MainPage(),
+        ),
       );
     } catch (_) {
       if (!mounted) return;

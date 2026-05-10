@@ -1,12 +1,16 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
+import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
+import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
+import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 import 'publicar_vehiculo_page.dart';
 
-// Página principal del arrendador
-// Dashboard que muestra los vehículos del arrendador y estadísticas
+// PÃ¡gina principal del arrendador
+// Dashboard que muestra los Vehículos del arrendador y estadÃ­sticas
 class PrincipalArrendatarioPage extends StatefulWidget {
   const PrincipalArrendatarioPage({super.key});
 
@@ -15,15 +19,27 @@ class PrincipalArrendatarioPage extends StatefulWidget {
       _PrincipalArrendatarioPageState();
 }
 
-// Estado de la página principal del arrendador
-// Maneja la carga de vehículos y métricas
+// Estado de la pÃ¡gina principal del arrendador
+// Maneja la carga de Vehículos y mÃ©tricas
 class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
-  // Servicio para manejar vehículos
+  final AccountAccessUseCase _accountRepository =
+      InjectionContainer.instance.accountAccessUseCase;
+  final PublicationAccessUseCase _publicationDb =
+      InjectionContainer.instance.publicationAccessUseCase;
+  final ReservationAccessUseCase _reservationDb =
+      InjectionContainer.instance.reservationAccessUseCase;
+  final ReviewAccessUseCase _reviewDb =
+      InjectionContainer.instance.reviewAccessUseCase;
+  // Servicio para manejar Vehículos
   final VehicleInventoryUseCase _service =
       InjectionContainer.instance.vehicleInventoryUseCase;
-  // Lista de vehículos del arrendador
+  // Lista de Vehículos del arrendador
   List<Map<String, dynamic>> _misVehiculos = [];
-  // Indica si se están cargando los vehículos
+  // Nombre del usuario logueado para el header
+  String _firstName = 'Invitado';
+  // Solicitudes pendientes reales del backend
+  int _pendingRequests = 0;
+  // Indica si se estÃ¡n cargando los Vehículos
   bool _isLoading = true;
 
   @override
@@ -33,11 +49,133 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
   }
 
   Future<void> _cargarVehiculos() async {
-    await _service.init();
-    setState(() {
-      _misVehiculos = _service.getVehiculosByPropietario(1);
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      await Future.wait([
+        _service.init(),
+        _publicationDb.loadIfNeeded(),
+        _reservationDb.loadIfNeeded(),
+        _reviewDb.loadIfNeeded(),
+      ]);
+
+      final currentUser = await _accountRepository.getCurrentUser();
+      if (currentUser == null) {
+        if (!mounted) return;
+        setState(() {
+          _misVehiculos = [];
+          _pendingRequests = 0;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final ownerPublications = _publicationDb.publications
+          .where((publication) =>
+              publication.userId == currentUser.id && publication.active)
+          .toList();
+      final ownerPublicationIds =
+          ownerPublications.map((publication) => publication.id).toSet();
+
+      final reservationsForOwner = _reservationDb.reservations
+          .where(
+            (reservation) =>
+                ownerPublicationIds.contains(reservation.publicationId),
+          )
+          .toList();
+
+      final pendingRequests =
+          reservationsForOwner.where((reservation) => reservation.statusId == 1).length;
+
+      final vehiclesById = <int, Map<String, dynamic>>{
+        for (final vehicle in _service.getVehiculos())
+          _asInt(vehicle['vehiculo_id'] ?? vehicle['id']): vehicle,
+      };
+      final usersById = <int, Map<String, dynamic>>{
+        for (final user in _service.usuarios)
+          _asInt(user['usuario_id'] ?? user['id']): user,
+      };
+      final opinionsById = {
+        for (final opinion in _reviewDb.opinions) opinion.id: opinion,
+      };
+      final dailyPricesByPublicationId = <int, int>{
+        for (final price in _publicationDb.publicationPrices
+            .where((item) => item.periodTypeId == 1))
+          price.publicationId: price.price.round(),
+      };
+
+      final ownerVehicles = <Map<String, dynamic>>[];
+      for (final publication in ownerPublications) {
+        final vehicle = vehiclesById[publication.vehicleId];
+        if (vehicle == null) continue;
+
+        final reservations = reservationsForOwner
+            .where((reservation) => reservation.publicationId == publication.id)
+            .toList();
+        final activeReservations = reservations
+            .where((reservation) => reservation.statusId == 2)
+            .toList();
+        final activeReservation =
+            activeReservations.isEmpty ? null : activeReservations.first;
+        final completedTrips =
+            reservations.where((reservation) => reservation.statusId == 3).length;
+        final earnings = reservations
+            .where((reservation) =>
+                reservation.statusId == 2 || reservation.statusId == 3)
+            .fold<double>(0, (sum, reservation) => sum + reservation.totalValue);
+
+        final publicationReviews = _reviewDb.reviews
+            .where((review) => review.publicationId == publication.id)
+            .toList();
+        final ratings = publicationReviews
+            .map((review) => opinionsById[review.opinionId]?.rating)
+            .whereType<int>()
+            .toList();
+        final averageRating = ratings.isEmpty
+            ? 5.0
+            : ratings.reduce((a, b) => a + b) / ratings.length;
+
+        final renter = activeReservation == null
+            ? null
+            : usersById[activeReservation.userId];
+        final renterName = renter == null
+            ? 'Usuario'
+            : _resolveUserName(renter);
+
+        ownerVehicles.add({
+          ...vehicle,
+          'precio_dia': dailyPricesByPublicationId[publication.id] ??
+              _asInt(vehicle['precio_dia']),
+          'calificacion': averageRating,
+          'viajes': completedTrips,
+          'ganado': earnings.round(),
+          'estado': activeReservation == null ? 'DISPONIBLE' : 'RENTADO',
+          'rentado_a': renterName,
+          'fecha_fin_renta': activeReservation == null
+              ? null
+              : _formatDate(activeReservation.endDate),
+        });
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _firstName = _extractFirstName(currentUser.fullName);
+        _pendingRequests = pendingRequests;
+        _misVehiculos = ownerVehicles;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _misVehiculos = [];
+        _pendingRequests = 0;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -124,7 +262,16 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Modo Arrendatario 🏠',
+                      'Modo Arrendatario',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$_firstName, tus publicaciones',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -268,6 +415,16 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
 
   Widget _buildPendingRequestCard(BuildContext context, bool isSmallPhone) {
     final theme = Theme.of(context);
+    final hasPending = _pendingRequests > 0;
+    final titleColor =
+        hasPending ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final titleText = hasPending
+        ? '$_pendingRequests ${_pendingRequests == 1 ? 'solicitud pendiente' : 'solicitudes pendientes'}'
+        : 'Sin solicitudes pendientes';
+    final subtitleText = hasPending
+        ? 'Revisa y acepta solicitudes de renta'
+        : 'No tienes solicitudes por revisar';
+
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
       decoration: BoxDecoration(
@@ -280,8 +437,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
           Container(
             width: 44,
             height: 44,
-            decoration: const BoxDecoration(
-              color: Color(0xFFEF4444),
+            decoration: BoxDecoration(
+              color: titleColor,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.access_time, color: Colors.white, size: 22),
@@ -292,16 +449,16 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '1 solicitud pendiente',
+                  titleText,
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFEF4444),
+                    color: titleColor,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Revisa y acepta solicitudes de renta',
+                  subtitleText,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -310,7 +467,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: const Color(0xFFEF4444), size: 24),
+          Icon(Icons.chevron_right, color: titleColor, size: 24),
         ],
       ),
     );
@@ -358,10 +515,11 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
     final subtitle =
         '${vehiculo['marca'] ?? ''} • ${vehiculo['categoria'] ?? 'Sedán'}';
-    final rating = (vehiculo['calificacion'] ?? 4.5).toString();
-    final trips = '${vehiculo['viajes'] ?? 0} viajes';
-    final pricePerDay = '\$${_formatNumber(vehiculo['precio_dia'] ?? 0)}/día';
-    final earned = '\$${_formatNumber(vehiculo['ganado'] ?? 0)}';
+    final rating = _formatRating(vehiculo['calificacion']);
+    final tripCount = _asInt(vehiculo['viajes']);
+    final trips = '$tripCount ${tripCount == 1 ? 'viaje' : 'viajes'}';
+    final pricePerDay = '\$${_formatNumber(_asInt(vehiculo['precio_dia']))}/día';
+    final earned = '\$${_formatNumber(_asInt(vehiculo['ganado']))}';
     final status = vehiculo['estado'] as String? ?? 'DISPONIBLE';
     final theme = Theme.of(context);
     return Container(
@@ -639,9 +797,9 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
   }
 
   int _calcularSaldo() {
-    // Saldo disponible = ganancias totales - un estimado de retención
+    // Saldo disponible = ganancias totales - un estimado de retenciÃ³n
     final ganancias = _calcularGanancias();
-    return (ganancias * 0.3).round();
+    return (ganancias * 0.7).round();
   }
 
   int _calcularRentasActivas() {
@@ -652,6 +810,38 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     return _misVehiculos.fold(0, (sum, v) => sum + (v['ganado'] as int? ?? 0));
   }
 
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.round();
+    return int.tryParse('$value') ?? 0;
+  }
+
+  String _formatRating(dynamic value) {
+    final parsed = value is num ? value.toDouble() : double.tryParse('$value');
+    return (parsed ?? 5.0).toStringAsFixed(1);
+  }
+
+  String _extractFirstName(String fullName) {
+    final trimmed = fullName.trim();
+    if (trimmed.isEmpty) return 'Invitado';
+    return trimmed.split(' ').first;
+  }
+
+  String _resolveUserName(Map<String, dynamic> user) {
+    final fullName =
+        '${user['nombre_completo'] ?? user['full_name'] ?? ''}'.trim();
+    if (fullName.isNotEmpty) return fullName;
+    final email = '${user['correo'] ?? user['email'] ?? ''}'.trim();
+    if (email.isNotEmpty) return email;
+    return 'Usuario';
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
+  }
+
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+$)'),
@@ -659,3 +849,6 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         );
   }
 }
+
+
+

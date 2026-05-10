@@ -68,6 +68,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   List<dynamic> _userPseAccounts = [];
   Map<String, dynamic>? _selectedPaymentMethod;
   bool _isLoadingPaymentMethods = true;
+  bool _isSavingCard = false;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -94,6 +95,183 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       description:
           'Tu reserva $codigoReserva de ${widget.vehiculoBrand} fue confirmada para ${_formatearFechaCorta(fechaInicio)} en ${widget.lugarRecogida}.',
     );
+  }
+
+  Future<void> _showPopupMessage(String title, String message) async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Aceptar',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _findCardPaymentTypeId() {
+    final cardType = _catalogDb.paymentMethodTypes.firstWhere(
+      (type) => type.name.toLowerCase().contains('tarjeta'),
+      orElse: () => _catalogDb.paymentMethodTypes.first,
+    );
+    return cardType.id;
+  }
+
+  int _findCardBrandId(String rawCardNumber) {
+    final number = rawCardNumber.replaceAll(RegExp(r'\D'), '');
+    final normalizedBrands = _catalogDb.cardBrands
+        .map((b) => {'id': b.id, 'name': b.name.toLowerCase()})
+        .toList();
+
+    if (number.startsWith('4')) {
+      final visa = normalizedBrands.firstWhere(
+        (b) => (b['name'] as String).contains('visa'),
+        orElse: () => normalizedBrands.first,
+      );
+      return visa['id'] as int;
+    }
+    if (number.startsWith('5') || number.startsWith('2')) {
+      final mc = normalizedBrands.firstWhere(
+        (b) =>
+            (b['name'] as String).contains('master') ||
+            (b['name'] as String).contains('mc'),
+        orElse: () => normalizedBrands.first,
+      );
+      return mc['id'] as int;
+    }
+    if (number.startsWith('3')) {
+      final amex = normalizedBrands.firstWhere(
+        (b) => (b['name'] as String).contains('amex'),
+        orElse: () => normalizedBrands.first,
+      );
+      return amex['id'] as int;
+    }
+    return normalizedBrands.first['id'] as int;
+  }
+
+  ({int month, int year})? _parseExpiry(String value) {
+    final normalized = value.trim();
+    final parts = normalized.split('/');
+    if (parts.length != 2) return null;
+    final month = int.tryParse(parts[0]);
+    final shortYear = int.tryParse(parts[1]);
+    if (month == null || shortYear == null) return null;
+    if (month < 1 || month > 12) return null;
+    final fullYear = shortYear < 100 ? 2000 + shortYear : shortYear;
+    return (month: month, year: fullYear);
+  }
+
+  Future<void> _saveCard() async {
+    if (_isSavingCard) return;
+    if (_numeroTarjetaCtrl.text.trim().isEmpty ||
+        _titularCtrl.text.trim().isEmpty ||
+        _vencimientoCtrl.text.trim().isEmpty ||
+        _cvvCtrl.text.trim().isEmpty) {
+      await _showPopupMessage(
+        'Campos incompletos',
+        'Completa todos los datos de la tarjeta para guardarla.',
+      );
+      return;
+    }
+
+    final expiry = _parseExpiry(_vencimientoCtrl.text);
+    if (expiry == null) {
+      await _showPopupMessage(
+        'Vencimiento inválido',
+        'Usa formato MM/AA para la fecha de vencimiento.',
+      );
+      return;
+    }
+
+    await _sessionStore.init();
+    final currentUserId = _sessionStore.userId;
+    if (currentUserId == null) {
+      await _showPopupMessage(
+        'Sesión requerida',
+        'Debes iniciar sesión para guardar una tarjeta.',
+      );
+      return;
+    }
+
+    await _catalogDb.loadIfNeeded();
+    if (_catalogDb.paymentMethodTypes.isEmpty || _catalogDb.cardBrands.isEmpty) {
+      await _showPopupMessage(
+        'Catálogos incompletos',
+        'No fue posible cargar tipos de pago o marcas de tarjeta.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isSavingCard = true;
+    });
+
+    try {
+      final paymentMethod = await _paymentDb.createPaymentMethod(
+        userId: currentUserId,
+        paymentMethodTypeId: _findCardPaymentTypeId(),
+      );
+
+      await _paymentDb.createCard(
+        paymentMethodId: paymentMethod.id,
+        cardBrandId: _findCardBrandId(_numeroTarjetaCtrl.text),
+        expirationMonth: expiry.month,
+        expirationYear: expiry.year,
+      );
+
+      await _loadUserPaymentMethods();
+      final latestCard = _userCards.isNotEmpty ? _userCards.last : null;
+      if (latestCard != null) {
+        setState(() {
+          _selectedPaymentMethod = latestCard;
+          _metodoPago = 'Tarjeta';
+        });
+      }
+
+      _numeroTarjetaCtrl.clear();
+      _titularCtrl.clear();
+      _vencimientoCtrl.clear();
+      _cvvCtrl.clear();
+
+      await _showPopupMessage(
+        'Tarjeta guardada',
+        'Tu tarjeta se guardó correctamente y ya puedes usarla en esta reserva.',
+      );
+    } catch (e) {
+      await _showPopupMessage(
+        'No se pudo guardar',
+        'No fue posible guardar la tarjeta. Intenta nuevamente.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingCard = false;
+        });
+      }
+    }
   }
 
   @override
@@ -662,6 +840,33 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _isSavingCard ? null : _saveCard,
+            icon: _isSavingCard
+                ? const SizedBox(
+                    height: 14,
+                    width: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_outlined),
+            label: Text(
+              _isSavingCard ? 'Guardando...' : 'Guardar tarjeta',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFF4F46E5)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -1253,13 +1458,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                     _titularCtrl.text.isEmpty ||
                     _vencimientoCtrl.text.isEmpty ||
                     _cvvCtrl.text.isEmpty) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'Por favor completa todos los campos de la tarjeta'),
-                      backgroundColor: Colors.red,
-                    ),
+                  await _showPopupMessage(
+                    'Campos incompletos',
+                    'Por favor completa todos los campos de la tarjeta.',
                   );
                   return;
                 }
@@ -1267,12 +1468,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
               // Validate payment method selection
               if (_metodoPago == 'Tarjeta' && _selectedPaymentMethod == null) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Por favor selecciona un método de pago'),
-                    backgroundColor: Colors.red,
-                  ),
+                await _showPopupMessage(
+                  'Método de pago',
+                  'Por favor selecciona un método de pago.',
                 );
                 return;
               }
@@ -1286,14 +1484,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
               final currentUserId = _sessionStore.userId;
 
               if (currentUserId == null) {
-                // Show error if no user is logged in
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Debes iniciar sesión para hacer una reserva'),
-                    backgroundColor: Colors.red,
-                  ),
+                await _showPopupMessage(
+                  'Sesión requerida',
+                  'Debes iniciar sesión para hacer una reserva.',
                 );
                 return;
               }
@@ -1308,13 +1501,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
                 if (userMethods.isEmpty) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('No hay métodos de pago de tarjeta disponibles'),
-                      backgroundColor: Colors.red,
-                    ),
+                  await _showPopupMessage(
+                    'Sin tarjetas',
+                    'No hay métodos de pago con tarjeta disponibles.',
                   );
                   return;
                 }
@@ -1328,12 +1517,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
                 if (userMethods.isEmpty) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('No hay métodos de pago PSE disponibles'),
-                      backgroundColor: Colors.red,
-                    ),
+                  await _showPopupMessage(
+                    'Sin cuentas PSE',
+                    'No hay métodos de pago PSE disponibles.',
                   );
                   return;
                 }

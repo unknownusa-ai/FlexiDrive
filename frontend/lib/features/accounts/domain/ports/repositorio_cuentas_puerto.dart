@@ -13,7 +13,7 @@ abstract class RepositorioCuentasPuerto {
     required String phone,
     required String password,
     int identificationTypeId,
-    int userTypeId,
+    int? userTypeId,
     bool canPublish,
   });
   Future<void> logout();
