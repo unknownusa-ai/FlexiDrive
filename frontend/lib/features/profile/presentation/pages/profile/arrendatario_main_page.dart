@@ -46,11 +46,12 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
   late int _selectedIndex; // Tab seleccionada actualmente
   late PageController _pageController; // Controlador del PageView
   int _historialTabIndex = 0; // Tab del historial (activas/completadas)
+  int _dashboardRefreshToken = 0;
   bool _hasUnreadAlerts = false;
 
   // Lista de paginas disponibles en el menu inferior
   List<Widget> get _pages => [
-        const PrincipalArrendatarioPage(),
+        PrincipalArrendatarioPage(refreshToken: _dashboardRefreshToken),
         SolicitudesPage(
           key: ValueKey<int>(_historialTabIndex),
           initialTab: _historialTabIndex,
@@ -204,13 +205,20 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
                 index: 1,
               ),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final didPublish = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const PublicarVehiculoPage(),
                     ),
                   );
+                  if (didPublish == true) {
+                    setState(() {
+                      _dashboardRefreshToken++;
+                      _selectedIndex = 0;
+                    });
+                    _pageController.jumpToPage(0);
+                  }
                 },
                 child: Container(
                   width: 74,

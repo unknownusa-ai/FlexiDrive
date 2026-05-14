@@ -17,4 +17,12 @@ class PublicationAccessUseCase {
   List<PublicationImageModel> get publicationImages {
     return _repository.obtenerImagenesPublicacion();
   }
+
+  void addPublication(PublicationModel publication) {
+    _repository.agregarPublicacion(publication);
+  }
+
+  void addPublicationPrice(PublicationPriceModel publicationPrice) {
+    _repository.agregarPrecioPublicacion(publicationPrice);
+  }
 }

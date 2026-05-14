@@ -1,10 +1,13 @@
 import 'package:flexidrive/core/api/api_client.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 // Modelos de categorías de carros
 import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
 
 // Servicio que simula un backend
 // En realidad todo está en JSON local, pero parece un backend real
 class VehiculoService {
+  static const _createdVehiclesKey = 'local_created_vehicles_v1';
   // Lista de carros en memoria (como un ArrayList de Java)
   List<Map<String, dynamic>> vehiculos = [];
   // Lista de usuarios
@@ -29,6 +32,8 @@ class VehiculoService {
 
     // Convertimos al formato viejo que usa la app
     vehiculos = rawVehicles.map((v) => _mapVehicleToLegacyFormat(v)).toList();
+    final createdVehicles = await _loadCreatedVehicles();
+    vehiculos.addAll(createdVehicles);
 
     // Cargamos usuarios
     usuarios = await _loadList('users');
@@ -157,9 +162,44 @@ class VehiculoService {
   /// CREATE - Agregar nuevo vehículo al ArrayList
   void addVehiculo(Map<String, dynamic> vehiculo) {
     // Generar ID autoincremental
-    final nuevoId = vehiculos.isEmpty ? 1 : vehiculos.last['id'] + 1;
+    final maxId = vehiculos
+        .map((v) => (v['id'] as num?)?.toInt() ?? 0)
+        .fold<int>(0, (current, next) => next > current ? next : current);
+    final nuevoId = maxId + 1;
     vehiculo['id'] = nuevoId;
+    vehiculo['vehiculo_id'] = nuevoId;
+    vehiculo['_is_local_created'] = true;
     vehiculos.add(vehiculo);
+    _saveCreatedVehicles();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadCreatedVehicles() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_createdVehiclesKey);
+    if (raw == null || raw.isEmpty) return <Map<String, dynamic>>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return <Map<String, dynamic>>[];
+      return decoded
+          .whereType<Map>()
+          .map(
+            (item) => item.map(
+              (key, value) => MapEntry(key.toString(), value),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return <Map<String, dynamic>>[];
+    }
+  }
+
+  void _saveCreatedVehicles() {
+    SharedPreferences.getInstance().then((prefs) {
+      final created = vehiculos
+          .where((vehicle) => vehicle['_is_local_created'] == true)
+          .toList();
+      prefs.setString(_createdVehiclesKey, jsonEncode(created));
+    });
   }
 
   /// UPDATE - Editar vehículo en el ArrayList

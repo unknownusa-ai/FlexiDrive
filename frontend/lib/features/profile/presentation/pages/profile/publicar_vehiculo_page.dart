@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
-import 'principal_arrendatario_page.dart';
+import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
+import 'package:flexidrive/features/accounts/infrastructure/datasources/local_account_db.dart';
+import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
+import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
+import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
+import 'package:flexidrive/injection_container.dart';
 
 // Página para publicar vehículo
 // Formulario para que los arrendadores publiquen sus carros
@@ -15,12 +20,20 @@ class PublicarVehiculoPage extends StatefulWidget {
 // Estado de la página de publicación de vehículo
 // Maneja el formulario de publicación paso a paso
 class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
+  final AccountAccessUseCase _accountRepository =
+      InjectionContainer.instance.accountAccessUseCase;
+  final VehicleInventoryUseCase _vehicleInventory =
+      InjectionContainer.instance.vehicleInventoryUseCase;
+  final PublicationAccessUseCase _publicationAccess =
+      InjectionContainer.instance.publicationAccessUseCase;
+
   // Paso actual del formulario (1-4)
   int currentStep = 1;
   // Categoría seleccionada del vehículo
   String? selectedCategory;
   // Tipo de transmisión seleccionada
   String? selectedTransmission;
+  String? selectedFuelType;
   // Número de asientos seleccionado
   int? selectedSeats;
   // Controladores para los campos del formulario
@@ -30,6 +43,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   final TextEditingController descripcionController = TextEditingController();
   final TextEditingController precioController = TextEditingController();
   final TextEditingController ubicacionController = TextEditingController();
+  List<String> availableCities = <String>[];
+  bool isLoadingCities = true;
 
   final List<String> categories = [
     'Sedán',
@@ -39,6 +54,30 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     'Deportivo',
     'Eléctrico',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCities();
+  }
+
+  Future<void> _loadCities() async {
+    await LocalAccountDb.instance.loadIfNeeded();
+    final cities = LocalAccountDb.instance.referenceCities
+        .where((city) => city.trim().isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+
+    if (!mounted) return;
+    setState(() {
+      availableCities = cities;
+      isLoadingCities = false;
+      if (cities.isNotEmpty && !cities.contains(ubicacionController.text)) {
+        ubicacionController.clear();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +225,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       ),
       const SizedBox(height: 20),
       _buildTransmissionSection(),
+      const SizedBox(height: 20),
+      _buildFuelTypeSection(),
       const SizedBox(height: 20),
       _buildSeatsSection(),
       const SizedBox(height: 20),
@@ -463,6 +504,63 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  Widget _buildFuelTypeSection() {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tipo de motor *',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildOptionChip(
+                label: 'Combustión',
+                selected: selectedFuelType == 'Combustión',
+                onTap: () {
+                  setState(() {
+                    selectedFuelType = 'Combustión';
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildOptionChip(
+                label: 'Híbrido',
+                selected: selectedFuelType == 'Híbrido',
+                onTap: () {
+                  setState(() {
+                    selectedFuelType = 'Híbrido';
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildOptionChip(
+                label: 'Eléctrico',
+                selected: selectedFuelType == 'Eléctrico',
+                onTap: () {
+                  setState(() {
+                    selectedFuelType = 'Eléctrico';
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildDescriptionSection() {
     final theme = Theme.of(context);
     return Column(
@@ -588,6 +686,9 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
 
   Widget _buildLocationField() {
     final theme = Theme.of(context);
+    final selectedLocation = availableCities.contains(ubicacionController.text)
+        ? ubicacionController.text
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -600,16 +701,24 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: ubicacionController,
-          onChanged: (_) => setState(() {}),
+        DropdownButtonFormField<String>(
+          initialValue: selectedLocation,
+          isExpanded: true,
+          onChanged: isLoadingCities
+              ? null
+              : (value) {
+                  ubicacionController.text = value ?? '';
+                  setState(() {});
+                },
           decoration: InputDecoration(
             prefixIcon: Icon(
               Icons.location_on_outlined,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               size: 28,
             ),
-            hintText: '',
+            hintText: isLoadingCities
+                ? 'Cargando ciudades...'
+                : 'Selecciona una ciudad',
             filled: true,
             fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
             border: OutlineInputBorder(
@@ -627,9 +736,28 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
+          items: availableCities
+              .map(
+                (city) => DropdownMenuItem<String>(
+                  value: city,
+                  child: Text(
+                    city,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
           style: GoogleFonts.inter(
             fontSize: 16,
             color: theme.colorScheme.onSurface,
+          ),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -739,6 +867,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   bool _isStepTwoValid() {
     return anoController.text.isNotEmpty &&
         selectedTransmission != null &&
+        selectedFuelType != null &&
         selectedSeats != null;
   }
 
@@ -780,6 +909,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       currentStep = 1;
       selectedCategory = null;
       selectedTransmission = null;
+      selectedFuelType = null;
       selectedSeats = null;
       nombreController.clear();
       marcaController.clear();
@@ -793,12 +923,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   void _handleGoHomeFromSuccess(BuildContext dialogContext) {
     Navigator.of(dialogContext).pop();
     if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => const PrincipalArrendatarioPage(),
-      ),
-      (route) => false,
-    );
+    Navigator.of(context).pop(true);
   }
 
   void _handlePublishAnotherVehicle(BuildContext dialogContext) {
@@ -1023,6 +1148,118 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  int _parsePriceValue() {
+    final digits = precioController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
+  }
+
+  int _resolveNextVehicleId() {
+    final vehicles = _vehicleInventory.getVehiculos();
+    if (vehicles.isEmpty) return 1;
+    final ids = vehicles
+        .map((vehicle) => vehicle['vehiculo_id'] ?? vehicle['id'])
+        .map((rawId) => int.tryParse(rawId.toString()) ?? 0);
+    final maxId =
+        ids.fold<int>(0, (current, next) => next > current ? next : current);
+    return maxId + 1;
+  }
+
+  int _resolveNextPublicationId() {
+    if (_publicationAccess.publications.isEmpty) return 1;
+    final maxId = _publicationAccess.publications
+        .map((publication) => publication.id)
+        .reduce((current, next) => current > next ? current : next);
+    return maxId + 1;
+  }
+
+  int _resolveNextPublicationPriceId() {
+    if (_publicationAccess.publicationPrices.isEmpty) return 1;
+    final maxId = _publicationAccess.publicationPrices
+        .map((price) => price.id)
+        .reduce((current, next) => current > next ? current : next);
+    return maxId + 1;
+  }
+
+  int _categoryToId(String? category) {
+    switch (category) {
+      case 'Sedán':
+        return 1;
+      case 'SUV':
+        return 2;
+      case 'Compacto':
+        return 3;
+      case 'Premium':
+        return 4;
+      case 'Deportivo':
+        return 4;
+      case 'Eléctrico':
+        return 3;
+      default:
+        return 1;
+    }
+  }
+
+  Future<void> _publishVehicle() async {
+    await _vehicleInventory.init();
+    await _publicationAccess.loadIfNeeded();
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (currentUser == null) return;
+
+    final nextVehicleId = _resolveNextVehicleId();
+    final pricePerDay = _parsePriceValue();
+    final publicationId = _resolveNextPublicationId();
+    final publicationPriceId = _resolveNextPublicationPriceId();
+    final vehicleName = nombreController.text.trim();
+    final location = _capitalizeWords(ubicacionController.text);
+
+    _vehicleInventory.addVehiculo({
+      'id': nextVehicleId,
+      'vehiculo_id': nextVehicleId,
+      'marca': marcaController.text.trim(),
+      'modelo': vehicleName,
+      'anio': int.tryParse(anoController.text.trim()) ?? DateTime.now().year,
+      'categoria': selectedCategory ?? 'Sedán',
+      'categoria_vehiculo_id': _categoryToId(selectedCategory),
+      'transmision': selectedTransmission ?? 'Automática',
+      'asientos': selectedSeats ?? 5,
+      'puertos': selectedSeats ?? 5,
+      'precio_hora': (pricePerDay / 8).round(),
+      'precio_dia': pricePerDay,
+      'precio_semana': pricePerDay * 6,
+      'ubicacion': location,
+      'propietario_id': currentUser.id,
+      'imagen': 'assets/imagenes_carros/mazda3.jpg',
+      'descripcion': descripcionController.text.trim().isEmpty
+          ? 'Vehículo publicado por usuario'
+          : descripcionController.text.trim(),
+      'calificacion': 5.0,
+      'resenas': 0,
+      'disponible': true,
+      'combustible': selectedFuelType ?? 'Combustión',
+      'color': 'Negro',
+      'aire_acondicionado': true,
+    });
+
+    _publicationAccess.addPublication(
+      PublicationModel(
+        id: publicationId,
+        userId: currentUser.id,
+        vehicleId: nextVehicleId,
+        publishDate: DateTime.now(),
+        active: true,
+      ),
+    );
+
+    _publicationAccess.addPublicationPrice(
+      PublicationPriceModel(
+        id: publicationPriceId,
+        publicationId: publicationId,
+        periodTypeId: 1,
+        price: pricePerDay.toDouble(),
+      ),
+    );
+  }
+
   Widget _buildBottomButton(bool isSmallPhone) {
     final isStepOneValid = _isFormValid();
     final isStepTwoValid = _isStepTwoValid();
@@ -1178,7 +1415,10 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                         child: ElevatedButton(
                           onPressed: isStepThreeValid
                               ? () {
-                                  _showPublishSuccessDialog();
+                                  _publishVehicle().then((_) {
+                                    if (!mounted) return;
+                                    _showPublishSuccessDialog();
+                                  });
                                 }
                               : null,
                           style: ElevatedButton.styleFrom(
@@ -1192,7 +1432,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                             ),
                           ),
                           child: Text(
-                            'Publicar Vehículo 🚗',
+                            'Publicar vehículo',
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

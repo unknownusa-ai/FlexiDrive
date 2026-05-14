@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
@@ -12,7 +12,9 @@ import 'publicar_vehiculo_page.dart';
 // PÃ¡gina principal del arrendador
 // Dashboard que muestra los Vehículos del arrendador y estadÃ­sticas
 class PrincipalArrendatarioPage extends StatefulWidget {
-  const PrincipalArrendatarioPage({super.key});
+  const PrincipalArrendatarioPage({super.key, this.refreshToken = 0});
+
+  final int refreshToken;
 
   @override
   State<PrincipalArrendatarioPage> createState() =>
@@ -46,6 +48,14 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
   void initState() {
     super.initState();
     _cargarVehiculos();
+  }
+
+  @override
+  void didUpdateWidget(covariant PrincipalArrendatarioPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _cargarVehiculos();
+    }
   }
 
   Future<void> _cargarVehiculos() async {
@@ -88,8 +98,9 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
           )
           .toList();
 
-      final pendingRequests =
-          reservationsForOwner.where((reservation) => reservation.statusId == 1).length;
+      final pendingRequests = reservationsForOwner
+          .where((reservation) => reservation.statusId == 1)
+          .length;
 
       final vehiclesById = <int, Map<String, dynamic>>{
         for (final vehicle in _service.getVehiculos())
@@ -121,12 +132,14 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
             .toList();
         final activeReservation =
             activeReservations.isEmpty ? null : activeReservations.first;
-        final completedTrips =
-            reservations.where((reservation) => reservation.statusId == 3).length;
+        final completedTrips = reservations
+            .where((reservation) => reservation.statusId == 3)
+            .length;
         final earnings = reservations
             .where((reservation) =>
                 reservation.statusId == 2 || reservation.statusId == 3)
-            .fold<double>(0, (sum, reservation) => sum + reservation.totalValue);
+            .fold<double>(
+                0, (sum, reservation) => sum + reservation.totalValue);
 
         final publicationReviews = _reviewDb.reviews
             .where((review) => review.publicationId == publication.id)
@@ -142,9 +155,8 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         final renter = activeReservation == null
             ? null
             : usersById[activeReservation.userId];
-        final renterName = renter == null
-            ? 'Usuario'
-            : _resolveUserName(renter);
+        final renterName =
+            renter == null ? 'Usuario' : _resolveUserName(renter);
 
         ownerVehicles.add({
           ...vehicle,
@@ -303,13 +315,16 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                   ),
                 ),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    final didPublish = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const PublicarVehiculoPage(),
                       ),
                     );
+                    if (didPublish == true) {
+                      _cargarVehiculos();
+                    }
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -511,14 +526,16 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     required String? rentInfo,
   }) {
     final imagePath = vehiculo['imagen'] as String?;
-    final title =
-        '${vehiculo['marca'] ?? 'Vehículo'} ${vehiculo['modelo'] ?? ''}';
+    final title = (vehiculo['modelo'] as String?)?.trim().isNotEmpty == true
+        ? (vehiculo['modelo'] as String).trim()
+        : (vehiculo['marca'] as String? ?? 'Vehículo');
     final subtitle =
         '${vehiculo['marca'] ?? ''} • ${vehiculo['categoria'] ?? 'Sedán'}';
     final rating = _formatRating(vehiculo['calificacion']);
     final tripCount = _asInt(vehiculo['viajes']);
     final trips = '$tripCount ${tripCount == 1 ? 'viaje' : 'viajes'}';
-    final pricePerDay = '\$${_formatNumber(_asInt(vehiculo['precio_dia']))}/día';
+    final pricePerDay =
+        '\$${_formatNumber(_asInt(vehiculo['precio_dia']))}/día';
     final earned = '\$${_formatNumber(_asInt(vehiculo['ganado']))}';
     final status = vehiculo['estado'] as String? ?? 'DISPONIBLE';
     final theme = Theme.of(context);
@@ -849,6 +866,3 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         );
   }
 }
-
-
-

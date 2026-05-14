@@ -26,5 +26,15 @@ class RepositorioPublicacionesLocal implements RepositorioPublicacionesPuerto {
     return _origen.publicationImages;
   }
 
+  @override
+  void agregarPublicacion(PublicationModel publication) {
+    _origen.addPublication(publication);
+  }
+
+  @override
+  void agregarPrecioPublicacion(PublicationPriceModel publicationPrice) {
+    _origen.addPublicationPrice(publicationPrice);
+  }
+
   LocalPublicationDb get origen => _origen;
 }
