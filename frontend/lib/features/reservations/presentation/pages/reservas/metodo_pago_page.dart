@@ -5,10 +5,10 @@ import 'package:flexidrive/core/session/local_session_store.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/reservations/domain/entities/reservation_models.dart';
 import 'package:flexidrive/features/payments/application/use_cases/payment_access_use_case.dart';
+import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
 import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
-import 'package:flexidrive/features/reservations/application/state/reservas_store.dart';
 import 'package:flexidrive/injection_container.dart';
 import 'reserva_confirmada_page.dart';
 
@@ -61,6 +61,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       InjectionContainer.instance.catalogAccessUseCase;
   final ReservationAccessUseCase _reservationDb =
       InjectionContainer.instance.reservationAccessUseCase;
+  final PublicationAccessUseCase _publicationDb =
+      InjectionContainer.instance.publicationAccessUseCase;
   final NotificationAccessUseCase _notificationDb =
       InjectionContainer.instance.notificationAccessUseCase;
 
@@ -80,7 +82,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       _isDark ? const Color(0xFF2E3355) : const Color(0xFFE2E8F0);
   Color get _cardBgColor => _isDark ? const Color(0xFF1A1F35) : Colors.white;
 
-  Future<void> _crearNotificacionReserva({
+  Future<void> _crearNotificacionSolicitudArrendatario({
     required String codigoReserva,
     required DateTime fechaInicio,
   }) async {
@@ -91,10 +93,34 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     await _notificationDb.addNotification(
       userId: currentUserId,
       categoryId: _reservaCategoryId,
-      subject: 'Reserva confirmada',
+      subject: 'Solicitud enviada',
       description:
-          'Tu reserva $codigoReserva de ${widget.vehiculoBrand} fue confirmada para ${_formatearFechaCorta(fechaInicio)} en ${widget.lugarRecogida}.',
+          'Tu solicitud $codigoReserva para ${widget.vehiculoBrand} fue enviada. Queda pendiente de aprobación para ${_formatearFechaCorta(fechaInicio)} en ${widget.lugarRecogida}.',
     );
+  }
+
+  Future<void> _crearNotificacionNuevaSolicitudArrendatario({
+    required int publicationId,
+    required String codigoReserva,
+    required DateTime fechaInicio,
+    required DateTime fechaFin,
+  }) async {
+    try {
+      await _publicationDb.loadIfNeeded();
+      final publication = _publicationDb.publications.firstWhere(
+        (item) => item.id == publicationId,
+      );
+
+      await _notificationDb.addNotification(
+        userId: publication.userId,
+        categoryId: 1,
+        subject: 'Nueva solicitud de reserva',
+        description:
+            'Recibiste una reserva ($codigoReserva) para ${widget.vehiculoBrand} del ${_formatearFechaCorta(fechaInicio)} al ${_formatearFechaCorta(fechaFin)}.',
+      );
+    } catch (_) {
+      // No bloquea el flujo de pago/reserva
+    }
   }
 
   Future<void> _showPopupMessage(String title, String message) async {
@@ -114,7 +140,8 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           message,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
         actions: [
@@ -133,6 +160,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   }
 
   int _findCardPaymentTypeId() {
+    if (_catalogDb.paymentMethodTypes.isEmpty) return 1;
     final cardType = _catalogDb.paymentMethodTypes.firstWhere(
       (type) => type.name.toLowerCase().contains('tarjeta'),
       orElse: () => _catalogDb.paymentMethodTypes.first,
@@ -142,6 +170,11 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   int _findCardBrandId(String rawCardNumber) {
     final number = rawCardNumber.replaceAll(RegExp(r'\D'), '');
+    if (_catalogDb.cardBrands.isEmpty) {
+      if (number.startsWith('4')) return 1;
+      if (number.startsWith('5') || number.startsWith('2')) return 2;
+      return 1;
+    }
     final normalizedBrands = _catalogDb.cardBrands
         .map((b) => {'id': b.id, 'name': b.name.toLowerCase()})
         .toList();
@@ -170,6 +203,39 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       return amex['id'] as int;
     }
     return normalizedBrands.first['id'] as int;
+  }
+
+  String _guessBrandLabelFromNumber(String rawCardNumber) {
+    final number = rawCardNumber.replaceAll(RegExp(r'\D'), '');
+    if (number.startsWith('4')) return 'Visa';
+    if (number.startsWith('5') || number.startsWith('2')) return 'Mastercard';
+    if (number.startsWith('3')) return 'Amex';
+    return 'Tarjeta';
+  }
+
+  String _guessBrandLabelFromId(int cardBrandId) {
+    if (cardBrandId == 1) return 'Visa';
+    if (cardBrandId == 2) return 'Mastercard';
+    if (cardBrandId == 3) return 'Amex';
+    return 'Tarjeta';
+  }
+
+  String _last4FromCardNumber(String rawCardNumber) {
+    final digits = rawCardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length >= 4) return digits.substring(digits.length - 4);
+    return digits.padLeft(4, '0');
+  }
+
+  String _resolveCardBrandLabel({
+    required int cardBrandId,
+    required String cardNumber,
+  }) {
+    for (final brand in _catalogDb.cardBrands) {
+      if (brand.id == cardBrandId) return brand.name;
+    }
+    final brandFromNumber = _guessBrandLabelFromNumber(cardNumber);
+    if (brandFromNumber != 'Tarjeta') return brandFromNumber;
+    return _guessBrandLabelFromId(cardBrandId);
   }
 
   ({int month, int year})? _parseExpiry(String value) {
@@ -216,13 +282,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       return;
     }
 
-    await _catalogDb.loadIfNeeded();
-    if (_catalogDb.paymentMethodTypes.isEmpty || _catalogDb.cardBrands.isEmpty) {
-      await _showPopupMessage(
-        'Catálogos incompletos',
-        'No fue posible cargar tipos de pago o marcas de tarjeta.',
-      );
-      return;
+    try {
+      await _catalogDb.loadIfNeeded().timeout(const Duration(seconds: 6));
+    } catch (_) {
+      // El catalogo no bloquea el guardado: se usa deteccion por prefijo.
     }
 
     setState(() {
@@ -235,21 +298,43 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         paymentMethodTypeId: _findCardPaymentTypeId(),
       );
 
-      await _paymentDb.createCard(
+      final createdCard = await _paymentDb.createCard(
         paymentMethodId: paymentMethod.id,
         cardBrandId: _findCardBrandId(_numeroTarjetaCtrl.text),
         expirationMonth: expiry.month,
         expirationYear: expiry.year,
+        cardNumber: _numeroTarjetaCtrl.text.trim(),
+        cvc: int.tryParse(_cvvCtrl.text.trim()) ?? 0,
+        last4: _last4FromCardNumber(_numeroTarjetaCtrl.text.trim()),
       );
 
-      await _loadUserPaymentMethods();
-      final latestCard = _userCards.isNotEmpty ? _userCards.last : null;
-      if (latestCard != null) {
+      final savedCardNumber = createdCard.cardNumber.trim().isEmpty
+          ? _numeroTarjetaCtrl.text.trim()
+          : createdCard.cardNumber.trim();
+      final savedLast4 = _last4FromCardNumber(savedCardNumber);
+
+      if (mounted) {
         setState(() {
-          _selectedPaymentMethod = latestCard;
+          _selectedPaymentMethod = {
+            'id': createdCard.id,
+            'paymentMethodId': paymentMethod.id,
+            'cardNumber': savedCardNumber,
+            'last4': savedLast4,
+            'cardBrandId': createdCard.cardBrandId,
+            'brand': _resolveCardBrandLabel(
+              cardBrandId: createdCard.cardBrandId,
+              cardNumber: savedCardNumber,
+            ),
+            'expiryMonth': createdCard.expirationMonth,
+            'expiryYear': createdCard.expirationYear,
+            'isDefault': paymentMethod.isDefault,
+            'type': 'Tarjeta',
+          };
           _metodoPago = 'Tarjeta';
         });
       }
+
+      await _loadUserPaymentMethods();
 
       _numeroTarjetaCtrl.clear();
       _titularCtrl.clear();
@@ -277,80 +362,121 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   @override
   void initState() {
     super.initState();
+    _numeroTarjetaCtrl.addListener(_onCardFieldChanged);
+    _titularCtrl.addListener(_onCardFieldChanged);
+    _vencimientoCtrl.addListener(_onCardFieldChanged);
+    _cvvCtrl.addListener(_onCardFieldChanged);
     _loadUserPaymentMethods();
   }
 
-  Future<void> _loadUserPaymentMethods() async {
-    await Future.wait([
-      _sessionStore.init(),
-      _paymentDb.loadIfNeeded(),
-      _catalogDb.loadIfNeeded(),
-    ]);
+  void _onCardFieldChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
 
-    final currentUserId = _sessionStore.userId;
-    if (currentUserId == null) {
+  Future<void> _loadUserPaymentMethods() async {
+    if (mounted) {
       setState(() {
-        _isLoadingPaymentMethods = false;
+        _isLoadingPaymentMethods = true;
       });
-      return;
     }
 
-    // Get user's payment methods
-    final userPaymentMethods = _paymentDb.getUserPaymentMethods(currentUserId);
-    final userCards = _paymentDb.getUserCards(currentUserId);
-    final userPseAccounts = _paymentDb.getUserPseAccounts(currentUserId);
+    try {
+      await _sessionStore.init().timeout(const Duration(seconds: 6));
+      await _paymentDb.loadIfNeeded().timeout(const Duration(seconds: 6));
+      try {
+        await _catalogDb.loadIfNeeded().timeout(const Duration(seconds: 6));
+      } catch (_) {
+        // Catalogos opcionales para render, no bloquean metodos guardados.
+      }
 
-    // Get card brands and banks for display
-    final cardBrands = _catalogDb.cardBrands;
-    final banks = _catalogDb.banks;
+      final currentUserId = _sessionStore.userId;
+      if (currentUserId == null) {
+        if (!mounted) return;
+        setState(() {
+          _userCards = [];
+          _userPseAccounts = [];
+          _isLoadingPaymentMethods = false;
+        });
+        return;
+      }
 
-    // Prepare cards with additional info
-    final cardsWithInfo = userCards.map((card) {
-      final paymentMethod = userPaymentMethods.firstWhere(
-        (method) => method.id == card.paymentMethodId,
-      );
-      final cardBrand = cardBrands.firstWhere(
-        (brand) => brand.id == card.cardBrandId,
-      );
-      return {
-        'id': card.id,
-        'paymentMethodId': card.paymentMethodId,
-        'cardNumber': card.cardNumber,
-        'last4': card.cardNumber.substring(card.cardNumber.length - 4),
-        'cardBrandId': card.cardBrandId,
-        'brand': cardBrand.name,
-        'expiryMonth': card.expirationMonth,
-        'expiryYear': card.expirationYear,
-        'isDefault': paymentMethod.isDefault,
-        'type': 'Tarjeta',
+      final userPaymentMethods =
+          _paymentDb.getUserPaymentMethods(currentUserId);
+      final userCards = _paymentDb.getUserCards(currentUserId);
+      final userPseAccounts = _paymentDb.getUserPseAccounts(currentUserId);
+
+      final paymentMethodsById = {
+        for (final method in userPaymentMethods) method.id: method,
       };
-    }).toList();
-
-    // Prepare PSE accounts with additional info
-    final pseWithInfo = userPseAccounts.map((pse) {
-      final paymentMethod = userPaymentMethods.firstWhere(
-        (method) => method.id == pse.paymentMethodId,
-      );
-      final bank = banks.firstWhere(
-        (bank) => bank.id == pse.bankId,
-      );
-      return {
-        'id': pse.id,
-        'paymentMethodId': pse.paymentMethodId,
-        'bankId': pse.bankId,
-        'bank': bank.name,
-        'personTypeId': pse.personTypeId,
-        'personType': pse.personTypeId == 1 ? 'Natural' : 'Jurídica',
-        'isDefault': paymentMethod.isDefault,
-        'type': 'PSE',
+      final cardBrandById = {
+        for (final brand in _catalogDb.cardBrands) brand.id: brand.name,
       };
-    }).toList();
+      final bankById = {
+        for (final bank in _catalogDb.banks) bank.id: bank.name,
+      };
 
-    setState(() {
-      _userCards = cardsWithInfo;
-      _userPseAccounts = pseWithInfo;
-      _isLoadingPaymentMethods = false;
-    });
+      final cardsWithInfo = userCards.map((card) {
+        final paymentMethod = paymentMethodsById[card.paymentMethodId];
+        final cardBrandName = cardBrandById[card.cardBrandId] ??
+            _resolveCardBrandLabel(
+              cardBrandId: card.cardBrandId,
+              cardNumber: card.cardNumber,
+            );
+        final cardNumber = card.cardNumber;
+        final cardDigits = cardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+        final isZeroMasked =
+            cardDigits.isNotEmpty && RegExp(r'^0+$').hasMatch(cardDigits);
+        final persistedLast4 = _paymentDb.getCardLast4(card.id);
+        final last4 = (persistedLast4 != null && persistedLast4.isNotEmpty)
+            ? persistedLast4
+            : (isZeroMasked ? '' : _last4FromCardNumber(cardNumber));
+
+        return {
+          'id': card.id,
+          'paymentMethodId': card.paymentMethodId,
+          'cardNumber': cardNumber,
+          'last4': last4,
+          'cardBrandId': card.cardBrandId,
+          'brand': cardBrandName,
+          'expiryMonth': card.expirationMonth,
+          'expiryYear': card.expirationYear,
+          'isDefault': paymentMethod?.isDefault ?? false,
+          'type': 'Tarjeta',
+        };
+      }).where((card) {
+        final last4 = (card['last4'] as String?)?.trim() ?? '';
+        return last4.isNotEmpty;
+      }).toList();
+
+      final pseWithInfo = userPseAccounts.map((pse) {
+        final paymentMethod = paymentMethodsById[pse.paymentMethodId];
+        return {
+          'id': pse.id,
+          'paymentMethodId': pse.paymentMethodId,
+          'bankId': pse.bankId,
+          'bank': bankById[pse.bankId] ?? 'Banco',
+          'personTypeId': pse.personTypeId,
+          'personType': pse.personTypeId == 1 ? 'Natural' : 'Juridica',
+          'isDefault': paymentMethod?.isDefault ?? false,
+          'type': 'PSE',
+        };
+      }).toList();
+
+      if (!mounted) return;
+      setState(() {
+        _userCards = cardsWithInfo;
+        _userPseAccounts = pseWithInfo;
+        _isLoadingPaymentMethods = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _userCards = [];
+        _userPseAccounts = [];
+        _isLoadingPaymentMethods = false;
+      });
+    }
   }
 
   @override
@@ -361,25 +487,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return Scaffold(
       backgroundColor:
           _isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: _textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Método de Pago',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: _textPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: Column(
         children: [
+          _buildStepHeader(isSmallPhone),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -395,6 +505,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                       SizedBox(height: isSmallPhone ? 16 : 20),
                       if (_metodoPago == 'Tarjeta Nueva')
                         _buildCamposTarjeta(isSmallPhone),
+                      if (_metodoPago == 'Tarjeta Nueva') ...[
+                        SizedBox(height: isSmallPhone ? 14 : 16),
+                        _buildGuardarTarjetaButton(),
+                      ],
                     ],
                     if (_metodoPago == 'PSE') ...[
                       _buildPSEContent(isSmallPhone),
@@ -414,6 +528,100 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           ),
           _buildBotonPagar(isSmallPhone),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStepHeader(bool isSmallPhone) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF5B58FF), Color(0xFF7C3AED)],
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        isSmallPhone ? 12 : 20,
+        MediaQuery.of(context).padding.top + (isSmallPhone ? 10 : 14),
+        isSmallPhone ? 12 : 20,
+        isSmallPhone ? 14 : 20,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Método de Pago',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: isSmallPhone ? 20 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: isSmallPhone ? 16 : 20),
+          Row(
+            children: [
+              _buildHeaderStepCircle(1, false),
+              _buildHeaderStepLine(),
+              _buildHeaderStepCircle(2, true),
+              _buildHeaderStepLine(),
+              _buildHeaderStepCircle(3, false),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderStepCircle(int step, bool active) {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: active ? Colors.white : Colors.white.withValues(alpha: 0.2),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          '$step',
+          style: GoogleFonts.poppins(
+            color: active ? const Color(0xFF5B58FF) : Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderStepLine() {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        height: 2,
+        color: Colors.white.withValues(alpha: 0.3),
       ),
     );
   }
@@ -559,24 +767,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         ),
         child: Row(
           children: [
-            Container(
-              width: isSmallPhone ? 40 : 48,
-              height: isSmallPhone ? 25 : 30,
-              decoration: BoxDecoration(
-                color: _getCardBrandColor(card['brand']),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: Text(
-                  _getCardBrandAbbreviation(card['brand']),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: isSmallPhone ? 10 : 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+            _buildCardBrandLogo(card['brand'], isSmallPhone),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -955,20 +1146,28 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             ],
           ),
           const SizedBox(height: 28),
+          _buildLiveCardNumber(isSmallPhone),
+          const SizedBox(height: 14),
           Text(
-            '• • • •    • • • •    • • • •    • • • •',
+            _titularCtrl.text.trim().isEmpty
+                ? 'NOMBRE COMO EN LA TARJETA'
+                : _titularCtrl.text.trim().toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: isSmallPhone ? 16 : 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-              letterSpacing: 2,
+              fontSize: isSmallPhone ? 13 : 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.95),
+              letterSpacing: 0.6,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'MM/AA',
+              _vencimientoCtrl.text.trim().isEmpty
+                  ? 'MM/AA'
+                  : _vencimientoCtrl.text.trim(),
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -979,6 +1178,39 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLiveCardNumber(bool isSmallPhone) {
+    final digits = _numeroTarjetaCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final groups = <String>[];
+
+    for (var i = 0; i < 4; i++) {
+      final start = i * 4;
+      if (start >= digits.length) {
+        groups.add('••••');
+      } else {
+        final end = (start + 4).clamp(0, digits.length);
+        final part = digits.substring(start, end);
+        groups.add(part.padRight(4, '•'));
+      }
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: groups
+          .map(
+            (group) => Text(
+              group,
+              style: GoogleFonts.poppins(
+                fontSize: isSmallPhone ? 16 : 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+                letterSpacing: 2,
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -1052,6 +1284,115 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCardBrandLogo(String brand, bool isSmallPhone) {
+    final normalized = brand.toLowerCase();
+    final width = isSmallPhone ? 42.0 : 50.0;
+    final height = isSmallPhone ? 26.0 : 30.0;
+
+    if (normalized.contains('master')) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              left: 8,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEB001B),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            Positioned(
+              right: 8,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF79E1B),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (normalized.contains('visa')) {
+      return Container(
+        width: width,
+        height: height,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          'VISA',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF1A1F71),
+            fontWeight: FontWeight.w800,
+            fontSize: isSmallPhone ? 11 : 12,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: _getCardBrandColor(brand),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Center(
+        child: Text(
+          _getCardBrandAbbreviation(brand),
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: isSmallPhone ? 10 : 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuardarTarjetaButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _isSavingCard ? null : _saveCard,
+        icon: _isSavingCard
+            ? const SizedBox(
+                height: 14,
+                width: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.save_outlined),
+        label: Text(
+          _isSavingCard ? 'Guardando...' : 'Guardar tarjeta',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: const BorderSide(color: Color(0xFF4F46E5)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1530,9 +1871,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 paymentMethodId = pseMethod.id;
               }
 
-              // Create new reservation with status 1 (Pendiente)
+              // Crea solicitud pendiente. La activación/cobro se hace al aprobar.
               final newReservation = ReservationModel(
-                id: _reservationDb.reservations.length + 1, // Generate new ID
+                id: _nextReservationId(),
                 code: codigoReserva,
                 userId: currentUserId,
                 publicationId:
@@ -1552,22 +1893,15 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
               await _reservationDb.addReservation(newReservation);
 
-              // Also add to store for UI
-              ReservasStore.addActiva(
-                ReservaActiva(
-                  vehicleName: widget.vehiculoBrand,
-                  code: codigoReserva,
-                  price: '\$ ${_formatearNumero(widget.total)}',
-                  startDate: _formatearFechaCorta(fechaInicio),
-                  endDate: _formatearFechaCorta(fechaFin),
-                  location: widget.lugarRecogida,
-                  imageUrl: widget.vehiculoImage,
-                ),
-              );
-
-              await _crearNotificacionReserva(
+              await _crearNotificacionSolicitudArrendatario(
                 codigoReserva: codigoReserva,
                 fechaInicio: fechaInicio,
+              );
+              await _crearNotificacionNuevaSolicitudArrendatario(
+                publicationId: widget.publicationId,
+                codigoReserva: codigoReserva,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
               );
 
               if (!mounted) return;
@@ -1618,6 +1952,14 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return 'FD-$year-$month-$day-$numero';
   }
 
+  int _nextReservationId() {
+    if (_reservationDb.reservations.isEmpty) return 1;
+    return _reservationDb.reservations
+            .map((item) => item.id)
+            .reduce((current, next) => current > next ? current : next) +
+        1;
+  }
+
   DateTime _calcularFechaFin(DateTime fechaInicio) {
     switch (widget.periodo.toLowerCase()) {
       case 'dias':
@@ -1631,24 +1973,22 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
-  String _formatearNumero(int numero) {
-    final asString = numero.toString();
-    final buffer = StringBuffer();
-
-    for (int i = 0; i < asString.length; i++) {
-      final reverseIndex = asString.length - i;
-      buffer.write(asString[i]);
-      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
-        buffer.write('.');
-      }
-    }
-
-    return buffer.toString();
-  }
-
   String _formatearFechaCorta(DateTime fecha) {
     final dia = fecha.day.toString().padLeft(2, '0');
     final mes = fecha.month.toString().padLeft(2, '0');
     return '$dia/$mes';
+  }
+
+  @override
+  void dispose() {
+    _numeroTarjetaCtrl.removeListener(_onCardFieldChanged);
+    _titularCtrl.removeListener(_onCardFieldChanged);
+    _vencimientoCtrl.removeListener(_onCardFieldChanged);
+    _cvvCtrl.removeListener(_onCardFieldChanged);
+    _numeroTarjetaCtrl.dispose();
+    _titularCtrl.dispose();
+    _vencimientoCtrl.dispose();
+    _cvvCtrl.dispose();
+    super.dispose();
   }
 }

@@ -20,8 +20,8 @@ class RepositorioVehiculosLocal implements RepositorioVehiculosPuerto {
       _origen.getVehiculoById(id);
 
   @override
-  void agregarVehiculo(Map<String, dynamic> vehiculo) {
-    _origen.addVehiculo(vehiculo);
+  Future<void> agregarVehiculo(Map<String, dynamic> vehiculo) {
+    return _origen.addVehiculo(vehiculo);
   }
 
   @override

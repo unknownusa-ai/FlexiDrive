@@ -35,7 +35,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('identification-types'),
+          await _safeLoadList('identification-types'),
           IdentificationTypeModel.fromJson,
         ).where(
           (type) => !_hiddenIdentificationTypeNames.contains(type.name),
@@ -44,47 +44,56 @@ class LocalCatalogDb {
     userTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('user-types'), UserTypeModel.fromJson),
+        _parseList(await _safeLoadList('user-types'), UserTypeModel.fromJson),
       );
     paymentMethodTypes
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('payment-method-types'),
+          await _safeLoadList('payment-method-types'),
           PaymentMethodTypeModel.fromJson,
         ),
       );
     banks
       ..clear()
-      ..addAll(_parseList(await _loadList('banks'), BankModel.fromJson));
+      ..addAll(_parseList(await _safeLoadList('banks'), BankModel.fromJson));
     cardBrands
       ..clear()
       ..addAll(
-        _parseList(await _loadList('card-brands'), CardBrandModel.fromJson),
+        _parseList(
+          await _safeLoadList('card-brands'),
+          CardBrandModel.fromJson,
+        ),
       );
     personTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('person-types'), PersonTypeModel.fromJson),
+        _parseList(
+          await _safeLoadList('person-types'),
+          PersonTypeModel.fromJson,
+        ),
       );
     vehicleCategories
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('vehicle-categories'),
+          await _safeLoadList('vehicle-categories'),
           VehicleCategoryModel.fromJson,
         ),
       );
     periodTypes
       ..clear()
       ..addAll(
-        _parseList(await _loadList('period-types'), PeriodTypeModel.fromJson),
+        _parseList(
+          await _safeLoadList('period-types'),
+          PeriodTypeModel.fromJson,
+        ),
       );
     reservationStatuses
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('reservation-statuses'),
+          await _safeLoadList('reservation-statuses'),
           ReservationStatusModel.fromJson,
         ),
       );
@@ -92,7 +101,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('notification-categories'),
+          await _safeLoadList('notification-categories'),
           NotificationCategoryModel.fromJson,
         ),
       );
@@ -100,7 +109,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('landlord-document-types'),
+          await _safeLoadList('landlord-document-types'),
           LandlordDocumentTypeModel.fromJson,
         ),
       );
@@ -108,7 +117,7 @@ class LocalCatalogDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('document-verification-statuses'),
+          await _safeLoadList('document-verification-statuses'),
           DocumentVerificationStatusModel.fromJson,
         ),
       );
@@ -126,4 +135,12 @@ class LocalCatalogDb {
 
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
+
+  Future<List<dynamic>> _safeLoadList(String endpoint) async {
+    try {
+      return await _loadList(endpoint).timeout(const Duration(seconds: 6));
+    } catch (_) {
+      return const [];
+    }
+  }
 }

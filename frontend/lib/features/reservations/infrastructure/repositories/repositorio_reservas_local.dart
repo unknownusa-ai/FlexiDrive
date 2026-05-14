@@ -22,6 +22,11 @@ class RepositorioReservasLocal implements RepositorioReservasPuerto {
   }
 
   @override
+  Future<void> actualizarReserva(ReservationModel reservation) {
+    return _origen.updateReservation(reservation);
+  }
+
+  @override
   void agregarReservaLocal(ReservationModel reservation) {
     _origen.addReservationLocally(reservation);
   }

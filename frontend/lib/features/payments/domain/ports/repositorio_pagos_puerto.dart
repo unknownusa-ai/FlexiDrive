@@ -9,6 +9,7 @@ abstract class RepositorioPagosPuerto {
   PaymentMethodModel? obtenerMetodoPagoPorId(int paymentMethodId);
   CardModel? obtenerTarjetaPorMetodoPagoId(int paymentMethodId);
   PseModel? obtenerPsePorMetodoPagoId(int paymentMethodId);
+  String? obtenerUltimos4Tarjeta(int cardId);
   Future<PaymentMethodModel> crearMetodoPago({
     required int userId,
     required int paymentMethodTypeId,
@@ -19,6 +20,8 @@ abstract class RepositorioPagosPuerto {
     required int cardBrandId,
     required int expirationMonth,
     required int expirationYear,
+    required String cardNumber,
+    required int cvc,
     String? last4,
   });
 }

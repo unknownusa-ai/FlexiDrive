@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flexidrive/core/api/api_client.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
@@ -6,9 +8,10 @@ import 'package:flexidrive/features/reservations/application/use_cases/reservati
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
 import 'package:flexidrive/features/reservations/domain/entities/reservation_models.dart';
+import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 
-// Página de solicitudes de reserva
+// PÃƒÂ¡gina de solicitudes de reserva
 // Muestra las solicitudes de renta recibidas por el arrendador
 class SolicitudesPage extends StatefulWidget {
   // Tab inicial a mostrar
@@ -19,13 +22,16 @@ class SolicitudesPage extends StatefulWidget {
   State<SolicitudesPage> createState() => SolicitudesPageState();
 }
 
-// Estado de la página de solicitudes
-// Maneja las pestañas y carga de solicitudes
+// Estado de la pÃƒÂ¡gina de solicitudes
+// Maneja las pestaÃƒÂ±as y carga de solicitudes
 class SolicitudesPageState extends State<SolicitudesPage>
     with SingleTickerProviderStateMixin {
-  // Controlador de pestañas
+  static const _solicitudCategoryId = 1;
+  static const _pagoCategoryId = 2;
+
+  // Controlador de pestaÃƒÂ±as
   late TabController _tabController;
-  // Índice de la pestaña seleccionada
+  // ÃƒÂndice de la pestaÃƒÂ±a seleccionada
   int _selectedTabIndex = 1;
   final ReservationAccessUseCase _reservationDb =
       InjectionContainer.instance.reservationAccessUseCase;
@@ -35,12 +41,16 @@ class SolicitudesPageState extends State<SolicitudesPage>
       InjectionContainer.instance.vehicleInventoryUseCase;
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
+  final NotificationAccessUseCase _notificationDb =
+      InjectionContainer.instance.notificationAccessUseCase;
 
   // Data management
   List<ReservationModel> _allReservations = [];
   List<Map<String, dynamic>> _vehicles = [];
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _publications = [];
+  final Map<int, String> _accountNamesByUserId = {};
+  final Map<int, String> _accountEmailsByUserId = {};
   bool _isLoading = true;
 
   // Current user ID in session
@@ -100,6 +110,67 @@ class SolicitudesPageState extends State<SolicitudesPage>
       await _vehiculoService.init();
       _vehicles = _vehiculoService.vehiculos;
       _users = _vehiculoService.usuarios;
+      try {
+        final accountUsers = await _accountRepository.getUsers();
+        _accountNamesByUserId
+          ..clear()
+          ..addEntries(
+            accountUsers.map(
+              (user) => MapEntry(user.id, _normalizeText(user.fullName)),
+            ),
+          );
+        _accountEmailsByUserId
+          ..clear()
+          ..addEntries(
+            accountUsers.map(
+              (user) => MapEntry(user.id, _normalizeText(user.email)),
+            ),
+          );
+      } catch (_) {
+        _accountNamesByUserId.clear();
+        _accountEmailsByUserId.clear();
+      }
+
+      for (final rawUser in _users) {
+        final id = _asInt(rawUser['usuario_id'] ?? rawUser['id']);
+        if (id <= 0) continue;
+        final rawName = _normalizeText(
+          rawUser['nombre_completo'] ??
+              rawUser['full_name'] ??
+              rawUser['nombre'],
+        );
+        final rawEmail = _normalizeText(
+          rawUser['correo'] ?? rawUser['email'] ?? rawUser['username'],
+        );
+        if (rawName.isNotEmpty && (_accountNamesByUserId[id] ?? '').isEmpty) {
+          _accountNamesByUserId[id] = rawName;
+        }
+        if (rawEmail.isNotEmpty && (_accountEmailsByUserId[id] ?? '').isEmpty) {
+          _accountEmailsByUserId[id] = rawEmail;
+        }
+      }
+
+      final reservationUserIds =
+          _allReservations.map((reservation) => reservation.userId).toSet();
+      for (final userId in reservationUserIds) {
+        final name = _normalizeText(_accountNamesByUserId[userId]);
+        if (name.isNotEmpty) continue;
+        try {
+          final payload = await ApiClient.instance.getMap('users/$userId');
+          final apiName = _normalizeText(
+            payload['nombre_completo'] ??
+                payload['full_name'] ??
+                payload['nombre'],
+          );
+          final apiEmail = _normalizeText(
+            payload['correo'] ?? payload['email'] ?? payload['username'],
+          );
+          if (apiName.isNotEmpty) _accountNamesByUserId[userId] = apiName;
+          if (apiEmail.isNotEmpty) _accountEmailsByUserId[userId] = apiEmail;
+        } catch (_) {
+          // keep fallbacks
+        }
+      }
 
       // Load publications
       _publications = await _loadPublications();
@@ -134,6 +205,19 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }).toList();
   }
 
+  List<ReservationModel> _getCompletedReservations() {
+    return _allReservations.where((reservation) {
+      final currentUserId = _currentUserId;
+      if (currentUserId == null) return false;
+
+      final publication = _findPublicationById(reservation.publicationId);
+      if (publication == null || publication['usuario_id'] != currentUserId) {
+        return false;
+      }
+      return reservation.statusId == 2 || reservation.statusId == 3;
+    }).toList();
+  }
+
   // Find publication by ID
   Map<String, dynamic>? _findPublicationById(int publicationId) {
     try {
@@ -144,14 +228,14 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
-  Map<String, dynamic>? _getVehicleForReservation(ReservationModel reservation) {
+  Map<String, dynamic>? _getVehicleForReservation(
+      ReservationModel reservation) {
     final publication = _findPublicationById(reservation.publicationId);
     if (publication == null) return null;
 
     final rawVehicleId = publication['vehiculo_id'];
-    final vehicleId = rawVehicleId is int
-        ? rawVehicleId
-        : int.tryParse('$rawVehicleId');
+    final vehicleId =
+        rawVehicleId is int ? rawVehicleId : int.tryParse('$rawVehicleId');
     if (vehicleId == null) return null;
     return _getVehicleById(vehicleId);
   }
@@ -159,7 +243,9 @@ class SolicitudesPageState extends State<SolicitudesPage>
   // Get vehicle info
   Map<String, dynamic>? _getVehicleById(int vehicleId) {
     try {
-      return _vehicles.firstWhere((v) => v['vehiculo_id'] == vehicleId);
+      return _vehicles.firstWhere(
+        (v) => _asInt(v['vehiculo_id'] ?? v['id']) == vehicleId,
+      );
     } catch (e) {
       return null;
     }
@@ -168,9 +254,87 @@ class SolicitudesPageState extends State<SolicitudesPage>
   // Get user info
   Map<String, dynamic>? _getUserById(int userId) {
     try {
-      return _users.firstWhere((u) => u['usuario_id'] == userId);
+      return _users.firstWhere(
+        (u) => _asInt(u['usuario_id'] ?? u['id']) == userId,
+      );
     } catch (e) {
       return null;
+    }
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.round();
+    return int.tryParse('$value') ?? 0;
+  }
+
+  String _normalizeText(dynamic value) {
+    if (value == null) return '';
+    final text = '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (text.isEmpty) return '';
+    final lowered = text.toLowerCase();
+    if (lowered == 'null' || lowered == 'undefined' || lowered == 'nan') {
+      return '';
+    }
+    return _fixMojibake(text);
+  }
+
+  String _resolveUserName(int userId, Map<String, dynamic>? user) {
+    final mappedName = _normalizeText(_accountNamesByUserId[userId]);
+    if (mappedName.isNotEmpty) return mappedName;
+    final mappedEmail = _normalizeText(_accountEmailsByUserId[userId]);
+    if (mappedEmail.isNotEmpty) return mappedEmail;
+
+    if (user == null) return 'Usuario #$userId';
+    final fullName = _normalizeText(
+      user['nombre_completo'] ?? user['full_name'] ?? user['nombre'],
+    );
+    if (fullName.isNotEmpty) return fullName;
+    final email = _normalizeText(
+      user['correo'] ?? user['email'] ?? user['username'],
+    );
+    if (email.isNotEmpty) return email;
+    return 'Usuario #$userId';
+  }
+
+  String _resolveVehicleName(Map<String, dynamic>? vehicle) {
+    if (vehicle == null) return 'Vehículo';
+    final explicitName = _normalizeText(vehicle['nombre']);
+    if (explicitName.isNotEmpty) return explicitName;
+
+    final brand = _normalizeText(vehicle['marca']);
+    final line = _normalizeText(vehicle['linea']);
+    final model = _normalizeText(vehicle['modelo']);
+    final year = _normalizeText(vehicle['anio']);
+
+    final rawModel = line.isNotEmpty ? line : model;
+    var cleanedModel = rawModel;
+    if (brand.isNotEmpty &&
+        cleanedModel.toLowerCase().startsWith(brand.toLowerCase())) {
+      cleanedModel = cleanedModel.substring(brand.length).trimLeft();
+    }
+
+    var name = [
+      if (brand.isNotEmpty) brand,
+      if (cleanedModel.isNotEmpty) cleanedModel,
+    ].join(' ').trim();
+    if (name.isEmpty) name = rawModel.isEmpty ? 'Vehículo' : rawModel;
+
+    final hasYear = RegExp(r'^\d{4}$').hasMatch(year);
+    if (hasYear && !name.contains(year)) {
+      return '$name $year';
+    }
+    return name;
+  }
+
+  String _fixMojibake(String input) {
+    if (!input.contains('Ã') && !input.contains('Â') && !input.contains('â')) {
+      return input;
+    }
+    try {
+      return utf8.decode(latin1.encode(input));
+    } catch (_) {
+      return input;
     }
   }
 
@@ -293,9 +457,8 @@ class SolicitudesPageState extends State<SolicitudesPage>
     final pendingCount =
         _getReservationsByStatus(1).length; // status_id 1 = pendiente
     final activeCount =
-        _getReservationsByStatus(2).length; // status_id 2 = activa
-    final completedCount =
-        _getReservationsByStatus(3).length; // status_id 3 = completada
+        _getReservationsByStatus(4).length; // status_id 4 = activa
+    final completedCount = _getCompletedReservations().length; // 2 o 3
 
     return Container(
       color: theme.cardTheme.color,
@@ -441,18 +604,18 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userName: _resolveUserName(reservation.userId, user),
           userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
           userRating: '4.8', // Default rating
-          userType: 'Arrendador',
-          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          userType: 'Arrendatario',
+          vehicleName: _resolveVehicleName(vehicle),
           vehicleImage:
               vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
               '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
-          location: reservation.pickupLocation,
+          location: _normalizeText(reservation.pickupLocation),
           totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'pending',
           reservation: reservation,
@@ -466,7 +629,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
       return Center(child: CircularProgressIndicator());
     }
 
-    final activeReservations = _getReservationsByStatus(2);
+    final activeReservations = _getReservationsByStatus(4);
 
     if (activeReservations.isEmpty) {
       return Center(
@@ -495,18 +658,18 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userName: _resolveUserName(reservation.userId, user),
           userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
           userRating: '4.8',
-          userType: 'Arrendador',
-          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          userType: 'Arrendatario',
+          vehicleName: _resolveVehicleName(vehicle),
           vehicleImage:
               vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
               '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
-          location: reservation.pickupLocation,
+          location: _normalizeText(reservation.pickupLocation),
           totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'active',
           reservation: reservation,
@@ -520,7 +683,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
       return Center(child: CircularProgressIndicator());
     }
 
-    final completedReservations = _getReservationsByStatus(3);
+    final completedReservations = _getCompletedReservations();
 
     if (completedReservations.isEmpty) {
       return Center(
@@ -549,18 +712,18 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
         return _buildRequestCard(
           isSmallPhone: isSmallPhone,
-          userName: user?['nombre_completo'] ?? 'Usuario desconocido',
+          userName: _resolveUserName(reservation.userId, user),
           userImage: 'https://i.pravatar.cc/150?img=${reservation.userId}',
           userRating: '4.8',
-          userType: 'Arrendador',
-          vehicleName: vehicle?['nombre'] ?? 'Vehículo desconocido',
+          userType: 'Arrendatario',
+          vehicleName: _resolveVehicleName(vehicle),
           vehicleImage:
               vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
               '${reservation.endDate.day}/${reservation.endDate.month}/${reservation.endDate.year}',
-          location: reservation.pickupLocation,
+          location: _normalizeText(reservation.pickupLocation),
           totalPrice: '\$${reservation.totalValue.toStringAsFixed(0)}',
           status: 'completed',
           reservation: reservation,
@@ -638,7 +801,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      userName,
+                      _fixMojibake(userName),
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 17 : 19,
                         fontWeight: FontWeight.bold,
@@ -657,7 +820,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          userRating,
+                          _fixMojibake(userRating),
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -704,7 +867,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
           const SizedBox(height: 16),
 
-          // Vehículo con imagen
+          // VehÃƒÂ­culo con imagen
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -723,7 +886,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      vehicleName,
+                      _fixMojibake(vehicleName),
                       style: GoogleFonts.inter(
                         fontSize: isSmallPhone ? 15 : 17,
                         fontWeight: FontWeight.bold,
@@ -734,7 +897,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '$startDate - $endDate',
+                      _fixMojibake('$startDate - $endDate'),
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         color: const Color(0xFF94A3B8),
@@ -855,7 +1018,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
+                _fixMojibake(label),
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -865,7 +1028,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
               ),
               const SizedBox(height: 2),
               Text(
-                value,
+                _fixMojibake(value),
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: valueBold ? FontWeight.bold : FontWeight.w500,
@@ -1082,7 +1245,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
   Future<void> _approveReservation(ReservationModel reservation) async {
     try {
-      // Update reservation status from pending (1) to active (2)
+      // Update reservation status from pending (1) to active (4)
       final updatedReservation = ReservationModel(
         id: reservation.id,
         code: reservation.code,
@@ -1096,21 +1259,19 @@ class SolicitudesPageState extends State<SolicitudesPage>
         pickupLocation: reservation.pickupLocation,
         returnLocation: reservation.returnLocation,
         totalValue: reservation.totalValue,
-        statusId: 2, // Change to active
+        statusId: 4, // Change to active
         reservationDate: reservation.reservationDate,
       );
 
-      // Update the reservation in the local database
+      await _reservationDb.updateReservation(updatedReservation);
       final index = _allReservations.indexWhere((r) => r.id == reservation.id);
-      if (index != -1) {
-        _allReservations[index] = updatedReservation;
-        _reservationDb.reservations[index] = updatedReservation;
-      }
+      if (index != -1) _allReservations[index] = updatedReservation;
 
       setState(() {});
 
-      // Create notification for the user
       await _createApprovalNotification(reservation);
+      await _createPaymentChargedNotification(updatedReservation);
+      await _createPaymentReceivedNotification(updatedReservation);
 
       _showSuccessSnackBar('Solicitud aprobada correctamente');
     } catch (e) {
@@ -1121,15 +1282,32 @@ class SolicitudesPageState extends State<SolicitudesPage>
   Future<void> _rejectReservation(
       ReservationModel reservation, String reason) async {
     try {
-      // Remove the reservation from the list when rejected
+      final rejectedReservation = ReservationModel(
+        id: reservation.id,
+        code: reservation.code,
+        userId: reservation.userId,
+        publicationId: reservation.publicationId,
+        paymentMethodId: reservation.paymentMethodId,
+        periodTypeId: reservation.periodTypeId,
+        periodCount: reservation.periodCount,
+        startDate: reservation.startDate,
+        endDate: reservation.endDate,
+        pickupLocation: reservation.pickupLocation,
+        returnLocation: reservation.returnLocation,
+        totalValue: reservation.totalValue,
+        statusId: 3, // 3 = Cancelada/Rechazada
+        reservationDate: reservation.reservationDate,
+      );
+
+      await _reservationDb.updateReservation(rejectedReservation);
       final index = _allReservations.indexWhere((r) => r.id == reservation.id);
       if (index != -1) {
-        _allReservations.removeAt(index);
-        _reservationDb.reservations.removeAt(index);
+        _allReservations[index] = rejectedReservation;
       }
 
       setState(() {});
-      _showSuccessSnackBar('Solicitud rechazada y eliminada');
+      await _createRejectionNotification(reservation, reason);
+      _showSuccessSnackBar('Solicitud rechazada');
     } catch (e) {
       _showErrorSnackBar('Error al rechazar solicitud: $e');
     }
@@ -1163,34 +1341,75 @@ class SolicitudesPageState extends State<SolicitudesPage>
 
   Future<void> _createApprovalNotification(ReservationModel reservation) async {
     try {
-      // Get user and vehicle info for the notification
-      final user = _getUserById(reservation.userId);
       final vehicle = _getVehicleForReservation(reservation);
-
-      final userName = user?['nombre_completo'] ?? 'Usuario';
-      final vehicleName = vehicle?['nombre'] ?? 'Vehículo';
-
-      // Create notification
-      // ignore: unused_local_variable - notification object prepared for future database integration
-      final notification = {
-        'notificacion_id': DateTime.now().millisecondsSinceEpoch,
-        'asunto': 'Solicitud de renta aprobada',
-        'descripcion':
-            'Tu solicitud para rentar el $vehicleName ha sido aprobada por el arrendatario.',
-        'fecha_envio': DateTime.now().toIso8601String(),
-        'estado': 'no_leida',
-        'usuario_id': reservation.userId,
-        'categoria_notificacion_id': 1,
-      };
-
-      // Use userName to avoid warning
-      // ignore: unused_local_variable
-      final unusedUser = userName;
-
-      // Add to notifications (in a real app, this would save to the database)
-      // Notification created successfully
+      final vehicleName = vehicle?['nombre'] ?? 'vehiculo';
+      await _notificationDb.addNotification(
+        userId: reservation.userId,
+        categoryId: _solicitudCategoryId,
+        subject: 'Solicitud aprobada',
+        description:
+            'Tu solicitud ${reservation.code} para rentar el $vehicleName fue aprobada.',
+      );
     } catch (e) {
       // Error creating notification - silently handle
+    }
+  }
+
+  Future<void> _createRejectionNotification(
+    ReservationModel reservation,
+    String reason,
+  ) async {
+    try {
+      final vehicle = _getVehicleForReservation(reservation);
+      final vehicleName = vehicle?['nombre'] ?? 'vehiculo';
+      await _notificationDb.addNotification(
+        userId: reservation.userId,
+        categoryId: _solicitudCategoryId,
+        subject: 'Solicitud rechazada',
+        description:
+            'Tu solicitud ${reservation.code} para rentar el $vehicleName fue rechazada. Motivo: $reason.',
+      );
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _createPaymentChargedNotification(
+    ReservationModel reservation,
+  ) async {
+    try {
+      final vehicle = _getVehicleForReservation(reservation);
+      final vehicleName = vehicle?['nombre'] ?? 'vehiculo';
+      await _notificationDb.addNotification(
+        userId: reservation.userId,
+        categoryId: _pagoCategoryId,
+        subject: 'Pago procesado',
+        description:
+            'Se procesó el cobro de la reserva ${reservation.code} por \$${reservation.totalValue.toStringAsFixed(0)} para $vehicleName.',
+      );
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _createPaymentReceivedNotification(
+    ReservationModel reservation,
+  ) async {
+    try {
+      final publication = _findPublicationById(reservation.publicationId);
+      final ownerIdRaw = publication?['usuario_id'];
+      final ownerId =
+          ownerIdRaw is int ? ownerIdRaw : int.tryParse('$ownerIdRaw');
+      if (ownerId == null) return;
+      await _notificationDb.addNotification(
+        userId: ownerId,
+        categoryId: _pagoCategoryId,
+        subject: 'Pago confirmado',
+        description:
+            'La reserva ${reservation.code} fue aprobada y quedó activa con cobro de \$${reservation.totalValue.toStringAsFixed(0)}.',
+      );
+    } catch (_) {
+      // ignore
     }
   }
 

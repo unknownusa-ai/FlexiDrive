@@ -99,19 +99,27 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
           .where((pub) => pub.userId == currentUserId && pub.active)
           .toList();
       final userPublicationIds = userPublications.map((pub) => pub.id).toSet();
-      final userVehicleIds = userPublications.map((pub) => pub.vehicleId).toSet();
+      final userVehicleIds =
+          userPublications.map((pub) => pub.vehicleId).toSet();
 
       final reservationsForOwner = _reservationDb.reservations
           .where((reservation) =>
               userPublicationIds.contains(reservation.publicationId))
           .toList();
+      final now = DateTime.now();
       final activeReservations = reservationsForOwner
-          .where((reservation) => reservation.statusId == 2)
+          .where(
+            (reservation) =>
+                reservation.statusId == 4 ||
+                (reservation.statusId == 2 && reservation.endDate.isAfter(now)),
+          )
           .toList();
       final earnedReservations = reservationsForOwner
           .where(
             (reservation) =>
-                reservation.statusId == 2 || reservation.statusId == 3,
+                reservation.statusId == 2 ||
+                reservation.statusId == 3 ||
+                reservation.statusId == 4,
           )
           .toList();
       final reviewsReceived = _reviewDb.reviews
@@ -154,7 +162,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   Future<void> _persistArrendatarioMode(bool enabled) async {
     final userId = _currentUserId;
     if (userId == null) return;
-    await _preferenceService.setArrendatarioMode(userId: userId, enabled: enabled);
+    await _preferenceService.setArrendatarioMode(
+        userId: userId, enabled: enabled);
   }
 
   @override
@@ -423,7 +432,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17),
+            child:
+                Icon(icon, color: Colors.white, size: isSmallPhone ? 14 : 17),
           ),
           SizedBox(height: isSmallPhone ? 4 : 7),
           Text(
@@ -550,7 +560,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
             subtitle: 'Tarjetas y PSE guardadas',
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PaymentMethodsPage()),
+              MaterialPageRoute(
+                  builder: (context) => const PaymentMethodsPage()),
             ),
           ),
           _divider(),
@@ -827,7 +838,8 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: EdgeInsets.zero,
           content: Container(
             width: isSmallPhone ? 280 : 320,

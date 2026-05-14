@@ -97,6 +97,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
                 ownerPublicationIds.contains(reservation.publicationId),
           )
           .toList();
+      final now = DateTime.now();
 
       final pendingRequests = reservationsForOwner
           .where((reservation) => reservation.statusId == 1)
@@ -128,16 +129,28 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
             .where((reservation) => reservation.publicationId == publication.id)
             .toList();
         final activeReservations = reservations
-            .where((reservation) => reservation.statusId == 2)
+            .where(
+              (reservation) =>
+                  reservation.statusId == 4 ||
+                  (reservation.statusId == 2 &&
+                      reservation.endDate.isAfter(now)),
+            )
             .toList();
         final activeReservation =
             activeReservations.isEmpty ? null : activeReservations.first;
         final completedTrips = reservations
-            .where((reservation) => reservation.statusId == 3)
+            .where(
+              (reservation) =>
+                  reservation.statusId == 3 ||
+                  (reservation.statusId == 2 &&
+                      !reservation.endDate.isAfter(now)),
+            )
             .length;
         final earnings = reservations
             .where((reservation) =>
-                reservation.statusId == 2 || reservation.statusId == 3)
+                reservation.statusId == 2 ||
+                reservation.statusId == 3 ||
+                reservation.statusId == 4)
             .fold<double>(
                 0, (sum, reservation) => sum + reservation.totalValue);
 

@@ -988,7 +988,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.only(right: 16),
                   child: _buildFeaturedCard(
                     vehicleId: vehicleId,
-                    title: '${v['marca']} ${v['modelo']} ${v['anio']}',
+                    title: _vehicleDisplayName(v),
                     type: v['categoria'],
                     typeColor: typeColor,
                     rating: ratingData['rating'],
@@ -1026,6 +1026,33 @@ class _HomePageState extends State<HomePage> {
       default:
         return const Color(0xFF4F46E5);
     }
+  }
+
+  String _normalizeVehicleText(dynamic value) {
+    return '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  String _vehicleDisplayName(Map<String, dynamic> v) {
+    final marca = _normalizeVehicleText(v['marca']);
+    final rawModel = _normalizeVehicleText(v['modelo'] ?? v['linea']);
+    final year = _normalizeVehicleText(v['anio']);
+
+    var model = rawModel;
+    if (marca.isNotEmpty &&
+        model.toLowerCase().startsWith(marca.toLowerCase())) {
+      model = model.substring(marca.length).trimLeft();
+    }
+
+    var base = [if (marca.isNotEmpty) marca, if (model.isNotEmpty) model]
+        .join(' ')
+        .trim();
+    if (base.isEmpty) base = rawModel.isEmpty ? 'Vehiculo' : rawModel;
+
+    final hasYear = RegExp(r'^\d{4}$').hasMatch(year);
+    if (hasYear && !base.contains(year)) {
+      return '$base $year';
+    }
+    return base;
   }
 
   Widget _buildFeaturedCard({
@@ -1305,7 +1332,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildVehicleListItem(Map<String, dynamic> v, bool isSmallPhone) {
     final vehicleId = v['id'] as int;
-    final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
+    final name = _vehicleDisplayName(v);
     final specs =
         '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
     final ratingData =
@@ -1704,7 +1731,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHorizontalCardFromJson(Map<String, dynamic> v) {
     final vehicleId = v['id'] as int;
-    final name = '${v['marca']} ${v['modelo']} ${v['anio']}';
+    final name = _vehicleDisplayName(v);
     final specs =
         '${v['anio']} • ${v['transmision']} • ${v['puertos']} puestos • ${v['ubicacion']}';
     final ratingData =

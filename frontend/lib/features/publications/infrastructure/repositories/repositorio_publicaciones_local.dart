@@ -27,13 +27,14 @@ class RepositorioPublicacionesLocal implements RepositorioPublicacionesPuerto {
   }
 
   @override
-  void agregarPublicacion(PublicationModel publication) {
-    _origen.addPublication(publication);
+  Future<void> agregarPublicacion(PublicationModel publication) {
+    return _origen.addPublication(publication);
   }
 
   @override
-  void agregarPrecioPublicacion(PublicationPriceModel publicationPrice) {
-    _origen.addPublicationPrice(publicationPrice);
+  Future<void> agregarPrecioPublicacion(
+      PublicationPriceModel publicationPrice) {
+    return _origen.addPublicationPrice(publicationPrice);
   }
 
   LocalPublicationDb get origen => _origen;

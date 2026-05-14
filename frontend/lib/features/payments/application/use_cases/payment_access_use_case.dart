@@ -36,6 +36,10 @@ class PaymentAccessUseCase {
     return _repository.obtenerPsePorMetodoPagoId(paymentMethodId);
   }
 
+  String? getCardLast4(int cardId) {
+    return _repository.obtenerUltimos4Tarjeta(cardId);
+  }
+
   Future<PaymentMethodModel> createPaymentMethod({
     required int userId,
     required int paymentMethodTypeId,
@@ -53,6 +57,8 @@ class PaymentAccessUseCase {
     required int cardBrandId,
     required int expirationMonth,
     required int expirationYear,
+    required String cardNumber,
+    required int cvc,
     String? last4,
   }) {
     return _repository.crearTarjeta(
@@ -60,6 +66,8 @@ class PaymentAccessUseCase {
       cardBrandId: cardBrandId,
       expirationMonth: expirationMonth,
       expirationYear: expirationYear,
+      cardNumber: cardNumber,
+      cvc: cvc,
       last4: last4,
     );
   }

@@ -2,7 +2,7 @@ abstract class RepositorioVehiculosPuerto {
   Future<void> inicializar();
   List<Map<String, dynamic>> obtenerVehiculos();
   Map<String, dynamic>? obtenerVehiculoPorId(int id);
-  void agregarVehiculo(Map<String, dynamic> vehiculo);
+  Future<void> agregarVehiculo(Map<String, dynamic> vehiculo);
   void actualizarVehiculo(int id, Map<String, dynamic> nuevosDatos);
   void eliminarVehiculo(int id);
   List<Map<String, dynamic>> obtenerVehiculosPorCategoria(String categoria);

@@ -160,7 +160,7 @@ class VehiculoService {
   }
 
   /// CREATE - Agregar nuevo vehículo al ArrayList
-  void addVehiculo(Map<String, dynamic> vehiculo) {
+  Future<void> addVehiculo(Map<String, dynamic> vehiculo) async {
     // Generar ID autoincremental
     final maxId = vehiculos
         .map((v) => (v['id'] as num?)?.toInt() ?? 0)
@@ -170,7 +170,7 @@ class VehiculoService {
     vehiculo['vehiculo_id'] = nuevoId;
     vehiculo['_is_local_created'] = true;
     vehiculos.add(vehiculo);
-    _saveCreatedVehicles();
+    await _saveCreatedVehicles();
   }
 
   Future<List<Map<String, dynamic>>> _loadCreatedVehicles() async {
@@ -193,13 +193,12 @@ class VehiculoService {
     }
   }
 
-  void _saveCreatedVehicles() {
-    SharedPreferences.getInstance().then((prefs) {
-      final created = vehiculos
-          .where((vehicle) => vehicle['_is_local_created'] == true)
-          .toList();
-      prefs.setString(_createdVehiclesKey, jsonEncode(created));
-    });
+  Future<void> _saveCreatedVehicles() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created = vehiculos
+        .where((vehicle) => vehicle['_is_local_created'] == true)
+        .toList();
+    await prefs.setString(_createdVehiclesKey, jsonEncode(created));
   }
 
   /// UPDATE - Editar vehículo en el ArrayList

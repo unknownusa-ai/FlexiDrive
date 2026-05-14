@@ -9,6 +9,7 @@ import 'package:flexidrive/core/session/local_session_store.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 // Base de datos de reservas
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
+import 'package:flexidrive/features/reservations/domain/entities/reservation_models.dart';
 // Base de datos de reseñas
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 // Servicio de vehiculos
@@ -111,12 +112,13 @@ class _ReservasPageState extends State<ReservasPage>
 
     final currentUserId = _sessionStore.userId;
     final userReservations = currentUserId == null
-        ? _reservationDb.reservations.take(6).toList()
+        ? <ReservationModel>[]
         : _reservationDb.reservations
             .where((reservation) => reservation.userId == currentUserId)
             .toList();
 
     // Separar reservas por estado
+    final now = DateTime.now();
     final pendingReservations = userReservations
         .where((reservation) => reservation.statusId == 1)
         .toList()
@@ -124,16 +126,14 @@ class _ReservasPageState extends State<ReservasPage>
           .compareTo(a.reservationDate)); // statusId = 1 (Pendiente)
 
     final activeReservations = userReservations
-        .where((reservation) => reservation.statusId == 4)
+        .where(
+          (reservation) =>
+              reservation.statusId == 4 ||
+              (reservation.statusId == 2 && reservation.endDate.isAfter(now)),
+        )
         .toList()
       ..sort((a, b) => b.reservationDate
           .compareTo(a.reservationDate)); // statusId = 4 (Activa)
-
-    final finalizedReservations = userReservations
-        .where((reservation) => reservation.statusId == 2)
-        .toList()
-      ..sort((a, b) => b.reservationDate
-          .compareTo(a.reservationDate)); // statusId = 2 (Finalizada)
 
     final publicationsById = {
       for (final publication in _publicationDb.publications)
@@ -184,21 +184,21 @@ class _ReservasPageState extends State<ReservasPage>
       return _ReservaCardData(
         vehicleName: vehicle == null
             ? 'Reserva ${reservation.code}'
-            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
+            : _vehicleNameFromMap(vehicle),
         code: reservation.code,
         price: '\$ ${_formatAmount(reservation.totalValue.round())}',
         startDate: _formatDate(reservation.startDate),
         endDate: _formatDate(reservation.endDate),
         location:
-            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+            '${reservation.pickupLocation} - ${reservation.returnLocation}',
         progress: 0.2, // Progress for pending reservations
         status: status,
         imageUrl: mainImagesByPublication[reservation.publicationId] ??
             'assets/imagenes_carros/cx5.jpg',
         showEnCurso: false,
         vehicleSpecs: vehicle == null
-            ? '2024 • Negro Jet'
-            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
+            ? '2024 - Negro Jet'
+            : _vehicleSpecsFromMap(vehicle),
         vehicleRating: rating,
         vehicleReviews: reviewsForPublication.length,
         vehiclePrice: pubPrices[reservation.periodTypeId] ??
@@ -234,13 +234,13 @@ class _ReservasPageState extends State<ReservasPage>
       return _ReservaCardData(
         vehicleName: vehicle == null
             ? 'Reserva ${reservation.code}'
-            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
+            : _vehicleNameFromMap(vehicle),
         code: reservation.code,
         price: '\$ ${_formatAmount(reservation.totalValue.round())}',
         startDate: _formatDate(reservation.startDate),
         endDate: _formatDate(reservation.endDate),
         location:
-            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+            '${reservation.pickupLocation} - ${reservation.returnLocation}',
         progress: status == 'Activa'
             ? 0.4
             : status == 'Cancelada'
@@ -251,8 +251,8 @@ class _ReservasPageState extends State<ReservasPage>
             'assets/imagenes_carros/cx5.jpg',
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
-            ? '2024 • Negro Jet'
-            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
+            ? '2024 - Negro Jet'
+            : _vehicleSpecsFromMap(vehicle),
         vehicleRating: rating,
         vehicleReviews: reviewsForPublication.length,
         vehiclePrice: pubPrices[reservation.periodTypeId] ??
@@ -272,9 +272,12 @@ class _ReservasPageState extends State<ReservasPage>
       );
     }).toList();
 
-    final reservations = finalizedReservations; // Para el historial
+    final reservationsForHistory = userReservations
+        .where((reservation) => reservation.statusId != 1)
+        .toList()
+      ..sort((a, b) => b.reservationDate.compareTo(a.reservationDate));
 
-    final history = reservations.map((reservation) {
+    final history = reservationsForHistory.map((reservation) {
       final publication = publicationsById[reservation.publicationId];
       final vehicle =
           publication == null ? null : vehiclesById[publication.vehicleId];
@@ -294,13 +297,13 @@ class _ReservasPageState extends State<ReservasPage>
       return _ReservaCardData(
         vehicleName: vehicle == null
             ? 'Reserva ${reservation.code}'
-            : '${vehicle['linea'] ?? 'Vehículo'} ${vehicle['modelo'] ?? ''}',
+            : _vehicleNameFromMap(vehicle),
         code: reservation.code,
         price: '\$ ${_formatAmount(reservation.totalValue.round())}',
         startDate: _formatDate(reservation.startDate),
         endDate: _formatDate(reservation.endDate),
         location:
-            '${reservation.pickupLocation} · ${reservation.returnLocation}',
+            '${reservation.pickupLocation} - ${reservation.returnLocation}',
         progress: status == 'Activa'
             ? 0.4
             : status == 'Cancelada'
@@ -312,8 +315,8 @@ class _ReservasPageState extends State<ReservasPage>
             : vehicle['imagen'] as String,
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
-            ? '2024 • Negro Jet'
-            : '${vehicle['modelo'] ?? ''} • ${vehicle['color'] ?? 'N/A'}',
+            ? '2024 - Negro Jet'
+            : _vehicleSpecsFromMap(vehicle),
         vehicleRating: rating,
         vehicleReviews: reviewsForPublication.length,
         vehiclePrice: pubPrices[reservation.periodTypeId] ??
@@ -343,8 +346,7 @@ class _ReservasPageState extends State<ReservasPage>
     setState(() {
       _activeReservations = activeReservationData;
       _pendingReservations = pendingReservationData;
-      _historyReservations =
-          history.isNotEmpty ? history : _fallbackHistoryReservations();
+      _historyReservations = history;
       _finalizadasCount = finalizadas;
       _canceladasCount = canceladas;
       _isLoadingHistory = false;
@@ -582,7 +584,7 @@ class _ReservasPageState extends State<ReservasPage>
                     ),
                     onViewDetails: () => _openReservationDetails(
                       vehicleName: reserva.vehicleName,
-                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 - Negro Jet',
                       vehicleRating: reserva.vehicleRating ?? 4.9,
                       vehicleReviews: reserva.vehicleReviews ?? 128,
                       vehiclePrice: reserva.vehiclePrice ?? 440000,
@@ -609,7 +611,7 @@ class _ReservasPageState extends State<ReservasPage>
                     ),
                     onViewDetails: () => _openReservationDetails(
                       vehicleName: reserva.vehicleName,
-                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 - Negro Jet',
                       vehicleRating: reserva.vehicleRating ?? 4.9,
                       vehicleReviews: reserva.vehicleReviews ?? 128,
                       vehiclePrice: reserva.vehiclePrice ?? 440000,
@@ -625,9 +627,7 @@ class _ReservasPageState extends State<ReservasPage>
         return const Center(child: CircularProgressIndicator());
       }
 
-      final reservations = _historyReservations.isNotEmpty
-          ? _historyReservations
-          : _fallbackHistoryReservations();
+      final reservations = _historyReservations;
 
       return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -637,7 +637,7 @@ class _ReservasPageState extends State<ReservasPage>
                     onSecondaryAction: () {},
                     onViewDetails: () => _openReservationDetails(
                       vehicleName: reserva.vehicleName,
-                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 • Negro Jet',
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 - Negro Jet',
                       vehicleRating: reserva.vehicleRating ?? 4.9,
                       vehicleReviews: reserva.vehicleReviews ?? 128,
                       vehiclePrice: reserva.vehiclePrice ?? 380000,
@@ -788,7 +788,7 @@ class _ReservasPageState extends State<ReservasPage>
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${reserva.startDate} · ${reserva.price}',
+                              '${reserva.startDate} - ${reserva.price}',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -999,7 +999,7 @@ class _ReservasPageState extends State<ReservasPage>
                     size: 14,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(width: 6),
-                Text('${data.startDate} → ${data.endDate}',
+                Text('${data.startDate} -> ${data.endDate}',
                     style: GoogleFonts.poppins(
                         fontSize: 12,
                         color:
@@ -1129,6 +1129,52 @@ class _ReservasPageState extends State<ReservasPage>
     }
   }
 
+  String _normalizeVehicleText(dynamic value) {
+    if (value == null) return '';
+    final normalized = '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final lowered = normalized.toLowerCase();
+    if (lowered == 'null' || lowered == 'undefined' || lowered == 'nan') {
+      return '';
+    }
+    return normalized;
+  }
+
+  String _vehicleNameFromMap(Map<String, dynamic> vehicle) {
+    final marca = _normalizeVehicleText(vehicle['marca']);
+    final linea = _normalizeVehicleText(vehicle['linea']);
+    final modelo = _normalizeVehicleText(vehicle['modelo']);
+    final anio = _normalizeVehicleText(vehicle['anio']);
+
+    final rawModel = linea.isNotEmpty ? linea : modelo;
+    var cleanedModel = rawModel;
+    if (marca.isNotEmpty &&
+        cleanedModel.toLowerCase().startsWith(marca.toLowerCase())) {
+      cleanedModel = cleanedModel.substring(marca.length).trimLeft();
+    }
+
+    var name = [
+      if (marca.isNotEmpty) marca,
+      if (cleanedModel.isNotEmpty) cleanedModel
+    ].join(' ').trim();
+    if (name.isEmpty) name = rawModel.isEmpty ? 'Vehiculo' : rawModel;
+
+    final hasYear = RegExp(r'^\d{4}$').hasMatch(anio);
+    if (hasYear && !name.contains(anio)) {
+      return '$name $anio';
+    }
+    return name;
+  }
+
+  String _vehicleSpecsFromMap(Map<String, dynamic> vehicle) {
+    final anio = _normalizeVehicleText(vehicle['anio']);
+    final color = _normalizeVehicleText(vehicle['color']);
+
+    if (anio.isNotEmpty && color.isNotEmpty) return '$anio - $color';
+    if (anio.isNotEmpty) return anio;
+    if (color.isNotEmpty) return color;
+    return 'N/A';
+  }
+
   String _formatAmount(int amount) {
     final digits = amount.toString();
     final buffer = StringBuffer();
@@ -1162,55 +1208,6 @@ class _ReservasPageState extends State<ReservasPage>
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
-
-  List<_ReservaCardData> _fallbackHistoryReservations() => [
-        const _ReservaCardData(
-          vehicleName: 'Tesla Model 3 2024',
-          code: 'FXD-2024-0087',
-          price: '\$ 380,000',
-          startDate: '18 Feb 2026',
-          endDate: '20 Feb 2026',
-          location: 'Cra 7, Bogotá',
-          progress: 1.0,
-          status: 'Finalizada',
-          imageUrl: 'assets/imagenes_carros/cx5.jpg',
-          showEnCurso: false,
-          vehicleSpecs: '2024 • Negro Jet',
-          vehicleRating: 4.9,
-          vehicleReviews: 128,
-          vehiclePrice: 380000,
-          precioDia: 380000,
-          precioSemana: 2280000,
-          statusColor: Color(0xFF3B82F6),
-          secondaryActionLabel: 'Calificar',
-          secondaryActionIcon: Icons.star_rounded,
-          secondaryButtonColor: Color(0xFFFCD34D),
-          secondaryTextColor: Color(0xFF111827),
-        ),
-        const _ReservaCardData(
-          vehicleName: 'Mercedes GLC 2024',
-          code: 'FXD-2024-0086',
-          price: '\$ 520,000',
-          startDate: '10 Feb 2026',
-          endDate: '12 Feb 2026',
-          location: 'Av. Paseo Consistorial, Bogotá',
-          progress: 0.0,
-          status: 'Cancelada',
-          imageUrl: 'assets/imagenes_carros/cx5.jpg',
-          showEnCurso: false,
-          vehicleSpecs: '2024 • Negro Jet',
-          vehicleRating: 4.9,
-          vehicleReviews: 128,
-          vehiclePrice: 520000,
-          precioDia: 520000,
-          precioSemana: 3120000,
-          statusColor: Color(0xFFEF4444),
-          secondaryActionLabel: 'Calificar',
-          secondaryActionIcon: Icons.star_rounded,
-          secondaryButtonColor: Color(0xFFFCD34D),
-          secondaryTextColor: Color(0xFF111827),
-        ),
-      ];
 
   Widget _buildPlaceholder() => Container(
         color: const Color(0xFFE5E7EB),

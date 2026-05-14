@@ -1,16 +1,25 @@
+import 'dart:convert';
+
 import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/payments/domain/entities/payment_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalPaymentDb {
   LocalPaymentDb._();
 
   static final LocalPaymentDb instance = LocalPaymentDb._();
+  static const _paymentMethodsOverridesKey = 'payment_methods_overrides_v1';
+  static const _cardsOverridesKey = 'payment_cards_overrides_v1';
+  static const _cardLast4OverridesKey = 'payment_cards_last4_v1';
 
   bool? _loaded = false;
 
   final List<PaymentMethodModel> paymentMethods = [];
   final List<CardModel> cards = [];
   final List<PseModel> pses = [];
+  final List<PaymentMethodModel> _createdPaymentMethods = [];
+  final List<CardModel> _createdCards = [];
+  final Map<int, String> _cardLast4ById = {};
 
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
@@ -19,20 +28,37 @@ class LocalPaymentDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('payment-methods'),
+          await _safeLoadList('payment-methods'),
           PaymentMethodModel.fromJson,
         ),
       );
     cards
       ..clear()
       ..addAll(
-        _parseList(await _loadList('cards'), CardModel.fromJson),
+        _parseList(await _safeLoadList('cards'), CardModel.fromJson),
       );
     pses
       ..clear()
       ..addAll(
-        _parseList(await _loadList('pses'), PseModel.fromJson),
+        _parseList(await _safeLoadList('pses'), PseModel.fromJson),
       );
+
+    _createdPaymentMethods
+      ..clear()
+      ..addAll(await _loadPaymentMethodsOverrides());
+    _createdCards
+      ..clear()
+      ..addAll(await _loadCardsOverrides());
+    _cardLast4ById
+      ..clear()
+      ..addAll(await _loadCardLast4Overrides());
+
+    for (final paymentMethod in _createdPaymentMethods) {
+      _upsertPaymentMethod(paymentMethod);
+    }
+    for (final card in _createdCards) {
+      _upsertCard(card);
+    }
 
     _loaded = true;
   }
@@ -47,6 +73,14 @@ class LocalPaymentDb {
 
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
+
+  Future<List<dynamic>> _safeLoadList(String endpoint) async {
+    try {
+      return await _loadList(endpoint).timeout(const Duration(seconds: 6));
+    } catch (_) {
+      return const [];
+    }
+  }
 
   // Get payment methods for the current user
   List<PaymentMethodModel> getUserPaymentMethods(int userId) {
@@ -112,19 +146,34 @@ class LocalPaymentDb {
     }
   }
 
+  String? getCardLast4ById(int cardId) => _cardLast4ById[cardId];
+
   Future<PaymentMethodModel> createPaymentMethod({
     required int userId,
     required int paymentMethodTypeId,
     bool isDefault = false,
   }) async {
     await loadIfNeeded();
-    final created = await ApiClient.instance.postMap('payment-methods', {
-      'usuario_id': userId,
-      'tipo_metodo_pago_id': paymentMethodTypeId,
-      'predeterminado': isDefault,
-    });
-    final model = PaymentMethodModel.fromJson(created);
-    paymentMethods.add(model);
+    PaymentMethodModel model;
+    try {
+      final created = await ApiClient.instance.postMap('payment-methods', {
+        'usuario_id': userId,
+        'tipo_metodo_pago_id': paymentMethodTypeId,
+        'predeterminado': isDefault,
+      });
+      model = PaymentMethodModel.fromJson(created);
+    } catch (_) {
+      model = PaymentMethodModel(
+        id: _nextPaymentMethodId(),
+        userId: userId,
+        paymentMethodTypeId: paymentMethodTypeId,
+        isDefault: isDefault,
+      );
+    }
+
+    _upsertPaymentMethod(model);
+    _upsertCreatedPaymentMethod(model);
+    await _savePaymentMethodsOverrides();
     return model;
   }
 
@@ -133,17 +182,224 @@ class LocalPaymentDb {
     required int cardBrandId,
     required int expirationMonth,
     required int expirationYear,
+    required String cardNumber,
+    required int cvc,
     String? last4,
   }) async {
     await loadIfNeeded();
-    final created = await ApiClient.instance.postMap('cards', {
-      'metodo_pago_id': paymentMethodId,
-      'marca_tarjeta_id': cardBrandId,
-      'mes_expiracion': expirationMonth,
-      'ano_expiracion': expirationYear,
-    });
-    final model = CardModel.fromJson(created);
-    cards.add(model);
+    final inputDigits = cardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    final normalizedInputNumber =
+        inputDigits.isEmpty ? cardNumber : inputDigits;
+    final inputLast4 = inputDigits.length >= 4
+        ? inputDigits.substring(inputDigits.length - 4)
+        : (last4 ?? '');
+    CardModel model;
+    try {
+      final created = await ApiClient.instance.postMap('cards', {
+        'metodo_pago_id': paymentMethodId,
+        'marca_tarjeta_id': cardBrandId,
+        'mes_expiracion': expirationMonth,
+        'ano_expiracion': expirationYear,
+        'numero_tarjeta': cardNumber,
+        'cvc': cvc,
+      });
+      final parsed = CardModel.fromJson(created);
+      final parsedDigits = parsed.cardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      final parsedLooksMaskedOrInvalid =
+          parsedDigits.length < 12 || RegExp(r'^0+$').hasMatch(parsedDigits);
+      final resolvedCardNumber =
+          (parsed.cardNumber.trim().isEmpty || parsedLooksMaskedOrInvalid)
+              ? normalizedInputNumber
+              : parsed.cardNumber;
+      final resolvedBrandId =
+          parsed.cardBrandId <= 0 ? cardBrandId : parsed.cardBrandId;
+      model = CardModel(
+        id: parsed.id,
+        paymentMethodId: paymentMethodId,
+        cardNumber: resolvedCardNumber,
+        cardBrandId: resolvedBrandId,
+        expirationMonth: parsed.expirationMonth,
+        expirationYear: parsed.expirationYear,
+        cvc: parsed.cvc,
+      );
+    } catch (_) {
+      final resolvedCardNumber = normalizedInputNumber.isEmpty
+          ? last4 ?? cardNumber
+          : normalizedInputNumber;
+      model = CardModel(
+        id: _nextCardId(),
+        paymentMethodId: paymentMethodId,
+        cardNumber: resolvedCardNumber,
+        cardBrandId: cardBrandId,
+        expirationMonth: expirationMonth,
+        expirationYear: expirationYear,
+        cvc: cvc,
+      );
+    }
+
+    _upsertCard(model);
+    _upsertCreatedCard(model);
+    final resolvedLast4 = _resolveLast4(
+      explicitLast4: inputLast4,
+      cardNumber: model.cardNumber,
+    );
+    if (resolvedLast4.isNotEmpty) {
+      _cardLast4ById[model.id] = resolvedLast4;
+      await _saveCardLast4Overrides();
+    }
+    await _saveCardsOverrides();
     return model;
+  }
+
+  String _resolveLast4({
+    required String explicitLast4,
+    required String cardNumber,
+  }) {
+    final normalizedExplicit = explicitLast4.replaceAll(RegExp(r'[^0-9]'), '');
+    if (normalizedExplicit.length >= 4) {
+      return normalizedExplicit.substring(normalizedExplicit.length - 4);
+    }
+    final digits = cardNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length >= 4) return digits.substring(digits.length - 4);
+    return '';
+  }
+
+  void _upsertPaymentMethod(PaymentMethodModel model) {
+    final index = paymentMethods.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      paymentMethods.add(model);
+    } else {
+      paymentMethods[index] = model;
+    }
+  }
+
+  void _upsertCard(CardModel model) {
+    final index = cards.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      cards.add(model);
+    } else {
+      cards[index] = model;
+    }
+  }
+
+  void _upsertCreatedPaymentMethod(PaymentMethodModel model) {
+    final index =
+        _createdPaymentMethods.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      _createdPaymentMethods.add(model);
+    } else {
+      _createdPaymentMethods[index] = model;
+    }
+  }
+
+  void _upsertCreatedCard(CardModel model) {
+    final index = _createdCards.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      _createdCards.add(model);
+    } else {
+      _createdCards[index] = model;
+    }
+  }
+
+  int _nextPaymentMethodId() {
+    if (paymentMethods.isEmpty) return 1;
+    return paymentMethods
+            .map((item) => item.id)
+            .reduce((current, next) => current > next ? current : next) +
+        1;
+  }
+
+  int _nextCardId() {
+    if (cards.isEmpty) return 1;
+    return cards
+            .map((item) => item.id)
+            .reduce((current, next) => current > next ? current : next) +
+        1;
+  }
+
+  Future<List<PaymentMethodModel>> _loadPaymentMethodsOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_paymentMethodsOverridesKey);
+    if (raw == null || raw.isEmpty) return <PaymentMethodModel>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return <PaymentMethodModel>[];
+      return decoded
+          .whereType<Map>()
+          .map(
+            (item) => PaymentMethodModel.fromJson(
+              item.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return <PaymentMethodModel>[];
+    }
+  }
+
+  Future<List<CardModel>> _loadCardsOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_cardsOverridesKey);
+    if (raw == null || raw.isEmpty) return <CardModel>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return <CardModel>[];
+      return decoded
+          .whereType<Map>()
+          .map(
+            (item) => CardModel.fromJson(
+              item.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return <CardModel>[];
+    }
+  }
+
+  Future<Map<int, String>> _loadCardLast4Overrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_cardLast4OverridesKey);
+    if (raw == null || raw.isEmpty) return <int, String>{};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return <int, String>{};
+      final result = <int, String>{};
+      decoded.forEach((key, value) {
+        final id = int.tryParse(key.toString());
+        final last4 = value?.toString() ?? '';
+        if (id != null && id > 0 && last4.isNotEmpty) {
+          result[id] = last4;
+        }
+      });
+      return result;
+    } catch (_) {
+      return <int, String>{};
+    }
+  }
+
+  Future<void> _savePaymentMethodsOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created = _createdPaymentMethods
+        .map((paymentMethod) => paymentMethod.toJson())
+        .toList();
+    await prefs.setString(_paymentMethodsOverridesKey, jsonEncode(created));
+  }
+
+  Future<void> _saveCardsOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created = _createdCards.map((card) => card.toJson()).toList();
+    await prefs.setString(_cardsOverridesKey, jsonEncode(created));
+  }
+
+  Future<void> _saveCardLast4Overrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = <String, String>{};
+    _cardLast4ById.forEach((key, value) {
+      if (key > 0 && value.isNotEmpty) {
+        encoded['$key'] = value;
+      }
+    });
+    await prefs.setString(_cardLast4OverridesKey, jsonEncode(encoded));
   }
 }

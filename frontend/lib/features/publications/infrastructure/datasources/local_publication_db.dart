@@ -37,7 +37,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('publications'),
+          await _safeLoadList('publications'),
           PublicationModel.fromJson,
         ),
       );
@@ -47,7 +47,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('publication-prices'),
+          await _safeLoadList('publication-prices'),
           PublicationPriceModel.fromJson,
         ),
       );
@@ -57,7 +57,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _loadList('publication-images'),
+          await _safeLoadList('publication-images'),
           PublicationImageModel.fromJson,
         ),
       );
@@ -87,6 +87,14 @@ class LocalPublicationDb {
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  Future<List<dynamic>> _safeLoadList(String endpoint) async {
+    try {
+      return await _loadList(endpoint).timeout(const Duration(seconds: 6));
+    } catch (_) {
+      return const [];
+    }
+  }
+
   int nextPublicationId() {
     if (publications.isEmpty) return 1;
     return publications
@@ -103,16 +111,17 @@ class LocalPublicationDb {
         1;
   }
 
-  void addPublication(PublicationModel publication) {
+  Future<void> addPublication(PublicationModel publication) async {
     publications.add(publication);
     _createdPublications.add(publication);
-    _savePublicationOverrides();
+    await _savePublicationOverrides();
   }
 
-  void addPublicationPrice(PublicationPriceModel publicationPrice) {
+  Future<void> addPublicationPrice(
+      PublicationPriceModel publicationPrice) async {
     publicationPrices.add(publicationPrice);
     _createdPublicationPrices.add(publicationPrice);
-    _savePublicationPriceOverrides();
+    await _savePublicationPriceOverrides();
   }
 
   Future<List<PublicationModel>> _loadPublicationOverrides() async {
@@ -155,20 +164,18 @@ class LocalPublicationDb {
     }
   }
 
-  void _savePublicationOverrides() {
-    SharedPreferences.getInstance().then((prefs) {
-      final created = _createdPublications
-          .map((publication) => publication.toJson())
-          .toList();
-      prefs.setString(_publicationsOverridesKey, jsonEncode(created));
-    });
+  Future<void> _savePublicationOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created = _createdPublications
+        .map((publication) => publication.toJson())
+        .toList();
+    await prefs.setString(_publicationsOverridesKey, jsonEncode(created));
   }
 
-  void _savePublicationPriceOverrides() {
-    SharedPreferences.getInstance().then((prefs) {
-      final created =
-          _createdPublicationPrices.map((price) => price.toJson()).toList();
-      prefs.setString(_pricesOverridesKey, jsonEncode(created));
-    });
+  Future<void> _savePublicationPriceOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created =
+        _createdPublicationPrices.map((price) => price.toJson()).toList();
+    await prefs.setString(_pricesOverridesKey, jsonEncode(created));
   }
 }

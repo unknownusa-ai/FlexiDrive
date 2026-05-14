@@ -49,6 +49,11 @@ class RepositorioPagosLocal implements RepositorioPagosPuerto {
   }
 
   @override
+  String? obtenerUltimos4Tarjeta(int cardId) {
+    return _origen.getCardLast4ById(cardId);
+  }
+
+  @override
   Future<PaymentMethodModel> crearMetodoPago({
     required int userId,
     required int paymentMethodTypeId,
@@ -67,6 +72,8 @@ class RepositorioPagosLocal implements RepositorioPagosPuerto {
     required int cardBrandId,
     required int expirationMonth,
     required int expirationYear,
+    required String cardNumber,
+    required int cvc,
     String? last4,
   }) {
     return _origen.createCard(
@@ -74,6 +81,8 @@ class RepositorioPagosLocal implements RepositorioPagosPuerto {
       cardBrandId: cardBrandId,
       expirationMonth: expirationMonth,
       expirationYear: expirationYear,
+      cardNumber: cardNumber,
+      cvc: cvc,
       last4: last4,
     );
   }

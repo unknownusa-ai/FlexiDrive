@@ -58,7 +58,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
   }
 
   /// Agregar vehículo al ArrayList
-  void _agregarVehiculo() {
+  Future<void> _agregarVehiculo() async {
     final nuevoVehiculo = {
       'marca': 'Nissan',
       'modelo': 'Sentra',
@@ -75,12 +75,13 @@ class _VehiculosPageState extends State<VehiculosPage> {
       'resenas': 0,
     };
 
+    final messenger = ScaffoldMessenger.of(context);
+    await _service.addVehiculo(nuevoVehiculo);
     setState(() {
-      _service.addVehiculo(nuevoVehiculo);
       _vehiculos = _service.getVehiculos();
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
+    if (!mounted) return;
+    messenger.showSnackBar(
       const SnackBar(content: Text('Vehículo agregado al ArrayList')),
     );
   }

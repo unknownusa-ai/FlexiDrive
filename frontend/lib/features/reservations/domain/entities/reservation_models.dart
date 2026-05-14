@@ -18,7 +18,7 @@ class ReservationModel {
     required this.pickupLocation, // Donde recoge el carro
     required this.returnLocation, // Donde devuelve el carro
     required this.totalValue, // Valor total en pesos
-    required this.statusId, // 1=pendiente, 2=activa, 3=completada, 4=cancelada
+    required this.statusId, // 1=pendiente, 2=finalizada, 3=cancelada, 4=activa
     required this.reservationDate, // Fecha en que hizo la reserva
   });
 
@@ -46,7 +46,7 @@ class ReservationModel {
   final String returnLocation;
   // Valor total de la reserva
   final double totalValue;
-  // Estado: 1=pendiente, 2=activa, 3=completada, 4=cancelada
+  // Estado: 1=pendiente, 2=finalizada, 3=cancelada, 4=activa
   final int statusId;
   // Fecha en que se creo la reserva
   final DateTime reservationDate;

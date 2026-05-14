@@ -5,6 +5,6 @@ abstract class RepositorioPublicacionesPuerto {
   List<PublicationModel> obtenerPublicaciones();
   List<PublicationPriceModel> obtenerPreciosPublicacion();
   List<PublicationImageModel> obtenerImagenesPublicacion();
-  void agregarPublicacion(PublicationModel publication);
-  void agregarPrecioPublicacion(PublicationPriceModel publicationPrice);
+  Future<void> agregarPublicacion(PublicationModel publication);
+  Future<void> agregarPrecioPublicacion(PublicationPriceModel publicationPrice);
 }

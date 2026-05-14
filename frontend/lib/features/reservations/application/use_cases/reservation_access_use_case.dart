@@ -14,6 +14,10 @@ class ReservationAccessUseCase {
     return _repository.agregarReserva(reservation);
   }
 
+  Future<void> updateReservation(ReservationModel reservation) {
+    return _repository.actualizarReserva(reservation);
+  }
+
   void addReservationLocally(ReservationModel reservation) {
     _repository.agregarReservaLocal(reservation);
   }

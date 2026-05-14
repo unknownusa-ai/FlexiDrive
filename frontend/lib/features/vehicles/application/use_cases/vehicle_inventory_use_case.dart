@@ -17,8 +17,8 @@ class VehicleInventoryUseCase {
     return _repository.obtenerVehiculoPorId(id);
   }
 
-  void addVehiculo(Map<String, dynamic> vehiculo) {
-    _repository.agregarVehiculo(vehiculo);
+  Future<void> addVehiculo(Map<String, dynamic> vehiculo) {
+    return _repository.agregarVehiculo(vehiculo);
   }
 
   void updateVehiculo(int id, Map<String, dynamic> nuevosDatos) {

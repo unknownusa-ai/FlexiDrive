@@ -18,11 +18,11 @@ class PublicationAccessUseCase {
     return _repository.obtenerImagenesPublicacion();
   }
 
-  void addPublication(PublicationModel publication) {
-    _repository.agregarPublicacion(publication);
+  Future<void> addPublication(PublicationModel publication) {
+    return _repository.agregarPublicacion(publication);
   }
 
-  void addPublicationPrice(PublicationPriceModel publicationPrice) {
-    _repository.agregarPrecioPublicacion(publicationPrice);
+  Future<void> addPublicationPrice(PublicationPriceModel publicationPrice) {
+    return _repository.agregarPrecioPublicacion(publicationPrice);
   }
 }

@@ -1212,7 +1212,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     final vehicleName = nombreController.text.trim();
     final location = _capitalizeWords(ubicacionController.text);
 
-    _vehicleInventory.addVehiculo({
+    await _vehicleInventory.addVehiculo({
       'id': nextVehicleId,
       'vehiculo_id': nextVehicleId,
       'marca': marcaController.text.trim(),
@@ -1240,7 +1240,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       'aire_acondicionado': true,
     });
 
-    _publicationAccess.addPublication(
+    await _publicationAccess.addPublication(
       PublicationModel(
         id: publicationId,
         userId: currentUser.id,
@@ -1250,7 +1250,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       ),
     );
 
-    _publicationAccess.addPublicationPrice(
+    await _publicationAccess.addPublicationPrice(
       PublicationPriceModel(
         id: publicationPriceId,
         publicationId: publicationId,
