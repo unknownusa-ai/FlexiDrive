@@ -3,7 +3,17 @@ from rest_framework import serializers
 
 class RegisterSerializer(serializers.Serializer):
     tipo_identificacion_id = serializers.IntegerField(min_value=1)
+    tipo_identificacion_nombre = serializers.CharField(
+        max_length=120,
+        required=False,
+        allow_blank=True,
+    )
     tipo_usuario_id = serializers.IntegerField(min_value=1, required=False)
+    tipo_usuario_nombre = serializers.CharField(
+        max_length=120,
+        required=False,
+        allow_blank=True,
+    )
     nombre_completo = serializers.CharField(max_length=180)
     numero_identificacion = serializers.CharField(max_length=50)
     correo = serializers.EmailField(max_length=254)

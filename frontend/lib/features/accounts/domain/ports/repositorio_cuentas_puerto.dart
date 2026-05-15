@@ -9,6 +9,8 @@ abstract class RepositorioCuentasPuerto {
   Future<UserModel> register({
     required String fullName,
     required String identificationNumber,
+    String? identificationTypeName,
+    String? userTypeName,
     required String email,
     required String phone,
     required String password,

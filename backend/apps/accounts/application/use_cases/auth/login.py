@@ -53,6 +53,8 @@ def login_user(
         "refresh_token": issued_tokens.refresh_token,
         "user": {
             "usuario_id": user.id,
+            "tipo_usuario_id": user.user_type_id,
+            "tipo_usuario_nombre": user.user_type_name,
             "nombre_completo": user.full_name,
             "foto_perfil": user.profile_photo_url,
             "ubicacion": ubicacion,

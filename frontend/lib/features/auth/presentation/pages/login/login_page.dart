@@ -100,9 +100,10 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      final isArrendatarioMode = await _preferenceService.getArrendatarioMode(
+      final isArrendatarioMode = user.userTypeId == 2;
+      await _preferenceService.setArrendatarioMode(
         userId: user.id,
-        defaultValue: false,
+        enabled: isArrendatarioMode,
       );
 
       if (!mounted) return;

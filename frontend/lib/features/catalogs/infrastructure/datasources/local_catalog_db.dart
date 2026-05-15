@@ -29,7 +29,7 @@ class LocalCatalogDb {
   final List<DocumentVerificationStatusModel> documentVerificationStatuses = [];
 
   Future<void> loadIfNeeded() async {
-    if (_loaded == true) return;
+    if (_loaded == true && identificationTypes.isNotEmpty) return;
 
     identificationTypes
       ..clear()
@@ -122,7 +122,10 @@ class LocalCatalogDb {
         ),
       );
 
-    _loaded = true;
+    // Solo marcamos como cargado cuando al menos el catalogo critico de
+    // tipos de identificacion llega con datos. Si viene vacio por un fallo
+    // temporal de red/API, permitimos reintentos en llamadas siguientes.
+    _loaded = identificationTypes.isNotEmpty;
   }
 
   List<T> _parseList<T>(

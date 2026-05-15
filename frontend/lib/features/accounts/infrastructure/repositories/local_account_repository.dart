@@ -38,6 +38,12 @@ class LocalAccountRepository {
     final rawUser = response['user'];
     final userMap = rawUser is Map ? rawUser : const {};
     final userId = int.tryParse('${userMap['usuario_id'] ?? ''}');
+    final userTypeId = int.tryParse('${userMap['tipo_usuario_id'] ?? ''}');
+    final userTypeName = '${userMap['tipo_usuario_nombre'] ?? ''}'.trim();
+    final resolvedUserTypeId = _resolveFallbackUserTypeId(
+      incomingUserTypeId: userTypeId,
+      incomingUserTypeName: userTypeName,
+    );
     if (userId == null) return null;
 
     await _session.setUserId(userId);
@@ -46,7 +52,17 @@ class LocalAccountRepository {
       await _db.reload();
       for (final user in _db.users) {
         if (user.id == userId) {
-          return user;
+          return UserModel(
+            id: user.id,
+            identificationTypeId: user.identificationTypeId,
+            identificationNumber: user.identificationNumber,
+            userTypeId: resolvedUserTypeId > 0 ? resolvedUserTypeId : user.userTypeId,
+            fullName: user.fullName,
+            email: user.email,
+            phone: user.phone,
+            password: user.password,
+            canPublish: user.canPublish,
+          );
         }
       }
     } catch (_) {
@@ -57,7 +73,7 @@ class LocalAccountRepository {
       id: userId,
       identificationTypeId: 0,
       identificationNumber: '',
-      userTypeId: 0,
+      userTypeId: resolvedUserTypeId,
       fullName: '${userMap['nombre_completo'] ?? ''}'.trim(),
       email: email.trim().toLowerCase(),
       phone: '',
@@ -84,6 +100,8 @@ class LocalAccountRepository {
   Future<UserModel> register({
     required String fullName,
     required String identificationNumber,
+    String? identificationTypeName,
+    String? userTypeName,
     required String email,
     required String phone,
     required String password,
@@ -96,6 +114,8 @@ class LocalAccountRepository {
     final normalizedEmail = email.trim().toLowerCase();
     final payload = <String, dynamic>{
       'tipo_identificacion_id': identificationTypeId,
+      'tipo_identificacion_nombre': identificationTypeName?.trim() ?? '',
+      'tipo_usuario_nombre': userTypeName?.trim() ?? '',
       'numero_identificacion': identificationNumber.trim(),
       'nombre_completo': fullName.trim(),
       'correo': normalizedEmail,
@@ -211,5 +231,26 @@ class LocalAccountRepository {
 
     await _db.saveUserOverride(updatedUser);
     await _db.reload();
+  }
+
+  int _resolveFallbackUserTypeId({
+    required int? incomingUserTypeId,
+    required String incomingUserTypeName,
+  }) {
+    final normalizedName = incomingUserTypeName
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('ñ', 'n');
+    if (normalizedName.contains('arrendatario')) return 2;
+    if (normalizedName.contains('arrendador')) return 1;
+    if (incomingUserTypeId != null && incomingUserTypeId > 0) {
+      return incomingUserTypeId;
+    }
+    return 0;
   }
 }

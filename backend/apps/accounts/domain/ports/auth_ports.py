@@ -8,6 +8,8 @@ from typing import Protocol
 @dataclass(frozen=True)
 class AuthUser:
     id: int
+    user_type_id: int
+    user_type_name: str
     full_name: str
     email: str
     password_hash: str
@@ -44,7 +46,15 @@ class AccountsAuthRepositoryPort(Protocol):
 
     def identification_type_exists(self, identification_type_id: int) -> bool: ...
 
+    def find_identification_type_id_by_name(self, name: str) -> int | None: ...
+
+    def create_identification_type(self, name: str) -> int: ...
+
     def user_type_exists(self, user_type_id: int) -> bool: ...
+
+    def find_user_type_id_by_name(self, name: str) -> int | None: ...
+
+    def create_user_type(self, name: str) -> int: ...
 
     def get_default_arrendador_user_type_id(self) -> int | None: ...
 
@@ -83,4 +93,3 @@ class JwtTokenServicePort(Protocol):
     def get_user_id_from_refresh_token(self, refresh_token: str) -> int: ...
 
     def validate_access_token(self, access_token: str) -> None: ...
-

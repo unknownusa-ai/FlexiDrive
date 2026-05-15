@@ -35,6 +35,10 @@ class _RegisterPageState extends State<RegisterPage> {
     'Numero Unico de Identificacion Personal',
     'NIT',
   ];
+  static const List<String> _preferredUserTypes = [
+    'Arrendador',
+    'Arrendatario',
+  ];
 
   static const Map<int, String> _fallbackIdentificationNamesById = {
     1: 'Cedula de Ciudadania',
@@ -46,6 +50,10 @@ class _RegisterPageState extends State<RegisterPage> {
     7: 'Permiso Especial de Permanencia',
     8: 'Permiso por Proteccion Temporal',
     9: 'Numero Unico de Identificacion Personal',
+  };
+  static const Map<int, String> _fallbackUserTypeNamesById = {
+    1: 'Arrendador',
+    2: 'Arrendatario',
   };
 
   // Controladores de los campos del formulario
@@ -73,6 +81,8 @@ class _RegisterPageState extends State<RegisterPage> {
   // Catalogo de tipos de documento (CC, CE, Pasaporte, etc)
   List<IdentificationTypeModel> _identificationTypes = [];
   IdentificationTypeModel? _selectedIdentificationType; // Tipo seleccionado
+  List<UserTypeModel> _userTypes = [];
+  UserTypeModel? _selectedUserType;
 
   // Muestra un dialogo con mensaje
   Future<void> _showDialogMessage(String title, String message) async {
@@ -201,31 +211,47 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final selectedOrderedTypes =
           _buildOrderedIdentificationTypes(normalizedTypes);
+      final orderedUserTypes =
+          _buildOrderedUserTypes(_catalogDb.userTypes.toList());
 
       if (selectedOrderedTypes.isEmpty) {
         final localTypes = _buildLocalColombianIdentificationTypes();
+        final localUserTypes = _buildLocalUserTypes();
         setState(() {
           _identificationTypes = localTypes;
           _selectedIdentificationType =
               localTypes.isNotEmpty ? localTypes.first : null;
+          _userTypes = localUserTypes;
+          _selectedUserType =
+              localUserTypes.isNotEmpty ? localUserTypes.first : null;
           _isLoadingCatalogs = false;
         });
         return;
       }
 
+      final finalUserTypes =
+          orderedUserTypes.isEmpty ? _buildLocalUserTypes() : orderedUserTypes;
       setState(() {
         _identificationTypes = selectedOrderedTypes;
         if (_identificationTypes.isNotEmpty) {
           _selectedIdentificationType = _identificationTypes.first;
         }
+        _userTypes = finalUserTypes;
+        if (_userTypes.isNotEmpty) {
+          _selectedUserType = _userTypes.first;
+        }
         _isLoadingCatalogs = false;
       });
     } catch (_) {
       final localTypes = _buildLocalColombianIdentificationTypes();
+      final localUserTypes = _buildLocalUserTypes();
       setState(() {
         _identificationTypes = localTypes;
         _selectedIdentificationType =
             localTypes.isNotEmpty ? localTypes.first : null;
+        _userTypes = localUserTypes;
+        _selectedUserType =
+            localUserTypes.isNotEmpty ? localUserTypes.first : null;
         _isLoadingCatalogs = false;
       });
     }
@@ -256,6 +282,28 @@ class _RegisterPageState extends State<RegisterPage> {
     return selectedOrderedTypes;
   }
 
+  List<UserTypeModel> _buildOrderedUserTypes(List<UserTypeModel> userTypes) {
+    final typesByName = <String, UserTypeModel>{
+      for (final type in userTypes) _normalizeText(type.name): type,
+    };
+
+    final ordered = <UserTypeModel>[];
+    for (final preferredName in _preferredUserTypes) {
+      final matched = typesByName[_normalizeText(preferredName)];
+      if (matched != null && !ordered.any((item) => item.id == matched.id)) {
+        ordered.add(matched);
+      }
+    }
+
+    for (final type in userTypes) {
+      if (!ordered.any((item) => item.id == type.id)) {
+        ordered.add(type);
+      }
+    }
+
+    return ordered;
+  }
+
   List<IdentificationTypeModel> _buildLocalColombianIdentificationTypes() {
     return _fallbackIdentificationNamesById.entries
         .map(
@@ -277,10 +325,35 @@ class _RegisterPageState extends State<RegisterPage> {
       });
   }
 
+  List<UserTypeModel> _buildLocalUserTypes() {
+    return _fallbackUserTypeNamesById.entries
+        .map(
+          (entry) => UserTypeModel(
+            id: entry.key,
+            name: entry.value,
+          ),
+        )
+        .toList()
+      ..sort((a, b) {
+        final indexA = _preferredUserTypes.indexOf(_resolveUserTypeName(a));
+        final indexB = _preferredUserTypes.indexOf(_resolveUserTypeName(b));
+        if (indexA == -1 && indexB == -1) return a.id.compareTo(b.id);
+        if (indexA == -1) return 1;
+        if (indexB == -1) return -1;
+        return indexA.compareTo(indexB);
+      });
+  }
+
   String _resolveIdentificationTypeName(IdentificationTypeModel type) {
     final rawName = type.name.trim();
     if (rawName.isNotEmpty) return rawName;
     return _fallbackIdentificationNamesById[type.id] ?? '';
+  }
+
+  String _resolveUserTypeName(UserTypeModel type) {
+    final rawName = type.name.trim();
+    if (rawName.isNotEmpty) return rawName;
+    return _fallbackUserTypeNamesById[type.id] ?? '';
   }
 
   String _normalizeText(String text) {
@@ -312,7 +385,8 @@ class _RegisterPageState extends State<RegisterPage> {
         phone.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty ||
-        _selectedIdentificationType == null) {
+        _selectedIdentificationType == null ||
+        _selectedUserType == null) {
       await _showDialogMessage(
         'Campos obligatorios',
         'Completa todos los campos para crear la cuenta.',
@@ -341,13 +415,18 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
+      final selectedType = _selectedIdentificationType!;
+      final selectedUserType = _selectedUserType!;
       await _accountRepository.register(
         fullName: fullName,
         identificationNumber: document,
+        identificationTypeName: _resolveIdentificationTypeName(selectedType),
+        userTypeName: _resolveUserTypeName(selectedUserType),
         email: email,
         phone: phone,
         password: password,
-        identificationTypeId: _selectedIdentificationType!.id,
+        identificationTypeId: selectedType.id,
+        userTypeId: selectedUserType.id,
       );
 
       if (!mounted) return;
@@ -542,6 +621,80 @@ class _RegisterPageState extends State<RegisterPage> {
                                   onChanged: (value) {
                                     setState(() {
                                       _selectedIdentificationType = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                      const SizedBox(height: 16),
+                      // Tipo de Usuario
+                      _buildLabel('TIPO DE USUARIO'),
+                      const SizedBox(height: 8),
+                      _isLoadingCatalogs
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F7FA),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.groups_outlined,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Cargando...',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.grey.withValues(alpha: 0.6),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F7FA),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<UserTypeModel>(
+                                  value: _selectedUserType,
+                                  isExpanded: true,
+                                  style: GoogleFonts.poppins(
+                                    color: const Color(0xFF111827),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: Colors.grey,
+                                  ),
+                                  dropdownColor: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  selectedItemBuilder: (context) {
+                                    return _userTypes.map((type) {
+                                      return _buildUserTypeOption(
+                                        type,
+                                        selected: true,
+                                      );
+                                    }).toList();
+                                  },
+                                  items: _userTypes.map((type) {
+                                    return DropdownMenuItem<UserTypeModel>(
+                                      value: type,
+                                      child: _buildUserTypeOption(type),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedUserType = value;
                                     });
                                   },
                                 ),
@@ -848,6 +1001,34 @@ class _RegisterPageState extends State<RegisterPage> {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               color: Colors.black87, // Siempre negro para máxima visibilidad
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUserTypeOption(
+    UserTypeModel type, {
+    bool selected = false,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          Icons.groups_outlined,
+          color: const Color(0xFF9CA3AF),
+          size: 20,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            _resolveUserTypeName(type),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              color: Colors.black87,
               fontSize: 14,
               fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
             ),

@@ -18,6 +18,8 @@ class AccountAccessUseCase {
   Future<UserModel> register({
     required String fullName,
     required String identificationNumber,
+    String? identificationTypeName,
+    String? userTypeName,
     required String email,
     required String phone,
     required String password,
@@ -28,6 +30,8 @@ class AccountAccessUseCase {
     return _repository.register(
       fullName: fullName,
       identificationNumber: identificationNumber,
+      identificationTypeName: identificationTypeName,
+      userTypeName: userTypeName,
       email: email,
       phone: phone,
       password: password,

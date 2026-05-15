@@ -32,8 +32,42 @@ class DjangoAccountsAuthRepository(AccountsAuthRepositoryPort):
     def identification_type_exists(self, identification_type_id: int) -> bool:
         return IdentificationType.objects.filter(id=identification_type_id).exists()
 
+    def find_identification_type_id_by_name(self, name: str) -> int | None:
+        normalized_name = name.strip()
+        if not normalized_name:
+            return None
+        identification_type = IdentificationType.objects.filter(
+            name__iexact=normalized_name
+        ).first()
+        if not identification_type:
+            return None
+        return identification_type.id
+
+    def create_identification_type(self, name: str) -> int:
+        identification_type = IdentificationType.objects.create(
+            name=name.strip(),
+            description="Creado automaticamente durante registro de usuario",
+        )
+        return identification_type.id
+
     def user_type_exists(self, user_type_id: int) -> bool:
         return UserType.objects.filter(id=user_type_id).exists()
+
+    def find_user_type_id_by_name(self, name: str) -> int | None:
+        normalized_name = name.strip()
+        if not normalized_name:
+            return None
+        user_type = UserType.objects.filter(name__iexact=normalized_name).first()
+        if not user_type:
+            return None
+        return user_type.id
+
+    def create_user_type(self, name: str) -> int:
+        user_type = UserType.objects.create(
+            name=name.strip(),
+            description="Creado automaticamente durante registro de usuario",
+        )
+        return user_type.id
 
     def get_default_arrendador_user_type_id(self) -> int | None:
         user_type = UserType.objects.filter(name__iexact="Arrendador").first()
@@ -85,6 +119,8 @@ class DjangoAccountsAuthRepository(AccountsAuthRepositoryPort):
         profile_photo_url = user.profile_photo.url if user.profile_photo else None
         return AuthUser(
             id=user.id,
+            user_type_id=user.user_type_id,
+            user_type_name=user.user_type.name if user.user_type else "",
             full_name=user.full_name,
             email=user.email,
             password_hash=user.password_hash,
