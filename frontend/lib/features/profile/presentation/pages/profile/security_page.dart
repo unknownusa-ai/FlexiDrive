@@ -163,7 +163,11 @@ class _SecurityPageState extends State<SecurityPage> {
         return;
       }
 
-      if (currentUser.password != currentPassword) {
+      final validatedUser = await _accountRepository.login(
+        email: currentUser.email,
+        password: currentPassword,
+      );
+      if (validatedUser == null || validatedUser.id != currentUser.id) {
         _showErrorSnackBar('La contraseña actual no es correcta');
         return;
       }

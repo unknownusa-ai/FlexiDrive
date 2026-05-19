@@ -15,6 +15,8 @@ import 'package:flexidrive/features/reviews/application/use_cases/review_access_
 // Servicio de vehiculos
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 
 // Pagina de detalle de reserva
 import 'reserva_detalle_completa_page.dart';
@@ -193,8 +195,10 @@ class _ReservasPageState extends State<ReservasPage>
             '${reservation.pickupLocation} - ${reservation.returnLocation}',
         progress: 0.2, // Progress for pending reservations
         status: status,
-        imageUrl: mainImagesByPublication[reservation.publicationId] ??
-            'assets/imagenes_carros/cx5.jpg',
+        imageUrl: _resolveVehicleImage(
+          vehicle,
+          publicationImage: mainImagesByPublication[reservation.publicationId],
+        ),
         showEnCurso: false,
         vehicleSpecs: vehicle == null
             ? '2024 - Negro Jet'
@@ -247,8 +251,10 @@ class _ReservasPageState extends State<ReservasPage>
                 ? 0.0
                 : 1.0,
         status: status,
-        imageUrl: mainImagesByPublication[reservation.publicationId] ??
-            'assets/imagenes_carros/cx5.jpg',
+        imageUrl: _resolveVehicleImage(
+          vehicle,
+          publicationImage: mainImagesByPublication[reservation.publicationId],
+        ),
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
             ? '2024 - Negro Jet'
@@ -310,9 +316,10 @@ class _ReservasPageState extends State<ReservasPage>
                 ? 0.0
                 : 1.0,
         status: status,
-        imageUrl: vehicle == null || vehicle['imagen'] == null
-            ? 'assets/imagenes_carros/cx5.jpg'
-            : vehicle['imagen'] as String,
+        imageUrl: _resolveVehicleImage(
+          vehicle,
+          publicationImage: mainImagesByPublication[reservation.publicationId],
+        ),
         showEnCurso: status == 'Activa',
         vehicleSpecs: vehicle == null
             ? '2024 - Negro Jet'
@@ -763,11 +770,10 @@ class _ReservasPageState extends State<ReservasPage>
                           color: const Color(0xFFE5E7EB),
                           child: reserva.imageUrl.isEmpty
                               ? _buildSmallPlaceholder()
-                              : Image.asset(
-                                  reserva.imageUrl,
+                              : FlexiVehicleImage(
+                                  imagePath: reserva.imageUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _buildSmallPlaceholder(),
+                                  placeholder: _buildSmallPlaceholder(),
                                 ),
                         ),
                       ),
@@ -897,6 +903,17 @@ class _ReservasPageState extends State<ReservasPage>
         ),
       );
 
+  String _resolveVehicleImage(
+    Map<String, dynamic>? vehicle, {
+    String? publicationImage,
+  }) {
+    return VehicleImageResolver.resolveFromVehicle(
+      vehicle,
+      preferredImage: publicationImage,
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
+  }
+
   Widget _buildReservationCard({
     required _ReservaCardData data,
     required VoidCallback onSecondaryAction,
@@ -932,10 +949,10 @@ class _ReservasPageState extends State<ReservasPage>
                   ])),
               child: data.imageUrl.isEmpty
                   ? _buildPlaceholder()
-                  : Image.asset(
-                      data.imageUrl,
+                  : FlexiVehicleImage(
+                      imagePath: data.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                      placeholder: _buildPlaceholder(),
                     ),
             ),
           ),

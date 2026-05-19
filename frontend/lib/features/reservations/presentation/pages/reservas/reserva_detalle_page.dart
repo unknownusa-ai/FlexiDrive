@@ -9,6 +9,8 @@ import 'package:flexidrive/features/accounts/application/use_cases/account_acces
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 // Modelos de datos
 import 'package:flexidrive/features/accounts/domain/entities/account_models.dart';
 import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
@@ -93,6 +95,17 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   int _publicationId = 1; // Default publication ID
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  String _resolvedVehicleImage() {
+    return VehicleImageResolver.resolveFromVehicle(
+      {
+        'modelo': widget.vehicleName ?? '',
+        'imagen': widget.vehicleImage ?? '',
+      },
+      preferredImage: widget.vehicleImage,
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
+  }
 
   @override
   void initState() {
@@ -392,10 +405,10 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              widget.vehicleImage ?? 'assets/imagenes_carros/cx5.jpg',
+            child: FlexiVehicleImage(
+              imagePath: _resolvedVehicleImage(),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              placeholder: Container(
                 color: const Color(0xFFE5E7EB),
                 child: const Center(
                   child: Icon(

@@ -18,14 +18,22 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ('true', '1', 'yes', 'on')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-us$rf=7t=tf3y3rax2t-dq^3o@z6v0xtcoo2flnh68%xa3wl$v')
+JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY', f'{SECRET_KEY}-flexidrive-jwt-signing-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
+DEBUG = _env_bool('DJANGO_DEBUG', False)
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -42,8 +50,18 @@ if DEBUG:
             '0.0.0.0',
             '10.0.2.2',
             'web',
+            'testserver',
         }
     )
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        'DJANGO_CSRF_TRUSTED_ORIGINS',
+        'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    ).split(',')
+    if origin.strip()
+]
 
 
 # Application definition
@@ -167,11 +185,41 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    # La app móvil consume listas planas (sin wrapper count/results).
+    # Mantener paginación desactivada evita inconsistencias de contrato frontend/backend.
+    'DEFAULT_PAGINATION_CLASS': None,
     'DEFAULT_THROTTLE_CLASSES': [],
     'DEFAULT_THROTTLE_RATES': {},
 }
+
+# Security defaults (override with env vars when needed)
+SECURE_HSTS_SECONDS = int(
+    os.getenv(
+        'DJANGO_SECURE_HSTS_SECONDS',
+        '0' if DEBUG else '31536000',
+    )
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool(
+    'DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS',
+    not DEBUG,
+)
+SECURE_HSTS_PRELOAD = _env_bool(
+    'DJANGO_SECURE_HSTS_PRELOAD',
+    not DEBUG,
+)
+SECURE_SSL_REDIRECT = _env_bool(
+    'DJANGO_SECURE_SSL_REDIRECT',
+    not DEBUG,
+)
+SESSION_COOKIE_SECURE = _env_bool(
+    'DJANGO_SESSION_COOKIE_SECURE',
+    not DEBUG,
+)
+CSRF_COOKIE_SECURE = _env_bool(
+    'DJANGO_CSRF_COOKIE_SECURE',
+    not DEBUG,
+)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 SIMPLE_JWT = {
@@ -180,6 +228,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'UPDATE_LAST_LOGIN': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'SIGNING_KEY': JWT_SIGNING_KEY,
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }

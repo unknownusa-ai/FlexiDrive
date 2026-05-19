@@ -9,6 +9,7 @@ import 'package:flexidrive/features/publications/application/use_cases/publicati
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
 import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
+import 'package:flexidrive/core/utils/colombia_time.dart';
 import 'package:flexidrive/injection_container.dart';
 import 'reserva_confirmada_page.dart';
 
@@ -81,6 +82,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   Color get _borderColor =>
       _isDark ? const Color(0xFF2E3355) : const Color(0xFFE2E8F0);
   Color get _cardBgColor => _isDark ? const Color(0xFF1A1F35) : Colors.white;
+  Color get _selectedBgColor =>
+      _isDark ? const Color(0xFF2A3154) : const Color(0xFFEEF2FF);
+  Color get _selectedAccentColor => const Color(0xFF4F46E5);
 
   Future<void> _crearNotificacionSolicitudArrendatario({
     required String codigoReserva,
@@ -758,10 +762,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEEF2FF) : _cardBgColor,
+          color: selected ? _selectedBgColor : _cardBgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xFF4F46E5) : _borderColor,
+            color: selected ? _selectedAccentColor : _borderColor,
             width: selected ? 2 : 1,
           ),
         ),
@@ -814,7 +818,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             if (selected)
               Icon(
                 Icons.check_circle,
-                color: const Color(0xFF4F46E5),
+                color: _selectedAccentColor,
                 size: isSmallPhone ? 20 : 24,
               ),
           ],
@@ -838,10 +842,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEEF2FF) : _cardBgColor,
+          color: selected ? _selectedBgColor : _cardBgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xFF4F46E5) : _borderColor,
+            color: selected ? _selectedAccentColor : _borderColor,
             width: selected ? 2 : 1,
           ),
         ),
@@ -908,7 +912,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
             if (selected)
               Icon(
                 Icons.check_circle,
-                color: const Color(0xFF4F46E5),
+                color: _selectedAccentColor,
                 size: isSmallPhone ? 20 : 24,
               ),
           ],
@@ -957,10 +961,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         width: double.infinity,
         padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
         decoration: BoxDecoration(
-          color: isAddingNewCard ? const Color(0xFFEEF2FF) : _cardBgColor,
+          color: isAddingNewCard ? _selectedBgColor : _cardBgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isAddingNewCard ? const Color(0xFF4F46E5) : _borderColor,
+            color: isAddingNewCard ? _selectedAccentColor : _borderColor,
             width: isAddingNewCard ? 2 : 1,
           ),
         ),
@@ -1074,10 +1078,10 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           horizontal: isSmallPhone ? 8 : 12,
         ),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEEF2FF) : _cardBgColor,
+          color: selected ? _selectedBgColor : _cardBgColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xFF4F46E5) : _borderColor,
+            color: selected ? _selectedAccentColor : _borderColor,
             width: selected ? 2 : 1,
           ),
         ),
@@ -1087,7 +1091,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           children: [
             Icon(
               icon,
-              color: selected ? const Color(0xFF4F46E5) : _textSecondary,
+              color: selected ? _selectedAccentColor : _textSecondary,
               size: isSmallPhone ? 16 : 18,
             ),
             const SizedBox(width: 4),
@@ -1097,7 +1101,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 style: GoogleFonts.poppins(
                   fontSize: isSmallPhone ? 11 : 12,
                   fontWeight: FontWeight.w600,
-                  color: selected ? const Color(0xFF4F46E5) : _textPrimary,
+                  color: selected ? _selectedAccentColor : _textPrimary,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -1332,14 +1336,16 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         height: height,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _isDark ? const Color(0xFFE5EDFF) : Colors.white,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(
+            color: _isDark ? const Color(0xFFAFC3FF) : const Color(0xFFE2E8F0),
+          ),
         ),
         child: Text(
           'VISA',
           style: GoogleFonts.poppins(
-            color: const Color(0xFF1A1F71),
+            color: _isDark ? const Color(0xFF1E3A8A) : const Color(0xFF1A1F71),
             fontWeight: FontWeight.w800,
             fontSize: isSmallPhone ? 11 : 12,
           ),
@@ -1817,7 +1823,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
               }
 
               final codigoReserva = _generarCodigoReserva();
-              final fechaInicio = DateTime.now();
+              final fechaInicio = ColombiaTime.now();
               final fechaFin = _calcularFechaFin(fechaInicio);
 
               // Get current user ID
@@ -1879,8 +1885,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 publicationId:
                     widget.publicationId, // Use the publication ID from widget
                 paymentMethodId: paymentMethodId,
-                periodTypeId:
-                    1, // Default period type - should come from widget
+                periodTypeId: _resolveReservationPeriodTypeId(),
                 periodCount: widget.cantidad,
                 startDate: fechaInicio,
                 endDate: fechaFin,
@@ -1888,7 +1893,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 returnLocation: 'Punto por defecto', // Should come from widget
                 totalValue: widget.total.toDouble(),
                 statusId: 1, // 1 = Pendiente
-                reservationDate: DateTime.now(),
+                reservationDate: ColombiaTime.now(),
               );
 
               await _reservationDb.addReservation(newReservation);
@@ -1944,7 +1949,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
   }
 
   String _generarCodigoReserva() {
-    final fecha = DateTime.now();
+    final fecha = ColombiaTime.now();
     final year = fecha.year;
     final month = fecha.month.toString().padLeft(2, '0');
     final day = fecha.day.toString().padLeft(2, '0');
@@ -1962,6 +1967,9 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
 
   DateTime _calcularFechaFin(DateTime fechaInicio) {
     switch (widget.periodo.toLowerCase()) {
+      case 'horas':
+      case 'hora':
+        return fechaInicio.add(Duration(hours: widget.cantidad));
       case 'dias':
         return fechaInicio.add(Duration(days: widget.cantidad));
       case 'semanas':
@@ -1971,6 +1979,14 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
       default:
         return fechaInicio.add(Duration(days: widget.cantidad));
     }
+  }
+
+  int _resolveReservationPeriodTypeId() {
+    final normalized = widget.periodo.toLowerCase();
+    if (normalized.contains('hora')) return 4; // Horas
+    if (normalized.contains('semana')) return 2; // Semanas
+    if (normalized.contains('mes')) return 3; // Meses
+    return 1; // Días
   }
 
   String _formatearFechaCorta(DateTime fecha) {

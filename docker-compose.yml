@@ -21,6 +21,21 @@ services:
     networks:
       - flexidrive_network
 
+  pgadmin:
+    container_name: flexidrive_pgadmin
+    image: dpage/pgadmin4:8
+    restart: "no"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@flexidrive.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - flexidrive_network
+
   backend:
     container_name: flexidrive_backend
     build:
@@ -33,6 +48,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings
       DB_HOST: db
       DB_PORT: 5432
+      FLEXIDRIVE_CORS_ALLOWED_ORIGINS: ${FLEXIDRIVE_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
     volumes:
       - ./backend:/app
     ports:
@@ -40,7 +56,36 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      if [ \"${DJANGO_DEBUG:-True}\" = \"True\" ]; then
+        python manage.py runserver 0.0.0.0:8000;
+      else
+        gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120;
+      fi
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health').read()\""]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    networks:
+      - flexidrive_network
+
+  frontend:
+    container_name: flexidrive_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: "no"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      backend:
+        condition: service_healthy
     networks:
       - flexidrive_network
 

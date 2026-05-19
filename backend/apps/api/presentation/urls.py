@@ -30,6 +30,7 @@ from .views import (
     UserViewSet,
     VehicleCategoryViewSet,
     VehicleViewSet,
+    healthcheck,
     reference_cities,
 )
 
@@ -65,5 +66,6 @@ router.register("user-sessions", UserSessionViewSet, basename="user-sessions")
 
 urlpatterns = [
     path("reference-cities", reference_cities, name="reference-cities"),
+    path("health", healthcheck, name="healthcheck"),
 ]
 urlpatterns += router.urls

@@ -76,7 +76,11 @@ class LocalAccountDb {
     return ApiClient.instance.getList(assetPath);
   }
 
-  Future<void> saveUserOverride(UserModel user) async {
+  Future<void> saveUserOverride(
+    UserModel user, {
+    bool syncRemote = true,
+    bool throwOnRemoteFailure = false,
+  }) async {
     await loadIfNeeded();
 
     final overrides = await _loadUserOverrides();
@@ -88,9 +92,20 @@ class LocalAccountDb {
       overrides[index] = user;
     }
 
-    await ApiClient.instance.patchMap('users/${user.id}', user.toJson());
+    if (syncRemote) {
+      try {
+        await ApiClient.instance.patchMap('users/${user.id}', user.toJson());
+      } catch (error) {
+        if (throwOnRemoteFailure) rethrow;
+        // Si falla la API, conservamos el override local para no perder el cambio.
+      }
+    }
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_usersOverridesKey, jsonEncode(<dynamic>[]));
+    await prefs.setString(
+      _usersOverridesKey,
+      jsonEncode(overrides.map((item) => item.toJson()).toList()),
+    );
   }
 
   Future<List<UserModel>> _loadUserOverrides() async {

@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flexidrive/core/utils/colombia_time.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
 import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 import 'package:flexidrive/features/notifications/domain/entities/notification_models.dart';
+import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
+import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 
 class AlertasPage extends StatefulWidget {
@@ -15,6 +21,7 @@ class AlertasPage extends StatefulWidget {
 }
 
 class _AlertasPageState extends State<AlertasPage> {
+  static const _reminderKeysStorage = 'reservation_reminder_keys_v1';
   static const List<String> _tabs = <String>[
     'Todas',
     'Solicitudes',
@@ -30,21 +37,31 @@ class _AlertasPageState extends State<AlertasPage> {
       InjectionContainer.instance.catalogAccessUseCase;
   final NotificationAccessUseCase _notificationDb =
       InjectionContainer.instance.notificationAccessUseCase;
+  final ReservationAccessUseCase _reservationDb =
+      InjectionContainer.instance.reservationAccessUseCase;
+  final PublicationAccessUseCase _publicationDb =
+      InjectionContainer.instance.publicationAccessUseCase;
 
   int _selectedTab = 0;
   bool _isLoading = true;
   int _unreadCount = 0;
   List<_AlertItem> _alerts = <_AlertItem>[];
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _notificationDb.changes.addListener(_onNotificationsChanged);
     _loadAlerts();
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      _loadAlerts();
+    });
   }
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _notificationDb.changes.removeListener(_onNotificationsChanged);
     super.dispose();
   }
@@ -57,10 +74,16 @@ class _AlertasPageState extends State<AlertasPage> {
     await Future.wait([
       _catalogDb.loadIfNeeded(),
       _notificationDb.loadIfNeeded(),
+      _reservationDb.loadIfNeeded(),
+      _publicationDb.loadIfNeeded(),
     ]);
 
     final currentUser = await _accountDb.getCurrentUser();
     final currentUserId = currentUser?.id;
+    if (currentUserId != null) {
+      await _syncReservationReminders(currentUserId);
+      await _notificationDb.loadIfNeeded();
+    }
 
     final categoriesById = <int, String>{
       for (final category in _catalogDb.notificationCategories)
@@ -134,8 +157,8 @@ class _AlertasPageState extends State<AlertasPage> {
   }
 
   String _timeAgo(DateTime sentAt) {
-    final now = DateTime.now();
-    final diff = now.difference(sentAt);
+    final now = ColombiaTime.now();
+    final diff = now.difference(ColombiaTime.toColombia(sentAt));
 
     if (diff.inMinutes < 1) return 'Hace un momento';
     if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes} min';
@@ -143,6 +166,157 @@ class _AlertasPageState extends State<AlertasPage> {
     if (diff.inDays == 1) return 'Ayer';
     if (diff.inDays < 7) return 'Hace ${diff.inDays} días';
     return '${sentAt.day.toString().padLeft(2, '0')}/${sentAt.month.toString().padLeft(2, '0')}/${sentAt.year}';
+  }
+
+  Future<void> _syncReservationReminders(int currentUserId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sentKeys =
+        (prefs.getStringList(_reminderKeysStorage) ?? <String>[]).toSet();
+    final reminderCategoryId = _resolveReminderCategoryId();
+
+    final publicationsById = {
+      for (final publication in _publicationDb.publications)
+        publication.id: publication,
+    };
+
+    final userOwnedPublicationIds = _publicationDb.publications
+        .where((publication) => publication.userId == currentUserId)
+        .map((publication) => publication.id)
+        .toSet();
+
+    final nowColombia = ColombiaTime.now();
+    var updated = false;
+
+    for (final reservation in _reservationDb.reservations) {
+      // Considerar reservas pendientes/activas/finalizadas para no perder
+      // recordatorios cuando el estado aún no se normaliza en UI.
+      if (reservation.statusId == 3) continue;
+
+      final start = ColombiaTime.toColombia(reservation.startDate);
+      final end = ColombiaTime.toColombia(reservation.endDate);
+      final minutesToEnd = end.difference(nowColombia).inMinutes;
+      final reminderWindow = _resolveReminderWindow(reservation, start, end);
+      final hasEnded = !end.isAfter(nowColombia);
+
+      final publication = publicationsById[reservation.publicationId];
+      final ownerId = publication?.userId;
+
+      // Recordatorio al arrendatario (usuario que reservó)
+      if (reservation.userId == currentUserId) {
+        if (minutesToEnd <= reminderWindow.inMinutes && minutesToEnd > 0) {
+          final key = 'renter_ending_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Recordatorio de reserva ⏰',
+              description:
+                  'Tu reserva ${reservation.code} finaliza pronto. Queda ${_formatRemainingTime(minutesToEnd)}.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        } else if (hasEnded) {
+          final key = 'renter_ended_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Reserva finalizada ✅',
+              description:
+                  'Tu reserva ${reservation.code} ya finalizó. Gracias por usar FlexiDrive.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        }
+      }
+
+      // Recordatorio al arrendador (dueño de la publicación)
+      if (ownerId != null &&
+          ownerId == currentUserId &&
+          userOwnedPublicationIds.contains(reservation.publicationId)) {
+        if (minutesToEnd <= reminderWindow.inMinutes && minutesToEnd > 0) {
+          final key = 'owner_ending_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Recordatorio de entrega 🚗',
+              description:
+                  'La renta ${reservation.code} de tu vehículo finaliza pronto. Queda ${_formatRemainingTime(minutesToEnd)}.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        } else if (hasEnded) {
+          final key = 'owner_ended_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Renta finalizada ✅',
+              description:
+                  'La renta ${reservation.code} de tu vehículo ya finalizó.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        }
+      }
+    }
+
+    if (updated) {
+      await prefs.setStringList(_reminderKeysStorage, sentKeys.toList());
+    }
+  }
+
+  int _resolveReminderCategoryId() {
+    for (final category in _catalogDb.notificationCategories) {
+      final name = category.name.toLowerCase();
+      if (name.contains('recordatorio')) return category.id;
+    }
+    return _catalogDb.notificationCategories.isEmpty
+        ? 1
+        : _catalogDb.notificationCategories.first.id;
+  }
+
+  Duration _resolveReminderWindow(
+    dynamic reservation,
+    DateTime start,
+    DateTime end,
+  ) {
+    // Reglas pedidas:
+    // - día: 24 horas antes
+    // - hora: 30 minutos antes
+    // - semana: 3 días antes
+    if (reservation.periodTypeId == 4) {
+      return const Duration(minutes: 30); // horas
+    }
+    if (reservation.periodTypeId == 2) {
+      return const Duration(days: 3); // semanas
+    }
+    if (reservation.periodTypeId == 1) {
+      return const Duration(hours: 24); // días
+    }
+
+    // Fallback por duración real cuando no venga tipificado.
+    final duration = end.difference(start);
+    if (duration <= const Duration(hours: 6)) {
+      return const Duration(minutes: 30);
+    }
+    if (duration >= const Duration(days: 7)) {
+      return const Duration(days: 3);
+    }
+    return const Duration(hours: 24);
+  }
+
+  String _formatRemainingTime(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final remaining = minutes % 60;
+    if (remaining == 0) return '$hours h';
+    return '$hours h ${remaining} min';
   }
 
   List<_AlertItem> _currentTabAlerts() {

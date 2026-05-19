@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 // Modelos de categorías de carros
 import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 
 // Servicio que simula un backend
 // En realidad todo está en JSON local, pero parece un backend real
@@ -33,7 +34,15 @@ class VehiculoService {
     // Convertimos al formato viejo que usa la app
     vehiculos = rawVehicles.map((v) => _mapVehicleToLegacyFormat(v)).toList();
     final createdVehicles = await _loadCreatedVehicles();
-    vehiculos.addAll(createdVehicles);
+    for (final localVehicle in createdVehicles) {
+      final vehicleId = _asInt(localVehicle['vehiculo_id'] ?? localVehicle['id']);
+      final exists = vehiculos.any((item) => _asInt(item['vehiculo_id']) == vehicleId);
+      if (!exists) {
+        vehiculos.add(localVehicle);
+      }
+    }
+
+    await _applyPublicationImages();
 
     // Cargamos usuarios
     usuarios = await _loadList('users');
@@ -95,7 +104,10 @@ class VehiculoService {
       'precio_semana': 750000 + (vehicleId * 50000), // Precio determinista
       'ubicacion': ciudad, // Ciudad asignada correctamente
       'propietario_id': 1,
-      'imagen': _imageForVehicle(vehicleId),
+      'imagen': _imageForVehicle(
+        vehicleId: vehicleId,
+        line: v['linea']?.toString() ?? '',
+      ),
       'descripcion': v['descripcion'],
       'calificacion': 4.5 + (vehicleId % 5) * 0.1, // Rating entre 4.5-4.9
       'resenas': vehicleId * 5, // Reseñas simuladas
@@ -128,7 +140,13 @@ class VehiculoService {
     return parts.isNotEmpty ? parts.first : 'Toyota';
   }
 
-  String _imageForVehicle(int vehicleId) {
+  String _imageForVehicle({
+    required int vehicleId,
+    required String line,
+  }) {
+    final matchedByName = VehicleImageResolver.assetByVehicleName(line);
+    if (matchedByName != null) return matchedByName;
+
     const images = [
       'assets/imagenes_carros/mazda3.jpg',
       'assets/imagenes_carros/corolla.jpg',
@@ -161,7 +179,40 @@ class VehiculoService {
 
   /// CREATE - Agregar nuevo vehículo al ArrayList
   Future<void> addVehiculo(Map<String, dynamic> vehiculo) async {
-    // Generar ID autoincremental
+    await init();
+
+    try {
+      final createdVehicleRaw = await ApiClient.instance.postMap(
+        'vehicles',
+        _toApiVehiclePayload(vehiculo),
+      );
+      final normalizedRemote = _mapVehicleToLegacyFormat(createdVehicleRaw)
+        ..addAll({
+          'precio_hora': vehiculo['precio_hora'] ?? 18000,
+          'precio_dia': vehiculo['precio_dia'] ?? 150000,
+          'precio_semana': vehiculo['precio_semana'] ?? 900000,
+          'ubicacion': vehiculo['ubicacion'] ?? 'Bogotá',
+          'propietario_id': vehiculo['propietario_id'] ?? 1,
+          'imagen': vehiculo['imagen'] ?? _imageForVehicle(
+            vehicleId: _asInt(createdVehicleRaw['vehiculo_id']),
+            line: '${createdVehicleRaw['linea'] ?? ''}',
+          ),
+          'calificacion': vehiculo['calificacion'] ?? 5.0,
+          'resenas': vehiculo['resenas'] ?? 0,
+          'disponible': vehiculo['disponible'] ?? true,
+        });
+      final remoteVehicleId = _asInt(createdVehicleRaw['vehiculo_id']);
+      if (remoteVehicleId > 0) {
+        vehiculo['id'] = remoteVehicleId;
+        vehiculo['vehiculo_id'] = remoteVehicleId;
+      }
+      _upsertVehicle(normalizedRemote);
+      return;
+    } catch (_) {
+      // Si la API falla, mantenemos la experiencia funcional de forma local.
+    }
+
+    // Fallback local: generar ID autoincremental para uso offline.
     final maxId = vehiculos
         .map((v) => (v['id'] as num?)?.toInt() ?? 0)
         .fold<int>(0, (current, next) => next > current ? next : current);
@@ -169,7 +220,7 @@ class VehiculoService {
     vehiculo['id'] = nuevoId;
     vehiculo['vehiculo_id'] = nuevoId;
     vehiculo['_is_local_created'] = true;
-    vehiculos.add(vehiculo);
+    _upsertVehicle(vehiculo);
     await _saveCreatedVehicles();
   }
 
@@ -199,6 +250,101 @@ class VehiculoService {
         .where((vehicle) => vehicle['_is_local_created'] == true)
         .toList();
     await prefs.setString(_createdVehiclesKey, jsonEncode(created));
+  }
+
+  Future<void> _applyPublicationImages() async {
+    List<Map<String, dynamic>> publications = const [];
+    List<Map<String, dynamic>> images = const [];
+    try {
+      publications = await _loadList('publications');
+      images = await _loadList('publication-images');
+    } catch (_) {
+      return;
+    }
+
+    final publicationToVehicle = <int, int>{};
+    for (final publication in publications) {
+      final publicationId = _asInt(publication['publicacion_id']);
+      final vehicleId = _asInt(publication['vehiculo_id']);
+      if (publicationId > 0 && vehicleId > 0) {
+        publicationToVehicle[publicationId] = vehicleId;
+      }
+    }
+
+    final imageByVehicle = <int, String>{};
+    for (final image in images) {
+      final publicationId = _asInt(image['publicacion_id']);
+      final vehicleId = publicationToVehicle[publicationId] ?? 0;
+      if (vehicleId == 0) continue;
+
+      final rawPath = '${image['url_imagen'] ?? ''}'.trim();
+      if (rawPath.isEmpty) continue;
+
+      final isMain = image['es_principal'] == true;
+      if (isMain || !imageByVehicle.containsKey(vehicleId)) {
+        imageByVehicle[vehicleId] = rawPath;
+      }
+    }
+
+    if (imageByVehicle.isEmpty) return;
+    for (final vehicle in vehiculos) {
+      final vehicleId = _asInt(vehicle['vehiculo_id'] ?? vehicle['id']);
+      final uploadedPath = imageByVehicle[vehicleId];
+      if (uploadedPath == null || uploadedPath.isEmpty) continue;
+      vehicle['imagen'] = uploadedPath;
+    }
+  }
+
+  Map<String, dynamic> _toApiVehiclePayload(Map<String, dynamic> vehiculo) {
+    final model = _asInt(vehiculo['anio']);
+    return {
+      'categoria_vehiculo_id': _categoryNameToId('${vehiculo['categoria'] ?? ''}'),
+      'linea': '${vehiculo['modelo'] ?? ''}'.trim(),
+      'modelo': model == 0 ? DateTime.now().year : model,
+      'color': '${vehiculo['color'] ?? 'Negro'}'.trim(),
+      'asientos': _asInt(vehiculo['asientos']) == 0 ? 5 : _asInt(vehiculo['asientos']),
+      'tipo_transmision': '${vehiculo['transmision'] ?? 'Automática'}'.trim(),
+      'aire_acondicionado': vehiculo['aire_acondicionado'] == true,
+      'tipo_combustible': '${vehiculo['combustible'] ?? 'Combustión'}'.trim(),
+      'descripcion': '${vehiculo['descripcion'] ?? ''}'.trim(),
+    };
+  }
+
+  int _categoryNameToId(String categoryName) {
+    switch (categoryName.trim()) {
+      case 'Sedán':
+        return 1;
+      case 'SUV':
+        return 2;
+      case 'Compacto':
+      case 'Eléctrico':
+        return 3;
+      case 'Premium':
+      case 'Deportivo':
+        return 4;
+      case 'Pickup':
+        return 5;
+      default:
+        return 1;
+    }
+  }
+
+  void _upsertVehicle(Map<String, dynamic> vehicle) {
+    final vehicleId = _asInt(vehicle['vehiculo_id'] ?? vehicle['id']);
+    final index = vehiculos.indexWhere(
+      (item) => _asInt(item['vehiculo_id'] ?? item['id']) == vehicleId,
+    );
+    if (index == -1) {
+      vehiculos.add(vehicle);
+      return;
+    }
+    vehiculos[index] = vehicle;
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse('$value') ?? 0;
   }
 
   /// UPDATE - Editar vehículo en el ArrayList

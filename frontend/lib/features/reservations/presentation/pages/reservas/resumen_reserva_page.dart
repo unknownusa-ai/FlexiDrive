@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 import 'metodo_pago_page.dart';
 
 // Página de resumen de reserva
@@ -316,18 +318,23 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: Image.asset(
-              'assets/imagenes_carros/cx5.jpg',
+            child: FlexiVehicleImage(
+              imagePath: VehicleImageResolver.resolveFromVehicle(
+                {
+                  'modelo': widget.vehiculoBrand,
+                  'imagen': widget.vehiculoImage,
+                },
+                preferredImage: widget.vehiculoImage,
+                fallback: 'assets/imagenes_carros/cx5.jpg',
+              ),
               height: isSmallPhone ? 180 : 220,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: isSmallPhone ? 180 : 220,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.directions_car),
-                );
-              },
+              placeholder: Container(
+                height: isSmallPhone ? 180 : 220,
+                color: Colors.grey[300],
+                child: const Icon(Icons.directions_car),
+              ),
             ),
           ),
           // Gradiente oscuro

@@ -45,7 +45,7 @@ class AuthApiService {
   /// Refresca el token de acceso
   Future<AuthToken?> refreshToken(String refreshToken) async {
     try {
-      final response = await _apiClient.postMap('auth/refresh', {
+      final response = await _apiClient.postMap('auth/token/refresh', {
         'refresh_token': refreshToken,
       });
 
@@ -62,7 +62,11 @@ class AuthApiService {
   /// Verifica si el token es válido
   Future<bool> verifyToken(String token) async {
     try {
-      await _apiClient.getMap('auth/verify');
+      final response = await _apiClient.postMap('auth/token/verify', {
+        'access_token': token,
+      });
+      final valid = response['valid'];
+      if (valid is bool) return valid;
       return true;
     } catch (_) {
       return false;

@@ -1,7 +1,11 @@
 // Flutter framework
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 // Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Pagina principal (para volver)
@@ -9,7 +13,7 @@ import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 
 // Pagina de Factura Digital
 // Muestra el comprobante de pago de una reserva
-class FacturaDigitalPage extends StatelessWidget {
+class FacturaDigitalPage extends StatefulWidget {
   // Constructor con parámetros de la factura
   const FacturaDigitalPage({
     super.key,
@@ -39,8 +43,15 @@ class FacturaDigitalPage extends StatelessWidget {
   final int tarifaServicio; // Tarifa del servicio
   final int seguroBasico; // Costo del seguro basico
 
+  @override
+  State<FacturaDigitalPage> createState() => _FacturaDigitalPageState();
+}
+
+class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
+  bool _isDownloadingPdf = false;
+
   // Calculos de la factura
-  int get subtotal => tarifaServicio + seguroBasico; // Subtotal sin IVA
+  int get subtotal => widget.tarifaServicio + widget.seguroBasico; // Subtotal
   int get iva => 0; // IVA (0% en este caso)
   int get total => subtotal + iva; // Total a pagar
 
@@ -63,6 +74,303 @@ class FacturaDigitalPage extends StatelessWidget {
 
   bool _isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
+
+  Future<void> _downloadInvoicePdf() async {
+    if (_isDownloadingPdf) return;
+
+    setState(() {
+      _isDownloadingPdf = true;
+    });
+
+    try {
+      final pdf = pw.Document();
+
+      final bg = PdfColor.fromInt(0xFF11162B);
+      final card = PdfColor.fromInt(0xFF1A1F35);
+      final border = PdfColor.fromInt(0xFF2E3355);
+      final title = PdfColor.fromInt(0xFFE4E8FF);
+      final muted = PdfColor.fromInt(0xFF9CA3C8);
+      final blue = PdfColor.fromInt(0xFF2563EB);
+      final green = PdfColor.fromInt(0xFF059669);
+
+      pdf.addPage(
+        pw.Page(
+          margin: const pw.EdgeInsets.all(22),
+          build: (context) {
+            return pw.Container(
+              color: bg,
+              padding: const pw.EdgeInsets.all(14),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: pw.BoxDecoration(
+                      gradient: const pw.LinearGradient(
+                        colors: [
+                          PdfColor.fromInt(0xFF2563EB),
+                          PdfColor.fromInt(0xFF7C3AED),
+                        ],
+                      ),
+                      borderRadius: pw.BorderRadius.circular(12),
+                    ),
+                    child: pw.Text(
+                      'Factura Digital',
+                      style: pw.TextStyle(
+                        color: PdfColors.white,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  pw.SizedBox(height: 14),
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.all(16),
+                    decoration: pw.BoxDecoration(
+                      color: card,
+                      borderRadius: pw.BorderRadius.circular(14),
+                      border: pw.Border.all(color: border),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  widget.empresa,
+                                  style: pw.TextStyle(
+                                    color: blue,
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                pw.SizedBox(height: 2),
+                                pw.Text(
+                                  'NIT: ${widget.nit}',
+                                  style: pw.TextStyle(color: muted, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                            pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: pw.BoxDecoration(
+                                borderRadius: pw.BorderRadius.circular(12),
+                                color: const PdfColor.fromInt(0x3322C55E),
+                                border: pw.Border.all(
+                                  color: const PdfColor.fromInt(0x6622C55E),
+                                ),
+                              ),
+                              child: pw.Text(
+                                'PAGADO',
+                                style: pw.TextStyle(
+                                  color: green,
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        pw.SizedBox(height: 12),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text('N° FACTURA',
+                                    style: pw.TextStyle(
+                                        color: muted,
+                                        fontWeight: pw.FontWeight.bold,
+                                        fontSize: 10)),
+                                pw.SizedBox(height: 2),
+                                pw.Text(
+                                  widget.numeroFactura,
+                                  style: pw.TextStyle(
+                                    color: title,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.end,
+                              children: [
+                                pw.Text('FECHA',
+                                    style: pw.TextStyle(
+                                        color: muted,
+                                        fontWeight: pw.FontWeight.bold,
+                                        fontSize: 10)),
+                                pw.SizedBox(height: 2),
+                                pw.Text(
+                                  widget.fecha,
+                                  style: pw.TextStyle(
+                                      color: title,
+                                      fontWeight: pw.FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        pw.SizedBox(height: 12),
+                        pw.Divider(color: border),
+                        pw.SizedBox(height: 10),
+                        pw.Text('CLIENTE',
+                            style: pw.TextStyle(
+                                color: muted,
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 10)),
+                        pw.SizedBox(height: 4),
+                        pw.Text(widget.clienteNombre,
+                            style: pw.TextStyle(
+                                color: title, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(widget.clienteEmail,
+                            style: pw.TextStyle(color: muted, fontSize: 10)),
+                        pw.SizedBox(height: 12),
+                        pw.Divider(color: border),
+                        pw.SizedBox(height: 10),
+                        pw.Text('DESCRIPCIÓN DEL SERVICIO',
+                            style: pw.TextStyle(
+                                color: muted,
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 10)),
+                        pw.SizedBox(height: 8),
+                        _pdfPriceRow(
+                          '${
+                              widget.descripcionServicio
+                          } — ${widget.cantidad} ${widget.periodoUnidad}${widget.cantidad > 1 ? 's' : ''}',
+                          0,
+                          title,
+                        ),
+                        _pdfPriceRow('Tarifa de servicio (5%)',
+                            widget.tarifaServicio, title),
+                        _pdfPriceRow(
+                            'Seguro básico de viaje', widget.seguroBasico, title),
+                        pw.SizedBox(height: 8),
+                        _pdfPriceRow('Subtotal', subtotal, title,
+                            isBold: true, divider: false),
+                        _pdfPriceRow('IVA (19%)', iva, title,
+                            isBold: true, divider: false),
+                        pw.Divider(color: border),
+                        pw.SizedBox(height: 8),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text('TOTAL',
+                                style: pw.TextStyle(
+                                    color: title,
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 14)),
+                            pw.Text('\$ ${_price(total)}',
+                                style: pw.TextStyle(
+                                    color: blue,
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 18)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+
+      final bytes = await pdf.save();
+      final fileName =
+          '${widget.numeroFactura.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_')}.pdf';
+
+      final outputPath = await FilePicker.saveFile(
+        dialogTitle: 'Guardar factura PDF',
+        fileName: fileName,
+        bytes: bytes,
+      );
+
+      if (outputPath == null) return;
+
+      final file = File(outputPath);
+      await file.writeAsBytes(bytes, flush: true);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Factura guardada en: $outputPath',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No se pudo generar/guardar el PDF',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloadingPdf = false;
+        });
+      }
+    }
+  }
+
+  pw.Widget _pdfPriceRow(
+    String label,
+    int value,
+    PdfColor color, {
+    bool isBold = false,
+    bool divider = true,
+  }) {
+    return pw.Column(
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Expanded(
+              child: pw.Text(
+                label,
+                style: pw.TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+                ),
+              ),
+            ),
+            pw.SizedBox(width: 8),
+            pw.Text(
+              '\$ ${_price(value)}',
+              style: pw.TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        if (divider) ...[
+          pw.SizedBox(height: 7),
+          pw.Divider(color: const PdfColor.fromInt(0xFF2E3355)),
+          pw.SizedBox(height: 7),
+        ],
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +502,7 @@ class FacturaDigitalPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                empresa,
+                                widget.empresa,
                                 style: GoogleFonts.poppins(
                                   color: const Color(0xFF2563EB),
                                   fontWeight: FontWeight.bold,
@@ -202,7 +510,7 @@ class FacturaDigitalPage extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                'NIT: $nit',
+                                'NIT: ${widget.nit}',
                                 style: GoogleFonts.poppins(
                                   color: muted,
                                   fontWeight: FontWeight.w600,
@@ -241,7 +549,7 @@ class FacturaDigitalPage extends StatelessWidget {
                     Expanded(
                       child: _blockInfo(
                         'N° FACTURA',
-                        numeroFactura,
+                        widget.numeroFactura,
                         muted,
                         titleColor,
                         valueFontSize: isSmallPhone ? 16 : 17,
@@ -251,7 +559,7 @@ class FacturaDigitalPage extends StatelessWidget {
                     Expanded(
                       child: _blockInfo(
                         'FECHA',
-                        fecha,
+                        widget.fecha,
                         muted,
                         titleColor,
                         textAlign: TextAlign.end,
@@ -281,7 +589,7 @@ class FacturaDigitalPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    clienteNombre,
+                    widget.clienteNombre,
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       color: titleColor,
@@ -291,7 +599,7 @@ class FacturaDigitalPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    clienteEmail,
+                    widget.clienteEmail,
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       color: muted,
@@ -319,14 +627,14 @@ class FacturaDigitalPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _priceRow(
-                  '$descripcionServicio — $cantidad $periodoUnidad${cantidad > 1 ? 's' : ''}',
+                  '${widget.descripcionServicio} — ${widget.cantidad} ${widget.periodoUnidad}${widget.cantidad > 1 ? 's' : ''}',
                   0,
                   titleColor,
                   borderColor,
                 ),
-                _priceRow('Tarifa de servicio (5%)', tarifaServicio, titleColor,
+                _priceRow('Tarifa de servicio (5%)', widget.tarifaServicio, titleColor,
                     borderColor),
-                _priceRow('Seguro básico de viaje', seguroBasico, titleColor,
+                _priceRow('Seguro básico de viaje', widget.seguroBasico, titleColor,
                     borderColor,
                     showDivider: false),
                 const SizedBox(height: 16),
@@ -386,7 +694,7 @@ class FacturaDigitalPage extends StatelessWidget {
                     border: Border.all(color: borderColor),
                   ),
                   child: Text(
-                    'Código: ${numeroFactura.replaceAll('FXD-INV-', 'FXD-')} • FlexiDrive S.A.S. • Bogotá, Colombia 🇨🇴',
+                    'Código: ${widget.numeroFactura.replaceAll('FXD-INV-', 'FXD-')} • FlexiDrive S.A.S. • Bogotá, Colombia 🇨🇴',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       color: muted,
@@ -411,16 +719,7 @@ class FacturaDigitalPage extends StatelessWidget {
           child: SizedBox(
             height: isSmallPhone ? 56 : 60,
             child: ElevatedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Descarga de PDF próximamente',
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                );
-              },
+              onPressed: _isDownloadingPdf ? null : _downloadInvoicePdf,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 foregroundColor: Colors.white,
@@ -429,9 +728,18 @@ class FacturaDigitalPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              icon: const Icon(Icons.download_outlined),
+              icon: _isDownloadingPdf
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.download_outlined),
               label: Text(
-                'Descargar PDF',
+                _isDownloadingPdf ? 'Generando...' : 'Descargar PDF',
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.bold,
                   fontSize: isSmallPhone ? 17 : 18,

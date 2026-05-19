@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/accounts/infrastructure/datasources/local_account_db.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
@@ -45,6 +47,25 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
   final TextEditingController ubicacionController = TextEditingController();
   List<String> availableCities = <String>[];
   bool isLoadingCities = true;
+  final ImagePicker _imagePicker = ImagePicker();
+  String? _selectedVehicleImagePath;
+
+  static const List<String> _assetVehicleImages = [
+    'assets/imagenes_carros/ranger.jpg',
+    'assets/imagenes_carros/corolla.jpg',
+    'assets/imagenes_carros/mazda3.jpg',
+    'assets/imagenes_carros/mercedes.jpg',
+    'assets/imagenes_carros/porsche.jpg',
+    'assets/imagenes_carros/tesla.jpg',
+    'assets/imagenes_carros/Renault-Sandero.jpg',
+    'assets/imagenes_carros/cx5.jpg',
+    'assets/imagenes_carros/onix.jpeg',
+    'assets/imagenes_carros/audia4.jpg',
+    'assets/imagenes_carros/sentra.jpg',
+    'assets/imagenes_carros/bmw.jpg',
+    'assets/imagenes_carros/tucson.jpg',
+    'assets/imagenes_carros/sportage.jpg',
+  ];
 
   final List<String> categories = [
     'Sedán',
@@ -248,44 +269,129 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
 
   Widget _buildPhotoUploadArea(bool isSmallPhone) {
     final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      height: 160,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.3),
-          width: 2,
+    final previewPath = _selectedVehicleImagePath ?? _assetVehicleImages.first;
+    final isGalleryImage = !FlexiVehicleImage.isAssetPath(previewPath);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          height: 170,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+              width: 2,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                FlexiVehicleImage(
+                  imagePath: previewPath,
+                  fit: BoxFit.cover,
+                  placeholder: Container(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.directions_car,
+                      size: 48,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      isGalleryImage ? 'Galería' : 'Asset',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.camera_alt,
-            size: 48,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Subir fotos del vehículo',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickImageFromGallery,
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Subir de galería'),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Máx. 5 fotos (JPG, PNG)',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _selectedVehicleImagePath = _assetVehicleImages.first;
+                  });
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Usar predeterminada'),
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: isSmallPhone ? 62 : 68,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _assetVehicleImages.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final imagePath = _assetVehicleImages[index];
+              final isSelected = previewPath == imagePath;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedVehicleImagePath = imagePath;
+                  });
+                },
+                child: Container(
+                  width: isSmallPhone ? 72 : 84,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFFF59E0B)
+                          : theme.dividerColor,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: FlexiVehicleImage(
+                      imagePath: imagePath,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -911,6 +1017,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       selectedTransmission = null;
       selectedFuelType = null;
       selectedSeats = null;
+      _selectedVehicleImagePath = null;
       nombreController.clear();
       marcaController.clear();
       anoController.clear();
@@ -1180,6 +1287,14 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return maxId + 1;
   }
 
+  int _resolveNextPublicationImageId() {
+    if (_publicationAccess.publicationImages.isEmpty) return 1;
+    final maxId = _publicationAccess.publicationImages
+        .map((image) => image.id)
+        .reduce((current, next) => current > next ? current : next);
+    return maxId + 1;
+  }
+
   int _categoryToId(String? category) {
     switch (category) {
       case 'Sedán':
@@ -1199,6 +1314,34 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     }
   }
 
+  String _resolveImageForPublication() {
+    final selectedPath = _selectedVehicleImagePath?.trim();
+    if (selectedPath != null && selectedPath.isNotEmpty) {
+      return selectedPath;
+    }
+    return _assetVehicleImages.first;
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked == null || !mounted) return;
+      setState(() {
+        _selectedVehicleImagePath = picked.path;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo abrir la galería'),
+        ),
+      );
+    }
+  }
+
   Future<void> _publishVehicle() async {
     await _vehicleInventory.init();
     await _publicationAccess.loadIfNeeded();
@@ -1209,10 +1352,12 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     final pricePerDay = _parsePriceValue();
     final publicationId = _resolveNextPublicationId();
     final publicationPriceId = _resolveNextPublicationPriceId();
+    final publicationImageId = _resolveNextPublicationImageId();
     final vehicleName = nombreController.text.trim();
     final location = _capitalizeWords(ubicacionController.text);
+    final vehicleImage = _resolveImageForPublication();
 
-    await _vehicleInventory.addVehiculo({
+    final draftVehicle = <String, dynamic>{
       'id': nextVehicleId,
       'vehiculo_id': nextVehicleId,
       'marca': marcaController.text.trim(),
@@ -1228,7 +1373,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       'precio_semana': pricePerDay * 6,
       'ubicacion': location,
       'propietario_id': currentUser.id,
-      'imagen': 'assets/imagenes_carros/mazda3.jpg',
+      'imagen': vehicleImage,
       'descripcion': descripcionController.text.trim().isEmpty
           ? 'Vehículo publicado por usuario'
           : descripcionController.text.trim(),
@@ -1238,13 +1383,20 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
       'combustible': selectedFuelType ?? 'Combustión',
       'color': 'Negro',
       'aire_acondicionado': true,
-    });
+    };
 
-    await _publicationAccess.addPublication(
+    await _vehicleInventory.addVehiculo(draftVehicle);
+
+    final createdVehicleId = int.tryParse(
+          '${draftVehicle['vehiculo_id'] ?? draftVehicle['id'] ?? nextVehicleId}',
+        ) ??
+        nextVehicleId;
+
+    final createdPublication = await _publicationAccess.addPublication(
       PublicationModel(
         id: publicationId,
         userId: currentUser.id,
-        vehicleId: nextVehicleId,
+        vehicleId: createdVehicleId,
         publishDate: DateTime.now(),
         active: true,
       ),
@@ -1253,9 +1405,20 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     await _publicationAccess.addPublicationPrice(
       PublicationPriceModel(
         id: publicationPriceId,
-        publicationId: publicationId,
+        publicationId: createdPublication.id,
         periodTypeId: 1,
         price: pricePerDay.toDouble(),
+      ),
+    );
+
+    await _publicationAccess.addPublicationImage(
+      PublicationImageModel(
+        id: publicationImageId,
+        publicationId: createdPublication.id,
+        imageUrl: vehicleImage,
+        order: 1,
+        isMain: true,
+        uploadDate: DateTime.now(),
       ),
     );
   }

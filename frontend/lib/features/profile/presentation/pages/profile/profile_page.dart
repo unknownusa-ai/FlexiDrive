@@ -28,6 +28,7 @@ import 'help_center_page.dart';
 import 'arrendatario_main_page.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/core/session/local_session_store.dart';
 import 'package:flexidrive/injection_container.dart';
 
 // Pagina principal del perfil del usuario
@@ -790,6 +791,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return GestureDetector(
       onTap: () async {
+        final normalizedEmail = _profileEmail.trim().toLowerCase();
+        if (normalizedEmail.isNotEmpty &&
+            normalizedEmail != 'sin_sesion@flexidrive.local') {
+          await LocalSessionStore.instance.setLastLoggedEmail(normalizedEmail);
+        }
         // Usar el nuevo Auth hexagonal use case
         await _authLogoutUseCase.execute();
         // También limpiar el perfil local

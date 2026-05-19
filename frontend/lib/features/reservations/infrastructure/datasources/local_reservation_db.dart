@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flexidrive/core/api/api_client.dart';
+import 'package:flexidrive/core/utils/colombia_time.dart';
 import 'package:flexidrive/features/reservations/domain/entities/reservation_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,10 @@ class LocalReservationDb {
 
   // Carga los datos solo si es necesario
   Future<void> loadIfNeeded() async {
-    if (_loaded == true) return;
+    if (_loaded == true) {
+      await _applyTimeBasedStatusTransitions();
+      return;
+    }
     await forceReload();
   }
 
@@ -50,6 +54,7 @@ class LocalReservationDb {
       ..clear()
       ..addAll(createdReservations);
 
+    await _applyTimeBasedStatusTransitions();
     _loaded = true;
   }
 
@@ -167,5 +172,79 @@ class LocalReservationDb {
         .map((reservation) => reservation.toJson())
         .toList();
     await prefs.setString(_reservationsOverridesKey, jsonEncode(created));
+  }
+
+  Future<void> _applyTimeBasedStatusTransitions() async {
+    final nowColombia = ColombiaTime.now();
+    var changed = false;
+
+    for (var index = 0; index < reservations.length; index++) {
+      final current = reservations[index];
+      final normalized = _normalizeStatusForCurrentTime(
+        reservation: current,
+        nowColombia: nowColombia,
+      );
+      if (normalized.statusId == current.statusId) continue;
+
+      reservations[index] = normalized;
+      final createdIndex =
+          _createdReservations.indexWhere((item) => item.id == normalized.id);
+      if (createdIndex == -1) {
+        _createdReservations.add(normalized);
+      } else {
+        _createdReservations[createdIndex] = normalized;
+      }
+      changed = true;
+    }
+
+    if (changed) {
+      await _saveReservationOverrides();
+    }
+  }
+
+  ReservationModel _normalizeStatusForCurrentTime({
+    required ReservationModel reservation,
+    required DateTime nowColombia,
+  }) {
+    // Pendiente o cancelada se mantienen como están.
+    if (reservation.statusId == 1 || reservation.statusId == 3) {
+      return reservation;
+    }
+
+    final start = ColombiaTime.toColombia(reservation.startDate);
+    final end = ColombiaTime.toColombia(reservation.endDate);
+
+    // Si ya pasó la fecha/hora final, se marca finalizada.
+    final ended = !end.isAfter(nowColombia);
+    if (ended && reservation.statusId != 2) {
+      return _copyWithStatus(reservation, 2);
+    }
+
+    // Si todavía no termina y ya comenzó, se considera activa.
+    final started = !nowColombia.isBefore(start);
+    if (!ended && started && reservation.statusId == 2) {
+      return _copyWithStatus(reservation, 4);
+    }
+
+    return reservation;
+  }
+
+  ReservationModel _copyWithStatus(ReservationModel reservation, int statusId) {
+    return ReservationModel(
+      id: reservation.id,
+      code: reservation.code,
+      userId: reservation.userId,
+      publicationId: reservation.publicationId,
+      paymentMethodId: reservation.paymentMethodId,
+      periodTypeId: reservation.periodTypeId,
+      periodCount: reservation.periodCount,
+      startDate: reservation.startDate,
+      endDate: reservation.endDate,
+      pickupLocation: reservation.pickupLocation,
+      returnLocation: reservation.returnLocation,
+      totalValue: reservation.totalValue,
+      statusId: statusId,
+      reservationDate: reservation.reservationDate,
+    );
   }
 }

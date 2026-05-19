@@ -6,6 +6,8 @@ import 'package:flexidrive/features/reservations/application/use_cases/reservati
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 
 // Página de detalle completo de reserva
 // Muestra toda la información detallada de una reserva específica
@@ -169,14 +171,15 @@ class _ReservaDetalleCompletaPageState
         background: Stack(
           fit: StackFit.expand,
           children: [
-            if (_vehiculo!['imagen'] != null && _vehiculo!['imagen'].isNotEmpty)
-              Image.asset(
-                _vehiculo!['imagen'],
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
-              )
-            else
-              _buildPlaceholderImage(),
+            FlexiVehicleImage(
+              imagePath: VehicleImageResolver.resolveFromVehicle(
+                _vehiculo,
+                preferredImage: _vehiculo?['imagen']?.toString(),
+                fallback: 'assets/imagenes_carros/cx5.jpg',
+              ),
+              fit: BoxFit.cover,
+              placeholder: _buildPlaceholderImage(),
+            ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

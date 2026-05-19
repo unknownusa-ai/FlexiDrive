@@ -47,6 +47,7 @@ class LocalAccountRepository {
     if (userId == null) return null;
 
     await _session.setUserId(userId);
+    await _session.setLastLoggedEmail(email);
 
     try {
       await _db.reload();
@@ -148,6 +149,15 @@ class LocalAccountRepository {
 
   Future<void> logout() async {
     await init();
+    final currentUserId = _session.userId;
+    if (currentUserId != null) {
+      for (final user in _db.users) {
+        if (user.id == currentUserId) {
+          await _session.setLastLoggedEmail(user.email);
+          break;
+        }
+      }
+    }
     await _session.clear();
   }
 
@@ -229,7 +239,11 @@ class LocalAccountRepository {
       canPublish: user.canPublish,
     );
 
-    await _db.saveUserOverride(updatedUser);
+    await _db.saveUserOverride(
+      updatedUser,
+      syncRemote: true,
+      throwOnRemoteFailure: true,
+    );
     await _db.reload();
   }
 

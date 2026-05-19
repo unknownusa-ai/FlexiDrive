@@ -76,12 +76,24 @@ class LocalSecurityDb {
       'verificacion_dos_pasos': twoFactorVerification,
       'acceso_biometrico': biometricAccess,
     };
-    final updated = UserSecurityModel.fromJson(
-      current.isEmpty
-          ? await ApiClient.instance.postMap('user-security', payload)
-          : await ApiClient.instance
-              .patchMap('user-security/${current.first.id}', payload),
-    );
+    UserSecurityModel updated;
+    try {
+      updated = UserSecurityModel.fromJson(
+        current.isEmpty
+            ? await ApiClient.instance.postMap('user-security', payload)
+            : await ApiClient.instance
+                .patchMap('user-security/${current.first.id}', payload),
+      );
+    } catch (_) {
+      // Fallback local: mantener la preferencia de seguridad del usuario.
+      final localId = current.isEmpty ? DateTime.now().millisecondsSinceEpoch : current.first.id;
+      updated = UserSecurityModel(
+        id: localId,
+        userId: userId,
+        twoFactorVerification: twoFactorVerification,
+        biometricAccess: biometricAccess,
+      );
+    }
 
     final index = userSecurities.indexWhere((item) => item.userId == userId);
     if (index == -1) {

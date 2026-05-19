@@ -17,6 +17,7 @@ class LocalPublicationDb {
   bool? _loaded = false;
   static const _publicationsOverridesKey = 'local_publications_created_v1';
   static const _pricesOverridesKey = 'local_publication_prices_created_v1';
+  static const _imagesOverridesKey = 'local_publication_images_created_v1';
 
   // Listas de datos en memoria
   final List<PublicationModel> publications = []; // Publicaciones de carros
@@ -26,18 +27,23 @@ class LocalPublicationDb {
       []; // Fotos de los carros
   final List<PublicationModel> _createdPublications = [];
   final List<PublicationPriceModel> _createdPublicationPrices = [];
+  final List<PublicationImageModel> _createdPublicationImages = [];
 
   // Carga todos los datos si no estan cargados
   Future<void> loadIfNeeded() async {
     // Si ya cargamos, no hacemos nada
     if (_loaded == true) return;
 
+    final publicationsLoad = await _safeLoadList('publications');
+    final pricesLoad = await _safeLoadList('publication-prices');
+    final imagesLoad = await _safeLoadList('publication-images');
+
     // Cargamos las publicaciones principales
     publications
       ..clear()
       ..addAll(
         _parseList(
-          await _safeLoadList('publications'),
+          publicationsLoad.data,
           PublicationModel.fromJson,
         ),
       );
@@ -47,7 +53,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _safeLoadList('publication-prices'),
+          pricesLoad.data,
           PublicationPriceModel.fromJson,
         ),
       );
@@ -57,7 +63,7 @@ class LocalPublicationDb {
       ..clear()
       ..addAll(
         _parseList(
-          await _safeLoadList('publication-images'),
+          imagesLoad.data,
           PublicationImageModel.fromJson,
         ),
       );
@@ -68,11 +74,41 @@ class LocalPublicationDb {
     _createdPublicationPrices
       ..clear()
       ..addAll(await _loadPublicationPriceOverrides());
-    publications.addAll(_createdPublications);
-    publicationPrices.addAll(_createdPublicationPrices);
+    _createdPublicationImages
+      ..clear()
+      ..addAll(await _loadPublicationImageOverrides());
+
+    // Si hay conexión con backend, priorizamos datos remotos para evitar
+    // que overrides locales viejos inflen conteos o dupliquen publicaciones.
+    if (!publicationsLoad.succeeded) {
+      publications.addAll(_createdPublications);
+    } else if (_createdPublications.isNotEmpty) {
+      _createdPublications.clear();
+      await _savePublicationOverrides();
+    }
+
+    if (!pricesLoad.succeeded) {
+      publicationPrices.addAll(_createdPublicationPrices);
+    } else if (_createdPublicationPrices.isNotEmpty) {
+      _createdPublicationPrices.clear();
+      await _savePublicationPriceOverrides();
+    }
+
+    if (!imagesLoad.succeeded) {
+      publicationImages.addAll(_createdPublicationImages);
+    } else if (_createdPublicationImages.isNotEmpty) {
+      _createdPublicationImages.clear();
+      await _savePublicationImageOverrides();
+    }
+    _dedupeById();
 
     // Marcamos como cargado
     _loaded = true;
+  }
+
+  Future<void> reload() async {
+    _loaded = false;
+    await loadIfNeeded();
   }
 
   // Convierte una lista dinamica a lista tipada
@@ -87,11 +123,12 @@ class LocalPublicationDb {
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
-  Future<List<dynamic>> _safeLoadList(String endpoint) async {
+  Future<_LoadListResult> _safeLoadList(String endpoint) async {
     try {
-      return await _loadList(endpoint).timeout(const Duration(seconds: 6));
+      final data = await _loadList(endpoint).timeout(const Duration(seconds: 6));
+      return _LoadListResult(data: data, succeeded: true);
     } catch (_) {
-      return const [];
+      return const _LoadListResult(data: <dynamic>[], succeeded: false);
     }
   }
 
@@ -111,17 +148,76 @@ class LocalPublicationDb {
         1;
   }
 
-  Future<void> addPublication(PublicationModel publication) async {
-    publications.add(publication);
-    _createdPublications.add(publication);
-    await _savePublicationOverrides();
+  int nextPublicationImageId() {
+    if (publicationImages.isEmpty) return 1;
+    return publicationImages
+            .map((item) => item.id)
+            .reduce((current, next) => current > next ? current : next) +
+        1;
   }
 
-  Future<void> addPublicationPrice(
-      PublicationPriceModel publicationPrice) async {
-    publicationPrices.add(publicationPrice);
-    _createdPublicationPrices.add(publicationPrice);
-    await _savePublicationPriceOverrides();
+  Future<PublicationModel> addPublication(PublicationModel publication) async {
+    await loadIfNeeded();
+    try {
+      final createdRaw = await ApiClient.instance.postMap('publications', {
+        'usuario_id': publication.userId,
+        'vehiculo_id': publication.vehicleId,
+        'fecha_publicacion': publication.publishDate.toIso8601String(),
+        'activa': publication.active,
+      });
+      final created = PublicationModel.fromJson(createdRaw);
+      _upsertPublication(created);
+      return created;
+    } catch (_) {
+      _upsertPublication(publication);
+      _upsertCreatedPublication(publication);
+      await _savePublicationOverrides();
+      return publication;
+    }
+  }
+
+  Future<PublicationPriceModel> addPublicationPrice(
+    PublicationPriceModel publicationPrice,
+  ) async {
+    await loadIfNeeded();
+    try {
+      final createdRaw = await ApiClient.instance.postMap('publication-prices', {
+        'publicacion_id': publicationPrice.publicationId,
+        'tipo_periodo_id': publicationPrice.periodTypeId,
+        'precio': publicationPrice.price,
+      });
+      final created = PublicationPriceModel.fromJson(createdRaw);
+      _upsertPublicationPrice(created);
+      return created;
+    } catch (_) {
+      _upsertPublicationPrice(publicationPrice);
+      _upsertCreatedPublicationPrice(publicationPrice);
+      await _savePublicationPriceOverrides();
+      return publicationPrice;
+    }
+  }
+
+  Future<PublicationImageModel> addPublicationImage(
+    PublicationImageModel publicationImage,
+  ) async {
+    await loadIfNeeded();
+    try {
+      final createdRaw = await ApiClient.instance.postMap('publication-images', {
+        'publicacion_id': publicationImage.publicationId,
+        'url_imagen': publicationImage.imageUrl,
+        'orden': publicationImage.order,
+        'es_principal': publicationImage.isMain,
+        'fecha_subida': publicationImage.uploadDate.toIso8601String(),
+      });
+      final created = PublicationImageModel.fromJson(createdRaw);
+      _upsertPublicationImage(created);
+      return created;
+    } catch (_) {
+      _upsertPublicationImage(publicationImage);
+      _upsertCreatedPublicationImage(publicationImage);
+      await _savePublicationImageOverrides();
+      return publicationImage;
+    }
   }
 
   Future<List<PublicationModel>> _loadPublicationOverrides() async {
@@ -164,6 +260,26 @@ class LocalPublicationDb {
     }
   }
 
+  Future<List<PublicationImageModel>> _loadPublicationImageOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_imagesOverridesKey);
+    if (raw == null || raw.isEmpty) return <PublicationImageModel>[];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return <PublicationImageModel>[];
+      return decoded
+          .whereType<Map>()
+          .map(
+            (item) => PublicationImageModel.fromJson(
+              item.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return <PublicationImageModel>[];
+    }
+  }
+
   Future<void> _savePublicationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created = _createdPublications
@@ -178,4 +294,106 @@ class LocalPublicationDb {
         _createdPublicationPrices.map((price) => price.toJson()).toList();
     await prefs.setString(_pricesOverridesKey, jsonEncode(created));
   }
+
+  Future<void> _savePublicationImageOverrides() async {
+    final prefs = await SharedPreferences.getInstance();
+    final created =
+        _createdPublicationImages.map((image) => image.toJson()).toList();
+    await prefs.setString(_imagesOverridesKey, jsonEncode(created));
+  }
+
+  void _upsertPublication(PublicationModel publication) {
+    final index = publications.indexWhere((item) => item.id == publication.id);
+    if (index == -1) {
+      publications.add(publication);
+      return;
+    }
+    publications[index] = publication;
+  }
+
+  void _upsertPublicationPrice(PublicationPriceModel publicationPrice) {
+    final index =
+        publicationPrices.indexWhere((item) => item.id == publicationPrice.id);
+    if (index == -1) {
+      publicationPrices.add(publicationPrice);
+      return;
+    }
+    publicationPrices[index] = publicationPrice;
+  }
+
+  void _upsertPublicationImage(PublicationImageModel publicationImage) {
+    final index =
+        publicationImages.indexWhere((item) => item.id == publicationImage.id);
+    if (index == -1) {
+      publicationImages.add(publicationImage);
+      return;
+    }
+    publicationImages[index] = publicationImage;
+  }
+
+  void _upsertCreatedPublication(PublicationModel publication) {
+    final index =
+        _createdPublications.indexWhere((item) => item.id == publication.id);
+    if (index == -1) {
+      _createdPublications.add(publication);
+      return;
+    }
+    _createdPublications[index] = publication;
+  }
+
+  void _upsertCreatedPublicationPrice(PublicationPriceModel publicationPrice) {
+    final index = _createdPublicationPrices
+        .indexWhere((item) => item.id == publicationPrice.id);
+    if (index == -1) {
+      _createdPublicationPrices.add(publicationPrice);
+      return;
+    }
+    _createdPublicationPrices[index] = publicationPrice;
+  }
+
+  void _upsertCreatedPublicationImage(PublicationImageModel publicationImage) {
+    final index = _createdPublicationImages
+        .indexWhere((item) => item.id == publicationImage.id);
+    if (index == -1) {
+      _createdPublicationImages.add(publicationImage);
+      return;
+    }
+    _createdPublicationImages[index] = publicationImage;
+  }
+
+  void _dedupeById() {
+    final publicationsMap = <int, PublicationModel>{};
+    for (final item in publications) {
+      publicationsMap[item.id] = item;
+    }
+    publications
+      ..clear()
+      ..addAll(publicationsMap.values);
+
+    final pricesMap = <int, PublicationPriceModel>{};
+    for (final item in publicationPrices) {
+      pricesMap[item.id] = item;
+    }
+    publicationPrices
+      ..clear()
+      ..addAll(pricesMap.values);
+
+    final imagesMap = <int, PublicationImageModel>{};
+    for (final item in publicationImages) {
+      imagesMap[item.id] = item;
+    }
+    publicationImages
+      ..clear()
+      ..addAll(imagesMap.values);
+  }
+}
+
+class _LoadListResult {
+  const _LoadListResult({
+    required this.data,
+    required this.succeeded,
+  });
+
+  final List<dynamic> data;
+  final bool succeeded;
 }

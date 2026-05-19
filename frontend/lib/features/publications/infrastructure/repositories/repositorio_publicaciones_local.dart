@@ -14,6 +14,11 @@ class RepositorioPublicacionesLocal implements RepositorioPublicacionesPuerto {
   }
 
   @override
+  Future<void> recargar() async {
+    await _origen.reload();
+  }
+
+  @override
   List<PublicationModel> obtenerPublicaciones() => _origen.publications;
 
   @override
@@ -27,14 +32,22 @@ class RepositorioPublicacionesLocal implements RepositorioPublicacionesPuerto {
   }
 
   @override
-  Future<void> agregarPublicacion(PublicationModel publication) {
+  Future<PublicationModel> agregarPublicacion(PublicationModel publication) {
     return _origen.addPublication(publication);
   }
 
   @override
-  Future<void> agregarPrecioPublicacion(
-      PublicationPriceModel publicationPrice) {
+  Future<PublicationPriceModel> agregarPrecioPublicacion(
+    PublicationPriceModel publicationPrice,
+  ) {
     return _origen.addPublicationPrice(publicationPrice);
+  }
+
+  @override
+  Future<PublicationImageModel> agregarImagenPublicacion(
+    PublicationImageModel publicationImage,
+  ) {
+    return _origen.addPublicationImage(publicationImage);
   }
 
   LocalPublicationDb get origen => _origen;

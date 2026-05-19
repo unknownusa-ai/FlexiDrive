@@ -10,6 +10,8 @@ import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inven
 import 'package:flexidrive/features/reservations/domain/entities/reservation_models.dart';
 import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 
 // PÃƒÂ¡gina de solicitudes de reserva
 // Muestra las solicitudes de renta recibidas por el arrendador
@@ -327,6 +329,14 @@ class SolicitudesPageState extends State<SolicitudesPage>
     return name;
   }
 
+  String _resolveVehicleImage(Map<String, dynamic>? vehicle) {
+    return VehicleImageResolver.resolveFromVehicle(
+      vehicle,
+      preferredImage: vehicle?['imagen']?.toString(),
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
+  }
+
   String _fixMojibake(String input) {
     if (!input.contains('Ã') && !input.contains('Â') && !input.contains('â')) {
       return input;
@@ -609,8 +619,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           userRating: '4.8', // Default rating
           userType: 'Arrendatario',
           vehicleName: _resolveVehicleName(vehicle),
-          vehicleImage:
-              vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          vehicleImage: _resolveVehicleImage(vehicle),
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
@@ -663,8 +672,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           userRating: '4.8',
           userType: 'Arrendatario',
           vehicleName: _resolveVehicleName(vehicle),
-          vehicleImage:
-              vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          vehicleImage: _resolveVehicleImage(vehicle),
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
@@ -717,8 +725,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           userRating: '4.8',
           userType: 'Arrendatario',
           vehicleName: _resolveVehicleName(vehicle),
-          vehicleImage:
-              vehicle?['imagen'] ?? 'assets/imagenes_carros/mazda3.jpg',
+          vehicleImage: _resolveVehicleImage(vehicle),
           startDate:
               '${reservation.startDate.day}/${reservation.startDate.month}/${reservation.startDate.year}',
           endDate:
@@ -873,8 +880,8 @@ class SolicitudesPageState extends State<SolicitudesPage>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  vehicleImage,
+                child: FlexiVehicleImage(
+                  imagePath: vehicleImage,
                   width: isSmallPhone ? 90 : 100,
                   height: isSmallPhone ? 72 : 80,
                   fit: BoxFit.cover,

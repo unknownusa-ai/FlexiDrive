@@ -7,6 +7,8 @@ import 'package:flexidrive/features/reservations/application/use_cases/reservati
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 import 'publicar_vehiculo_page.dart';
 
 // PÃ¡gina principal del arrendador
@@ -68,7 +70,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     try {
       await Future.wait([
         _service.init(),
-        _publicationDb.loadIfNeeded(),
+        _publicationDb.reload(),
         _reservationDb.loadIfNeeded(),
         _reviewDb.loadIfNeeded(),
       ]);
@@ -84,14 +86,24 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         return;
       }
 
+      final usersById = <int, Map<String, dynamic>>{
+        for (final user in _service.usuarios)
+          _asInt(user['usuario_id'] ?? user['id']): user,
+      };
+
       final ownerPublications = _publicationDb.publications
-          .where((publication) =>
-              publication.userId == currentUser.id && publication.active)
+          .where((publication) {
+            if (!publication.active) return false;
+            if (publication.userId != currentUser.id) return false;
+            final owner = usersById[publication.userId];
+            if (owner == null) return false;
+            return owner['puede_publicar'] == true;
+          })
           .toList();
       final ownerPublicationIds =
           ownerPublications.map((publication) => publication.id).toSet();
 
-      final reservationsForOwner = _reservationDb.reservations
+      final reservationsForPublishedVehicles = _reservationDb.reservations
           .where(
             (reservation) =>
                 ownerPublicationIds.contains(reservation.publicationId),
@@ -99,17 +111,13 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
           .toList();
       final now = DateTime.now();
 
-      final pendingRequests = reservationsForOwner
+      final pendingRequests = reservationsForPublishedVehicles
           .where((reservation) => reservation.statusId == 1)
           .length;
 
       final vehiclesById = <int, Map<String, dynamic>>{
         for (final vehicle in _service.getVehiculos())
           _asInt(vehicle['vehiculo_id'] ?? vehicle['id']): vehicle,
-      };
-      final usersById = <int, Map<String, dynamic>>{
-        for (final user in _service.usuarios)
-          _asInt(user['usuario_id'] ?? user['id']): user,
       };
       final opinionsById = {
         for (final opinion in _reviewDb.opinions) opinion.id: opinion,
@@ -125,7 +133,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         final vehicle = vehiclesById[publication.vehicleId];
         if (vehicle == null) continue;
 
-        final reservations = reservationsForOwner
+        final reservations = reservationsForPublishedVehicles
             .where((reservation) => reservation.publicationId == publication.id)
             .toList();
         final activeReservations = reservations
@@ -538,7 +546,11 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     required Map<String, dynamic> vehiculo,
     required String? rentInfo,
   }) {
-    final imagePath = vehiculo['imagen'] as String?;
+    final imagePath = VehicleImageResolver.resolveFromVehicle(
+      vehiculo,
+      preferredImage: vehiculo['imagen']?.toString(),
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
     final title = (vehiculo['modelo'] as String?)?.trim().isNotEmpty == true
         ? (vehiculo['modelo'] as String).trim()
         : (vehiculo['marca'] as String? ?? 'Vehículo');
@@ -573,26 +585,12 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: imagePath != null
-                    ? Image.asset(
-                        imagePath,
-                        width: isSmallPhone ? 90 : 100,
-                        height: isSmallPhone ? 70 : 80,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: isSmallPhone ? 90 : 100,
-                        height: isSmallPhone ? 70 : 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.directions_car,
-                          color: Colors.grey,
-                          size: 32,
-                        ),
-                      ),
+                child: FlexiVehicleImage(
+                  imagePath: imagePath,
+                  width: isSmallPhone ? 90 : 100,
+                  height: isSmallPhone ? 70 : 80,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(

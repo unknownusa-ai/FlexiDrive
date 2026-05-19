@@ -260,8 +260,16 @@ class _RegisterPageState extends State<RegisterPage> {
   List<IdentificationTypeModel> _buildOrderedIdentificationTypes(
     List<IdentificationTypeModel> normalizedTypes,
   ) {
+    final uniqueByNormalizedName = <String, IdentificationTypeModel>{};
+    for (final type in normalizedTypes) {
+      final normalizedName = _normalizeText(type.name);
+      // Priorizamos el primer elemento para mantener estabilidad en el orden inicial.
+      uniqueByNormalizedName.putIfAbsent(normalizedName, () => type);
+    }
+    final uniqueTypes = uniqueByNormalizedName.values.toList();
+
     final typesByNormalizedName = <String, IdentificationTypeModel>{
-      for (final type in normalizedTypes) _normalizeText(type.name): type,
+      for (final type in uniqueTypes) _normalizeText(type.name): type,
     };
 
     final selectedOrderedTypes = <IdentificationTypeModel>[];
@@ -273,7 +281,7 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
 
-    for (final type in normalizedTypes) {
+    for (final type in uniqueTypes) {
       if (!selectedOrderedTypes.any((item) => item.id == type.id)) {
         selectedOrderedTypes.add(type);
       }
@@ -283,8 +291,15 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   List<UserTypeModel> _buildOrderedUserTypes(List<UserTypeModel> userTypes) {
+    final uniqueByNormalizedName = <String, UserTypeModel>{};
+    for (final type in userTypes) {
+      final normalizedName = _normalizeText(type.name);
+      uniqueByNormalizedName.putIfAbsent(normalizedName, () => type);
+    }
+    final uniqueTypes = uniqueByNormalizedName.values.toList();
+
     final typesByName = <String, UserTypeModel>{
-      for (final type in userTypes) _normalizeText(type.name): type,
+      for (final type in uniqueTypes) _normalizeText(type.name): type,
     };
 
     final ordered = <UserTypeModel>[];
@@ -295,7 +310,7 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
 
-    for (final type in userTypes) {
+    for (final type in uniqueTypes) {
       if (!ordered.any((item) => item.id == type.id)) {
         ordered.add(type);
       }

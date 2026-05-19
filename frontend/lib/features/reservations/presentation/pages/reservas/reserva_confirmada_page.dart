@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
 // Pagina de factura digital
 import 'factura_digital_page.dart';
 // Pagina principal (para volver)
@@ -330,9 +332,14 @@ class ReservaConfirmadaPage extends StatelessWidget {
     Color textSecondary,
   ) {
     final unidad = _unidadPeriodo();
-    final image = vehiculoImage.isEmpty
-        ? 'assets/imagenes_carros/cx5.jpg'
-        : vehiculoImage;
+    final image = VehicleImageResolver.resolveFromVehicle(
+      {
+        'modelo': vehiculoBrand,
+        'imagen': vehiculoImage,
+      },
+      preferredImage: vehiculoImage,
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -352,10 +359,10 @@ class ReservaConfirmadaPage extends StatelessWidget {
                 SizedBox(
                   height: 110,
                   width: double.infinity,
-                  child: Image.asset(
-                    image,
+                  child: FlexiVehicleImage(
+                    imagePath: image,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: Container(
                       color: borderColor,
                       alignment: Alignment.center,
                       child: const Icon(Icons.directions_car, size: 36),

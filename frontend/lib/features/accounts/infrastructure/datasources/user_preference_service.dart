@@ -70,16 +70,23 @@ class UserPreferenceService {
 
     final existingIndex =
         _db.preferences.indexWhere((item) => item.userId == userId);
-    final saved = existingIndex == -1
-        ? await ApiClient.instance.postMap(
-            'user-preferences',
-            updatedPreference.toJson(),
-          )
-        : await ApiClient.instance.patchMap(
-            'user-preferences/${_db.preferences[existingIndex].id}',
-            updatedPreference.toJson(),
-          );
-    final savedPreference = UserPreferenceModel.fromJson(saved);
+
+    UserPreferenceModel savedPreference = updatedPreference;
+    try {
+      final saved = existingIndex == -1
+          ? await ApiClient.instance.postMap(
+              'user-preferences',
+              updatedPreference.toJson(),
+            )
+          : await ApiClient.instance.patchMap(
+              'user-preferences/${_db.preferences[existingIndex].id}',
+              updatedPreference.toJson(),
+            );
+      savedPreference = UserPreferenceModel.fromJson(saved);
+    } catch (_) {
+      // Si falla la API, mantenemos la preferencia local para persistirla.
+      savedPreference = updatedPreference;
+    }
 
     if (existingIndex == -1) {
       _db.preferences.add(savedPreference);
@@ -87,8 +94,7 @@ class UserPreferenceService {
       _db.preferences[existingIndex] = savedPreference;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_preferencesOverridesKey);
+    await _upsertPreferenceOverride(savedPreference);
   }
 
   Future<bool> getArrendatarioMode({
@@ -168,6 +174,23 @@ class UserPreferenceService {
     } catch (_) {
       return <UserPreferenceModel>[];
     }
+  }
+
+  Future<void> _upsertPreferenceOverride(UserPreferenceModel preference) async {
+    final prefs = await SharedPreferences.getInstance();
+    final overrides = await _readPreferenceOverrides();
+    final index = overrides.indexWhere((item) => item.userId == preference.userId);
+
+    if (index == -1) {
+      overrides.add(preference);
+    } else {
+      overrides[index] = preference;
+    }
+
+    await prefs.setString(
+      _preferencesOverridesKey,
+      jsonEncode(overrides.map((item) => item.toJson()).toList()),
+    );
   }
 
   Future<List<Map<String, dynamic>>> _readModeOverrides() async {

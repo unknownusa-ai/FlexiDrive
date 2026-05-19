@@ -19,7 +19,11 @@ import 'package:flexidrive/features/publications/application/use_cases/publicati
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 // Reservas que hacen los usuarios
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
+import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
+import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
+import 'package:flexidrive/core/utils/colombia_time.dart';
 // Modelos de datos de publicaciones
 import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
 // Modelos de reseñas
@@ -35,6 +39,7 @@ class HomePage extends StatefulWidget {
 
 // Estado de la página principal
 class _HomePageState extends State<HomePage> {
+  static const String _allCitiesOption = 'Todas las ciudades';
   // Repositorio para manejar usuarios
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
@@ -48,11 +53,13 @@ class _HomePageState extends State<HomePage> {
   // DB de reservas
   final ReservationAccessUseCase _reservationDb =
       InjectionContainer.instance.reservationAccessUseCase;
+  final NotificationAccessUseCase _notificationDb =
+      InjectionContainer.instance.notificationAccessUseCase;
 
   // Filtro por categoría de carro
   String _selectedCategory = 'Todos';
   // Ciudad seleccionada para buscar carros
-  String _selectedCity = 'Bogotá';
+  String _selectedCity = _allCitiesOption;
   // Nombre del usuario que está usando la app
   String _currentUserName = 'Invitado';
 
@@ -62,8 +69,8 @@ class _HomePageState extends State<HomePage> {
   String _searchQuery = '';
 
   // Fechas del período de renta
-  DateTime _fechaDesde = DateTime(2026, 4, 23); // Fecha inicio por defecto
-  DateTime _fechaHasta = DateTime(2026, 4, 30); // Fecha fin por defecto
+  late DateTime _fechaDesde; // Fecha inicio por defecto
+  late DateTime _fechaHasta; // Fecha fin por defecto
   DateTime? _rentalStartDate; // Fecha que escoge el usuario
   DateTime? _rentalEndDate; // Fecha fin que escoge el usuario
 
@@ -80,6 +87,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoadingCities = true;
   // Lista de ciudades disponibles
   List<String> _cities = [];
+  bool _hasUnreadNotifications = false;
 
   // Caché de calificaciones: vehicleId -> {rating, count}
   // Guardamos esto para no calcular todo el tiempo
@@ -87,6 +95,7 @@ class _HomePageState extends State<HomePage> {
 
   // Iconos que representan cada ciudad
   final Map<String, IconData> _cityIcons = {
+    _allCitiesOption: Icons.public,
     'Bogotá': Icons.account_balance, // Capital, gobierno
     'Medellín': Icons.forest, // Ciudad de la eterna primavera
     'Cali': Icons.nightlife, // Salsa y fiesta
@@ -96,6 +105,9 @@ class _HomePageState extends State<HomePage> {
   };
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+  bool get _isAllCitiesSelected => _selectedCity == _allCitiesOption;
+  String get _citySectionLabel =>
+      _isAllCitiesSelected ? 'todas las ciudades' : _selectedCity;
 
   // Dark-mode aware palette helpers
   Color get _cardBg => _isDark ? const Color(0xFF161827) : Colors.white;
@@ -112,15 +124,48 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    final nowCo = ColombiaTime.now();
+    _fechaDesde = DateTime(nowCo.year, nowCo.month, nowCo.day);
+    _fechaHasta = _fechaDesde.add(const Duration(days: 7));
     _cargarVehiculos();
     _cargarUsuarioActual();
     _cargarCiudades();
+    _notificationDb.changes.addListener(_onNotificationsChanged);
+    _cargarEstadoNotificaciones();
   }
 
   @override
   void dispose() {
+    _notificationDb.changes.removeListener(_onNotificationsChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onNotificationsChanged() {
+    _cargarEstadoNotificaciones();
+  }
+
+  Future<void> _cargarEstadoNotificaciones() async {
+    await _notificationDb.loadIfNeeded();
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (!mounted) return;
+
+    if (currentUser == null) {
+      setState(() {
+        _hasUnreadNotifications = false;
+      });
+      return;
+    }
+
+    final hasUnread = _notificationDb.notifications.any(
+      (notification) =>
+          notification.userId == currentUser.id &&
+          notification.status == 'no_leida',
+    );
+
+    setState(() {
+      _hasUnreadNotifications = hasUnread;
+    });
   }
 
   Future<void> _cargarCiudades() async {
@@ -128,7 +173,9 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     setState(() {
       _cities = cities;
-      if (_cities.isNotEmpty && !_cities.contains(_selectedCity)) {
+      if (_cities.isNotEmpty &&
+          _selectedCity != _allCitiesOption &&
+          !_cities.contains(_selectedCity)) {
         _selectedCity = _cities.first;
       }
       _isLoadingCities = false;
@@ -136,7 +183,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _contarVehiculosPorCiudad(String city) {
-    return _vehiculos.where((v) => v['ubicacion'] == city).length;
+    if (city == _allCitiesOption) return _vehiculos.length;
+    final normalizedCity = _normalizeCity(city);
+    return _vehiculos
+        .where((v) => _normalizeCity('${v['ubicacion'] ?? ''}') == normalizedCity)
+        .length;
+  }
+
+  String _normalizeCity(String value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('ñ', 'n');
   }
 
   /// Verifica si un vehículo está disponible en el rango de fechas seleccionado
@@ -148,7 +212,7 @@ class _HomePageState extends State<HomePage> {
 
     // Buscar la publicación de este vehículo
     final publication = _publicationDb.publications
-        .where((p) => p.vehicleId == vehicleId)
+        .where((p) => p.vehicleId == vehicleId && p.active)
         .firstOrNull;
 
     if (publication == null) return true;
@@ -191,7 +255,10 @@ class _HomePageState extends State<HomePage> {
   void _filtrarVehiculos() {
     var filtrados = _vehiculos.where((v) {
       // Filtro por ciudad
-      final matchesCity = v['ubicacion'] == _selectedCity;
+      final matchesCity = _isAllCitiesSelected
+          ? true
+          : _normalizeCity('${v['ubicacion'] ?? ''}') ==
+              _normalizeCity(_selectedCity);
 
       // Filtro por búsqueda de texto
       bool matchesSearch = true;
@@ -228,10 +295,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _selectFechaDesde() async {
+    final nowCo = ColombiaTime.now();
+    final firstAllowed = DateTime(nowCo.year, nowCo.month, nowCo.day);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _fechaDesde,
-      firstDate: DateTime(2026, 4, 23),
+      firstDate: firstAllowed,
       lastDate: DateTime(2027, 12, 31),
       builder: (context, child) {
         return Theme(
@@ -258,10 +327,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _selectFechaHasta() async {
+    final nowCo = ColombiaTime.now();
+    final firstAllowed = DateTime(nowCo.year, nowCo.month, nowCo.day);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _fechaHasta,
-      firstDate: _fechaDesde,
+      firstDate: _fechaDesde.isAfter(firstAllowed) ? _fechaDesde : firstAllowed,
       lastDate: DateTime(2027, 12, 31),
       builder: (context, child) {
         return Theme(
@@ -312,14 +383,27 @@ class _HomePageState extends State<HomePage> {
   /// Carga vehículos desde el JSON usando dart:convert y calcula ratings reales
   Future<void> _cargarVehiculos() async {
     await _vehiculoService.init();
-    await _publicationDb.loadIfNeeded();
+    await _publicationDb.reload();
     await _reviewDb.loadIfNeeded();
     await _reservationDb.loadIfNeeded();
 
-    final vehiculos = _vehiculoService.getVehiculos();
+    final allVehiculos = _vehiculoService.getVehiculos();
+    final publishedVehicleIds = _publicationDb.publications
+        .where((publication) => publication.active)
+        .map((publication) => publication.vehicleId)
+        .toSet();
+    final vehiculos = allVehiculos.where((vehicle) {
+      final vehicleId = int.tryParse(
+            '${vehicle['vehiculo_id'] ?? vehicle['id'] ?? 0}',
+          ) ??
+          0;
+      return publishedVehicleIds.contains(vehicleId);
+    }).toList();
 
     if (vehiculos.isEmpty) {
       setState(() {
+        _vehiculos = [];
+        _vehiculosFiltrados = [];
         _isLoading = false;
       });
       return;
@@ -345,7 +429,7 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic> _calcularRatingVehiculo(int vehicleId) {
     // Buscar publicación del vehículo
     final publication = _publicationDb.publications.firstWhere(
-      (p) => p.vehicleId == vehicleId,
+      (p) => p.vehicleId == vehicleId && p.active,
       orElse: () => PublicationModel(
         id: 0,
         userId: 0,
@@ -537,17 +621,18 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 const Icon(Icons.notifications_none_rounded,
                                     color: Colors.white, size: 22),
-                                Positioned(
-                                  top: 9,
-                                  right: 9,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                        color: Color(0xFFEF4444),
-                                        shape: BoxShape.circle),
+                                if (_hasUnreadNotifications)
+                                  Positioned(
+                                    top: 9,
+                                    right: 9,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                          color: Color(0xFFEF4444),
+                                          shape: BoxShape.circle),
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -996,7 +1081,7 @@ class _HomePageState extends State<HomePage> {
                     price: v['precio_hora'],
                     precioDia: v['precio_dia'],
                     precioSemana: v['precio_semana'],
-                    image: v['imagen'],
+                    image: _resolveVehicleImage(v),
                     location: v['ubicacion'],
                     year: v['anio'],
                     transmission: v['transmision'],
@@ -1055,6 +1140,14 @@ class _HomePageState extends State<HomePage> {
     return base;
   }
 
+  String _resolveVehicleImage(Map<String, dynamic> vehicle) {
+    return VehicleImageResolver.resolveFromVehicle(
+      vehicle,
+      preferredImage: vehicle['imagen']?.toString(),
+      fallback: 'assets/imagenes_carros/cx5.jpg',
+    );
+  }
+
   Widget _buildFeaturedCard({
     required int vehicleId,
     required String title,
@@ -1096,20 +1189,24 @@ class _HomePageState extends State<HomePage> {
                 topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             child: Stack(
               children: [
-                Image.asset(image,
+                FlexiVehicleImage(
+                  imagePath: image,
+                  height: 135,
+                  width: 210,
+                  fit: BoxFit.cover,
+                  placeholder: Container(
                     height: 135,
                     width: 210,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                          height: 135,
-                          width: 210,
-                          color: _isDark
-                              ? const Color(0xFF1F2235)
-                              : const Color(0xFF1E1B4B),
-                          child: Icon(Icons.directions_car,
-                              size: 50,
-                              color: Colors.white.withValues(alpha: 0.25)),
-                        )),
+                    color: _isDark
+                        ? const Color(0xFF1F2235)
+                        : const Color(0xFF1E1B4B),
+                    child: Icon(
+                      Icons.directions_car,
+                      size: 50,
+                      color: Colors.white.withValues(alpha: 0.25),
+                    ),
+                  ),
+                ),
                 Positioned(
                   top: 10,
                   left: 10,
@@ -1262,7 +1359,7 @@ class _HomePageState extends State<HomePage> {
             const Text('🚗', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
             Expanded(
-                child: Text('Vehículos en $_selectedCity',
+                child: Text('Vehículos en $_citySectionLabel',
                     style: GoogleFonts.poppins(
                         fontSize: isSmallPhone ? 16 : 18,
                         fontWeight: FontWeight.w700,
@@ -1342,7 +1439,7 @@ class _HomePageState extends State<HomePage> {
     final price = v['precio_hora'] as int;
     final precioDia = v['precio_dia'] as int;
     final precioSemana = v['precio_semana'] as int;
-    final image = v['imagen'] as String;
+    final image = _resolveVehicleImage(v);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1361,18 +1458,21 @@ class _HomePageState extends State<HomePage> {
         ClipRRect(
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
-          child: Image.asset(
-            image,
+          child: FlexiVehicleImage(
+            imagePath: image,
             width: isSmallPhone ? 100 : 120,
             height: isSmallPhone ? 100 : 120,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            placeholder: Container(
               width: isSmallPhone ? 100 : 120,
               height: isSmallPhone ? 100 : 120,
               color:
                   _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-              child: Icon(Icons.directions_car,
-                  size: 36, color: Colors.white.withValues(alpha: 0.3)),
+              child: Icon(
+                Icons.directions_car,
+                size: 36,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
             ),
           ),
         ),
@@ -1586,7 +1686,7 @@ class _HomePageState extends State<HomePage> {
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Sedán').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _buildCategoryHeader(
-          '🚗', 'Sedán en $_selectedCity', '${sedanes.length} disponibles'),
+          '🚗', 'Sedán en $_citySectionLabel', '${sedanes.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1607,7 +1707,7 @@ class _HomePageState extends State<HomePage> {
         _vehiculosFiltrados.where((v) => v['categoria'] == 'SUV').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _buildCategoryHeader(
-          '🚙', 'SUV en $_selectedCity', '${suvs.length} disponibles'),
+          '🚙', 'SUV en $_citySectionLabel', '${suvs.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1627,7 +1727,7 @@ class _HomePageState extends State<HomePage> {
     final compactos =
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Compacto').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader('🚗', 'Compacto en $_selectedCity',
+      _buildCategoryHeader('🚗', 'Compacto en $_citySectionLabel',
           '${compactos.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
@@ -1650,7 +1750,7 @@ class _HomePageState extends State<HomePage> {
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Premium').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _buildCategoryHeader(
-          '✨', 'Premium en $_selectedCity', '${premium.length} disponibles'),
+          '✨', 'Premium en $_citySectionLabel', '${premium.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1672,7 +1772,7 @@ class _HomePageState extends State<HomePage> {
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Pickup').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _buildCategoryHeader(
-          '🛻', 'Pickup en $_selectedCity', '${pickups.length} disponibles'),
+          '🛻', 'Pickup en $_citySectionLabel', '${pickups.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1741,7 +1841,7 @@ class _HomePageState extends State<HomePage> {
     final price = v['precio_hora'] as int;
     final precioDia = v['precio_dia'] as int;
     final precioSemana = v['precio_semana'] as int;
-    final image = v['imagen'] as String;
+    final image = _resolveVehicleImage(v);
 
     return Container(
       decoration: BoxDecoration(
@@ -1759,18 +1859,21 @@ class _HomePageState extends State<HomePage> {
         ClipRRect(
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
-          child: Image.asset(
-            image,
+          child: FlexiVehicleImage(
+            imagePath: image,
             width: 120,
             height: 120,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            placeholder: Container(
               width: 120,
               height: 120,
               color:
                   _isDark ? const Color(0xFF1F2235) : const Color(0xFF1E1B4B),
-              child: Icon(Icons.directions_car,
-                  size: 50, color: Colors.white.withValues(alpha: 0.25)),
+              child: Icon(
+                Icons.directions_car,
+                size: 50,
+                color: Colors.white.withValues(alpha: 0.25),
+              ),
             ),
           ),
         ),
@@ -1909,7 +2012,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         String searchQuery = '';
         return StatefulBuilder(builder: (context, setModalState) {
-          final filtered = _cities
+          final cityOptions = <String>[_allCitiesOption, ..._cities];
+          final filtered = cityOptions
               .where((c) => c.toLowerCase().contains(searchQuery.toLowerCase()))
               .toList();
           return Container(

@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 // Caso de uso para autenticacion
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
+import 'package:flexidrive/core/session/local_session_store.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/injection_container.dart';
@@ -41,6 +42,19 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   // Está enviando el formulario? (para evitar doble clic)
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastLoggedEmail();
+  }
+
+  Future<void> _loadLastLoggedEmail() async {
+    await LocalSessionStore.instance.init();
+    final lastEmail = LocalSessionStore.instance.lastLoggedEmail;
+    if (!mounted || lastEmail == null || lastEmail.isEmpty) return;
+    _emailController.text = lastEmail;
+  }
 
   // Muestra alerta cuando hay error
   Future<void> _showErrorDialog(String title, String message) async {
@@ -141,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
     final scale = ResponsiveUtils.scale(context, 1.0);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
@@ -237,11 +252,11 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            // White Card Section
+            // Form Card Section
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF0F172A) : Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
@@ -253,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Email Field
-                      _buildLabel('CORREO ELECTRÓNICO', scale),
+                      _buildLabel('CORREO ELECTRÓNICO', scale, isDark),
                       SizedBox(height: 8 * scale),
                       _buildTextField(
                         controller: _emailController,
@@ -261,10 +276,11 @@ class _LoginPageState extends State<LoginPage> {
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         scale: scale,
+                        isDark: isDark,
                       ),
                       SizedBox(height: 20 * scale),
                       // Password Field
-                      _buildLabel('CONTRASEÑA', scale),
+                      _buildLabel('CONTRASEÑA', scale, isDark),
                       SizedBox(height: 8 * scale),
                       _buildTextField(
                         controller: _passwordController,
@@ -277,7 +293,9 @@ class _LoginPageState extends State<LoginPage> {
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: Colors.grey,
+                            color: isDark
+                                ? const Color(0xFF8B93B8)
+                                : Colors.grey,
                             size: 20 * scale,
                           ),
                           onPressed: () {
@@ -286,6 +304,7 @@ class _LoginPageState extends State<LoginPage> {
                             });
                           },
                         ),
+                        isDark: isDark,
                       ),
                       // Forgot Password
                       Align(
@@ -305,11 +324,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: Text(
                             '¿Olvidaste tu contraseña?',
-                            style: GoogleFonts.poppins(
-                              color: const Color(0xFF4F7DF3),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF4F7DF3),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
                           ),
                         ),
                       ),
@@ -378,8 +397,10 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Divider(
-                              color: Colors.grey.withAlpha((0.3 * 255).round()),
+                          child: Divider(
+                              color: isDark
+                                  ? const Color(0xFF2E3355)
+                                  : Colors.grey.withAlpha((0.3 * 255).round()),
                               thickness: 1,
                             ),
                           ),
@@ -388,15 +409,19 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'o continúa con',
                               style: GoogleFonts.poppins(
-                                color:
-                                    Colors.grey.withAlpha((0.7 * 255).round()),
+                                color: isDark
+                                    ? const Color(0xFF8B93B8)
+                                    : Colors.grey
+                                        .withAlpha((0.7 * 255).round()),
                                 fontSize: 13,
                               ),
                             ),
                           ),
                           Expanded(
-                            child: Divider(
-                              color: Colors.grey.withAlpha((0.3 * 255).round()),
+                          child: Divider(
+                              color: isDark
+                                  ? const Color(0xFF2E3355)
+                                  : Colors.grey.withAlpha((0.3 * 255).round()),
                               thickness: 1,
                             ),
                           ),
@@ -412,6 +437,7 @@ class _LoginPageState extends State<LoginPage> {
                               label: 'Google',
                               onTap: () {},
                               scale: scale,
+                              isDark: isDark,
                             ),
                           ),
                           SizedBox(width: 12 * scale),
@@ -421,6 +447,7 @@ class _LoginPageState extends State<LoginPage> {
                               label: 'Apple',
                               onTap: () {},
                               scale: scale,
+                              isDark: isDark,
                             ),
                           ),
                         ],
@@ -433,7 +460,9 @@ class _LoginPageState extends State<LoginPage> {
                           Text(
                             '¿No tienes cuenta? ',
                             style: GoogleFonts.poppins(
-                              color: Colors.grey.withAlpha((0.8 * 255).round()),
+                              color: isDark
+                                  ? const Color(0xFF8B93B8)
+                                  : Colors.grey.withAlpha((0.8 * 255).round()),
                               fontSize: 14,
                             ),
                           ),
@@ -468,11 +497,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildLabel(String text, double scale) {
+  Widget _buildLabel(String text, double scale, bool isDark) {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        color: const Color(0xFF9CA3AF),
+        color: isDark ? const Color(0xFF8B93B8) : const Color(0xFF9CA3AF),
         fontSize: ResponsiveUtils.fontSize(context, 12),
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
@@ -488,25 +517,37 @@ class _LoginPageState extends State<LoginPage> {
     Widget? suffixIcon,
     TextInputType? keyboardType,
     required double scale,
+    required bool isDark,
   }) {
+    final fieldTextColor =
+        isDark ? const Color(0xFFE5E7EB) : const Color(0xFF111827);
+    final hintColor =
+        isDark ? const Color(0xFF8B93B8) : const Color(0xFF6B7280);
+    final fieldBg = isDark ? const Color(0xFF1F2937) : const Color(0xFFF5F7FA);
+
     return TextField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      cursorColor: fieldTextColor,
+      style: GoogleFonts.poppins(
+        color: fieldTextColor,
+        fontSize: ResponsiveUtils.fontSize(context, 14),
+      ),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.poppins(
-          color: const Color(0xFF9CA3AF),
+          color: hintColor,
           fontSize: ResponsiveUtils.fontSize(context, 14),
         ),
         prefixIcon: Icon(
           prefixIcon,
-          color: const Color(0xFF9CA3AF),
+          color: hintColor,
           size: 20 * scale,
         ),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFFF5F7FA),
+        fillColor: fieldBg,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16 * scale),
           borderSide: BorderSide.none,
@@ -532,16 +573,17 @@ class _LoginPageState extends State<LoginPage> {
     required String label,
     required VoidCallback onTap,
     required double scale,
+    required bool isDark,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 14 * scale),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF111827) : Colors.white,
           borderRadius: BorderRadius.circular(16 * scale),
           border: Border.all(
-            color: const Color(0xFFE5E7EB),
+            color: isDark ? const Color(0xFF2E3355) : const Color(0xFFE5E7EB),
             width: 1,
           ),
         ),
@@ -557,7 +599,7 @@ class _LoginPageState extends State<LoginPage> {
             Text(
               label,
               style: GoogleFonts.poppins(
-                color: Colors.black87,
+                color: isDark ? const Color(0xFFE5E7EB) : Colors.black87,
                 fontSize: ResponsiveUtils.fontSize(context, 14),
                 fontWeight: FontWeight.w500,
               ),

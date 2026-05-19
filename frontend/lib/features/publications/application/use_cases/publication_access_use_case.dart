@@ -7,6 +7,7 @@ class PublicationAccessUseCase {
   final RepositorioPublicacionesPuerto _repository;
 
   Future<void> loadIfNeeded() => _repository.inicializar();
+  Future<void> reload() => _repository.recargar();
 
   List<PublicationModel> get publications => _repository.obtenerPublicaciones();
 
@@ -18,11 +19,19 @@ class PublicationAccessUseCase {
     return _repository.obtenerImagenesPublicacion();
   }
 
-  Future<void> addPublication(PublicationModel publication) {
+  Future<PublicationModel> addPublication(PublicationModel publication) {
     return _repository.agregarPublicacion(publication);
   }
 
-  Future<void> addPublicationPrice(PublicationPriceModel publicationPrice) {
+  Future<PublicationPriceModel> addPublicationPrice(
+    PublicationPriceModel publicationPrice,
+  ) {
     return _repository.agregarPrecioPublicacion(publicationPrice);
+  }
+
+  Future<PublicationImageModel> addPublicationImage(
+    PublicationImageModel publicationImage,
+  ) {
+    return _repository.agregarImagenPublicacion(publicationImage);
   }
 }

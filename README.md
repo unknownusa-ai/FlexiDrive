@@ -128,3 +128,39 @@ docker compose up -d db backend frontend
 3. Activar el ícono de dispositivo móvil (Toggle device toolbar).
 4. Elegir un modelo (iPhone, Pixel, etc.) para simular pantalla móvil.
 
+## ✅ Checklist de producción
+
+Antes de publicar, define estas variables en `.env`:
+
+```bash
+DJANGO_DEBUG=False
+DJANGO_SECRET_KEY=<clave-larga-segura>
+JWT_SIGNING_KEY=<clave-jwt-32+-caracteres>
+DJANGO_ALLOWED_HOSTS=tu-dominio.com,api.tu-dominio.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://tu-dominio.com,https://api.tu-dominio.com
+FLEXIDRIVE_CORS_ALLOWED_ORIGINS=https://tu-dominio.com,https://app.tu-dominio.com
+DJANGO_SECURE_SSL_REDIRECT=True
+DJANGO_SESSION_COOKIE_SECURE=True
+DJANGO_CSRF_COOKIE_SECURE=True
+DJANGO_SECURE_HSTS_SECONDS=31536000
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+DJANGO_SECURE_HSTS_PRELOAD=True
+```
+
+Levantar servicios en modo producción:
+
+```bash
+docker compose up -d --build db backend frontend
+```
+
+Si es una base de datos nueva, carga catálogos y datos base:
+
+```bash
+docker compose exec -T backend sh -lc "python manage.py shell < scripts/seed_demo_data.py"
+```
+
+Validación rápida:
+
+```bash
+curl http://localhost:8000/api/health
+```

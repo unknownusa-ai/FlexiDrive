@@ -54,7 +54,12 @@ class ApiClient {
 
   Future<List<dynamic>> getList(String path, {bool useCache = true}) async {
     final decoded = await _send('GET', path, useCache: useCache);
-    return decoded is List ? decoded : const [];
+    if (decoded is List) return decoded;
+    if (decoded is Map) {
+      final dynamic results = decoded['results'] ?? decoded['data'] ?? decoded['items'];
+      if (results is List) return results;
+    }
+    return const [];
   }
 
   Future<Map<String, dynamic>> getMap(String path,
