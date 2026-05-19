@@ -316,7 +316,7 @@ class _AlertasPageState extends State<AlertasPage> {
     final hours = minutes ~/ 60;
     final remaining = minutes % 60;
     if (remaining == 0) return '$hours h';
-    return '$hours h ${remaining} min';
+    return '$hours h $remaining min';
   }
 
   List<_AlertItem> _currentTabAlerts() {
