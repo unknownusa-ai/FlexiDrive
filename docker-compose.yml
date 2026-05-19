@@ -1,4 +1,4 @@
-services:
+git sservices:
   db:
     container_name: flexidrive_db
     image: postgres:16-alpine
