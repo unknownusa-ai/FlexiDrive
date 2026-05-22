@@ -7,8 +7,10 @@ import 'arrendatario_main_page.dart';
 // Página de modo arrendador
 // Muestra el proceso de verificación para convertirse en arrendador
 class ModoArrendatarioPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `ModoArrendatarioPage`.
   const ModoArrendatarioPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ModoArrendatarioPage> createState() => _ModoArrendatarioPageState();
 }
@@ -49,6 +51,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     ),
   ];
 
+  /// Gestiona subir documento dentro de esta parte del flujo.
   void _subirDocumento(int index) {
     if (!documentos[index].completado) {
       setState(() {
@@ -58,6 +61,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -95,6 +99,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildOrangeHeader(bool isSmallPhone) {
     return Container(
       decoration: const BoxDecoration(
@@ -155,6 +160,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildProgressSection(bool isSmallPhone, double progress) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
@@ -198,6 +204,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildInfoCard(bool isSmallPhone) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -274,6 +281,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDocumentsList(bool isSmallPhone) {
     return Column(
       children: List.generate(
@@ -434,6 +442,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildActivateButton(bool isSmallPhone) {
     final isEnabled = documentosCompletados == totalDocumentos;
 
@@ -502,6 +511,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
     );
   }
 
+  /// Mostrar diálogo de éxito esta parte del flujo de trabajo.
   void _showSuccessDialog() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -540,7 +550,7 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Círculo verde con check
+                // Círculo verde con verificar
                 Container(
                   width: isSmallPhone ? 80 : 100,
                   height: isSmallPhone ? 80 : 100,
@@ -585,12 +595,14 @@ class _ModoArrendatarioPageState extends State<ModoArrendatarioPage> {
   }
 }
 
+/// Define la responsabilidad de `DocumentoVerificacion` dentro de este módulo.
 class DocumentoVerificacion {
   final IconData icono;
   final String titulo;
   final String descripcion;
   bool completado;
 
+  /// Crea una instancia y prepara el estado inicial de `DocumentoVerificacion`.
   DocumentoVerificacion({
     required this.icono,
     required this.titulo,

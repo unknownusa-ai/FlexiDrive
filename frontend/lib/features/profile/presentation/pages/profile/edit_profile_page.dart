@@ -10,8 +10,10 @@ import 'package:flexidrive/injection_container.dart';
 // Página de edición de perfil
 // Permite al usuario modificar su información personal
 class EditProfilePage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `EditProfilePage`.
   const EditProfilePage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
 }
@@ -43,19 +45,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     'NIT',
   ];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
 
+  /// Carga los datos necesarios para cargar usuario data.
   Future<void> _loadUserData() async {
     try {
       final currentUser = await _accountRepository.getCurrentUser();
       if (currentUser != null) {
         _currentUserId = currentUser.id;
 
-        // Load users data to get document type
         await _vehiculoService.init();
         final users = _vehiculoService.usuarios;
         final userData = users.firstWhere(
@@ -71,7 +74,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               userData['numero_identificacion']?.toString() ?? '';
           _documentTypeId = userData['tipo_identificacion_id'];
 
-          // Set document type based on ID
           if (_documentTypeId != null) {
             switch (_documentTypeId) {
               case 1:
@@ -95,6 +97,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _nameController.dispose();
@@ -104,6 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -193,6 +197,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGradientHeaderWithPhoto(bool isSmallPhone, bool isDark) {
     return Stack(
       children: [
@@ -269,6 +274,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildProfilePhotoInGradient(bool isSmallPhone, bool isDark) {
     return Column(
       children: [
@@ -500,6 +506,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSaveButton(bool isSmallPhone, bool isDark) {
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -551,6 +558,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  /// Gestiona change photo dentro de esta parte del flujo.
   void _changePhoto() {
     showModalBottomSheet(
       context: context,
@@ -596,6 +604,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         icon: Icons.camera_alt_outlined,
                         title: 'Tomar foto',
                         onTap: () {
+                          /// Crea una instancia y prepara el estado inicial de `Navigator`.
                           Navigator.pop(context);
                         },
                       ),
@@ -604,6 +613,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         icon: Icons.photo_library_outlined,
                         title: 'Elegir de la galería',
                         onTap: () {
+                          /// Crea una instancia y prepara el estado inicial de `Navigator`.
                           Navigator.pop(context);
                         },
                       ),
@@ -613,6 +623,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         title: 'Eliminar foto',
                         isDestructive: true,
                         onTap: () {
+                          /// Crea una instancia y prepara el estado inicial de `Navigator`.
                           Navigator.pop(context);
                         },
                       ),
@@ -674,33 +685,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  /// Guardar changes esta parte del flujo de trabajo.
   void _saveChanges() async {
     try {
       if (_currentUserId != null) {
-        // Get document type ID from selected type
-        int documentTypeId = 1; // Default
-        switch (_selectedDocumentType) {
-          case 'Cédula de Ciudadanía':
-            documentTypeId = 1;
-            break;
-          case 'Cédula de Extranjería':
-            documentTypeId = 2;
-            break;
-          case 'Pasaporte':
-            documentTypeId = 3;
-            break;
-          case 'NIT':
-            documentTypeId = 4;
-            break;
-        }
+        // En una implementación completa, aquí se invocaría el servicio de actualización.
 
-        // Note: In a real implementation, you would call a service method here
-        // to update the user data. For now, we just show a success message.
-        // The update would be similar to _accountRepository.updatePassword() pattern
-
-        // Profile update data logged for debugging
-        // ignore: unused_local_variable - documentTypeId will be used when service update method is implemented
-        final unused = documentTypeId;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -714,6 +704,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
         );
+
+        /// Crea una instancia y prepara el estado inicial de `Navigator`.
         Navigator.pop(context);
       }
     } catch (e) {

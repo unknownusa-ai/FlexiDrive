@@ -39,10 +39,12 @@ class ResumenReservaPage extends StatefulWidget {
   final int seguroBasico;
   final int publicationId;
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ResumenReservaPage> createState() => _ResumenReservaPageState();
 }
 
+/// Define la responsabilidad de `_ResumenReservaPageState` dentro de este módulo.
 class _ResumenReservaPageState extends State<ResumenReservaPage> {
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -61,12 +63,14 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
   late int _totalPrice;
   late String _unidadLabel;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _calcularTotal();
   }
 
+  /// Gestiona calcular total dentro de esta parte del flujo.
   void _calcularTotal() {
     _totalPrice = (widget.precioUnitario * widget.cantidad) +
         widget.tarifaServicio +
@@ -77,6 +81,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
         : widget.periodo.toLowerCase();
   }
 
+  /// Gestiona formatear precio dentro de esta parte del flujo.
   String _formatearPrecio(int precio) {
     final asString = precio.toString();
     final buffer = StringBuffer();
@@ -92,6 +97,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     return buffer.toString();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -281,6 +287,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPasoCirculo(int numero, bool activo) {
     return Container(
       width: 36,
@@ -302,6 +309,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTarjetaVehiculo(bool isSmallPhone) {
     return Container(
       decoration: BoxDecoration(
@@ -416,6 +424,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDetallesAlquiler(bool isSmallPhone) {
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
@@ -525,6 +534,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDesglosePrecios(bool isSmallPhone) {
     final precioVehiculo = widget.precioUnitario * widget.cantidad;
 
@@ -641,6 +651,7 @@ class _ResumenReservaPageState extends State<ResumenReservaPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildMensajeAhorro(bool isSmallPhone) {
     final precioVehiculo = widget.precioUnitario * widget.cantidad;
     final transporteTradicional =

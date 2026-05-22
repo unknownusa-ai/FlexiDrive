@@ -1,7 +1,9 @@
 import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
 
+/// Define la responsabilidad de `LocalCatalogDb` dentro de este módulo.
 class LocalCatalogDb {
+  /// Crea una instancia y prepara el estado inicial de `LocalCatalogDb`.
   LocalCatalogDb._();
 
   static final LocalCatalogDb instance = LocalCatalogDb._();
@@ -28,6 +30,7 @@ class LocalCatalogDb {
   final List<LandlordDocumentTypeModel> landlordDocumentTypes = [];
   final List<DocumentVerificationStatusModel> documentVerificationStatuses = [];
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() async {
     if (_loaded == true && identificationTypes.isNotEmpty) return;
 
@@ -136,9 +139,11 @@ class LocalCatalogDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  /// Gestiona carga segura de lista dentro de esta parte del flujo.
   Future<List<dynamic>> _safeLoadList(String endpoint) async {
     try {
       return await _loadList(endpoint).timeout(const Duration(seconds: 6));

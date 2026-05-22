@@ -6,8 +6,10 @@ import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Página de onboarding - tutorial del mapa
 // Muestra cómo usar la función de mapa para encontrar vehículos cercanos
 class OnboardingPageMap extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingPageMap`.
   const OnboardingPageMap({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<OnboardingPageMap> createState() => _OnboardingPageMapState();
 }
@@ -24,6 +26,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
   late Animation<double> _pin3Animation;
   late Animation<double> _pin4Animation;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -63,12 +66,14 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
     _controller.forward();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -247,6 +252,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPin(Color color, {required bool isSmallPhone}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -279,6 +285,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGridLines({required bool isSmallPhone}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -292,6 +299,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVerticalLine({required bool isSmallPhone}) {
     return Positioned(
       left: isSmallPhone ? 100 : 140,
@@ -304,6 +312,7 @@ class _OnboardingPageMapState extends State<OnboardingPageMap>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHorizontalLine({required bool isSmallPhone}) {
     return Positioned(
       top: isSmallPhone ? 70 : 110,

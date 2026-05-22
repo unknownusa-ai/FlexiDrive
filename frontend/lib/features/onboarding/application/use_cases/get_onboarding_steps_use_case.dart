@@ -3,6 +3,7 @@ import '../../domain/ports/onboarding_repository_port.dart';
 
 /// Caso de uso para obtener los pasos del onboarding
 class GetOnboardingStepsUseCase {
+  /// Crea una instancia y prepara el estado inicial de `GetOnboardingStepsUseCase`.
   GetOnboardingStepsUseCase(this._repository);
 
   final OnboardingRepositoryPort _repository;

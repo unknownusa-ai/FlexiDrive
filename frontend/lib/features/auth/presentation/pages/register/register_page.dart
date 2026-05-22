@@ -10,14 +10,16 @@ import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/injection_container.dart';
-// Pagina de login (si ya tiene cuenta)
+// Pagina de inicio de sesión (si ya tiene cuenta)
 import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
 
 // Pagina de registro de nuevos usuarios
 // Formulario para crear una cuenta en FlexiDrive
 class RegisterPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `RegisterPage`.
   const RegisterPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
@@ -186,12 +188,14 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadIdentificationTypes();
   }
 
+  /// Carga los datos necesarios para cargar identification types.
   Future<void> _loadIdentificationTypes() async {
     setState(() {
       _isLoadingCatalogs = true;
@@ -290,6 +294,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return selectedOrderedTypes;
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<UserTypeModel> _buildOrderedUserTypes(List<UserTypeModel> userTypes) {
     final uniqueByNormalizedName = <String, UserTypeModel>{};
     for (final type in userTypes) {
@@ -319,6 +324,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return ordered;
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<IdentificationTypeModel> _buildLocalColombianIdentificationTypes() {
     return _fallbackIdentificationNamesById.entries
         .map(
@@ -340,6 +346,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<UserTypeModel> _buildLocalUserTypes() {
     return _fallbackUserTypeNamesById.entries
         .map(
@@ -359,18 +366,21 @@ class _RegisterPageState extends State<RegisterPage> {
       });
   }
 
+  /// Gestiona resolve identification tipo name dentro de esta parte del flujo.
   String _resolveIdentificationTypeName(IdentificationTypeModel type) {
     final rawName = type.name.trim();
     if (rawName.isNotEmpty) return rawName;
     return _fallbackIdentificationNamesById[type.id] ?? '';
   }
 
+  /// Gestiona resolve usuario tipo name dentro de esta parte del flujo.
   String _resolveUserTypeName(UserTypeModel type) {
     final rawName = type.name.trim();
     if (rawName.isNotEmpty) return rawName;
     return _fallbackUserTypeNamesById[type.id] ?? '';
   }
 
+  /// Gestiona normalize text dentro de esta parte del flujo.
   String _normalizeText(String text) {
     final lower = text.toLowerCase();
     return lower
@@ -384,6 +394,7 @@ class _RegisterPageState extends State<RegisterPage> {
         .replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
+  /// Gestiona submit register dentro de esta parte del flujo.
   Future<void> _submitRegister() async {
     if (_isSubmitting) return;
 
@@ -467,6 +478,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _nameController.dispose();
@@ -478,6 +490,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
@@ -490,7 +503,6 @@ class _RegisterPageState extends State<RegisterPage> {
         maxWidth: 600,
         child: Column(
           children: [
-            // Header Section
             SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(
@@ -498,7 +510,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Back button
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Row(
@@ -542,7 +553,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             ),
-            // White Card Section
+            // White tarjeta Section
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -795,7 +806,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Terms and Conditions - Toggle Style
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -805,7 +815,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Toggle Switch
+                            // alternar Switch
                             GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -879,7 +889,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Create Account Button
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -955,7 +964,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      // Login Link
+                      // inicio de sesión Link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -1053,6 +1062,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLabel(String text) {
     return Text(
       text,

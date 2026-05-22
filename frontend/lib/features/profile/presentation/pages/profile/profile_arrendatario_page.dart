@@ -20,14 +20,18 @@ import 'payment_methods_page.dart';
 import 'principal_arrendatario_page.dart';
 import 'security_page.dart';
 
+/// Define la responsabilidad de `ProfileArrendatarioPage` dentro de este módulo.
 class ProfileArrendatarioPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `ProfileArrendatarioPage`.
   const ProfileArrendatarioPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ProfileArrendatarioPage> createState() =>
       _ProfileArrendatarioPageState();
 }
 
+/// Define la responsabilidad de `_ProfileArrendatarioPageState` dentro de este módulo.
 class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
@@ -51,12 +55,14 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   double _totalEarnings = 0;
   double _availableBalance = 0;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadProfile();
   }
 
+  /// Carga los datos necesarios para cargar perfil.
   Future<void> _loadProfile() async {
     final currentUser = await _accountRepository.getCurrentUser();
     if (!mounted || currentUser == null) return;
@@ -76,6 +82,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     final userPreference =
         await _preferenceService.findEffectiveByUserId(currentUser.id);
     if (mounted && userPreference != null) {
+      /// Crea una instancia y prepara el estado inicial de `FlexiDriveApp`.
       FlexiDriveApp.of(context)?.setDarkMode(userPreference.darkMode);
     }
 
@@ -84,6 +91,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     }
   }
 
+  /// Carga los datos necesarios para cargar arrendatario estadísticas.
   Future<void> _loadArrendatarioStats() async {
     final currentUserId = _currentUserId;
     if (currentUserId == null) return;
@@ -153,12 +161,14 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     }
   }
 
+  /// Gestiona persist dark modo preferencia dentro de esta parte del flujo.
   Future<void> _persistDarkModePreference(bool isDarkMode) async {
     final userId = _currentUserId;
     if (userId == null) return;
     await _preferenceService.setDarkMode(userId: userId, darkMode: isDarkMode);
   }
 
+  /// Gestiona persist arrendatario modo dentro de esta parte del flujo.
   Future<void> _persistArrendatarioMode(bool enabled) async {
     final userId = _currentUserId;
     if (userId == null) return;
@@ -166,6 +176,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
         userId: userId, enabled: enabled);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -215,6 +226,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeaderWithStats() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -457,6 +469,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPreferencesSection() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
@@ -473,11 +486,13 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildThemeToggleItem(bool isDarkMode) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
     return InkWell(
       onTap: () {
+        /// Crea una instancia y prepara el estado inicial de `FlexiDriveApp`.
         FlexiDriveApp.of(context)?.toggleTheme();
         _persistDarkModePreference(!isDarkMode);
       },
@@ -521,6 +536,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
             Switch(
               value: !isDarkMode,
               onChanged: (value) {
+                /// Crea una instancia y prepara el estado inicial de `FlexiDriveApp`.
                 FlexiDriveApp.of(context)?.setDarkMode(!value);
                 _persistDarkModePreference(!value);
               },
@@ -532,6 +548,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildAccountSection() {
     final theme = Theme.of(context);
     return _buildSectionContainer(
@@ -581,6 +598,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildModoArrendatarioSection() {
     final theme = Theme.of(context);
     return _buildSectionContainer(
@@ -641,6 +659,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildActivitySection() {
     final theme = Theme.of(context);
     return _buildSectionContainer(
@@ -680,7 +699,9 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                 '$_totalReviewsReceived ${_totalReviewsReceived == 1 ? 'reseña recibida' : 'reseñas recibidas'}',
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const MyReviewsPage()),
+              MaterialPageRoute(
+                builder: (context) => const MyReviewsPage(receivedMode: true),
+              ),
             ),
           ),
           _divider(),
@@ -700,6 +721,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSectionContainer(ThemeData theme, {required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -717,6 +739,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
@@ -732,6 +755,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Gestiona divider dentro de esta parte del flujo.
   Widget _divider() {
     return Divider(
       height: 1,
@@ -831,6 +855,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Mostrar diálogo para cambiar a arrendador esta parte del flujo de trabajo.
   void _showSwitchToArrendadorDialog(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -906,6 +931,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
+                          /// Crea una instancia y prepara el estado inicial de `Navigator`.
                           Navigator.pop(context);
                           _persistArrendatarioMode(false);
                           Navigator.pushAndRemoveUntil(
@@ -977,6 +1003,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLogoutButton() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -1019,6 +1046,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVersionInfo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1031,12 +1059,14 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
     );
   }
 
+  /// Gestiona extract first name dentro de esta parte del flujo.
   String _extractFirstName(String fullName) {
     final trimmed = fullName.trim();
     if (trimmed.isEmpty) return 'Invitado';
     return trimmed.split(' ').first;
   }
 
+  /// Gestiona format currency dentro de esta parte del flujo.
   String _formatCurrency(double amount) {
     return amount.toStringAsFixed(0).replaceAllMapped(
           RegExp(r'\B(?=(\d{3})+(?!\d))'),
@@ -1044,6 +1074,7 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
         );
   }
 
+  /// Gestiona format currency short dentro de esta parte del flujo.
   String _formatCurrencyShort(double amount) {
     if (amount >= 1000000) {
       return '\$${(amount / 1000000).toStringAsFixed(1)}M';
@@ -1055,7 +1086,9 @@ class _ProfileArrendatarioPageState extends State<ProfileArrendatarioPage> {
   }
 }
 
+/// Define la responsabilidad de `ConstrainedContainer` dentro de este módulo.
 class ConstrainedContainer extends StatelessWidget {
+  /// Crea una instancia y prepara el estado inicial de `ConstrainedContainer`.
   const ConstrainedContainer({
     super.key,
     required this.child,
@@ -1065,6 +1098,7 @@ class ConstrainedContainer extends StatelessWidget {
   final Widget child;
   final double maxWidth;
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Center(

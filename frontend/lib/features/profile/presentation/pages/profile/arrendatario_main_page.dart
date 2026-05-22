@@ -30,6 +30,7 @@ class ArrendatarioMainPage extends StatefulWidget {
     return state!;
   }
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ArrendatarioMainPage> createState() => ArrendatarioMainPageState();
 }
@@ -51,7 +52,10 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
 
   // Lista de paginas disponibles en el menu inferior
   List<Widget> get _pages => [
-        PrincipalArrendatarioPage(refreshToken: _dashboardRefreshToken),
+        PrincipalArrendatarioPage(
+          refreshToken: _dashboardRefreshToken,
+          onOpenRequests: () => setHistorialTab(0),
+        ),
         SolicitudesPage(
           key: ValueKey<int>(_historialTabIndex),
           initialTab: _historialTabIndex,
@@ -60,6 +64,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
         const ProfileArrendatarioPage(),
       ];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -70,6 +75,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     _loadUnreadAlerts();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _notificationDb.changes.removeListener(_onNotificationsChanged);
@@ -77,6 +83,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     super.dispose();
   }
 
+  /// Actualiza el estado relacionado con definir index.
   void setIndex(int index) {
     if (index >= 0 && index < _pages.length) {
       // Restablecer historialTabIndex a 0 (Pendientes) cuando se navega desde la tabbar
@@ -98,6 +105,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     }
   }
 
+  /// Actualiza el estado relacionado con definir historial tab.
   void setHistorialTab(int tabIndex) {
     setState(() {
       _historialTabIndex = tabIndex;
@@ -110,6 +118,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     );
   }
 
+  /// Marca el modo arrendatario como activo para el usuario.
   Future<void> _markArrendatarioModeAsActive() async {
     final currentUser = await _accountRepository.getCurrentUser();
     if (currentUser == null) return;
@@ -119,10 +128,12 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     );
   }
 
+  /// Gestiona on notificaciones changed dentro de esta parte del flujo.
   void _onNotificationsChanged() {
     _loadUnreadAlerts();
   }
 
+  /// Carga los datos necesarios para cargar unread alerts.
   Future<void> _loadUnreadAlerts() async {
     await _notificationDb.loadIfNeeded();
     final currentUser = await _accountRepository.getCurrentUser();
@@ -148,6 +159,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     });
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +177,7 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBottomNavBar() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final theme = Theme.of(context);

@@ -10,11 +10,13 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
 
   final LocalConfigStorage _localStorage;
 
+  /// Inicializa el flujo de initialize antes de su uso.
   @override
   Future<void> initialize() async {
     // Inicialización si es necesaria
   }
 
+  /// Obtiene la configuración general de la aplicación.
   @override
   Future<AppConfig> getAppConfig() async {
     var config = await _localStorage.getAppConfig();
@@ -29,11 +31,13 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     return config;
   }
 
+  /// Guardar app configuración esta parte del flujo de trabajo.
   @override
   Future<void> saveAppConfig(AppConfig config) async {
     await _localStorage.saveAppConfig(config);
   }
 
+  /// Obtiene la información asociada a obtener onboarding estado.
   @override
   Future<OnboardingStatus> getOnboardingStatus() async {
     var status = await _localStorage.getOnboardingStatus();
@@ -48,11 +52,13 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     return status;
   }
 
+  /// Guardar estado de onboarding esta parte del flujo de trabajo.
   @override
   Future<void> saveOnboardingStatus(OnboardingStatus status) async {
     await _localStorage.saveOnboardingStatus(status);
   }
 
+  /// Marca el onboarding como completado.
   @override
   Future<void> markOnboardingAsCompleted() async {
     await _localStorage.markOnboardingAsCompleted();
@@ -63,16 +69,19 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     await saveAppConfig(updatedConfig);
   }
 
+  /// Gestiona verificación de first launch dentro de esta parte del flujo.
   @override
   Future<bool> isFirstLaunch() async {
     return _localStorage.isFirstLaunch();
   }
 
+  /// Obtiene la información asociada a obtener last opened version.
   @override
   Future<String> getLastOpenedVersion() async {
     return _localStorage.getLastOpenedVersion();
   }
 
+  /// Actualiza el estado relacionado con actualizar last opened version.
   @override
   Future<void> updateLastOpenedVersion(String version) async {
     await _localStorage.updateLastOpenedVersion(version);
@@ -82,6 +91,7 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     await saveAppConfig(updatedConfig);
   }
 
+  /// Registra la aceptación de términos y condiciones.
   @override
   Future<void> acceptTerms() async {
     await _localStorage.acceptTerms();
@@ -91,6 +101,7 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     await saveAppConfig(updatedConfig);
   }
 
+  /// Registra la aceptación de la política de privacidad.
   @override
   Future<void> acceptPrivacyPolicy() async {
     await _localStorage.acceptPrivacyPolicy();
@@ -100,11 +111,13 @@ class ConfigRepositoryImpl implements ConfigRepositoryPort {
     await saveAppConfig(updatedConfig);
   }
 
+  /// Verifica si el usuario aceptó los términos y condiciones.
   @override
   Future<bool> hasAcceptedTerms() async {
     return _localStorage.hasAcceptedTerms();
   }
 
+  /// Verifica si el usuario aceptó la política de privacidad.
   @override
   Future<bool> hasAcceptedPrivacyPolicy() async {
     return _localStorage.hasAcceptedPrivacyPolicy();

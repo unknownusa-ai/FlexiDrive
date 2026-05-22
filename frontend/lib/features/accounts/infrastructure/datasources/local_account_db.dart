@@ -29,11 +29,13 @@ class LocalAccountDb {
   // Getter para verificar si los datos están cargados
   bool get isLoaded => _loaded == true;
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
     await reload();
   }
 
+  /// Gestiona recargar dentro de esta parte del flujo.
   Future<void> reload() async {
     final rawUsers = await _loadList('users');
     final rawPreferences = await _loadList('user-preferences');
@@ -72,6 +74,7 @@ class LocalAccountDb {
     _loaded = true;
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String assetPath) async {
     return ApiClient.instance.getList(assetPath);
   }
@@ -108,6 +111,7 @@ class LocalAccountDb {
     );
   }
 
+  /// Carga los cambios locales sobrescritos de usuario.
   Future<List<UserModel>> _loadUserOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_usersOverridesKey);
@@ -129,12 +133,14 @@ class LocalAccountDb {
     }
   }
 
+  /// Gestiona siguiente usuario id dentro de esta parte del flujo.
   int nextUserId() {
     if (users.isEmpty) return 1;
     final maxId = users.map((u) => u.id).reduce((a, b) => a > b ? a : b);
     return maxId + 1;
   }
 
+  /// Gestiona siguiente preferencia id dentro de esta parte del flujo.
   int nextPreferenceId() {
     if (preferences.isEmpty) return 1;
     final maxId = preferences.map((p) => p.id).reduce((a, b) => a > b ? a : b);

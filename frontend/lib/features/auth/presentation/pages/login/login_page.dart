@@ -19,17 +19,19 @@ import 'package:flexidrive/features/profile/presentation/pages/profile/arrendata
 // Si olvidó la contraseña
 import 'forgot_password_page.dart';
 
-// Página de login - donde el usuario entra a la app
+// Página de inicio de sesión - donde el usuario entra a la app
 class LoginPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `LoginPage`.
   const LoginPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
-// Estado del login
+// Estado del inicio de sesión
 class _LoginPageState extends State<LoginPage> {
-  // Controlador del campo de email
+  // Controlador del campo de correo
   final _emailController = TextEditingController();
   // Controlador del campo de contraseña
   final _passwordController = TextEditingController();
@@ -43,12 +45,14 @@ class _LoginPageState extends State<LoginPage> {
   // Está enviando el formulario? (para evitar doble clic)
   bool _isSubmitting = false;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadLastLoggedEmail();
   }
 
+  /// Carga los datos necesarios para cargar last logged correo.
   Future<void> _loadLastLoggedEmail() async {
     await LocalSessionStore.instance.init();
     final lastEmail = LocalSessionStore.instance.lastLoggedEmail;
@@ -75,12 +79,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Procesa el login cuando tocan el botón
+  // Procesa el inicio de sesión cuando tocan el botón
   Future<void> _submitLogin() async {
     // Si ya está procesando, no hace nada
     if (_isSubmitting) return;
 
-    // Toma el email y limpia espacios
+    // Toma el correo y limpia espacios
     final email = _emailController.text.trim();
     // Toma la contraseña
     final password = _passwordController.text;
@@ -99,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Login con el use case existente
+      // Inicio de sesión con el caso de uso existente
       final user = await _accountRepository
           .login(email: email, password: password)
           .timeout(const Duration(seconds: 10));
@@ -143,6 +147,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _emailController.dispose();
@@ -150,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
@@ -163,7 +169,6 @@ class _LoginPageState extends State<LoginPage> {
         maxWidth: 600,
         child: Column(
           children: [
-            // Header Section with gradient
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -252,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            // Form Card Section
+            // Form tarjeta Section
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -267,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Email Field
+                      // correo Field
                       _buildLabel('CORREO ELECTRÓNICO', scale, isDark),
                       SizedBox(height: 8 * scale),
                       _buildTextField(
@@ -279,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                         isDark: isDark,
                       ),
                       SizedBox(height: 20 * scale),
-                      // Password Field
+                      // contraseña Field
                       _buildLabel('CONTRASEÑA', scale, isDark),
                       SizedBox(height: 8 * scale),
                       _buildTextField(
@@ -293,9 +298,8 @@ class _LoginPageState extends State<LoginPage> {
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: isDark
-                                ? const Color(0xFF8B93B8)
-                                : Colors.grey,
+                            color:
+                                isDark ? const Color(0xFF8B93B8) : Colors.grey,
                             size: 20 * scale,
                           ),
                           onPressed: () {
@@ -306,7 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         isDark: isDark,
                       ),
-                      // Forgot Password
+                      // Forgot contraseña
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -324,16 +328,15 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: Text(
                             '¿Olvidaste tu contraseña?',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF4F7DF3),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF4F7DF3),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Login Button
                       Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
@@ -397,7 +400,7 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         children: [
                           Expanded(
-                          child: Divider(
+                            child: Divider(
                               color: isDark
                                   ? const Color(0xFF2E3355)
                                   : Colors.grey.withAlpha((0.3 * 255).round()),
@@ -418,7 +421,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           Expanded(
-                          child: Divider(
+                            child: Divider(
                               color: isDark
                                   ? const Color(0xFF2E3355)
                                   : Colors.grey.withAlpha((0.3 * 255).round()),
@@ -428,7 +431,6 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       SizedBox(height: 24 * scale),
-                      // Social Login Buttons
                       Row(
                         children: [
                           Expanded(
@@ -497,6 +499,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLabel(String text, double scale, bool isDark) {
     return Text(
       text,

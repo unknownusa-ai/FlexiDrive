@@ -4,8 +4,7 @@ import '../../domain/entities/auth_session.dart';
 
 /// Fuente de datos local para almacenar sesiones de autenticación
 class LocalAuthStorage {
-  LocalAuthStorage({SharedPreferences? prefs})
-      : _prefs = prefs;
+  LocalAuthStorage({SharedPreferences? prefs}) : _prefs = prefs;
 
   static const String _sessionKey = 'auth_session';
   static const String _tokenKey = 'auth_token';

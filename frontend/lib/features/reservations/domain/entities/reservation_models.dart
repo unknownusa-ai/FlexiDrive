@@ -71,6 +71,7 @@ class ReservationModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'reserva_id': id,
         'codigo_reserva': code,

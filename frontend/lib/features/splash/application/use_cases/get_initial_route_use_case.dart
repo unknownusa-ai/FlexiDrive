@@ -2,6 +2,7 @@ import '../../domain/ports/config_repository_port.dart';
 
 /// Caso de uso para determinar la ruta inicial de la app
 class GetInitialRouteUseCase {
+  /// Crea una instancia y prepara el estado inicial de `GetInitialRouteUseCase`.
   GetInitialRouteUseCase({
     required this.configRepository,
   });

@@ -15,10 +15,13 @@ import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_catal
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 
-// Pagina "Mis Reseñas" - muestra las reseñas que hizo el usuario
+// Pagina "Mis Reseñas" - muestra reseñas escritas o recibidas
 class MyReviewsPage extends StatefulWidget {
-  const MyReviewsPage({super.key});
+  const MyReviewsPage({super.key, this.receivedMode = false});
 
+  final bool receivedMode;
+
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<MyReviewsPage> createState() => _MyReviewsPageState();
 }
@@ -38,7 +41,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
   // Esta cargando las reseñas?
   bool _isLoading = true;
 
-  // Funcion helper para buscar un elemento o retornar null
+  // Funcion ayudante para buscar un elemento o retornar null
   // Como firstWhereOrNull pero implementado aqui
   T? _firstWhereOrNull<T>(Iterable<T> items, bool Function(T) test) {
     for (final item in items) {
@@ -47,13 +50,14 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     return null;
   }
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadReviews(); // Carga las reseñas del usuario
   }
 
-  // Carga las reseñas que el usuario ha escrito
+  // Carga reseñas escritas por el usuario o recibidas en sus publicaciones.
   Future<void> _loadReviews() async {
     final users = await _accountRepository.getUsers();
     // Aseguramos que las bases de datos esten cargadas
@@ -70,14 +74,23 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
       return;
     }
 
-    // Filtramos las reseñas donde el usuario actual es el autor
-    final userReviews =
-        _reviewDb.reviews.where((r) => r.userId == currentUser.id).toList();
+    final ownedPublicationIds = _publicationDb.publications
+        .where((publication) => publication.userId == currentUser.id)
+        .map((publication) => publication.id)
+        .toSet();
+
+    final userReviews = widget.receivedMode
+        ? _reviewDb.reviews
+            .where(
+                (review) => ownedPublicationIds.contains(review.publicationId))
+            .toList()
+        : _reviewDb.reviews
+            .where((review) => review.userId == currentUser.id)
+            .toList();
 
     final reviewsData = <Map<String, dynamic>>[];
 
     for (final review in userReviews) {
-      // Get the opinion details
       final opinion = _firstWhereOrNull(
         _reviewDb.opinions,
         (o) => o.id == review.opinionId,
@@ -85,7 +98,6 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
 
       if (opinion == null) continue;
 
-      // Get publication to find vehicle
       final publication = _firstWhereOrNull(
         _publicationDb.publications,
         (p) => p.id == review.publicationId,
@@ -93,7 +105,6 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
 
       if (publication == null) continue;
 
-      // Get vehicle details
       final vehicle = _firstWhereOrNull(
         _vehicleDb.vehicles,
         (v) => v.id == publication.vehicleId,
@@ -101,16 +112,15 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
 
       if (vehicle == null) continue;
 
-      // Get owner details for the name
-      final owner = _firstWhereOrNull(
+      final reviewer = _firstWhereOrNull(
         users,
-        (u) => u.id == publication.userId,
+        (u) => u.id == review.userId,
       );
-      if (owner == null) continue;
+      if (reviewer == null) continue;
 
       reviewsData.add({
-        'userAvatar': owner.fullName.isNotEmpty ? owner.fullName[0] : 'U',
-        'userName': owner.fullName,
+        'userAvatar': reviewer.fullName.isNotEmpty ? reviewer.fullName[0] : 'U',
+        'userName': reviewer.fullName,
         'rating': opinion.rating,
         'carModel': '${vehicle.line} ${vehicle.model}',
         'carPlate': 'Sin placa',
@@ -127,6 +137,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     });
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -149,6 +160,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGradientHeader(bool isSmallPhone) {
     return Stack(
       children: [
@@ -222,6 +234,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEmptyState(bool isSmallPhone) {
     final theme = Theme.of(context);
     return Center(
@@ -246,7 +259,9 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
             ),
             SizedBox(height: isSmallPhone ? 24 : 28),
             Text(
-              'Aún no tienes reseñas',
+              widget.receivedMode
+                  ? 'Aún no has recibido reseñas'
+                  : 'Aún no tienes reseñas',
               style: GoogleFonts.poppins(
                 fontSize: isSmallPhone ? 18 : 20,
                 fontWeight: FontWeight.bold,
@@ -265,36 +280,42 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
                   height: 1.5,
                 ),
                 children: [
-                  const TextSpan(
-                    text:
-                        'Cuando finalices un viaje, podrás\ncalificarlo desde la pantalla de ',
-                  ),
-                  TextSpan(
-                    text: 'Mis\nReservas',
-                    style: GoogleFonts.inter(
-                      fontSize: isSmallPhone ? 13 : 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF2563EB),
+                  if (widget.receivedMode) ...[
+                    const TextSpan(
+                      text:
+                          'Cuando finalicen viajes en tus publicaciones,\nrecibirás reseñas aquí.',
                     ),
-                  ),
-                  const TextSpan(text: ' usando el botón '),
-                  TextSpan(
-                    text: '⭐ Calificar',
-                    style: GoogleFonts.inter(
-                      fontSize: isSmallPhone ? 13 : 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFFEF4444),
+                  ] else ...[
+                    const TextSpan(
+                      text:
+                          'Cuando finalices un viaje, podrás\ncalificarlo desde la pantalla de ',
                     ),
-                  ),
-                  const TextSpan(text: '.'),
+                    TextSpan(
+                      text: 'Mis\nReservas',
+                      style: GoogleFonts.inter(
+                        fontSize: isSmallPhone ? 13 : 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF2563EB),
+                      ),
+                    ),
+                    const TextSpan(text: ' usando el botón '),
+                    TextSpan(
+                      text: '⭐ Calificar',
+                      style: GoogleFonts.inter(
+                        fontSize: isSmallPhone ? 13 : 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFFEF4444),
+                      ),
+                    ),
+                    const TextSpan(text: '.'),
+                  ],
                 ],
               ),
             ),
             SizedBox(height: isSmallPhone ? 32 : 36),
-            // CTA Button with orange gradient
             GestureDetector(
               onTap: () {
-                // Navigate to reservations
+                // Navigate a reservas
                 Navigator.pop(context);
               },
               child: Container(
@@ -346,6 +367,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildReviewsList(bool isSmallPhone) {
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -364,6 +386,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildStatsSection(bool isSmallPhone) {
     final theme = Theme.of(context);
     final avgRating = _reviews.isEmpty
@@ -458,6 +481,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildReviewsSection(bool isSmallPhone) {
     final theme = Theme.of(context);
     return Column(
@@ -478,6 +502,7 @@ class _MyReviewsPageState extends State<MyReviewsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildReviewCard(Map<String, dynamic> review, bool isSmallPhone) {
     final theme = Theme.of(context);
     return Container(

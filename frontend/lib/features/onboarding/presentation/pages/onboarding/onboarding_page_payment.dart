@@ -6,8 +6,10 @@ import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Página de onboarding - tutorial de pagos
 // Muestra cómo funciona el sistema de pagos y métodos de pago disponibles
 class OnboardingPagePayment extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingPagePayment`.
   const OnboardingPagePayment({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<OnboardingPagePayment> createState() => _OnboardingPagePaymentState();
 }
@@ -29,6 +31,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
   // Animación flotante
   late Animation<double> _floatAnimation;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -82,12 +85,14 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
     _controller.forward();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -382,6 +387,7 @@ class _OnboardingPagePaymentState extends State<OnboardingPagePayment>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPaymentMethod(String text, {required bool isSmallPhone}) {
     return Container(
       padding: EdgeInsets.symmetric(

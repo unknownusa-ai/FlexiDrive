@@ -2,6 +2,7 @@ import '../../domain/ports/auth_repository_port.dart';
 
 /// Caso de uso para cerrar sesión
 class LogoutUseCase {
+  /// Crea una instancia y prepara el estado inicial de `LogoutUseCase`.
   LogoutUseCase(this._repository);
 
   final AuthRepositoryPort _repository;

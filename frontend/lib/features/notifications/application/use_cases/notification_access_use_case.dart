@@ -2,11 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flexidrive/features/notifications/domain/entities/notification_models.dart';
 import 'package:flexidrive/features/notifications/domain/ports/repositorio_notificaciones_puerto.dart';
 
+/// Define la responsabilidad de `NotificationAccessUseCase` dentro de este módulo.
 class NotificationAccessUseCase {
+  /// Crea una instancia y prepara el estado inicial de `NotificationAccessUseCase`.
   NotificationAccessUseCase(this._repository);
 
   final RepositorioNotificacionesPuerto _repository;
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() => _repository.inicializar();
 
   List<NotificationModel> get notifications {
@@ -33,10 +36,12 @@ class NotificationAccessUseCase {
     );
   }
 
+  /// Marca una notificación como leída.
   Future<void> markAsRead(int notificationId) {
     return _repository.marcarComoLeida(notificationId);
   }
 
+  /// Elimina los datos vinculados a eliminar notificación.
   Future<void> deleteNotification(int notificationId) {
     return _repository.eliminarNotificacion(notificationId);
   }

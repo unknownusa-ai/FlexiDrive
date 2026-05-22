@@ -42,10 +42,12 @@ class MetodoPagoPage extends StatefulWidget {
   final String lugarRecogida;
   final int publicationId;
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<MetodoPagoPage> createState() => _MetodoPagoPageState();
 }
 
+/// Define la responsabilidad de `_MetodoPagoPageState` dentro de este módulo.
 class _MetodoPagoPageState extends State<MetodoPagoPage> {
   static const _reservaCategoryId = 1;
 
@@ -127,6 +129,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Mostrar mensaje emergente esta parte del flujo de trabajo.
   Future<void> _showPopupMessage(String title, String message) async {
     if (!mounted) return;
     await showDialog<void>(
@@ -163,6 +166,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Gestiona búsqueda de tipo de pago con tarjeta por id dentro de esta parte del flujo.
   int _findCardPaymentTypeId() {
     if (_catalogDb.paymentMethodTypes.isEmpty) return 1;
     final cardType = _catalogDb.paymentMethodTypes.firstWhere(
@@ -172,6 +176,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return cardType.id;
   }
 
+  /// Gestiona búsqueda de marca de tarjeta por id dentro de esta parte del flujo.
   int _findCardBrandId(String rawCardNumber) {
     final number = rawCardNumber.replaceAll(RegExp(r'\D'), '');
     if (_catalogDb.cardBrands.isEmpty) {
@@ -209,6 +214,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return normalizedBrands.first['id'] as int;
   }
 
+  /// Gestiona guess marca label desde number dentro de esta parte del flujo.
   String _guessBrandLabelFromNumber(String rawCardNumber) {
     final number = rawCardNumber.replaceAll(RegExp(r'\D'), '');
     if (number.startsWith('4')) return 'Visa';
@@ -217,6 +223,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return 'Tarjeta';
   }
 
+  /// Gestiona guess marca label desde id dentro de esta parte del flujo.
   String _guessBrandLabelFromId(int cardBrandId) {
     if (cardBrandId == 1) return 'Visa';
     if (cardBrandId == 2) return 'Mastercard';
@@ -224,6 +231,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return 'Tarjeta';
   }
 
+  /// Gestiona last4 desde tarjeta number dentro de esta parte del flujo.
   String _last4FromCardNumber(String rawCardNumber) {
     final digits = rawCardNumber.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.length >= 4) return digits.substring(digits.length - 4);
@@ -254,6 +262,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return (month: month, year: fullYear);
   }
 
+  /// Guardar tarjeta esta parte del flujo de trabajo.
   Future<void> _saveCard() async {
     if (_isSavingCard) return;
     if (_numeroTarjetaCtrl.text.trim().isEmpty ||
@@ -363,6 +372,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -373,11 +383,13 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     _loadUserPaymentMethods();
   }
 
+  /// Gestiona on tarjeta field changed dentro de esta parte del flujo.
   void _onCardFieldChanged() {
     if (!mounted) return;
     setState(() {});
   }
 
+  /// Carga los datos necesarios para cargar usuario pago methods.
   Future<void> _loadUserPaymentMethods() async {
     if (mounted) {
       setState(() {
@@ -483,6 +495,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -536,6 +549,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildStepHeader(bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -600,6 +614,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeaderStepCircle(int step, bool active) {
     return Container(
       width: 34,
@@ -620,6 +635,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeaderStepLine() {
     return Expanded(
       child: Container(
@@ -630,6 +646,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildMetodoSeleccion(bool isSmallPhone) {
     final theme = Theme.of(context);
 
@@ -654,7 +671,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         ),
         const SizedBox(height: 20),
 
-        // Payment type selection
+        // Payment tipo selection
         Row(
           children: [
             Expanded(
@@ -693,31 +710,32 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCardOptions(bool isSmallPhone) {
     if (_isLoadingPaymentMethods) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Check if we're adding a new card
+    // verificar if we're adding a new tarjeta
     final isAddingNewCard = _metodoPago == 'Tarjeta Nueva';
 
     return Column(
       children: [
-        // Show saved cards only if not adding new card
+        // Show saved tarjetas only if not adding new tarjeta
         if (!isAddingNewCard) ...[
-          // Show saved cards
+          // Show saved tarjetas
           ..._userCards.map((card) => _buildSavedCard(card, isSmallPhone)),
 
-          // Add new card button
           _buildAddNewCardButton(isSmallPhone),
         ],
 
-        // Show card form only when adding new card
+        // Show tarjeta form only when adding new tarjeta
         if (isAddingNewCard) _buildAddNewCardButton(isSmallPhone),
       ],
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPSEOptions(bool isSmallPhone) {
     if (_isLoadingPaymentMethods) {
       return const Center(child: CircularProgressIndicator());
@@ -747,6 +765,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSavedCard(Map<String, dynamic> card, bool isSmallPhone) {
     final selected = _selectedPaymentMethod?['id'] == card['id'] &&
         _selectedPaymentMethod?['type'] == 'Tarjeta';
@@ -827,6 +846,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSavedPseAccount(Map<String, dynamic> pse, bool isSmallPhone) {
     final selected = _selectedPaymentMethod?['id'] == pse['id'] &&
         _selectedPaymentMethod?['type'] == 'PSE';
@@ -921,6 +941,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Obtiene la información asociada a obtener tarjeta marca color.
   Color _getCardBrandColor(String brand) {
     switch (brand.toLowerCase()) {
       case 'visa':
@@ -934,6 +955,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Obtiene la información asociada a obtener tarjeta marca abbreviation.
   String _getCardBrandAbbreviation(String brand) {
     switch (brand.toLowerCase()) {
       case 'visa':
@@ -947,6 +969,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildAddNewCardButton(bool isSmallPhone) {
     final isAddingNewCard = _metodoPago == 'Tarjeta Nueva';
 
@@ -993,6 +1016,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildNewCardForm(bool isSmallPhone) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1067,6 +1091,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildMetodoBoton(String label, IconData icon, bool isSmallPhone) {
     final selected = _metodoPago == label;
 
@@ -1113,6 +1138,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTarjetaCard(bool isSmallPhone) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1185,6 +1211,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLiveCardNumber(bool isSmallPhone) {
     final digits = _numeroTarjetaCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
     final groups = <String>[];
@@ -1218,6 +1245,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCamposTarjeta(bool isSmallPhone) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1291,6 +1319,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCardBrandLogo(String brand, bool isSmallPhone) {
     final normalized = brand.toLowerCase();
     final width = isSmallPhone ? 42.0 : 50.0;
@@ -1373,6 +1402,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGuardarTarjetaButton() {
     return SizedBox(
       width: double.infinity,
@@ -1402,6 +1432,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPSEContent(bool isSmallPhone) {
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
@@ -1480,6 +1511,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEfectivoContent(bool isSmallPhone) {
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 12 : 16),
@@ -1605,6 +1637,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildResumenCobro(bool isSmallPhone) {
     final totalFormateado = _formatearPrecio(widget.total);
 
@@ -1662,6 +1695,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildResumenLineaDetallada() {
     String unidadLabel = widget.cantidad == 1
         ? widget.periodo.toLowerCase().replaceAll('s', '')
@@ -1707,6 +1741,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Gestiona formatear precio dentro de esta parte del flujo.
   String _formatearPrecio(int precio) {
     final asString = precio.toString();
     final buffer = StringBuffer();
@@ -1722,6 +1757,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return buffer.toString();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildResumenLinea(String label, int monto) {
     final montoFormateado = _formatearPrecio(monto);
 
@@ -1748,6 +1784,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSeguridad(bool isSmallPhone) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1777,6 +1814,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBotonPagar(bool isSmallPhone) {
     final totalFormateado = _formatearPrecio(widget.total);
 
@@ -1799,7 +1837,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
           height: isSmallPhone ? 48 : 56,
           child: ElevatedButton(
             onPressed: () async {
-              // Validate card payment method
+              // Validate tarjeta payment method
               if (_metodoPago == 'Tarjeta Nueva') {
                 if (_numeroTarjetaCtrl.text.isEmpty ||
                     _titularCtrl.text.isEmpty ||
@@ -1826,7 +1864,6 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
               final fechaInicio = ColombiaTime.now();
               final fechaFin = _calcularFechaFin(fechaInicio);
 
-              // Get current user ID
               await _sessionStore.init();
               final currentUserId = _sessionStore.userId;
 
@@ -1838,13 +1875,11 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 return;
               }
 
-              // Get payment method ID
               int paymentMethodId = 3; // Default to Efectivo
               if (_selectedPaymentMethod != null) {
                 paymentMethodId = _selectedPaymentMethod!['paymentMethodId'];
               } else if (_metodoPago == 'Tarjeta' ||
                   _metodoPago == 'Tarjeta Nueva') {
-                // Find first card payment method
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
                 if (userMethods.isEmpty) {
@@ -1860,7 +1895,6 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
                 );
                 paymentMethodId = cardMethod.id;
               } else if (_metodoPago == 'PSE') {
-                // Find first PSE payment method
                 final userMethods =
                     _paymentDb.getUserPaymentMethods(currentUserId);
                 if (userMethods.isEmpty) {
@@ -1948,6 +1982,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     );
   }
 
+  /// Gestiona generar codigo reserva dentro de esta parte del flujo.
   String _generarCodigoReserva() {
     final fecha = ColombiaTime.now();
     final year = fecha.year;
@@ -1957,6 +1992,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return 'FD-$year-$month-$day-$numero';
   }
 
+  /// Gestiona siguiente reserva id dentro de esta parte del flujo.
   int _nextReservationId() {
     if (_reservationDb.reservations.isEmpty) return 1;
     return _reservationDb.reservations
@@ -1965,6 +2001,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
         1;
   }
 
+  /// Gestiona calcular fecha fin dentro de esta parte del flujo.
   DateTime _calcularFechaFin(DateTime fechaInicio) {
     switch (widget.periodo.toLowerCase()) {
       case 'horas':
@@ -1981,6 +2018,7 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     }
   }
 
+  /// Gestiona resolve reserva period tipo id dentro de esta parte del flujo.
   int _resolveReservationPeriodTypeId() {
     final normalized = widget.periodo.toLowerCase();
     if (normalized.contains('hora')) return 4; // Horas
@@ -1989,12 +2027,14 @@ class _MetodoPagoPageState extends State<MetodoPagoPage> {
     return 1; // Días
   }
 
+  /// Gestiona formatear fecha corta dentro de esta parte del flujo.
   String _formatearFechaCorta(DateTime fecha) {
     final dia = fecha.day.toString().padLeft(2, '0');
     final mes = fecha.month.toString().padLeft(2, '0');
     return '$dia/$mes';
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _numeroTarjetaCtrl.removeListener(_onCardFieldChanged);

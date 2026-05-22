@@ -5,10 +5,12 @@ import 'package:flexidrive/features/splash/application/use_cases/splash_use_case
 import 'package:flexidrive/injection_container.dart';
 
 // Página de bienvenida (splash)
-// Pantalla inicial que muestra el logo y redirige al onboarding o login
+// Pantalla inicial que muestra el logo y redirige al onboarding o inicio de sesión
 class SplashPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `SplashPage`.
   const SplashPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
@@ -22,12 +24,13 @@ class _SplashPageState extends State<SplashPage>
   // Animación del progreso de carga
   late Animation<double> _progressAnimation;
 
-  // Use cases de la arquitectura hexagonal
+  // uso cases de la arquitectura hexagonal
   final GetInitialRouteUseCase _getInitialRouteUseCase =
       InjectionContainer.instance.splashGetInitialRouteUseCase;
   final CompleteOnboardingUseCase _completeOnboardingUseCase =
       InjectionContainer.instance.splashCompleteOnboardingUseCase;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -61,12 +64,14 @@ class _SplashPageState extends State<SplashPage>
     _controller.forward();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

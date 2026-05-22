@@ -5,12 +5,15 @@ import 'package:flexidrive/injection_container.dart';
 /// Página que demuestra el uso de JSON + ArrayList
 /// Consumiendo datos desde el VehiculoService
 class VehiculosPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `VehiculosPage`.
   const VehiculosPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<VehiculosPage> createState() => _VehiculosPageState();
 }
 
+/// Define la responsabilidad de `_VehiculosPageState` dentro de este módulo.
 class _VehiculosPageState extends State<VehiculosPage> {
   final VehicleInventoryUseCase _service =
       InjectionContainer.instance.vehicleInventoryUseCase;
@@ -18,6 +21,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
   List<Map<String, dynamic>> _vehiculos = [];
   String _filtroCategoria = 'Todos';
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -98,6 +102,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,6 +210,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
     );
   }
 
+  /// Gestiona stat item dentro de esta parte del flujo.
   Widget _statItem(String label, String value) {
     return Column(
       children: [
@@ -227,6 +233,7 @@ class _VehiculosPageState extends State<VehiculosPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVehiculoCard(Map<String, dynamic> vehiculo) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

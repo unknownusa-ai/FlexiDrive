@@ -1,3 +1,5 @@
+"""Application use case for user login in the accounts bounded context."""
+
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 
@@ -7,22 +9,31 @@ from apps.accounts.domain.ports.auth_ports import (
     JwtTokenServicePort,
     RefreshTokenRepositoryPort,
 )
-from apps.accounts.infrastructure.dependencies import (
-    get_accounts_auth_repository,
-    get_jwt_token_service,
-    get_refresh_token_repository,
-)
 
 
 def login_user(
     data: dict,
+    *,
     auth_repository: AccountsAuthRepositoryPort | None = None,
     refresh_token_repository: RefreshTokenRepositoryPort | None = None,
     token_service: JwtTokenServicePort | None = None,
 ) -> dict:
-    auth_repository = auth_repository or get_accounts_auth_repository()
-    refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
-    token_service = token_service or get_jwt_token_service()
+    """Authenticate credentials and issue JWT tokens.
+
+    The use case depends only on domain ports and receives concrete adapters
+    from the presentation layer (composition root), keeping infrastructure
+    concerns outside the application core.
+    """
+    if auth_repository is None or refresh_token_repository is None or token_service is None:
+        from apps.accounts.infrastructure.dependencies import (
+            get_accounts_auth_repository,
+            get_jwt_token_service,
+            get_refresh_token_repository,
+        )
+
+        auth_repository = auth_repository or get_accounts_auth_repository()
+        refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
+        token_service = token_service or get_jwt_token_service()
 
     correo = data["correo"].strip().lower()
     contrasena = data["contrasena"]

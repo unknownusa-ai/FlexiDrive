@@ -1,7 +1,10 @@
 // Flutter framework
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 // Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Pagina principal del arrendador (para volver)
@@ -10,14 +13,20 @@ import 'principal_arrendatario_page.dart';
 // Pagina "Mi Saldo" - muestra el dinero disponible del arrendador
 // Para los dueños de carros que quieren retirar sus ganancias
 class MiSaldoPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `MiSaldoPage`.
   const MiSaldoPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<MiSaldoPage> createState() => _MiSaldoPageState();
 }
 
 // Estado de la pagina de saldo
 class _MiSaldoPageState extends State<MiSaldoPage> {
+  static const _saldoDisponibleKey = 'mi_saldo_disponible_v1';
+  static const _saldoRetiradoKey = 'mi_saldo_retirado_v1';
+  static const _transaccionesKey = 'mi_saldo_transacciones_v1';
+
   // Saldo disponible para retirar (en pesos)
   int _saldoDisponible = 1440000;
   // Saldo ya retirado
@@ -35,6 +44,20 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
 
   // Indice de la cuenta seleccionada
   int _cuentaSeleccionadaIndex = 0;
+  final List<_TransaccionSaldo> _transacciones = [
+    _TransaccionSaldo(
+      title: 'Renta completada - Mazda 3',
+      date: '7 de mar de 2026',
+      amount: 900000,
+      isIngreso: true,
+    ),
+    _TransaccionSaldo(
+      title: 'Renta completada - Chevrolet Onix',
+      date: '5 de mar de 2026',
+      amount: 540000,
+      isIngreso: true,
+    ),
+  ];
 
   // Navega a la pagina principal del arrendador
   void _goToPrincipalArrendatario() {
@@ -46,6 +69,55 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
+  @override
+  void initState() {
+    super.initState();
+    _loadPersistedData();
+  }
+
+  /// Carga los datos necesarios para cargar persisted data.
+  Future<void> _loadPersistedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedSaldoDisponible = prefs.getInt(_saldoDisponibleKey);
+    final savedSaldoRetirado = prefs.getInt(_saldoRetiradoKey);
+    final rawTx = prefs.getString(_transaccionesKey);
+
+    if (!mounted) return;
+    setState(() {
+      if (savedSaldoDisponible != null) {
+        _saldoDisponible = savedSaldoDisponible;
+      }
+      if (savedSaldoRetirado != null) {
+        _saldoRetirado = savedSaldoRetirado;
+      }
+      if (rawTx != null && rawTx.trim().isNotEmpty) {
+        try {
+          final decoded = jsonDecode(rawTx) as List<dynamic>;
+          _transacciones
+            ..clear()
+            ..addAll(
+              decoded.map((item) => _TransaccionSaldo.fromJson(item)).toList(),
+            );
+        } catch (_) {
+          // Si hay formato inválido se conservan los datos por defecto.
+        }
+      }
+    });
+  }
+
+  /// Gestiona persist data dentro de esta parte del flujo.
+  Future<void> _persistData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_saldoDisponibleKey, _saldoDisponible);
+    await prefs.setInt(_saldoRetiradoKey, _saldoRetirado);
+    await prefs.setString(
+      _transaccionesKey,
+      jsonEncode(_transacciones.map((tx) => tx.toJson()).toList()),
+    );
+  }
+
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -81,6 +153,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGreenHeader(bool isSmallPhone, bool isDark) {
     return Container(
       width: double.infinity,
@@ -160,6 +233,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBalanceCard(bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -267,6 +341,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildStatsCards(bool isSmallPhone, bool isDark) {
     final cardBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
@@ -372,6 +447,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBankAccountsSection(bool isSmallPhone, bool isDark) {
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final cardBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -485,6 +561,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTransactionHistorySection(bool isSmallPhone, bool isDark) {
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final cardBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -503,27 +580,39 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
           ),
         ),
         SizedBox(height: isSmallPhone ? 12 : 16),
-        _buildTransactionCard(
-          isSmallPhone: isSmallPhone,
-          cardBgColor: cardBgColor,
-          textColor: textColor,
-          subtextColor: subtextColor,
-          isDark: isDark,
-          title: 'Renta completada - Mazda 3',
-          date: '7 de mar de 2026',
-          amount: '+\$ 900.000',
-        ),
-        SizedBox(height: isSmallPhone ? 10 : 12),
-        _buildTransactionCard(
-          isSmallPhone: isSmallPhone,
-          cardBgColor: cardBgColor,
-          textColor: textColor,
-          subtextColor: subtextColor,
-          isDark: isDark,
-          title: 'Renta completada - Chevrolet Onix',
-          date: '5 de mar de 2026',
-          amount: '+\$ 540.000',
-        ),
+        if (_transacciones.isEmpty)
+          Text(
+            'Aún no tienes transacciones',
+            style: GoogleFonts.inter(
+              fontSize: isSmallPhone ? 13 : 14,
+              color: subtextColor,
+            ),
+          )
+        else
+          Column(
+            children: List.generate(_transacciones.length, (index) {
+              final tx = _transacciones[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == _transacciones.length - 1
+                      ? 0
+                      : (isSmallPhone ? 10 : 12),
+                ),
+                child: _buildTransactionCard(
+                  isSmallPhone: isSmallPhone,
+                  cardBgColor: cardBgColor,
+                  textColor: textColor,
+                  subtextColor: subtextColor,
+                  isDark: isDark,
+                  title: tx.title,
+                  date: tx.date,
+                  amount:
+                      '${tx.isIngreso ? '+' : '-'}\$ ${_formatMoney(tx.amount)}',
+                  isIngreso: tx.isIngreso,
+                ),
+              );
+            }),
+          ),
       ],
     );
   }
@@ -537,7 +626,11 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     required String title,
     required String date,
     required String amount,
+    required bool isIngreso,
   }) {
+    final movementColor =
+        isIngreso ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final movementBg = movementColor.withValues(alpha: 0.2);
     return Container(
       padding: EdgeInsets.all(isSmallPhone ? 16 : 18),
       decoration: BoxDecoration(
@@ -556,12 +649,12 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withValues(alpha: 0.2),
+              color: movementBg,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.trending_up,
-              color: Color(0xFF10B981),
+            child: Icon(
+              isIngreso ? Icons.trending_up : Icons.arrow_downward_rounded,
+              color: movementColor,
               size: 20,
             ),
           ),
@@ -594,7 +687,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
             style: GoogleFonts.inter(
               fontSize: isSmallPhone ? 15 : 16,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF10B981),
+              color: movementColor,
             ),
           ),
         ],
@@ -602,6 +695,90 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     );
   }
 
+  /// Gestiona format date es dentro de esta parte del flujo.
+  String _formatDateEs(DateTime date) {
+    const months = <String>[
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ];
+    return '${date.day} de ${months[date.month - 1]} de ${date.year}';
+  }
+
+  Future<bool> _showRetiroVerificationDialog({
+    required int monto,
+    required _CuentaBancaria cuenta,
+    required bool isSmallPhone,
+  }) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final bodyColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E2A44) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          title: Text(
+            'Verificar retiro',
+            style: GoogleFonts.inter(
+              color: titleColor,
+              fontWeight: FontWeight.w700,
+              fontSize: isSmallPhone ? 18 : 20,
+            ),
+          ),
+          content: Text(
+            'Vas a retirar \$ ${_formatMoney(monto)} a ${cuenta.banco} •••• ${_last4(cuenta.numeroCuenta)}.\n\n¿Deseas continuar?',
+            style: GoogleFonts.inter(
+              color: bodyColor,
+              fontSize: isSmallPhone ? 13 : 14,
+              height: 1.45,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.inter(
+                  color: bodyColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'Confirmar',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    return ok ?? false;
+  }
+
+  /// Mostrar panel para retirar saldo esta parte del flujo de trabajo.
   Future<void> _showRetirarSaldoSheet(bool isSmallPhone) async {
     final montoController = TextEditingController(text: '0');
     int cuentaIndex = _cuentaSeleccionadaIndex;
@@ -621,9 +798,11 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
         isDark ? const Color(0xFF134052) : const Color(0xFFF0FDF4);
     final selectedAccountBorder =
         isDark ? const Color(0xFF10D5A0) : const Color(0xFF10B981);
-    final selectedButtonBg =
+    final enabledButtonBg = const Color(0xFF10B981);
+    final enabledButtonText = Colors.white;
+    final disabledButtonBg =
         isDark ? const Color(0xFF334766) : const Color(0xFFE2E8F0);
-    final selectedButtonText =
+    final disabledButtonText =
         isDark ? const Color(0xFF7D90AC) : const Color(0xFF64748B);
 
     await showModalBottomSheet(
@@ -812,20 +991,41 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: puedeRetirar
-                          ? () {
+                          ? () async {
+                              final navigator = Navigator.of(context);
+                              final confirmado =
+                                  await _showRetiroVerificationDialog(
+                                monto: monto,
+                                cuenta: _cuentas[cuentaIndex],
+                                isSmallPhone: isSmallPhone,
+                              );
+                              if (!confirmado) return;
+                              final now = DateTime.now();
+
                               setState(() {
                                 _saldoDisponible -= monto;
                                 _saldoRetirado += monto;
                                 _cuentaSeleccionadaIndex = cuentaIndex;
+                                _transacciones.insert(
+                                  0,
+                                  _TransaccionSaldo(
+                                    title:
+                                        'Retiro a ${_cuentas[cuentaIndex].banco}',
+                                    date: _formatDateEs(now),
+                                    amount: monto,
+                                    isIngreso: false,
+                                  ),
+                                );
                               });
-                              Navigator.pop(context);
+                              await _persistData();
+                              navigator.pop();
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: selectedButtonBg,
-                        disabledBackgroundColor: selectedButtonBg,
-                        foregroundColor: selectedButtonText,
-                        disabledForegroundColor: selectedButtonText,
+                        backgroundColor: enabledButtonBg,
+                        disabledBackgroundColor: disabledButtonBg,
+                        foregroundColor: enabledButtonText,
+                        disabledForegroundColor: disabledButtonText,
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
@@ -852,6 +1052,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     montoController.dispose();
   }
 
+  /// Mostrar panel para agregar cuenta esta parte del flujo de trabajo.
   Future<void> _showAgregarCuentaSheet(bool isSmallPhone) async {
     final bancoController = TextEditingController();
     final numeroController = TextEditingController();
@@ -940,6 +1141,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
               );
             }
 
+            /// Construye y devuelve el widget correspondiente a esta sección.
             Widget buildTipoButton(String label) {
               final isActive = tipoCuenta == label;
               return Expanded(
@@ -1066,6 +1268,8 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
                                   _cuentaSeleccionadaIndex =
                                       _cuentas.length - 1;
                                 });
+
+                                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                                 Navigator.pop(context);
                               }
                             : null,
@@ -1103,6 +1307,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     titularController.dispose();
   }
 
+  /// Elimina los datos vinculados a eliminar cuenta.
   void _eliminarCuenta(int index) {
     if (_cuentas.isEmpty || index < 0 || index >= _cuentas.length) {
       return;
@@ -1118,6 +1323,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     });
   }
 
+  /// Gestiona last4 dentro de esta parte del flujo.
   String _last4(String numeroCuenta) {
     if (numeroCuenta.length <= 4) {
       return numeroCuenta;
@@ -1125,6 +1331,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
     return numeroCuenta.substring(numeroCuenta.length - 4);
   }
 
+  /// Gestiona format money dentro de esta parte del flujo.
   String _formatMoney(int value) {
     final digits = value.toString();
     final buffer = StringBuffer();
@@ -1140,6 +1347,7 @@ class _MiSaldoPageState extends State<MiSaldoPage> {
   }
 }
 
+/// Define la responsabilidad de `_CuentaBancaria` dentro de este módulo.
 class _CuentaBancaria {
   final String banco;
   final String tipoCuenta;
@@ -1152,4 +1360,37 @@ class _CuentaBancaria {
     required this.numeroCuenta,
     required this.titular,
   });
+}
+
+/// Define la responsabilidad de `_TransaccionSaldo` dentro de este módulo.
+class _TransaccionSaldo {
+  _TransaccionSaldo({
+    required this.title,
+    required this.date,
+    required this.amount,
+    required this.isIngreso,
+  });
+
+  final String title;
+  final String date;
+  final int amount;
+  final bool isIngreso;
+
+  factory _TransaccionSaldo.fromJson(dynamic json) {
+    final map = json as Map<String, dynamic>;
+    return _TransaccionSaldo(
+      title: map['title'] as String? ?? '',
+      date: map['date'] as String? ?? '',
+      amount: (map['amount'] as num?)?.toInt() ?? 0,
+      isIngreso: map['isIngreso'] as bool? ?? true,
+    );
+  }
+
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'date': date,
+        'amount': amount,
+        'isIngreso': isIngreso,
+      };
 }

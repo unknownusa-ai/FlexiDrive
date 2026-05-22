@@ -6,7 +6,7 @@ abstract class AuthRepositoryPort {
   /// Inicializa el repositorio y carga datos locales
   Future<void> initialize();
 
-  /// Realiza login con email y contraseña
+  /// Realiza inicio de sesión con correo y contraseña
   Future<AuthSession?> login({
     required String email,
     required String password,

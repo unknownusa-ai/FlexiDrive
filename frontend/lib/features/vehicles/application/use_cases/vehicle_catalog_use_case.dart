@@ -1,12 +1,15 @@
 import 'package:flexidrive/features/vehicles/domain/entities/vehicle_models.dart';
-import 'package:flexidrive/features/vehicles/infrastructure/datasources/local_vehicle_db.dart';
+import 'package:flexidrive/features/vehicles/domain/ports/vehicle_catalog_repository_port.dart';
 
+/// Caso de uso para consultar el catálogo tipado de vehículos.
 class VehicleCatalogUseCase {
-  VehicleCatalogUseCase(this._source);
+  /// Crea una instancia y prepara el estado inicial de `VehicleCatalogUseCase`.
+  VehicleCatalogUseCase(this._repository);
 
-  final LocalVehicleDb _source;
+  final VehicleCatalogRepositoryPort _repository;
 
-  Future<void> loadIfNeeded() => _source.loadIfNeeded();
+  /// Carga los datos necesarios para cargar if needed.
+  Future<void> loadIfNeeded() => _repository.loadIfNeeded();
 
-  List<VehicleModel> get vehicles => _source.vehicles;
+  List<VehicleModel> get vehicles => _repository.vehicles;
 }

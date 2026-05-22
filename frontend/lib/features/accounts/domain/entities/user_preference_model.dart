@@ -24,6 +24,7 @@ class UserPreferenceModel {
   // URL de la imagen de perfil (opcional)
   final String? profileImage;
 
+  /// Crea una instancia y prepara el estado inicial de `UserPreferenceModel`.
   factory UserPreferenceModel.fromJson(Map<String, dynamic> json) {
     return UserPreferenceModel(
       id: JsonUtils.asInt(json['preferencia_usuario_id']),
@@ -34,6 +35,7 @@ class UserPreferenceModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'preferencia_usuario_id': id,
         'usuario_id': userId,

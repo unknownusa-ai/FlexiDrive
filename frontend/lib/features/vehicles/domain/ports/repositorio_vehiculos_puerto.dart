@@ -1,3 +1,4 @@
+/// Define la responsabilidad de `RepositorioVehiculosPuerto` dentro de este módulo.
 abstract class RepositorioVehiculosPuerto {
   Future<void> inicializar();
   List<Map<String, dynamic>> obtenerVehiculos();

@@ -72,6 +72,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
     return 'días';
   }
 
+  /// Gestiona mes corto es dentro de esta parte del flujo.
   String _mesCortoEs(int month) {
     const meses = [
       'Ene',
@@ -90,16 +91,19 @@ class ReservaConfirmadaPage extends StatelessWidget {
     return meses[month - 1];
   }
 
+  /// Gestiona fecha factura dentro de esta parte del flujo.
   String _fechaFactura() {
     final now = DateTime.now();
     return '${now.day.toString().padLeft(2, '0')} ${_mesCortoEs(now.month)} ${now.year}';
   }
 
+  /// Gestiona numero factura dentro de esta parte del flujo.
   String _numeroFactura() {
     final base = codigoReserva.replaceFirst('FXD-', '');
     return 'FXD-INV-$base';
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -147,6 +151,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(bool isSmallPhone) {
     return Container(
       decoration: const BoxDecoration(
@@ -217,6 +222,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
     );
   }
 
+  /// Gestiona paso line dentro de esta parte del flujo.
   Widget _stepLine() {
     return Container(
       width: 48,
@@ -275,6 +281,7 @@ class ReservaConfirmadaPage extends StatelessWidget {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCodigoCard(bool isSmallPhone) {
     return Container(
       width: double.infinity,

@@ -7,14 +7,16 @@ import 'package:flexidrive/features/accounts/application/use_cases/account_acces
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/injection_container.dart';
-// Pagina de login (despues de recuperar)
+// Pagina de inicio de sesión (despues de recuperar)
 import 'login_page.dart';
 
 // Pagina de recuperación de contraseña
-// Flujo de 2 pasos: 1) verificar email, 2) cambiar contraseña
+// Flujo de 2 pasos: 1) verificar correo, 2) cambiar contraseña
 class ForgotPasswordPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `ForgotPasswordPage`.
   const ForgotPasswordPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
@@ -79,6 +81,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           actions: [
             TextButton(
               onPressed: () {
+                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -92,6 +95,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  /// Gestiona validate correo dentro de esta parte del flujo.
   Future<void> _validateEmail() async {
     if (_isLoading) return;
 
@@ -143,6 +147,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
+  /// Gestiona change contraseña dentro de esta parte del flujo.
   Future<void> _changePassword() async {
     if (_isLoading) return;
 
@@ -204,6 +209,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _emailController.dispose();
@@ -212,6 +218,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
@@ -262,6 +269,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   _currentStep = 1;
                                 });
                               } else {
+                                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                                 Navigator.pop(context);
                               }
                             },
@@ -367,6 +375,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEmailStep(double scale) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -468,6 +477,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPasswordStep(double scale) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -607,6 +617,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLabel(String text, double scale) {
     return Text(
       text,

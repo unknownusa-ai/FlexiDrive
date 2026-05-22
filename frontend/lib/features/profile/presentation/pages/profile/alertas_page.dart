@@ -11,17 +11,24 @@ import 'package:flexidrive/features/notifications/application/use_cases/notifica
 import 'package:flexidrive/features/notifications/domain/entities/notification_models.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
+import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
+import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_catalog_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 
+/// Define la responsabilidad de `AlertasPage` dentro de este módulo.
 class AlertasPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `AlertasPage`.
   const AlertasPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<AlertasPage> createState() => _AlertasPageState();
 }
 
+/// Define la responsabilidad de `_AlertasPageState` dentro de este módulo.
 class _AlertasPageState extends State<AlertasPage> {
   static const _reminderKeysStorage = 'reservation_reminder_keys_v1';
+  static const _reviewKeysStorage = 'review_notifications_keys_v1';
   static const List<String> _tabs = <String>[
     'Todas',
     'Solicitudes',
@@ -41,13 +48,19 @@ class _AlertasPageState extends State<AlertasPage> {
       InjectionContainer.instance.reservationAccessUseCase;
   final PublicationAccessUseCase _publicationDb =
       InjectionContainer.instance.publicationAccessUseCase;
+  final ReviewAccessUseCase _reviewDb =
+      InjectionContainer.instance.reviewAccessUseCase;
+  final VehicleCatalogUseCase _vehicleDb =
+      InjectionContainer.instance.vehicleCatalogUseCase;
 
   int _selectedTab = 0;
   bool _isLoading = true;
   int _unreadCount = 0;
   List<_AlertItem> _alerts = <_AlertItem>[];
   Timer? _refreshTimer;
+  bool _isSyncingReviewNotifications = false;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -59,6 +72,7 @@ class _AlertasPageState extends State<AlertasPage> {
     });
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _refreshTimer?.cancel();
@@ -66,22 +80,27 @@ class _AlertasPageState extends State<AlertasPage> {
     super.dispose();
   }
 
+  /// Gestiona on notificaciones changed dentro de esta parte del flujo.
   void _onNotificationsChanged() {
     _loadAlerts();
   }
 
+  /// Carga los datos necesarios para cargar alerts.
   Future<void> _loadAlerts() async {
     await Future.wait([
       _catalogDb.loadIfNeeded(),
       _notificationDb.loadIfNeeded(),
       _reservationDb.loadIfNeeded(),
       _publicationDb.loadIfNeeded(),
+      _reviewDb.loadIfNeeded(),
+      _vehicleDb.loadIfNeeded(),
     ]);
 
     final currentUser = await _accountDb.getCurrentUser();
     final currentUserId = currentUser?.id;
     if (currentUserId != null) {
       await _syncReservationReminders(currentUserId);
+      await _syncReviewNotifications(currentUserId);
       await _notificationDb.loadIfNeeded();
     }
 
@@ -114,12 +133,13 @@ class _AlertasPageState extends State<AlertasPage> {
     });
   }
 
+  /// Gestiona a alert item dentro de esta parte del flujo.
   _AlertItem _toAlertItem(NotificationModel item, String? categoryName) {
     final tab = _resolveTab(categoryName, item.subject, item.description);
     return _AlertItem(
       id: item.id,
       tab: tab,
-      title: item.subject,
+      title: _cleanTitle(item.subject),
       subtitle: item.description,
       time: _timeAgo(item.sentAt),
       unread: item.status == 'no_leida',
@@ -127,6 +147,17 @@ class _AlertasPageState extends State<AlertasPage> {
     );
   }
 
+  /// Gestiona clean title dentro de esta parte del flujo.
+  String _cleanTitle(String subject) {
+    return subject
+        .replaceAll('✅', '')
+        .replaceAll('🚗', '')
+        .replaceAll('⏰', '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  /// Gestiona resolve tab dentro de esta parte del flujo.
   String _resolveTab(String? categoryName, String subject, String description) {
     final raw = '${categoryName ?? ''} $subject $description'.toLowerCase();
     if (raw.contains('pago') || raw.contains('transferencia')) {
@@ -156,6 +187,7 @@ class _AlertasPageState extends State<AlertasPage> {
     return 'Consejos';
   }
 
+  /// Gestiona time ago dentro de esta parte del flujo.
   String _timeAgo(DateTime sentAt) {
     final now = ColombiaTime.now();
     final diff = now.difference(ColombiaTime.toColombia(sentAt));
@@ -168,6 +200,7 @@ class _AlertasPageState extends State<AlertasPage> {
     return '${sentAt.day.toString().padLeft(2, '0')}/${sentAt.month.toString().padLeft(2, '0')}/${sentAt.year}';
   }
 
+  /// Sincronizar reserva reminders esta parte del flujo de trabajo.
   Future<void> _syncReservationReminders(int currentUserId) async {
     final prefs = await SharedPreferences.getInstance();
     final sentKeys =
@@ -271,10 +304,139 @@ class _AlertasPageState extends State<AlertasPage> {
     }
   }
 
+  /// Gestiona resolve reminder category id dentro de esta parte del flujo.
   int _resolveReminderCategoryId() {
     for (final category in _catalogDb.notificationCategories) {
       final name = category.name.toLowerCase();
       if (name.contains('recordatorio')) return category.id;
+    }
+    return _catalogDb.notificationCategories.isEmpty
+        ? 1
+        : _catalogDb.notificationCategories.first.id;
+  }
+
+  /// Sincronizar reseña notificaciones esta parte del flujo de trabajo.
+  Future<void> _syncReviewNotifications(int currentUserId) async {
+    if (_isSyncingReviewNotifications) return;
+    _isSyncingReviewNotifications = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sentKeys =
+          (prefs.getStringList(_reviewKeysStorage) ?? <String>[]).toSet();
+      final users = await _accountDb.getUsers();
+
+      final publicationsById = {
+        for (final publication in _publicationDb.publications)
+          publication.id: publication,
+      };
+      final publicationIds = _publicationDb.publications
+          .where((publication) => publication.userId == currentUserId)
+          .map((publication) => publication.id)
+          .toSet();
+      final usersById = {for (final user in users) user.id: user};
+      final vehiclesById = {
+        for (final vehicle in _vehicleDb.vehicles) vehicle.id: vehicle,
+      };
+
+      if (publicationIds.isEmpty) return;
+
+      final reviewCategoryId = _resolveReviewCategoryId();
+      var updated = false;
+
+      for (final review in _reviewDb.reviews) {
+        if (!publicationIds.contains(review.publicationId)) continue;
+        if (review.userId == currentUserId) continue;
+
+        final key = 'owner_review_${review.id}';
+        final existing = _notificationDb.notifications.where((notification) {
+          return notification.userId == currentUserId &&
+              _resolveTab(
+                    null,
+                    notification.subject,
+                    notification.description,
+                  ) ==
+                  'Reseñas' &&
+              notification.sentAt.millisecondsSinceEpoch ==
+                  review.date.millisecondsSinceEpoch;
+        }).toList();
+
+        final publication = publicationsById[review.publicationId];
+        final reviewer = usersById[review.userId];
+        final vehicle =
+            publication == null ? null : vehiclesById[publication.vehicleId];
+        final reviewerName =
+            reviewer == null || reviewer.fullName.trim().isEmpty
+                ? 'Usuario #${review.userId}'
+                : reviewer.fullName.trim();
+        final publicationLabel = vehicle == null
+            ? 'tu publicación #${review.publicationId}'
+            : '${vehicle.line} ${vehicle.model}';
+        final expectedSubject = '$reviewerName comentó tu publicación';
+        final expectedDescription = 'Nueva reseña en $publicationLabel.';
+
+        final hasExpected = existing.any(
+          (notification) =>
+              notification.subject == expectedSubject &&
+              notification.description == expectedDescription,
+        );
+        if (sentKeys.contains(key) && hasExpected) continue;
+        if (hasExpected) {
+          sentKeys.add(key);
+          continue;
+        }
+
+        for (final notification in existing) {
+          await _notificationDb.deleteNotification(notification.id);
+        }
+
+        await _notificationDb.addNotification(
+          userId: currentUserId,
+          categoryId: reviewCategoryId,
+          subject: expectedSubject,
+          description: expectedDescription,
+          sentAt: review.date,
+        );
+        sentKeys.add(key);
+        updated = true;
+        await prefs.setStringList(_reviewKeysStorage, sentKeys.toList());
+      }
+
+      final reviewAlerts = _notificationDb.notifications
+          .where((n) => n.userId == currentUserId)
+          .where(
+              (n) => _resolveTab(null, n.subject, n.description) == 'Reseñas')
+          .toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+      final seen = <String, int>{};
+      for (final n in reviewAlerts) {
+        final dedupeKey =
+            '${n.subject}||${n.description}||${n.sentAt.millisecondsSinceEpoch}';
+        final prevId = seen[dedupeKey];
+        if (prevId == null) {
+          seen[dedupeKey] = n.id;
+        } else {
+          await _notificationDb.deleteNotification(n.id);
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        await prefs.setStringList(_reviewKeysStorage, sentKeys.toList());
+      }
+    } finally {
+      _isSyncingReviewNotifications = false;
+    }
+  }
+
+  /// Gestiona resolve reseña category id dentro de esta parte del flujo.
+  int _resolveReviewCategoryId() {
+    for (final category in _catalogDb.notificationCategories) {
+      final name = category.name.toLowerCase();
+      if (name.contains('rese') ||
+          name.contains('resena') ||
+          name.contains('calificacion')) {
+        return category.id;
+      }
     }
     return _catalogDb.notificationCategories.isEmpty
         ? 1
@@ -311,6 +473,7 @@ class _AlertasPageState extends State<AlertasPage> {
     return const Duration(hours: 24);
   }
 
+  /// Gestiona format remaining time dentro de esta parte del flujo.
   String _formatRemainingTime(int minutes) {
     if (minutes < 60) return '$minutes min';
     final hours = minutes ~/ 60;
@@ -319,12 +482,14 @@ class _AlertasPageState extends State<AlertasPage> {
     return '$hours h $remaining min';
   }
 
+  /// Gestiona actual tab alerts dentro de esta parte del flujo.
   List<_AlertItem> _currentTabAlerts() {
     final tabName = _tabs[_selectedTab];
     if (tabName == 'Todas') return _alerts;
     return _alerts.where((item) => item.tab == tabName).toList();
   }
 
+  /// Marca todas las notificaciones como leídas.
   Future<void> _markAllAsRead() async {
     final unread = _alerts.where((item) => item.unread).toList();
     for (final item in unread) {
@@ -333,17 +498,20 @@ class _AlertasPageState extends State<AlertasPage> {
     await _loadAlerts();
   }
 
+  /// Marca una notificación como leída.
   Future<void> _markAsRead(_AlertItem item) async {
     if (!item.unread) return;
     await _notificationDb.markAsRead(item.id);
     await _loadAlerts();
   }
 
+  /// Elimina los datos vinculados a eliminar alert.
   Future<void> _deleteAlert(_AlertItem item) async {
     await _notificationDb.deleteNotification(item.id);
     await _loadAlerts();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -366,6 +534,7 @@ class _AlertasPageState extends State<AlertasPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -454,6 +623,7 @@ class _AlertasPageState extends State<AlertasPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTabBar(bool isSmallPhone) {
     final theme = Theme.of(context);
 
@@ -524,6 +694,7 @@ class _AlertasPageState extends State<AlertasPage> {
     );
   }
 
+  /// Obtiene la información asociada a obtener tab icon.
   Widget _getTabIcon(int index, bool isSelected, ThemeData theme) {
     final color = isSelected
         ? Colors.white
@@ -546,6 +717,7 @@ class _AlertasPageState extends State<AlertasPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildNotificationsList(bool isSmallPhone) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -599,8 +771,7 @@ class _AlertasPageState extends State<AlertasPage> {
     required _AlertItem notification,
   }) {
     final theme = Theme.of(context);
-    final iconData = _iconForTab(notification.tab);
-    final iconBg = _iconBgForTab(notification.tab);
+    final visual = _visualForNotification(notification);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -627,10 +798,10 @@ class _AlertasPageState extends State<AlertasPage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: iconBg,
+                  color: visual.background,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(iconData, size: 22, color: const Color(0xFF1F2937)),
+                child: Icon(visual.icon, size: 22, color: visual.foreground),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -687,7 +858,9 @@ class _AlertasPageState extends State<AlertasPage> {
               ),
               const Spacer(),
               GestureDetector(
-                onTap: notification.unread ? () => _markAsRead(notification) : null,
+                onTap: notification.unread
+                    ? () => _markAsRead(notification)
+                    : null,
                 child: Text(
                   notification.unread ? 'Marcar leído' : 'Leído',
                   style: GoogleFonts.inter(
@@ -715,41 +888,79 @@ class _AlertasPageState extends State<AlertasPage> {
     );
   }
 
-  IconData _iconForTab(String tab) {
-    switch (tab) {
-      case 'Solicitudes':
-        return Icons.car_rental;
-      case 'Pagos':
-        return Icons.payments_outlined;
-      case 'Reseñas':
-        return Icons.star;
-      case 'Recordatorios':
-        return Icons.access_time;
-      case 'Consejos':
-        return Icons.auto_graph;
-      default:
-        return Icons.notifications_none;
-    }
-  }
+  /// Gestiona visual for notificación dentro de esta parte del flujo.
+  _AlertVisual _visualForNotification(_AlertItem notification) {
+    final raw = '${notification.title} ${notification.subtitle}'.toLowerCase();
 
-  Color _iconBgForTab(String tab) {
-    switch (tab) {
-      case 'Solicitudes':
-        return const Color(0xFFFFF5F5);
-      case 'Pagos':
-        return const Color(0xFFF0FDF4);
-      case 'Reseñas':
-        return const Color(0xFFFFFBEB);
-      case 'Recordatorios':
-        return const Color(0xFFFEF2F2);
-      case 'Consejos':
-        return const Color(0xFFF0F9FF);
-      default:
-        return const Color(0xFFF3F4F6);
+    if (raw.contains('finalizada') || raw.contains('finalizó')) {
+      return const _AlertVisual(
+        icon: Icons.verified_rounded,
+        background: Color(0xFFDCFCE7),
+        foreground: Color(0xFF166534),
+      );
     }
+    if (raw.contains('recordatorio') ||
+        raw.contains('entrega') ||
+        raw.contains('finaliza pronto')) {
+      return const _AlertVisual(
+        icon: Icons.alarm_on_rounded,
+        background: Color(0xFFFFEDD5),
+        foreground: Color(0xFF9A3412),
+      );
+    }
+    if (raw.contains('pago') || raw.contains('transferencia')) {
+      return const _AlertVisual(
+        icon: Icons.payments_rounded,
+        background: Color(0xFFDBEAFE),
+        foreground: Color(0xFF1D4ED8),
+      );
+    }
+    if (raw.contains('reseña') ||
+        raw.contains('resena') ||
+        raw.contains('calificacion')) {
+      return const _AlertVisual(
+        icon: Icons.rate_review_rounded,
+        background: Color(0xFFFEF3C7),
+        foreground: Color(0xFF92400E),
+      );
+    }
+    if (raw.contains('solicitud') || raw.contains('reserva')) {
+      return const _AlertVisual(
+        icon: Icons.assignment_turned_in_rounded,
+        background: Color(0xFFE0E7FF),
+        foreground: Color(0xFF4338CA),
+      );
+    }
+    if (raw.contains('consejo') || raw.contains('tip')) {
+      return const _AlertVisual(
+        icon: Icons.lightbulb_rounded,
+        background: Color(0xFFE0F2FE),
+        foreground: Color(0xFF0C4A6E),
+      );
+    }
+
+    return const _AlertVisual(
+      icon: Icons.notifications_active_rounded,
+      background: Color(0xFFF3F4F6),
+      foreground: Color(0xFF374151),
+    );
   }
 }
 
+/// Define la responsabilidad de `_AlertVisual` dentro de este módulo.
+class _AlertVisual {
+  const _AlertVisual({
+    required this.icon,
+    required this.background,
+    required this.foreground,
+  });
+
+  final IconData icon;
+  final Color background;
+  final Color foreground;
+}
+
+/// Define la responsabilidad de `_AlertItem` dentro de este módulo.
 class _AlertItem {
   _AlertItem({
     required this.id,

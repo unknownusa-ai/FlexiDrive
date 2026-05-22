@@ -6,6 +6,7 @@ import '../datasources/home_api_service.dart';
 
 /// Implementación del repositorio de home
 class HomeRepositoryImpl implements HomeRepositoryPort {
+  /// Crea una instancia y prepara el estado inicial de `HomeRepositoryImpl`.
   HomeRepositoryImpl({
     HomeLocalStorage? localStorage,
     HomeApiService? apiService,
@@ -40,6 +41,7 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
         ),
       ];
 
+  /// Inicializa el flujo de initialize antes de su uso.
   @override
   Future<void> initialize() async {
     // Verificar si existe contenido guardado
@@ -53,6 +55,7 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
     }
   }
 
+  /// Obtiene la información asociada a obtener inicio contenido.
   @override
   Future<HomeContent> getHomeContent() async {
     // Intentar obtener de local primero
@@ -73,12 +76,15 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
         );
   }
 
+  /// Obtiene la información asociada a obtener visible sections.
   @override
   Future<List<HomeSection>> getVisibleSections() async {
     final content = await getHomeContent();
-    return content.visibleSections..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+    return content.visibleSections
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
   }
 
+  /// Obtiene la información asociada a obtener section por id.
   @override
   Future<HomeSection?> getSectionById(String sectionId) async {
     final content = await getHomeContent();
@@ -89,6 +95,7 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
     }
   }
 
+  /// Actualiza el estado relacionado con actualizar section.
   @override
   Future<void> updateSection(HomeSection section) async {
     final content = await getHomeContent();
@@ -102,6 +109,7 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
     }
   }
 
+  /// Alternar section visibility esta parte del flujo de trabajo.
   @override
   Future<void> toggleSectionVisibility(String sectionId, bool isVisible) async {
     final section = await getSectionById(sectionId);
@@ -111,6 +119,7 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
     }
   }
 
+  /// Gestiona reorder sections dentro de esta parte del flujo.
   @override
   Future<void> reorderSections(List<String> sectionIds) async {
     final content = await getHomeContent();
@@ -127,20 +136,22 @@ class HomeRepositoryImpl implements HomeRepositoryPort {
     await _localStorage.saveContent(updatedContent);
   }
 
+  /// Obtiene la información asociada a obtener usuario greeting.
   @override
   Future<String?> getUserGreeting(int userId) async {
-    // Intentar obtener de API primero
     var greeting = await _apiService.getUserGreeting(userId);
     // Fallback a saludo genérico
     greeting ??= '¡Bienvenido!';
     return greeting;
   }
 
+  /// Gestiona verificación de new notificaciones dentro de esta parte del flujo.
   @override
   Future<bool> hasNewNotifications(int userId) async {
     return _apiService.hasNewNotifications(userId);
   }
 
+  /// Gestiona refrescar contenido dentro de esta parte del flujo.
   @override
   Future<HomeContent> refreshContent() async {
     await _localStorage.clearCache();

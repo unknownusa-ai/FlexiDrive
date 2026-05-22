@@ -1,11 +1,14 @@
 import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
 import 'package:flexidrive/features/catalogs/domain/ports/repositorio_catalogos_puerto.dart';
 
+/// Define la responsabilidad de `CatalogAccessUseCase` dentro de este módulo.
 class CatalogAccessUseCase {
+  /// Crea una instancia y prepara el estado inicial de `CatalogAccessUseCase`.
   CatalogAccessUseCase(this._repository);
 
   final RepositorioCatalogosPuerto _repository;
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() => _repository.inicializar();
 
   List<IdentificationTypeModel> get identificationTypes {

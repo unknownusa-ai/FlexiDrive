@@ -6,6 +6,7 @@ import '../datasources/profile_api_service.dart';
 
 /// Implementación del repositorio de perfil
 class ProfileRepositoryImpl implements ProfileRepositoryPort {
+  /// Crea una instancia y prepara el estado inicial de `ProfileRepositoryImpl`.
   ProfileRepositoryImpl({
     ProfileLocalStorage? localStorage,
     ProfileApiService? apiService,
@@ -15,16 +16,19 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
   final ProfileLocalStorage _localStorage;
   final ProfileApiService _apiService;
 
+  /// Inicializa el flujo de initialize antes de su uso.
   @override
   Future<void> initialize() async {
     // Inicialización si es necesaria
   }
 
+  /// Obtiene la información asociada a obtener actual perfil.
   @override
   Future<UserProfile?> getCurrentProfile() async {
     return _localStorage.getCurrentProfile();
   }
 
+  /// Obtiene la información asociada a obtener perfil por id.
   @override
   Future<UserProfile?> getProfileById(int userId) async {
     // Intentar obtener de local primero
@@ -41,9 +45,9 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     return profile;
   }
 
+  /// Actualiza el estado relacionado con actualizar perfil.
   @override
   Future<UserProfile> updateProfile(UserProfile profile) async {
-    // Actualizar en API primero
     final updatedProfile = await _apiService.updateProfile(profile);
 
     // Guardar localmente
@@ -53,6 +57,7 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     return profileToSave;
   }
 
+  /// Actualiza el estado relacionado con actualizar avatar.
   @override
   Future<String?> updateAvatar(int userId, String imagePath) async {
     final avatarUrl = await _apiService.updateAvatar(userId, imagePath);
@@ -64,9 +69,9 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     return avatarUrl;
   }
 
+  /// Obtiene la información asociada a obtener perfil estadísticas.
   @override
   Future<ProfileStats> getProfileStats(int userId) async {
-    // Intentar obtener de API primero
     var stats = await _apiService.getStats(userId);
 
     // Si falla API, usar local
@@ -81,6 +86,7 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     return stats;
   }
 
+  /// Alternar usuario modo esta parte del flujo de trabajo.
   @override
   Future<void> toggleUserMode(int userId, bool canPublish) async {
     final success = await _apiService.toggleUserMode(userId, canPublish);
@@ -94,6 +100,7 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     }
   }
 
+  /// Gestiona can usuario publish dentro de esta parte del flujo.
   @override
   Future<bool> canUserPublish(int userId) async {
     final profile = await getProfileById(userId);
@@ -117,6 +124,7 @@ class ProfileRepositoryImpl implements ProfileRepositoryPort {
     }
   }
 
+  /// Gestiona clear perfil dentro de esta parte del flujo.
   @override
   Future<void> clearProfile() async {
     final currentProfile = await _localStorage.getCurrentProfile();

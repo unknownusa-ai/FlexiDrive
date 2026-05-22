@@ -14,10 +14,17 @@ import 'publicar_vehiculo_page.dart';
 // PÃ¡gina principal del arrendador
 // Dashboard que muestra los Vehículos del arrendador y estadÃ­sticas
 class PrincipalArrendatarioPage extends StatefulWidget {
-  const PrincipalArrendatarioPage({super.key, this.refreshToken = 0});
+  /// Crea una instancia y prepara el estado inicial de `PrincipalArrendatarioPage`.
+  const PrincipalArrendatarioPage({
+    super.key,
+    this.refreshToken = 0,
+    this.onOpenRequests,
+  });
 
   final int refreshToken;
+  final VoidCallback? onOpenRequests;
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<PrincipalArrendatarioPage> createState() =>
       _PrincipalArrendatarioPageState();
@@ -46,12 +53,14 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
   // Indica si se estÃ¡n cargando los Vehículos
   bool _isLoading = true;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _cargarVehiculos();
   }
 
+  /// Gestiona did actualizar widget dentro de esta parte del flujo.
   @override
   void didUpdateWidget(covariant PrincipalArrendatarioPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -60,6 +69,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     }
   }
 
+  /// Carga los datos necesarios para cargar vehiculos.
   Future<void> _cargarVehiculos() async {
     if (mounted) {
       setState(() {
@@ -91,15 +101,14 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
           _asInt(user['usuario_id'] ?? user['id']): user,
       };
 
-      final ownerPublications = _publicationDb.publications
-          .where((publication) {
-            if (!publication.active) return false;
-            if (publication.userId != currentUser.id) return false;
-            final owner = usersById[publication.userId];
-            if (owner == null) return false;
-            return owner['puede_publicar'] == true;
-          })
-          .toList();
+      final ownerPublications =
+          _publicationDb.publications.where((publication) {
+        if (!publication.active) return false;
+        if (publication.userId != currentUser.id) return false;
+        final owner = usersById[publication.userId];
+        if (owner == null) return false;
+        return owner['puede_publicar'] == true;
+      }).toList();
       final ownerPublicationIds =
           ownerPublications.map((publication) => publication.id).toSet();
 
@@ -211,6 +220,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -267,6 +277,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(BuildContext context, bool isSmallPhone) {
     final topPadding = MediaQuery.of(context).padding.top;
     return Container(
@@ -449,6 +460,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPendingRequestCard(BuildContext context, bool isSmallPhone) {
     final theme = Theme.of(context);
     final hasPending = _pendingRequests > 0;
@@ -461,54 +473,59 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
         ? 'Revisa y acepta solicitudes de renta'
         : 'No tienes solicitudes por revisar';
 
-    return Container(
-      padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: titleColor,
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: hasPending ? widget.onOpenRequests : null,
+      child: Container(
+        padding: EdgeInsets.all(isSmallPhone ? 12 : 14),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: titleColor,
+                shape: BoxShape.circle,
+              ),
+              child:
+                  const Icon(Icons.access_time, color: Colors.white, size: 22),
             ),
-            child: const Icon(Icons.access_time, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titleText,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: titleColor,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titleText,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: titleColor,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitleText,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitleText,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right, color: titleColor, size: 24),
-        ],
+            Icon(Icons.chevron_right, color: titleColor, size: 24),
+          ],
+        ),
       ),
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPublishedHeader(BuildContext context, bool isSmallPhone) {
     final theme = Theme.of(context);
     return Row(
@@ -731,6 +748,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildRentInfoText(BuildContext context, String rentInfo) {
     final theme = Theme.of(context);
     // Extraer el nombre del texto "Rentado a [Nombre] hasta el [fecha]"
@@ -781,6 +799,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTipsCard(BuildContext context, bool isSmallPhone) {
     final theme = Theme.of(context);
     return Container(
@@ -813,6 +832,7 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Gestiona tip item dentro de esta parte del flujo.
   Widget _tipItem(BuildContext context, String text) {
     final theme = Theme.of(context);
     return Text(
@@ -824,37 +844,44 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     );
   }
 
+  /// Gestiona calcular saldo dentro de esta parte del flujo.
   int _calcularSaldo() {
     // Saldo disponible = ganancias totales - un estimado de retenciÃ³n
     final ganancias = _calcularGanancias();
     return (ganancias * 0.7).round();
   }
 
+  /// Gestiona calcular rentas activas dentro de esta parte del flujo.
   int _calcularRentasActivas() {
     return _misVehiculos.where((v) => v['estado'] == 'RENTADO').length;
   }
 
+  /// Gestiona calcular ganancias dentro de esta parte del flujo.
   int _calcularGanancias() {
     return _misVehiculos.fold(0, (sum, v) => sum + (v['ganado'] as int? ?? 0));
   }
 
+  /// Convierte el valor a entero de forma segura.
   int _asInt(dynamic value) {
     if (value is int) return value;
     if (value is double) return value.round();
     return int.tryParse('$value') ?? 0;
   }
 
+  /// Gestiona format rating dentro de esta parte del flujo.
   String _formatRating(dynamic value) {
     final parsed = value is num ? value.toDouble() : double.tryParse('$value');
     return (parsed ?? 5.0).toStringAsFixed(1);
   }
 
+  /// Gestiona extract first name dentro de esta parte del flujo.
   String _extractFirstName(String fullName) {
     final trimmed = fullName.trim();
     if (trimmed.isEmpty) return 'Invitado';
     return trimmed.split(' ').first;
   }
 
+  /// Gestiona resolve usuario name dentro de esta parte del flujo.
   String _resolveUserName(Map<String, dynamic> user) {
     final fullName =
         '${user['nombre_completo'] ?? user['full_name'] ?? ''}'.trim();
@@ -864,12 +891,14 @@ class _PrincipalArrendatarioPageState extends State<PrincipalArrendatarioPage> {
     return 'Usuario';
   }
 
+  /// Gestiona format date dentro de esta parte del flujo.
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     return '$day/$month/${date.year}';
   }
 
+  /// Gestiona format number dentro de esta parte del flujo.
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+$)'),

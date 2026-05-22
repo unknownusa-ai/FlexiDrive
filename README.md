@@ -55,6 +55,13 @@ Sistema de autenticación
 
 Módulo de cálculo de tarifas por hora
 
+## 📚 Documentación Técnica
+
+- Arquitectura hexagonal y reglas de capas:
+  - `docs/HEXAGONAL_ARCHITECTURE.md`
+- Inventario completo de clases del proyecto:
+  - `docs/CLASS_INDEX.md`
+
 # 🛠️ Tecnologías Utilizadas
 
 Flutter

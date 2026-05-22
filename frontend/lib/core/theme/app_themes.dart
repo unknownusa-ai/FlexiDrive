@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 // Clase que contiene todos los temas de la aplicación
 // Define la paleta de colores y estilos tipográficos
 class AppThemes {
-  // ── Brand ──────────────────────────────────────────────────────
+  // ── marca ──────────────────────────────────────────────────────
   // Colores principales de la marca
   static const Color primaryIndigo = Color(0xFF4F46E5);
   static const Color primaryPurple = Color(0xFF7C3AED);
@@ -35,6 +35,7 @@ class AppThemes {
   static TextTheme _textTheme(Color body) =>
       GoogleFonts.poppinsTextTheme().apply(bodyColor: body, displayColor: body);
 
+  /// Gestiona input tema dentro de esta parte del flujo.
   static InputDecorationTheme _inputTheme(Color fill, Color border) =>
       InputDecorationTheme(
         filled: true,

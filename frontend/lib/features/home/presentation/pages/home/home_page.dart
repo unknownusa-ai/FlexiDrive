@@ -1,7 +1,10 @@
 // Importamos Flutter - lo básico para la UI
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 // Fuentes bonitas de Google
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // El menú principal con las pestañas
 import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 // Para saber quién está logueado
@@ -20,6 +23,7 @@ import 'package:flexidrive/features/reviews/application/use_cases/review_access_
 // Reservas que hacen los usuarios
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
+import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
 import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
 import 'package:flexidrive/core/utils/vehicle_image_resolver.dart';
@@ -31,8 +35,10 @@ import 'package:flexidrive/features/reviews/domain/entities/review_models.dart';
 
 // Página principal - lo primero que ve el usuario
 class HomePage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `HomePage`.
   const HomePage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -40,6 +46,7 @@ class HomePage extends StatefulWidget {
 // Estado de la página principal
 class _HomePageState extends State<HomePage> {
   static const String _allCitiesOption = 'Todas las ciudades';
+  static const _reminderKeysStorage = 'reservation_reminder_keys_v1';
   // Repositorio para manejar usuarios
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
@@ -55,6 +62,8 @@ class _HomePageState extends State<HomePage> {
       InjectionContainer.instance.reservationAccessUseCase;
   final NotificationAccessUseCase _notificationDb =
       InjectionContainer.instance.notificationAccessUseCase;
+  final CatalogAccessUseCase _catalogDb =
+      InjectionContainer.instance.catalogAccessUseCase;
 
   // Filtro por categoría de carro
   String _selectedCategory = 'Todos';
@@ -88,6 +97,9 @@ class _HomePageState extends State<HomePage> {
   // Lista de ciudades disponibles
   List<String> _cities = [];
   bool _hasUnreadNotifications = false;
+  Timer? _notificationSyncTimer;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _allVehiclesSectionKey = GlobalKey();
 
   // Caché de calificaciones: vehicleId -> {rating, count}
   // Guardamos esto para no calcular todo el tiempo
@@ -109,7 +121,7 @@ class _HomePageState extends State<HomePage> {
   String get _citySectionLabel =>
       _isAllCitiesSelected ? 'todas las ciudades' : _selectedCity;
 
-  // Dark-mode aware palette helpers
+  // Dark-modo aware palette helpers
   Color get _cardBg => _isDark ? const Color(0xFF161827) : Colors.white;
   Color get _borderColor =>
       _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
@@ -120,7 +132,7 @@ class _HomePageState extends State<HomePage> {
   Color get _textSub =>
       _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
 
-  // ─── INIT STATE - Cargar datos desde JSON ─────────────────────────
+  // ─── inicialización estado - Cargar datos desde JSON ─────────────────────────
   @override
   void initState() {
     super.initState();
@@ -132,19 +144,51 @@ class _HomePageState extends State<HomePage> {
     _cargarCiudades();
     _notificationDb.changes.addListener(_onNotificationsChanged);
     _cargarEstadoNotificaciones();
+    _notificationSyncTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      _syncAndRefreshNotifications();
+    });
+    _syncAndRefreshNotifications();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
+    _notificationSyncTimer?.cancel();
     _notificationDb.changes.removeListener(_onNotificationsChanged);
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  /// Gestiona scroll a all vehicles section dentro de esta parte del flujo.
+  void _scrollToAllVehiclesSection() {
+    final sectionContext = _allVehiclesSectionKey.currentContext;
+    if (sectionContext == null) return;
+
+    Scrollable.ensureVisible(
+      sectionContext,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+      alignment: 0.05,
+    );
+  }
+
+  /// Gestiona on notificaciones changed dentro de esta parte del flujo.
   void _onNotificationsChanged() {
     _cargarEstadoNotificaciones();
   }
 
+  /// Sincronizar y refrescar notificaciones esta parte del flujo de trabajo.
+  Future<void> _syncAndRefreshNotifications() async {
+    final currentUser = await _accountRepository.getCurrentUser();
+    if (currentUser != null) {
+      await _syncReservationReminders(currentUser.id);
+    }
+    await _cargarEstadoNotificaciones();
+  }
+
+  /// Carga los datos necesarios para cargar estado notificaciones.
   Future<void> _cargarEstadoNotificaciones() async {
     await _notificationDb.loadIfNeeded();
     final currentUser = await _accountRepository.getCurrentUser();
@@ -168,6 +212,129 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Sincronizar reserva reminders esta parte del flujo de trabajo.
+  Future<void> _syncReservationReminders(int currentUserId) async {
+    await Future.wait([
+      _catalogDb.loadIfNeeded(),
+      _reservationDb.loadIfNeeded(),
+      _publicationDb.loadIfNeeded(),
+    ]);
+
+    final prefs = await SharedPreferences.getInstance();
+    final sentKeys =
+        (prefs.getStringList(_reminderKeysStorage) ?? <String>[]).toSet();
+    final reminderCategoryId = _resolveReminderCategoryId();
+    final nowColombia = ColombiaTime.now();
+    var updated = false;
+
+    final publicationsById = {
+      for (final publication in _publicationDb.publications)
+        publication.id: publication,
+    };
+
+    final userOwnedPublicationIds = _publicationDb.publications
+        .where((publication) => publication.userId == currentUserId)
+        .map((publication) => publication.id)
+        .toSet();
+
+    for (final reservation in _reservationDb.reservations) {
+      if (reservation.statusId == 3) continue;
+
+      final end = ColombiaTime.toColombia(reservation.endDate);
+      final minutesToEnd = end.difference(nowColombia).inMinutes;
+      final hasEnded = !end.isAfter(nowColombia);
+      final publication = publicationsById[reservation.publicationId];
+      final ownerId = publication?.userId;
+
+      if (reservation.userId == currentUserId) {
+        if (hasEnded) {
+          final key = 'renter_ended_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Reserva finalizada ✅',
+              description:
+                  'Tu reserva ${reservation.code} ya finalizó. Gracias por usar FlexiDrive.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        } else if (minutesToEnd > 0 && minutesToEnd <= 30) {
+          final key = 'renter_ending_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Recordatorio de reserva ⏰',
+              description:
+                  'Tu reserva ${reservation.code} finaliza pronto. Queda ${_formatRemainingTime(minutesToEnd)}.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        }
+      }
+
+      if (ownerId != null &&
+          ownerId == currentUserId &&
+          userOwnedPublicationIds.contains(reservation.publicationId)) {
+        if (hasEnded) {
+          final key = 'owner_ended_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Renta finalizada ✅',
+              description:
+                  'La renta ${reservation.code} de tu vehículo ya finalizó.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        } else if (minutesToEnd > 0 && minutesToEnd <= 30) {
+          final key = 'owner_ending_${reservation.id}';
+          if (!sentKeys.contains(key)) {
+            await _notificationDb.addNotification(
+              userId: currentUserId,
+              categoryId: reminderCategoryId,
+              subject: 'Recordatorio de entrega 🚗',
+              description:
+                  'La renta ${reservation.code} de tu vehículo finaliza pronto. Queda ${_formatRemainingTime(minutesToEnd)}.',
+            );
+            sentKeys.add(key);
+            updated = true;
+          }
+        }
+      }
+    }
+
+    if (updated) {
+      await prefs.setStringList(_reminderKeysStorage, sentKeys.toList());
+    }
+  }
+
+  /// Gestiona resolve reminder category id dentro de esta parte del flujo.
+  int _resolveReminderCategoryId() {
+    for (final category in _catalogDb.notificationCategories) {
+      final name = category.name.toLowerCase();
+      if (name.contains('recordatorio')) return category.id;
+    }
+    return _catalogDb.notificationCategories.isEmpty
+        ? 1
+        : _catalogDb.notificationCategories.first.id;
+  }
+
+  /// Gestiona format remaining time dentro de esta parte del flujo.
+  String _formatRemainingTime(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final remaining = minutes % 60;
+    if (remaining == 0) return '$hours h';
+    return '$hours h $remaining min';
+  }
+
+  /// Carga los datos necesarios para cargar ciudades.
   Future<void> _cargarCiudades() async {
     final cities = await _accountRepository.getReferenceCities();
     if (!mounted) return;
@@ -182,14 +349,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Gestiona contar vehiculos por ciudad dentro de esta parte del flujo.
   int _contarVehiculosPorCiudad(String city) {
     if (city == _allCitiesOption) return _vehiculos.length;
     final normalizedCity = _normalizeCity(city);
     return _vehiculos
-        .where((v) => _normalizeCity('${v['ubicacion'] ?? ''}') == normalizedCity)
+        .where(
+            (v) => _normalizeCity('${v['ubicacion'] ?? ''}') == normalizedCity)
         .length;
   }
 
+  /// Gestiona normalize ciudad dentro de esta parte del flujo.
   String _normalizeCity(String value) {
     return value
         .trim()
@@ -252,6 +422,7 @@ class _HomePageState extends State<HomePage> {
     return true;
   }
 
+  /// Gestiona filtrar vehiculos dentro de esta parte del flujo.
   void _filtrarVehiculos() {
     var filtrados = _vehiculos.where((v) {
       // Filtro por ciudad
@@ -294,6 +465,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Gestiona select fecha desde dentro de esta parte del flujo.
   Future<void> _selectFechaDesde() async {
     final nowCo = ColombiaTime.now();
     final firstAllowed = DateTime(nowCo.year, nowCo.month, nowCo.day);
@@ -326,6 +498,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Gestiona select fecha hasta dentro de esta parte del flujo.
   Future<void> _selectFechaHasta() async {
     final nowCo = ColombiaTime.now();
     final firstAllowed = DateTime(nowCo.year, nowCo.month, nowCo.day);
@@ -354,6 +527,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Gestiona format fecha dentro de esta parte del flujo.
   String _formatFecha(DateTime fecha) {
     final meses = [
       'Ene',
@@ -372,6 +546,7 @@ class _HomePageState extends State<HomePage> {
     return '${fecha.day} ${meses[fecha.month - 1]}';
   }
 
+  /// Carga los datos necesarios para cargar usuario actual.
   Future<void> _cargarUsuarioActual() async {
     final currentUser = await _accountRepository.getCurrentUser();
     if (!mounted) return;
@@ -486,6 +661,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -525,7 +701,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── HEADER ──────────────────────────────────────────────────────
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader() {
     return Container(
       decoration: const BoxDecoration(
@@ -676,6 +852,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSearchBar() {
     final theme = Theme.of(context);
     return Container(
@@ -979,6 +1156,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCategoryButton(String category, String? emoji) {
     final isSelected = _selectedCategory == category;
     return GestureDetector(
@@ -1040,7 +1218,7 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w700,
                       color: _textPrimary)),
               GestureDetector(
-                onTap: () {},
+                onTap: _scrollToAllVehiclesSection,
                 child: Text('Ver todos',
                     style: GoogleFonts.inter(
                         color: const Color(0xFF4F46E5),
@@ -1098,6 +1276,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Obtiene la información asociada a obtener tipo color.
   Color _getTypeColor(String categoria) {
     switch (categoria) {
       case 'SUV':
@@ -1113,10 +1292,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Gestiona normalize vehicle text dentro de esta parte del flujo.
   String _normalizeVehicleText(dynamic value) {
     return '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
+  /// Gestiona vehicle display name dentro de esta parte del flujo.
   String _vehicleDisplayName(Map<String, dynamic> v) {
     final marca = _normalizeVehicleText(v['marca']);
     final rawModel = _normalizeVehicleText(v['modelo'] ?? v['linea']);
@@ -1140,6 +1321,7 @@ class _HomePageState extends State<HomePage> {
     return base;
   }
 
+  /// Gestiona resolve vehicle imagen dentro de esta parte del flujo.
   String _resolveVehicleImage(Map<String, dynamic> vehicle) {
     return VehicleImageResolver.resolveFromVehicle(
       vehicle,
@@ -1350,83 +1532,89 @@ class _HomePageState extends State<HomePage> {
   Widget _buildAllVehiclesSection() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
-          child: Row(children: [
-            const Text('🚗', style: TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
-            Expanded(
-                child: Text('Vehículos en $_citySectionLabel',
-                    style: GoogleFonts.poppins(
-                        fontSize: isSmallPhone ? 16 : 18,
-                        fontWeight: FontWeight.w700,
-                        color: _textPrimary))),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text('${_vehiculosFiltrados.length} disponibles',
-                  style: GoogleFonts.inter(
-                      color: _textSub,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500)),
-            ),
-          ]),
-        ),
-        const SizedBox(height: 14),
-        if (_isLoading)
-          const Center(
-              child: Padding(
-            padding: EdgeInsets.all(20),
-            child: CircularProgressIndicator(),
-          ))
-        else if (_vehiculosFiltrados.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                children: [
-                  Icon(Icons.search_off, size: 48, color: _textSub),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No se encontraron vehículos',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: _textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Intenta con otra búsqueda o ciudad',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: _textSub,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
+    return Container(
+      key: _allVehiclesSectionKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
-            child: Column(
-                children: _vehiculosFiltrados
-                    .map((v) => _buildVehicleListItem(v, isSmallPhone))
-                    .toList()),
+            child: Row(children: [
+              const Text('🚗', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: Text('Vehículos en $_citySectionLabel',
+                      style: GoogleFonts.poppins(
+                          fontSize: isSmallPhone ? 16 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: _textPrimary))),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('${_vehiculosFiltrados.length} disponibles',
+                    style: GoogleFonts.inter(
+                        color: _textSub,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500)),
+              ),
+            ]),
           ),
-        const SizedBox(height: 20),
-        _buildCompareSection(isSmallPhone),
-      ],
+          const SizedBox(height: 14),
+          if (_isLoading)
+            const Center(
+                child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ))
+          else if (_vehiculosFiltrados.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    Icon(Icons.search_off, size: 48, color: _textSub),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No se encontraron vehículos',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Intenta con otra búsqueda o ciudad',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: _textSub,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: isSmallPhone ? 16 : 20),
+              child: Column(
+                  children: _vehiculosFiltrados
+                      .map((v) => _buildVehicleListItem(v, isSmallPhone))
+                      .toList()),
+            ),
+          const SizedBox(height: 20),
+          _buildCompareSection(isSmallPhone),
+        ],
+      ),
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVehicleListItem(Map<String, dynamic> v, bool isSmallPhone) {
     final vehicleId = v['id'] as int;
     final name = _vehicleDisplayName(v);
@@ -1702,6 +1890,7 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSUVSection() {
     final suvs =
         _vehiculosFiltrados.where((v) => v['categoria'] == 'SUV').toList();
@@ -1723,6 +1912,7 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCompactoSection() {
     final compactos =
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Compacto').toList();
@@ -1745,12 +1935,13 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPremiumSection() {
     final premium =
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Premium').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader(
-          '✨', 'Premium en $_citySectionLabel', '${premium.length} disponibles'),
+      _buildCategoryHeader('✨', 'Premium en $_citySectionLabel',
+          '${premium.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1767,12 +1958,13 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPickupSection() {
     final pickups =
         _vehiculosFiltrados.where((v) => v['categoria'] == 'Pickup').toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildCategoryHeader(
-          '🛻', 'Pickup en $_citySectionLabel', '${pickups.length} disponibles'),
+      _buildCategoryHeader('🛻', 'Pickup en $_citySectionLabel',
+          '${pickups.length} disponibles'),
       const SizedBox(height: 16),
       if (_isLoading)
         const Center(child: CircularProgressIndicator())
@@ -1788,6 +1980,7 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEmptyCategoryMessage(String message) {
     return Center(
       child: Padding(
@@ -1803,6 +1996,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCategoryHeader(String emoji, String title, String count) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1829,6 +2023,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHorizontalCardFromJson(Map<String, dynamic> v) {
     final vehicleId = v['id'] as int;
     final name = _vehicleDisplayName(v);
@@ -1973,7 +2168,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── CITY SELECTOR ───────────────────────────────────────────────
+  // ─── ciudad SELECTOR ───────────────────────────────────────────────
   void _showCitySelector() {
     final sheetBg = _isDark ? const Color(0xFF161827) : Colors.white;
     final inputBg = _isDark ? const Color(0xFF1F2235) : Colors.grey.shade100;
@@ -2098,6 +2293,8 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         setState(() => _selectedCity = cityName);
                         _filtrarVehiculos();
+
+                        /// Crea una instancia y prepara el estado inicial de `Navigator`.
                         Navigator.pop(context);
                       },
                       borderRadius: BorderRadius.circular(14),
@@ -2178,6 +2375,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Gestiona format precio dentro de esta parte del flujo.
   String _formatPrice(int price) => price
       .toString()
       .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]}.');

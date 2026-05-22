@@ -3,6 +3,7 @@ import '../../domain/ports/home_repository_port.dart';
 
 /// Caso de uso para refrescar el contenido de home
 class RefreshHomeContentUseCase {
+  /// Crea una instancia y prepara el estado inicial de `RefreshHomeContentUseCase`.
   RefreshHomeContentUseCase(this._repository);
 
   final HomeRepositoryPort _repository;

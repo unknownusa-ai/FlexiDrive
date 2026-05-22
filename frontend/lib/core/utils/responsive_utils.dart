@@ -29,11 +29,11 @@ class ResponsiveUtils {
   static double screenHeight(BuildContext context) =>
       MediaQuery.of(context).size.height;
 
-  // Obtiene el safe area superior (notch, barra de estado)
+  // Obtiene el segura area superior (notch, barra de estado)
   static double safeAreaTop(BuildContext context) =>
       MediaQuery.of(context).padding.top;
 
-  // Obtiene el safe area inferior (botones de navegacion)
+  // Obtiene el segura area inferior (botones de navegacion)
   static double safeAreaBottom(BuildContext context) =>
       MediaQuery.of(context).padding.bottom;
 
@@ -84,6 +84,7 @@ class ResponsiveLayout extends StatelessWidget {
   final Widget? tablet; // Widget para tablets (opcional)
   final Widget? desktop; // Widget para escritorio (opcional)
 
+  /// Crea una instancia y prepara el estado inicial de `ResponsiveLayout`.
   const ResponsiveLayout({
     super.key,
     required this.mobile,
@@ -91,6 +92,7 @@ class ResponsiveLayout extends StatelessWidget {
     this.desktop,
   });
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     if (context.isDesktop && desktop != null) {
@@ -110,6 +112,7 @@ class ConstrainedContainer extends StatelessWidget {
   final double maxWidth; // Ancho maximo (default 600px)
   final EdgeInsetsGeometry? padding; // Padding opcional
 
+  /// Crea una instancia y prepara el estado inicial de `ConstrainedContainer`.
   const ConstrainedContainer({
     super.key,
     required this.child,
@@ -117,6 +120,7 @@ class ConstrainedContainer extends StatelessWidget {
     this.padding,
   });
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -137,12 +141,14 @@ class ResponsiveSizedBox extends StatelessWidget {
   final double height;
   final double? width;
 
+  /// Crea una instancia y prepara el estado inicial de `ResponsiveSizedBox`.
   const ResponsiveSizedBox({
     super.key,
     required this.height,
     this.width,
   });
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -159,6 +165,7 @@ class ResponsivePadding extends StatelessWidget {
   final double horizontal; // Valor base para padding horizontal
   final double vertical; // Padding vertical (no es adaptativo)
 
+  /// Crea una instancia y prepara el estado inicial de `ResponsivePadding`.
   const ResponsivePadding({
     super.key,
     required this.child,
@@ -166,6 +173,7 @@ class ResponsivePadding extends StatelessWidget {
     this.vertical = 0,
   });
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Padding(

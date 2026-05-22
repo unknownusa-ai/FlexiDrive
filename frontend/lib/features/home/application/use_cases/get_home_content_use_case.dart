@@ -3,6 +3,7 @@ import '../../domain/ports/home_repository_port.dart';
 
 /// Caso de uso para obtener el contenido de la página home
 class GetHomeContentUseCase {
+  /// Crea una instancia y prepara el estado inicial de `GetHomeContentUseCase`.
   GetHomeContentUseCase(this._repository);
 
   final HomeRepositoryPort _repository;

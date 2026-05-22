@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/security/domain/entities/security_models.dart';
 
+/// Define la responsabilidad de `LocalSecurityDb` dentro de este módulo.
 class LocalSecurityDb {
+  /// Crea una instancia y prepara el estado inicial de `LocalSecurityDb`.
   LocalSecurityDb._();
 
   static final LocalSecurityDb instance = LocalSecurityDb._();
@@ -16,6 +18,7 @@ class LocalSecurityDb {
   final List<UserSecurityModel> userSecurities = [];
   final List<UserSessionModel> userSessions = [];
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
 
@@ -59,6 +62,7 @@ class LocalSecurityDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
@@ -86,7 +90,9 @@ class LocalSecurityDb {
       );
     } catch (_) {
       // Fallback local: mantener la preferencia de seguridad del usuario.
-      final localId = current.isEmpty ? DateTime.now().millisecondsSinceEpoch : current.first.id;
+      final localId = current.isEmpty
+          ? DateTime.now().millisecondsSinceEpoch
+          : current.first.id;
       updated = UserSecurityModel(
         id: localId,
         userId: userId,
@@ -117,6 +123,7 @@ class LocalSecurityDb {
     );
   }
 
+  /// Carga los cambios locales sobrescritos de security.
   Future<List<UserSecurityModel>> _loadSecurityOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_securityOverridesKey);

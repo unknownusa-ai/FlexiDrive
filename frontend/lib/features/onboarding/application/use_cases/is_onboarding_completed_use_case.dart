@@ -2,6 +2,7 @@ import '../../domain/ports/onboarding_repository_port.dart';
 
 /// Caso de uso para verificar si el onboarding está completado
 class IsOnboardingCompletedUseCase {
+  /// Crea una instancia y prepara el estado inicial de `IsOnboardingCompletedUseCase`.
   IsOnboardingCompletedUseCase(this._repository);
 
   final OnboardingRepositoryPort _repository;

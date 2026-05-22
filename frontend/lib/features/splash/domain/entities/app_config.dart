@@ -1,5 +1,6 @@
 /// Entidad que representa la configuración de la aplicación
 class AppConfig {
+  /// Crea una instancia y prepara el estado inicial de `AppConfig`.
   const AppConfig({
     required this.hasSeenOnboarding,
     required this.lastVersionOpened,
@@ -41,6 +42,7 @@ class AppConfig {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'has_seen_onboarding': hasSeenOnboarding,
         'last_version_opened': lastVersionOpened,
@@ -51,6 +53,7 @@ class AppConfig {
         'theme_mode': themeMode,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `AppConfig`.
   factory AppConfig.fromJson(Map<String, dynamic> json) {
     return AppConfig(
       hasSeenOnboarding: json['has_seen_onboarding'] as bool? ?? false,

@@ -5,8 +5,7 @@ import '../../domain/entities/profile_stats.dart';
 
 /// Fuente de datos local para almacenar datos de perfil
 class ProfileLocalStorage {
-  ProfileLocalStorage({SharedPreferences? prefs})
-      : _prefs = prefs;
+  ProfileLocalStorage({SharedPreferences? prefs}) : _prefs = prefs;
 
   static const String _profileKey = 'user_profile';
   static const String _statsKey = 'profile_stats';

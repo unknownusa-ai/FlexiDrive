@@ -1,5 +1,6 @@
 import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
 
+/// Define la responsabilidad de `RepositorioPublicacionesPuerto` dentro de este módulo.
 abstract class RepositorioPublicacionesPuerto {
   Future<void> inicializar();
   Future<void> recargar();

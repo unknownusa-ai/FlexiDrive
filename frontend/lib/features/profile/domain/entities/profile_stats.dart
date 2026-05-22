@@ -1,5 +1,6 @@
 /// Entidad que representa las estadísticas del perfil de usuario
 class ProfileStats {
+  /// Crea una instancia y prepara el estado inicial de `ProfileStats`.
   const ProfileStats({
     this.totalRentals = 0,
     this.totalPublications = 0,
@@ -45,6 +46,7 @@ class ProfileStats {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'total_rentals': totalRentals,
         'total_publications': totalPublications,
@@ -56,6 +58,7 @@ class ProfileStats {
         'member_since': memberSince?.toIso8601String(),
       };
 
+  /// Crea una instancia y prepara el estado inicial de `ProfileStats`.
   factory ProfileStats.fromJson(Map<String, dynamic> json) {
     return ProfileStats(
       totalRentals: json['total_rentals'] as int? ?? 0,

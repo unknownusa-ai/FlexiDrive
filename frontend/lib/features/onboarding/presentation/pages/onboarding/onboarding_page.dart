@@ -6,14 +6,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'onboarding_page_rental.dart';
 import 'onboarding_page_map.dart';
 import 'onboarding_page_payment.dart';
-// Pagina de login (despues del onboarding)
+// Pagina de inicio de sesión (despues del onboarding)
 import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
 
 // Pagina de Onboarding - tutorial para nuevos usuarios
 // Muestra 3 pantallas explicando como usar la app
 class OnboardingPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingPage`.
   const OnboardingPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
@@ -32,6 +34,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     OnboardingPagePayment(), // Pagina 3: Metodos de pago
   ];
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     // Liberamos el controlador para evitar memory leaks
@@ -39,7 +42,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     super.dispose();
   }
 
-  // Avanza a la siguiente pagina o va al login
+  // Avanza a la siguiente pagina o va al inicio de sesión
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       // Si no es la ultima, avanza con animacion
@@ -48,20 +51,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Si es la ultima, va al login
+      // Si es la ultima, va al inicio de sesión
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     }
   }
 
-  // Salta el tutorial y va directo al login
+  // Salta el tutorial y va directo al inicio de sesión
   void _skip() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const LoginPage()),
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,6 +163,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
+  /// Obtiene la información asociada a obtener skip color.
   Color _getSkipColor() {
     switch (_currentPage) {
       case 0:

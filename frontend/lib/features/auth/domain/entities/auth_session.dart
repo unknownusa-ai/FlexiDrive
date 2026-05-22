@@ -2,6 +2,7 @@ import 'auth_token.dart';
 
 /// Entidad que representa una sesión de autenticación activa
 class AuthSession {
+  /// Crea una instancia y prepara el estado inicial de `AuthSession`.
   const AuthSession({
     required this.userId,
     required this.token,
@@ -26,12 +27,14 @@ class AuthSession {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'user_id': userId,
         'token': token.toJson(),
         'created_at': createdAt.toIso8601String(),
       };
 
+  /// Crea una instancia y prepara el estado inicial de `AuthSession`.
   factory AuthSession.fromJson(Map<String, dynamic> json) {
     return AuthSession(
       userId: json['user_id'] as int,

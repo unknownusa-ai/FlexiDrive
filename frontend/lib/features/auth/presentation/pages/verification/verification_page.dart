@@ -4,18 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 
+/// Define la responsabilidad de `VerificationPage` dentro de este módulo.
 class VerificationPage extends StatefulWidget {
   final String email;
 
+  /// Crea una instancia y prepara el estado inicial de `VerificationPage`.
   const VerificationPage({
     super.key,
     required this.email,
   });
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<VerificationPage> createState() => _VerificationPageState();
 }
 
+/// Define la responsabilidad de `_VerificationPageState` dentro de este módulo.
 class _VerificationPageState extends State<VerificationPage> {
   final List<TextEditingController> _controllers = List.generate(
     6,
@@ -30,12 +34,14 @@ class _VerificationPageState extends State<VerificationPage> {
   int _resendTimer = 60;
   bool _canResend = false;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _startResendTimer();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -47,12 +53,14 @@ class _VerificationPageState extends State<VerificationPage> {
     super.dispose();
   }
 
+  /// Gestiona start resend timer dentro de esta parte del flujo.
   void _startResendTimer() {
     setState(() {
       _canResend = false;
       _resendTimer = 60;
     });
 
+    /// Crea una instancia y prepara el estado inicial de `Future`.
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted && _resendTimer > 0) {
         setState(() {
@@ -67,6 +75,7 @@ class _VerificationPageState extends State<VerificationPage> {
     });
   }
 
+  /// Gestiona on code changed dentro de esta parte del flujo.
   void _onCodeChanged(int index, String value) {
     if (value.length == 1 && index < 5) {
       _focusNodes[index + 1].requestFocus();
@@ -74,13 +83,14 @@ class _VerificationPageState extends State<VerificationPage> {
       _focusNodes[index - 1].requestFocus();
     }
 
-    // Check if all fields are filled
+    // verificar if all fields are filled
     final code = _controllers.map((c) => c.text).join();
     if (code.length == 6) {
       _verifyCode();
     }
   }
 
+  /// Gestiona verify code dentro de esta parte del flujo.
   void _verifyCode() async {
     setState(() {
       _isVerifying = true;
@@ -97,6 +107,7 @@ class _VerificationPageState extends State<VerificationPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -114,7 +125,6 @@ class _VerificationPageState extends State<VerificationPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: EdgeInsets.fromLTRB(
                 isSmallPhone ? 16 : 24,
@@ -210,7 +220,7 @@ class _VerificationPageState extends State<VerificationPage> {
 
                     SizedBox(height: isSmallPhone ? 4 : 6),
 
-                    // Email
+                    // correo
                     Text(
                       widget.email,
                       textAlign: TextAlign.center,
@@ -267,7 +277,6 @@ class _VerificationPageState extends State<VerificationPage> {
 
                     SizedBox(height: isSmallPhone ? 32 : 40),
 
-                    // Verify button
                     GestureDetector(
                       onTap: _isVerifying ? null : _verifyCode,
                       child: Container(

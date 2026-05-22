@@ -9,7 +9,7 @@ class AuthApiService {
 
   final ApiClient _apiClient;
 
-  /// Realiza login en el servidor
+  /// Realiza inicio de sesión en el servidor
   Future<AuthSession?> login({
     required String email,
     required String password,

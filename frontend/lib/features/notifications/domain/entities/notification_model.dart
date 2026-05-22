@@ -30,6 +30,7 @@ class NotificationModel {
   // Fecha y hora de envío
   final DateTime sentAt;
 
+  /// Crea una instancia y prepara el estado inicial de `NotificationModel`.
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: JsonUtils.asInt(json['notificacion_id']),
@@ -42,6 +43,7 @@ class NotificationModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'notificacion_id': id,
         'usuario_id': userId,

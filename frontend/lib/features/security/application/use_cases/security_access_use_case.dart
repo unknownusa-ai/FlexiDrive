@@ -1,11 +1,14 @@
 import 'package:flexidrive/features/security/domain/entities/security_models.dart';
 import 'package:flexidrive/features/security/domain/ports/repositorio_seguridad_puerto.dart';
 
+/// Define la responsabilidad de `SecurityAccessUseCase` dentro de este módulo.
 class SecurityAccessUseCase {
+  /// Crea una instancia y prepara el estado inicial de `SecurityAccessUseCase`.
   SecurityAccessUseCase(this._repository);
 
   final RepositorioSeguridadPuerto _repository;
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() => _repository.inicializar();
 
   List<UserSecurityModel> get userSecurities {

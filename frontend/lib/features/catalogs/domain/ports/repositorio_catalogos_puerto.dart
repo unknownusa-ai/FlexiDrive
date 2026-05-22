@@ -1,5 +1,6 @@
 import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
 
+/// Define la responsabilidad de `RepositorioCatalogosPuerto` dentro de este módulo.
 abstract class RepositorioCatalogosPuerto {
   Future<void> inicializar();
   List<IdentificationTypeModel> obtenerTiposIdentificacion();

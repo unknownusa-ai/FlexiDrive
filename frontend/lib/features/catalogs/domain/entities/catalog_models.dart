@@ -18,7 +18,7 @@ class IdentificationTypeModel {
   // Descripcion detallada (opcional)
   final String? description;
 
-  // Crea IdentificationTypeModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `IdentificationTypeModel`.
   factory IdentificationTypeModel.fromJson(Map<String, dynamic> json) {
     return IdentificationTypeModel(
       id: JsonUtils.asInt(json['tipo_identificacion_id']),
@@ -52,7 +52,7 @@ class UserTypeModel {
   // Descripcion detallada (opcional)
   final String? description;
 
-  // Crea UserTypeModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `UserTypeModel`.
   factory UserTypeModel.fromJson(Map<String, dynamic> json) {
     return UserTypeModel(
       id: JsonUtils.asInt(json['tipo_usuario_id']),
@@ -83,6 +83,7 @@ class PaymentMethodTypeModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `PaymentMethodTypeModel`.
   factory PaymentMethodTypeModel.fromJson(Map<String, dynamic> json) {
     return PaymentMethodTypeModel(
       id: JsonUtils.asInt(json['tipo_metodo_pago_id']),
@@ -91,6 +92,7 @@ class PaymentMethodTypeModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'tipo_metodo_pago_id': id,
         'nombre': name,
@@ -98,7 +100,9 @@ class PaymentMethodTypeModel {
       };
 }
 
+/// Define la responsabilidad de `BankModel` dentro de este módulo.
 class BankModel {
+  /// Crea una instancia y prepara el estado inicial de `BankModel`.
   const BankModel({
     required this.id,
     required this.name,
@@ -109,6 +113,7 @@ class BankModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `BankModel`.
   factory BankModel.fromJson(Map<String, dynamic> json) {
     return BankModel(
       id: JsonUtils.asInt(json['banco_id']),
@@ -117,6 +122,7 @@ class BankModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'banco_id': id,
         'nombre': name,
@@ -124,7 +130,9 @@ class BankModel {
       };
 }
 
+/// Define la responsabilidad de `CardBrandModel` dentro de este módulo.
 class CardBrandModel {
+  /// Crea una instancia y prepara el estado inicial de `CardBrandModel`.
   const CardBrandModel({
     required this.id,
     required this.name,
@@ -135,6 +143,7 @@ class CardBrandModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `CardBrandModel`.
   factory CardBrandModel.fromJson(Map<String, dynamic> json) {
     return CardBrandModel(
       id: JsonUtils.asInt(json['marca_tarjeta_id']),
@@ -143,6 +152,7 @@ class CardBrandModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'marca_tarjeta_id': id,
         'nombre': name,
@@ -150,7 +160,9 @@ class CardBrandModel {
       };
 }
 
+/// Define la responsabilidad de `PersonTypeModel` dentro de este módulo.
 class PersonTypeModel {
+  /// Crea una instancia y prepara el estado inicial de `PersonTypeModel`.
   const PersonTypeModel({
     required this.id,
     required this.name,
@@ -161,6 +173,7 @@ class PersonTypeModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `PersonTypeModel`.
   factory PersonTypeModel.fromJson(Map<String, dynamic> json) {
     return PersonTypeModel(
       id: JsonUtils.asInt(json['tipo_persona_id']),
@@ -169,6 +182,7 @@ class PersonTypeModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'tipo_persona_id': id,
         'nombre': name,
@@ -176,7 +190,9 @@ class PersonTypeModel {
       };
 }
 
+/// Define la responsabilidad de `VehicleCategoryModel` dentro de este módulo.
 class VehicleCategoryModel {
+  /// Crea una instancia y prepara el estado inicial de `VehicleCategoryModel`.
   const VehicleCategoryModel({
     required this.id,
     required this.name,
@@ -187,6 +203,7 @@ class VehicleCategoryModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `VehicleCategoryModel`.
   factory VehicleCategoryModel.fromJson(Map<String, dynamic> json) {
     return VehicleCategoryModel(
       id: JsonUtils.asInt(json['categoria_vehiculo_id']),
@@ -195,6 +212,7 @@ class VehicleCategoryModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'categoria_vehiculo_id': id,
         'nombre': name,
@@ -202,7 +220,9 @@ class VehicleCategoryModel {
       };
 }
 
+/// Define la responsabilidad de `PeriodTypeModel` dentro de este módulo.
 class PeriodTypeModel {
+  /// Crea una instancia y prepara el estado inicial de `PeriodTypeModel`.
   const PeriodTypeModel({
     required this.id,
     required this.name,
@@ -213,6 +233,7 @@ class PeriodTypeModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `PeriodTypeModel`.
   factory PeriodTypeModel.fromJson(Map<String, dynamic> json) {
     return PeriodTypeModel(
       id: JsonUtils.asInt(json['tipo_periodo_id']),
@@ -221,6 +242,7 @@ class PeriodTypeModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'tipo_periodo_id': id,
         'nombre': name,
@@ -228,7 +250,9 @@ class PeriodTypeModel {
       };
 }
 
+/// Define la responsabilidad de `ReservationStatusModel` dentro de este módulo.
 class ReservationStatusModel {
+  /// Crea una instancia y prepara el estado inicial de `ReservationStatusModel`.
   const ReservationStatusModel({
     required this.id,
     required this.name,
@@ -239,6 +263,7 @@ class ReservationStatusModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `ReservationStatusModel`.
   factory ReservationStatusModel.fromJson(Map<String, dynamic> json) {
     return ReservationStatusModel(
       id: JsonUtils.asInt(json['estado_reserva_id']),
@@ -247,6 +272,7 @@ class ReservationStatusModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'estado_reserva_id': id,
         'nombre': name,
@@ -254,7 +280,9 @@ class ReservationStatusModel {
       };
 }
 
+/// Define la responsabilidad de `NotificationCategoryModel` dentro de este módulo.
 class NotificationCategoryModel {
+  /// Crea una instancia y prepara el estado inicial de `NotificationCategoryModel`.
   const NotificationCategoryModel({
     required this.id,
     required this.name,
@@ -265,6 +293,7 @@ class NotificationCategoryModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `NotificationCategoryModel`.
   factory NotificationCategoryModel.fromJson(Map<String, dynamic> json) {
     return NotificationCategoryModel(
       id: JsonUtils.asInt(json['categoria_notificacion_id']),
@@ -273,6 +302,7 @@ class NotificationCategoryModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'categoria_notificacion_id': id,
         'nombre': name,
@@ -280,7 +310,9 @@ class NotificationCategoryModel {
       };
 }
 
+/// Define la responsabilidad de `LandlordDocumentTypeModel` dentro de este módulo.
 class LandlordDocumentTypeModel {
+  /// Crea una instancia y prepara el estado inicial de `LandlordDocumentTypeModel`.
   const LandlordDocumentTypeModel({
     required this.id,
     required this.name,
@@ -291,6 +323,7 @@ class LandlordDocumentTypeModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `LandlordDocumentTypeModel`.
   factory LandlordDocumentTypeModel.fromJson(Map<String, dynamic> json) {
     return LandlordDocumentTypeModel(
       id: JsonUtils.asInt(json['tipo_documento_arrendador_id']),
@@ -299,6 +332,7 @@ class LandlordDocumentTypeModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'tipo_documento_arrendador_id': id,
         'nombre': name,
@@ -306,7 +340,9 @@ class LandlordDocumentTypeModel {
       };
 }
 
+/// Define la responsabilidad de `DocumentVerificationStatusModel` dentro de este módulo.
 class DocumentVerificationStatusModel {
+  /// Crea una instancia y prepara el estado inicial de `DocumentVerificationStatusModel`.
   const DocumentVerificationStatusModel({
     required this.id,
     required this.name,
@@ -317,6 +353,7 @@ class DocumentVerificationStatusModel {
   final String name;
   final String? description;
 
+  /// Crea una instancia y prepara el estado inicial de `DocumentVerificationStatusModel`.
   factory DocumentVerificationStatusModel.fromJson(Map<String, dynamic> json) {
     return DocumentVerificationStatusModel(
       id: JsonUtils.asInt(json['estado_verificacion_documento_id']),
@@ -325,6 +362,7 @@ class DocumentVerificationStatusModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'estado_verificacion_documento_id': id,
         'nombre': name,

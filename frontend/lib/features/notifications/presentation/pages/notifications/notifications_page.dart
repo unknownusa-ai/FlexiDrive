@@ -12,7 +12,10 @@ import 'package:flexidrive/injection_container.dart';
 // Página que muestra las notificaciones del usuario
 // Permite filtrar por categorías y marcar como leídas
 class NotificationsPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `NotificationsPage`.
   const NotificationsPage({super.key});
+
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
@@ -36,7 +39,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
-  // Dark-mode aware palette helpers
+  // Dark-modo aware palette helpers
   Color get _cardBg => _isDark ? const Color(0xFF161827) : Colors.white;
   Color get _borderColor =>
       _isDark ? const Color(0xFF2E3355) : Colors.grey.shade200;
@@ -45,7 +48,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Color get _textSub =>
       _isDark ? const Color(0xFF8B93B8) : Colors.grey.shade500;
 
-  // Icon background colors based on notification type
+  // Icon background colors based on notification tipo
   Color _getIconBgColor(String type, bool isDark) {
     switch (type) {
       case 'reserva':
@@ -63,6 +66,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   final List<Map<String, dynamic>> _notifications = [];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -70,16 +74,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _loadNotifications();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _notificationDb.changes.removeListener(_onNotificationDbChanged);
     super.dispose();
   }
 
+  /// Gestiona on notificación db changed dentro de esta parte del flujo.
   void _onNotificationDbChanged() {
     _loadNotifications();
   }
 
+  /// Carga los datos necesarios para cargar notificaciones.
   Future<void> _loadNotifications() async {
     await Future.wait([
       _sessionStore.init(),
@@ -116,6 +123,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
+  /// Gestiona map tipo dentro de esta parte del flujo.
   String _mapType(String? categoryName) {
     final raw = (categoryName ?? '').trim().toLowerCase();
     if (raw == 'reserva') return 'reserva';
@@ -139,6 +147,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     };
   }
 
+  /// Gestiona title emoji por tipo dentro de esta parte del flujo.
   String _titleEmojiByType(String type) {
     switch (type) {
       case 'reserva':
@@ -152,6 +161,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
+  /// Gestiona icon emoji por tipo dentro de esta parte del flujo.
   String _iconEmojiByType(String type) {
     switch (type) {
       case 'reserva':
@@ -165,6 +175,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
+  /// Gestiona time ago dentro de esta parte del flujo.
   String _timeAgo(DateTime sentAt) {
     final now = DateTime.now();
     final diff = now.difference(sentAt);
@@ -177,6 +188,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return '${sentAt.day.toString().padLeft(2, '0')}/${sentAt.month.toString().padLeft(2, '0')}/${sentAt.year}';
   }
 
+  /// Marca todas las notificaciones como leídas.
   Future<void> _markAllAsRead() async {
     final unreadIds = _notifications
         .where((n) => n['unread'] == true)
@@ -188,17 +200,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
     await _loadNotifications();
   }
 
+  /// Marca una notificación como leída.
   Future<void> _markAsRead(Map<String, dynamic> n) async {
     if (n['unread'] != true) return;
     await _notificationDb.markAsRead(n['id'] as int);
     await _loadNotifications();
   }
 
+  /// Elimina los datos vinculados a eliminar notificación.
   Future<void> _deleteNotification(Map<String, dynamic> n) async {
     await _notificationDb.deleteNotification(n['id'] as int);
     await _loadNotifications();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -213,7 +228,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  // ─── HEADER ──────────────────────────────────────────────────────
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader() {
     return Container(
       decoration: const BoxDecoration(
@@ -311,6 +326,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTabChip(String tab) {
     final isSelected = _selectedTab == tab;
     Widget? leading;
@@ -359,7 +375,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  // ─── LIST ────────────────────────────────────────────────────────
+  // ─── lista ────────────────────────────────────────────────────────
   Widget _buildList() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -403,7 +419,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  // ─── NOTIFICATION CARD ───────────────────────────────────────────
+  // ─── NOTIFICATION tarjeta ───────────────────────────────────────────
   Widget _buildCard(Map<String, dynamic> n) {
     final bool isUnread = n['unread'] == true;
 
@@ -455,7 +471,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title with inline emoji
                       RichText(
                         text: TextSpan(
                           children: [
@@ -504,7 +519,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ],
             ),
             const SizedBox(height: 12),
-            // Bottom row: time + actions
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -540,7 +554,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ),
                       ),
                     const SizedBox(width: 12),
-                    // Delete icon
                     GestureDetector(
                       onTap: () => _deleteNotification(n),
                       child: const Icon(

@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
 
 // Base de datos local de publicaciones
-// Carga las publicaciones, precios e imagenes desde JSON
 class LocalPublicationDb {
   // Constructor privado para singleton
   LocalPublicationDb._();
@@ -106,6 +105,7 @@ class LocalPublicationDb {
     _loaded = true;
   }
 
+  /// Gestiona recargar dentro de esta parte del flujo.
   Future<void> reload() async {
     _loaded = false;
     await loadIfNeeded();
@@ -120,18 +120,22 @@ class LocalPublicationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  /// Gestiona carga segura de lista dentro de esta parte del flujo.
   Future<_LoadListResult> _safeLoadList(String endpoint) async {
     try {
-      final data = await _loadList(endpoint).timeout(const Duration(seconds: 6));
+      final data =
+          await _loadList(endpoint).timeout(const Duration(seconds: 6));
       return _LoadListResult(data: data, succeeded: true);
     } catch (_) {
       return const _LoadListResult(data: <dynamic>[], succeeded: false);
     }
   }
 
+  /// Gestiona siguiente publicación id dentro de esta parte del flujo.
   int nextPublicationId() {
     if (publications.isEmpty) return 1;
     return publications
@@ -140,6 +144,7 @@ class LocalPublicationDb {
         1;
   }
 
+  /// Gestiona siguiente publicación precio id dentro de esta parte del flujo.
   int nextPublicationPriceId() {
     if (publicationPrices.isEmpty) return 1;
     return publicationPrices
@@ -148,6 +153,7 @@ class LocalPublicationDb {
         1;
   }
 
+  /// Gestiona siguiente publicación imagen id dentro de esta parte del flujo.
   int nextPublicationImageId() {
     if (publicationImages.isEmpty) return 1;
     return publicationImages
@@ -156,6 +162,7 @@ class LocalPublicationDb {
         1;
   }
 
+  /// Agregar publicación esta parte del flujo de trabajo.
   Future<PublicationModel> addPublication(PublicationModel publication) async {
     await loadIfNeeded();
     try {
@@ -181,7 +188,8 @@ class LocalPublicationDb {
   ) async {
     await loadIfNeeded();
     try {
-      final createdRaw = await ApiClient.instance.postMap('publication-prices', {
+      final createdRaw =
+          await ApiClient.instance.postMap('publication-prices', {
         'publicacion_id': publicationPrice.publicationId,
         'tipo_periodo_id': publicationPrice.periodTypeId,
         'precio': publicationPrice.price,
@@ -202,7 +210,8 @@ class LocalPublicationDb {
   ) async {
     await loadIfNeeded();
     try {
-      final createdRaw = await ApiClient.instance.postMap('publication-images', {
+      final createdRaw =
+          await ApiClient.instance.postMap('publication-images', {
         'publicacion_id': publicationImage.publicationId,
         'url_imagen': publicationImage.imageUrl,
         'orden': publicationImage.order,
@@ -220,6 +229,7 @@ class LocalPublicationDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de publicación.
   Future<List<PublicationModel>> _loadPublicationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_publicationsOverridesKey);
@@ -240,6 +250,7 @@ class LocalPublicationDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de publicación price.
   Future<List<PublicationPriceModel>> _loadPublicationPriceOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_pricesOverridesKey);
@@ -260,6 +271,7 @@ class LocalPublicationDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de publicación image.
   Future<List<PublicationImageModel>> _loadPublicationImageOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_imagesOverridesKey);
@@ -280,6 +292,7 @@ class LocalPublicationDb {
     }
   }
 
+  /// Guardar publicación cambios locales esta parte del flujo de trabajo.
   Future<void> _savePublicationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created = _createdPublications
@@ -288,6 +301,7 @@ class LocalPublicationDb {
     await prefs.setString(_publicationsOverridesKey, jsonEncode(created));
   }
 
+  /// Guardar publicación precio cambios locales esta parte del flujo de trabajo.
   Future<void> _savePublicationPriceOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created =
@@ -295,6 +309,7 @@ class LocalPublicationDb {
     await prefs.setString(_pricesOverridesKey, jsonEncode(created));
   }
 
+  /// Guardar publicación imagen cambios locales esta parte del flujo de trabajo.
   Future<void> _savePublicationImageOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created =
@@ -302,6 +317,7 @@ class LocalPublicationDb {
     await prefs.setString(_imagesOverridesKey, jsonEncode(created));
   }
 
+  /// Gestiona upsert publicación dentro de esta parte del flujo.
   void _upsertPublication(PublicationModel publication) {
     final index = publications.indexWhere((item) => item.id == publication.id);
     if (index == -1) {
@@ -311,6 +327,7 @@ class LocalPublicationDb {
     publications[index] = publication;
   }
 
+  /// Gestiona upsert publicación precio dentro de esta parte del flujo.
   void _upsertPublicationPrice(PublicationPriceModel publicationPrice) {
     final index =
         publicationPrices.indexWhere((item) => item.id == publicationPrice.id);
@@ -321,6 +338,7 @@ class LocalPublicationDb {
     publicationPrices[index] = publicationPrice;
   }
 
+  /// Gestiona upsert publicación imagen dentro de esta parte del flujo.
   void _upsertPublicationImage(PublicationImageModel publicationImage) {
     final index =
         publicationImages.indexWhere((item) => item.id == publicationImage.id);
@@ -331,6 +349,7 @@ class LocalPublicationDb {
     publicationImages[index] = publicationImage;
   }
 
+  /// Gestiona upsert created publicación dentro de esta parte del flujo.
   void _upsertCreatedPublication(PublicationModel publication) {
     final index =
         _createdPublications.indexWhere((item) => item.id == publication.id);
@@ -341,6 +360,7 @@ class LocalPublicationDb {
     _createdPublications[index] = publication;
   }
 
+  /// Gestiona upsert created publicación precio dentro de esta parte del flujo.
   void _upsertCreatedPublicationPrice(PublicationPriceModel publicationPrice) {
     final index = _createdPublicationPrices
         .indexWhere((item) => item.id == publicationPrice.id);
@@ -351,6 +371,7 @@ class LocalPublicationDb {
     _createdPublicationPrices[index] = publicationPrice;
   }
 
+  /// Gestiona upsert created publicación imagen dentro de esta parte del flujo.
   void _upsertCreatedPublicationImage(PublicationImageModel publicationImage) {
     final index = _createdPublicationImages
         .indexWhere((item) => item.id == publicationImage.id);
@@ -361,6 +382,7 @@ class LocalPublicationDb {
     _createdPublicationImages[index] = publicationImage;
   }
 
+  /// Gestiona dedupe por id dentro de esta parte del flujo.
   void _dedupeById() {
     final publicationsMap = <int, PublicationModel>{};
     for (final item in publications) {
@@ -388,6 +410,7 @@ class LocalPublicationDb {
   }
 }
 
+/// Define la responsabilidad de `_LoadListResult` dentro de este módulo.
 class _LoadListResult {
   const _LoadListResult({
     required this.data,

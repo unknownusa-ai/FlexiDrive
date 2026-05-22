@@ -1,5 +1,6 @@
 /// Entidad que representa un paso del onboarding
 class OnboardingStep {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingStep`.
   const OnboardingStep({
     required this.id,
     required this.title,
@@ -34,6 +35,7 @@ class OnboardingStep {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,
@@ -43,6 +45,7 @@ class OnboardingStep {
         'is_completed': isCompleted,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `OnboardingStep`.
   factory OnboardingStep.fromJson(Map<String, dynamic> json) {
     return OnboardingStep(
       id: json['id'] as int,

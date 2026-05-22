@@ -35,8 +35,10 @@ class VehiculoService {
     vehiculos = rawVehicles.map((v) => _mapVehicleToLegacyFormat(v)).toList();
     final createdVehicles = await _loadCreatedVehicles();
     for (final localVehicle in createdVehicles) {
-      final vehicleId = _asInt(localVehicle['vehiculo_id'] ?? localVehicle['id']);
-      final exists = vehiculos.any((item) => _asInt(item['vehiculo_id']) == vehicleId);
+      final vehicleId =
+          _asInt(localVehicle['vehiculo_id'] ?? localVehicle['id']);
+      final exists =
+          vehiculos.any((item) => _asInt(item['vehiculo_id']) == vehicleId);
       if (!exists) {
         vehiculos.add(localVehicle);
       }
@@ -118,6 +120,7 @@ class VehiculoService {
     };
   }
 
+  /// Gestiona asignar ciudad por vehiculo id dentro de esta parte del flujo.
   String _asignarCiudadPorVehiculoId(int vehicleId) {
     // Distribuir vehículos entre las 6 ciudades principales
     final ciudades = [
@@ -134,6 +137,7 @@ class VehiculoService {
     return ciudades[index];
   }
 
+  /// Gestiona extract marca desde line dentro de esta parte del flujo.
   String _extractBrandFromLine(String linea) {
     // Extraer marca de la línea (ej: "Mazda 3 Touring" -> "Mazda")
     final parts = linea.split(' ');
@@ -158,6 +162,7 @@ class VehiculoService {
     return images[(vehicleId - 1) % images.length];
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<Map<String, dynamic>>> _loadList(String endpoint) async {
     final decoded = await ApiClient.instance.getList(endpoint);
     return List<Map<String, dynamic>>.from(decoded);
@@ -177,7 +182,7 @@ class VehiculoService {
     }
   }
 
-  /// CREATE - Agregar nuevo vehículo al ArrayList
+  /// creación - Agregar nuevo vehículo al ArrayList
   Future<void> addVehiculo(Map<String, dynamic> vehiculo) async {
     await init();
 
@@ -193,10 +198,11 @@ class VehiculoService {
           'precio_semana': vehiculo['precio_semana'] ?? 900000,
           'ubicacion': vehiculo['ubicacion'] ?? 'Bogotá',
           'propietario_id': vehiculo['propietario_id'] ?? 1,
-          'imagen': vehiculo['imagen'] ?? _imageForVehicle(
-            vehicleId: _asInt(createdVehicleRaw['vehiculo_id']),
-            line: '${createdVehicleRaw['linea'] ?? ''}',
-          ),
+          'imagen': vehiculo['imagen'] ??
+              _imageForVehicle(
+                vehicleId: _asInt(createdVehicleRaw['vehiculo_id']),
+                line: '${createdVehicleRaw['linea'] ?? ''}',
+              ),
           'calificacion': vehiculo['calificacion'] ?? 5.0,
           'resenas': vehiculo['resenas'] ?? 0,
           'disponible': vehiculo['disponible'] ?? true,
@@ -208,9 +214,7 @@ class VehiculoService {
       }
       _upsertVehicle(normalizedRemote);
       return;
-    } catch (_) {
-      // Si la API falla, mantenemos la experiencia funcional de forma local.
-    }
+    } catch (_) {}
 
     // Fallback local: generar ID autoincremental para uso offline.
     final maxId = vehiculos
@@ -224,6 +228,7 @@ class VehiculoService {
     await _saveCreatedVehicles();
   }
 
+  /// Carga los datos necesarios para cargar created vehicles.
   Future<List<Map<String, dynamic>>> _loadCreatedVehicles() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_createdVehiclesKey);
@@ -244,6 +249,7 @@ class VehiculoService {
     }
   }
 
+  /// Guardar created vehicles esta parte del flujo de trabajo.
   Future<void> _saveCreatedVehicles() async {
     final prefs = await SharedPreferences.getInstance();
     final created = vehiculos
@@ -252,6 +258,7 @@ class VehiculoService {
     await prefs.setString(_createdVehiclesKey, jsonEncode(created));
   }
 
+  /// Gestiona apply publicación imágenes dentro de esta parte del flujo.
   Future<void> _applyPublicationImages() async {
     List<Map<String, dynamic>> publications = const [];
     List<Map<String, dynamic>> images = const [];
@@ -295,14 +302,17 @@ class VehiculoService {
     }
   }
 
+  /// Convierte el vehículo local al formato requerido por la API.
   Map<String, dynamic> _toApiVehiclePayload(Map<String, dynamic> vehiculo) {
     final model = _asInt(vehiculo['anio']);
     return {
-      'categoria_vehiculo_id': _categoryNameToId('${vehiculo['categoria'] ?? ''}'),
+      'categoria_vehiculo_id':
+          _categoryNameToId('${vehiculo['categoria'] ?? ''}'),
       'linea': '${vehiculo['modelo'] ?? ''}'.trim(),
       'modelo': model == 0 ? DateTime.now().year : model,
       'color': '${vehiculo['color'] ?? 'Negro'}'.trim(),
-      'asientos': _asInt(vehiculo['asientos']) == 0 ? 5 : _asInt(vehiculo['asientos']),
+      'asientos':
+          _asInt(vehiculo['asientos']) == 0 ? 5 : _asInt(vehiculo['asientos']),
       'tipo_transmision': '${vehiculo['transmision'] ?? 'Automática'}'.trim(),
       'aire_acondicionado': vehiculo['aire_acondicionado'] == true,
       'tipo_combustible': '${vehiculo['combustible'] ?? 'Combustión'}'.trim(),
@@ -310,6 +320,7 @@ class VehiculoService {
     };
   }
 
+  /// Gestiona category name a id dentro de esta parte del flujo.
   int _categoryNameToId(String categoryName) {
     switch (categoryName.trim()) {
       case 'Sedán':
@@ -329,6 +340,7 @@ class VehiculoService {
     }
   }
 
+  /// Gestiona upsert vehicle dentro de esta parte del flujo.
   void _upsertVehicle(Map<String, dynamic> vehicle) {
     final vehicleId = _asInt(vehicle['vehiculo_id'] ?? vehicle['id']);
     final index = vehiculos.indexWhere(
@@ -341,13 +353,14 @@ class VehiculoService {
     vehiculos[index] = vehicle;
   }
 
+  /// Convierte el valor a entero de forma segura.
   int _asInt(dynamic value) {
     if (value is int) return value;
     if (value is num) return value.toInt();
     return int.tryParse('$value') ?? 0;
   }
 
-  /// UPDATE - Editar vehículo en el ArrayList
+  /// actualizar - Editar vehículo en el ArrayList
   void updateVehiculo(int id, Map<String, dynamic> nuevosDatos) {
     final index = vehiculos.indexWhere((v) => v['id'] == id);
     if (index != -1) {
@@ -355,7 +368,7 @@ class VehiculoService {
     }
   }
 
-  /// DELETE - Eliminar vehículo del ArrayList
+  /// eliminar - Eliminar vehículo del ArrayList
   void deleteVehiculo(int id) {
     vehiculos.removeWhere((v) => v['id'] == id);
   }
@@ -415,14 +428,14 @@ class VehiculoService {
     return rentas.where((r) => r['estado'] == estado).toList();
   }
 
-  /// CREATE - Agregar renta al ArrayList
+  /// Agregar renta esta parte del flujo de trabajo.
   void addRenta(Map<String, dynamic> renta) {
     final nuevoId = rentas.isEmpty ? 1 : rentas.last['id'] + 1;
     renta['id'] = nuevoId;
     rentas.add(renta);
   }
 
-  /// UPDATE - Cambiar estado de renta
+  /// actualizar - Cambiar estado de renta
   void updateRentaEstado(int rentaId, String nuevoEstado) {
     final index = rentas.indexWhere((r) => r['id'] == rentaId);
     if (index != -1) {
@@ -442,7 +455,7 @@ class VehiculoService {
     return resenas.where((res) => rentaIds.contains(res['renta_id'])).toList();
   }
 
-  /// CREATE - Agregar reseña al ArrayList
+  /// creación - Agregar reseña al ArrayList
   void addResena(Map<String, dynamic> resena) {
     final nuevoId = resenas.isEmpty ? 1 : resenas.last['id'] + 1;
     resena['id'] = nuevoId;

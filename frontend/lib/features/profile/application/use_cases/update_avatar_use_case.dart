@@ -2,6 +2,7 @@ import '../../domain/ports/profile_repository_port.dart';
 
 /// Caso de uso para actualizar el avatar del usuario
 class UpdateAvatarUseCase {
+  /// Crea una instancia y prepara el estado inicial de `UpdateAvatarUseCase`.
   UpdateAvatarUseCase(this._repository);
 
   final ProfileRepositoryPort _repository;

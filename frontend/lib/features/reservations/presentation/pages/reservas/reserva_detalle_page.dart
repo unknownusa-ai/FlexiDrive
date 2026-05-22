@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 // Utilidades y servicios
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
+import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
+import 'package:flexidrive/features/notifications/application/use_cases/notification_access_use_case.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/injection_container.dart';
@@ -66,6 +68,7 @@ class ReservaDetallePage extends StatefulWidget {
   // Precio por semana
   final int? precioSemana;
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ReservaDetallePage> createState() => _ReservaDetallePageState();
 }
@@ -83,6 +86,10 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       InjectionContainer.instance.reviewAccessUseCase;
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
+  final CatalogAccessUseCase _catalogDb =
+      InjectionContainer.instance.catalogAccessUseCase;
+  final NotificationAccessUseCase _notificationDb =
+      InjectionContainer.instance.notificationAccessUseCase;
 
   // Estado de reseñas
   List<ReviewModel> _vehicleReviews = [];
@@ -96,6 +103,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
+  /// Gestiona resolved vehicle imagen dentro de esta parte del flujo.
   String _resolvedVehicleImage() {
     return VehicleImageResolver.resolveFromVehicle(
       {
@@ -107,12 +115,14 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadReviews();
   }
 
+  /// Carga los datos necesarios para cargar reseñas.
   Future<void> _loadReviews() async {
     await _publicationDb.loadIfNeeded();
     await _reviewDb.loadIfNeeded();
@@ -130,7 +140,6 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
       ),
     );
 
-    // Store publication ID for later use
     if (publication.id != 0) {
       _publicationId = publication.id;
     }
@@ -177,6 +186,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     setState(() => _isLoadingReviews = false);
   }
 
+  /// Agregar o actualizar reseña esta parte del flujo de trabajo.
   Future<void> _addOrUpdateReview(int rating, String description) async {
     if (_currentUser == null) {
       _showLoginDialog();
@@ -198,73 +208,76 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
 
     if (publication.id == 0) return;
+    final isNewReview = _currentUserReviewId == null;
 
-    if (_currentUserReviewId != null) {
-      // Actualizar opinión existente
-      final reviewIndex =
-          _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
-      if (reviewIndex != -1) {
-        final review = _reviewDb.reviews[reviewIndex];
-        final opinionIndex =
-            _reviewDb.opinions.indexWhere((o) => o.id == review.opinionId);
-        if (opinionIndex != -1) {
-          _reviewDb.opinions[opinionIndex] = OpinionModel(
-            id: review.opinionId,
-            rating: rating,
-            description: description,
-          );
-        }
-      }
-    } else {
-      // Crear nueva opinión
-      final newOpinionId = _reviewDb.opinions.isEmpty
-          ? 1
-          : _reviewDb.opinions
-                  .map((o) => o.id)
-                  .reduce((a, b) => a > b ? a : b) +
-              1;
-      final newReviewId = _reviewDb.reviews.isEmpty
-          ? 1
-          : _reviewDb.reviews.map((r) => r.id).reduce((a, b) => a > b ? a : b) +
-              1;
+    final savedReview = await _reviewDb.addOrUpdateReview(
+      userId: _currentUser!.id,
+      publicationId: publication.id,
+      rating: rating,
+      description: description,
+      reviewId: _currentUserReviewId,
+    );
 
-      _reviewDb.opinions.add(OpinionModel(
-        id: newOpinionId,
+    _currentUserReviewId = savedReview.id;
+    if (isNewReview) {
+      await _notifyOwnerAboutNewReview(
+        ownerUserId: publication.userId,
         rating: rating,
-        description: description,
-      ));
-
-      _reviewDb.reviews.add(ReviewModel(
-        id: newReviewId,
-        userId: _currentUser!.id,
-        publicationId: publication.id,
-        opinionId: newOpinionId,
-        date: DateTime.now(),
-      ));
-
-      _currentUserReviewId = newReviewId;
+      );
     }
-
     _loadReviews(); // Recargar
   }
 
+  Future<void> _notifyOwnerAboutNewReview({
+    required int ownerUserId,
+    required int rating,
+  }) async {
+    if (_currentUser == null) return;
+    if (ownerUserId == _currentUser!.id) return;
+
+    await _catalogDb.loadIfNeeded();
+    final categoryId = _resolveReviewCategoryId();
+    final vehicleName = (widget.vehicleName ?? 'tu publicación').trim();
+    final reviewerName = _currentUser!.fullName.trim().isEmpty
+        ? 'Un usuario'
+        : _currentUser!.fullName.trim();
+
+    await _notificationDb.addNotification(
+      userId: ownerUserId,
+      categoryId: categoryId,
+      subject: 'Nueva reseña en tu publicación',
+      description:
+          '$reviewerName dejó una reseña de $rating estrellas en $vehicleName.',
+    );
+  }
+
+  /// Gestiona resolve reseña category id dentro de esta parte del flujo.
+  int _resolveReviewCategoryId() {
+    for (final category in _catalogDb.notificationCategories) {
+      final name = category.name.toLowerCase();
+      if (name.contains('rese') ||
+          name.contains('resena') ||
+          name.contains('calificacion')) {
+        return category.id;
+      }
+    }
+    return _catalogDb.notificationCategories.isEmpty
+        ? 1
+        : _catalogDb.notificationCategories.first.id;
+  }
+
+  /// Elimina los datos vinculados a eliminar reseña.
   Future<void> _deleteReview() async {
     if (_currentUserReviewId == null) return;
 
     await _reviewDb.loadIfNeeded();
-
-    final reviewIndex =
-        _reviewDb.reviews.indexWhere((r) => r.id == _currentUserReviewId);
-    if (reviewIndex != -1) {
-      final review = _reviewDb.reviews[reviewIndex];
-      _reviewDb.reviews.removeAt(reviewIndex);
-      _reviewDb.opinions.removeWhere((o) => o.id == review.opinionId);
-      _currentUserReviewId = null;
-    }
+    await _reviewDb.deleteReview(_currentUserReviewId!);
+    _currentUserReviewId = null;
 
     _loadReviews(); // Recargar
   }
 
+  /// Mostrar diálogo de inicio de sesión esta parte del flujo de trabajo.
   void _showLoginDialog() {
     showDialog(
       context: context,
@@ -280,8 +293,9 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
           ),
           TextButton(
             onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(ctx);
-              // Navegar a login
+              // Navegar a inicio de sesión
             },
             child: Text('Iniciar sesión',
                 style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
@@ -291,7 +305,6 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
-  // Color properties for theme support
   Color get _textPrimary =>
       _isDark ? const Color(0xFFF1F3FF) : const Color(0xFF0F172A);
   Color get _textSecondary =>
@@ -345,6 +358,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     return buffer.toString();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -395,6 +409,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeroSection() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     final heroHeight = isSmallPhone ? 220.0 : 310.0;
@@ -424,6 +439,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
             top: isSmallPhone ? 40 : 56,
             left: isSmallPhone ? 12 : 20,
             child: _buildCircleIconButton(Icons.arrow_back_ios_new, () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(context);
             }, isSmallPhone),
           ),
@@ -514,6 +530,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTituloYRating(bool isSmallPhone) {
     // Usar el rating real calculado de las reseñas
     final displayRating = _isLoadingReviews
@@ -599,6 +616,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCaracteristicas(bool isSmallPhone) {
     // Extraer datos de vehicleSpecs (formato: "2023 • Automática • 5 puestos • Bogotá")
     final specs = widget.vehicleSpecs ?? '';
@@ -642,6 +660,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDescripcion(ThemeData theme, bool isSmallPhone) {
     final description = widget.vehicleDescription ??
         'El ${widget.vehicleName ?? 'vehículo'} combina elegancia y potencia. Perfecto para viajes urbanos y escapadas de fin de semana. Equipado con las últimas tecnologías de seguridad y confort.';
@@ -666,6 +685,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSeleccionPeriodo(ThemeData theme, bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -778,6 +798,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Gestiona period chip dentro de esta parte del flujo.
   Widget _periodChip(String text, bool isSmallPhone) {
     final selected = _periodoSeleccionado == text;
 
@@ -833,6 +854,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildOpiniones(ThemeData theme, bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -1027,7 +1049,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
-  // Helper methods para evitar errores en el resumen
+  // ayudante methods para evitar errores en el resumen
   String _extractColorFromSpecs() {
     try {
       final specs = widget.vehicleSpecs ?? '';
@@ -1045,6 +1067,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     }
   }
 
+  /// Obtiene la información asociada a obtener precio unitario.
   int _getPrecioUnitario() {
     try {
       // Calcular precio según el período seleccionado
@@ -1061,6 +1084,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     }
   }
 
+  /// Gestiona format fecha inicio dentro de esta parte del flujo.
   String _formatFechaInicio() {
     try {
       final now = DateTime.now();
@@ -1084,6 +1108,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     }
   }
 
+  /// Gestiona format date dentro de esta parte del flujo.
   String _formatDate(DateTime date) {
     final meses = [
       'Ene',
@@ -1102,6 +1127,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     return '${date.day} ${meses[date.month - 1]} ${date.year}';
   }
 
+  /// Gestiona confirm eliminar reseña dentro de esta parte del flujo.
   void _confirmDeleteReview(bool isSmallPhone) {
     showDialog(
       context: context,
@@ -1117,6 +1143,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
           ),
           TextButton(
             onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(ctx);
               _deleteReview();
             },
@@ -1130,6 +1157,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  /// Mostrar diálogo de reseña esta parte del flujo de trabajo.
   void _showReviewDialog(bool isSmallPhone, {OpinionModel? existingOpinion}) {
     int selectedRating = existingOpinion?.rating ?? 5;
     final descriptionController =
@@ -1188,9 +1216,13 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
             ),
             TextButton(
               onPressed: () {
+                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                 Navigator.pop(ctx);
-                _addOrUpdateReview(
-                    selectedRating, descriptionController.text.trim());
+                _confirmPublishReview(
+                  rating: selectedRating,
+                  description: descriptionController.text.trim(),
+                  isUpdate: existingOpinion != null,
+                );
               },
               child: Text(
                 existingOpinion != null ? 'Actualizar' : 'Publicar',
@@ -1203,6 +1235,46 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
     );
   }
 
+  void _confirmPublishReview({
+    required int rating,
+    required String description,
+    required bool isUpdate,
+  }) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          isUpdate ? 'Confirmar actualización' : 'Confirmar publicación',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          isUpdate
+              ? '¿Quieres actualizar tu reseña de este vehículo?'
+              : '¿Quieres publicar esta reseña en la publicación?',
+          style: GoogleFonts.inter(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancelar', style: GoogleFonts.inter()),
+          ),
+          TextButton(
+            onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
+              Navigator.pop(ctx);
+              _addOrUpdateReview(rating, description);
+            },
+            child: Text(
+              isUpdate ? 'Actualizar' : 'Publicar',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBottomTotal(ThemeData theme, bool isSmallPhone) {
     final isVertical = MediaQuery.of(context).size.width < 400;
 
@@ -1410,6 +1482,7 @@ class _ReservaDetallePageState extends State<ReservaDetallePage> {
   }
 }
 
+/// Define la responsabilidad de `_CaracteristicaItem` dentro de este módulo.
 class _CaracteristicaItem extends StatelessWidget {
   const _CaracteristicaItem({
     required this.icon,
@@ -1425,6 +1498,7 @@ class _CaracteristicaItem extends StatelessWidget {
   final bool isSmallPhone;
   final bool isDark;
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return Expanded(

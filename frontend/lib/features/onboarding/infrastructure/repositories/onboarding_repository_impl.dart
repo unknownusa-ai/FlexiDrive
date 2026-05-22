@@ -35,6 +35,7 @@ class OnboardingRepositoryImpl implements OnboardingRepositoryPort {
     ),
   ];
 
+  /// Inicializa el flujo de initialize antes de su uso.
   @override
   Future<void> initialize() async {
     // Verificar si ya existe contenido guardado
@@ -50,12 +51,14 @@ class OnboardingRepositoryImpl implements OnboardingRepositoryPort {
     }
   }
 
+  /// Obtiene la información asociada a obtener steps.
   @override
   Future<List<OnboardingStep>> getSteps() async {
     final content = await _localStorage.getContent();
     return content?.steps ?? _defaultSteps;
   }
 
+  /// Obtiene la información asociada a obtener contenido.
   @override
   Future<OnboardingContent> getContent() async {
     final content = await _localStorage.getContent();
@@ -67,11 +70,13 @@ class OnboardingRepositoryImpl implements OnboardingRepositoryPort {
         );
   }
 
+  /// Marca un paso del onboarding como completado.
   @override
   Future<void> markStepAsCompleted(int stepId) async {
     await _localStorage.markStepCompleted(stepId);
   }
 
+  /// Ir a siguiente paso esta parte del flujo de trabajo.
   @override
   Future<void> goToNextStep() async {
     final currentIndex = await _localStorage.getCurrentStepIndex();
@@ -82,6 +87,7 @@ class OnboardingRepositoryImpl implements OnboardingRepositoryPort {
     }
   }
 
+  /// Ir a anterior paso esta parte del flujo de trabajo.
   @override
   Future<void> goToPreviousStep() async {
     final currentIndex = await _localStorage.getCurrentStepIndex();
@@ -90,32 +96,38 @@ class OnboardingRepositoryImpl implements OnboardingRepositoryPort {
     }
   }
 
+  /// Gestiona saltar onboarding dentro de esta parte del flujo.
   @override
   Future<void> skipOnboarding() async {
     await _localStorage.markAsSkipped();
   }
 
+  /// Gestiona si onboarding está completado dentro de esta parte del flujo.
   @override
   Future<bool> isOnboardingCompleted() async {
     return _localStorage.isCompleted();
   }
 
+  /// Verifica si el onboarding fue omitido anteriormente.
   @override
   Future<bool> wasOnboardingSkipped() async {
     return _localStorage.wasSkipped();
   }
 
+  /// Obtiene el índice actual del paso de onboarding.
   @override
   Future<int> getCurrentStepIndex() async {
     return _localStorage.getCurrentStepIndex();
   }
 
+  /// Gestiona reiniciar onboarding dentro de esta parte del flujo.
   @override
   Future<void> resetOnboarding() async {
     await _localStorage.reset();
     await initialize();
   }
 
+  /// Gestiona completar onboarding dentro de esta parte del flujo.
   @override
   Future<void> completeOnboarding() async {
     await _localStorage.markAsCompleted();

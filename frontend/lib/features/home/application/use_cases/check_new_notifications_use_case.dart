@@ -2,6 +2,7 @@ import '../../domain/ports/home_repository_port.dart';
 
 /// Caso de uso para verificar notificaciones nuevas
 class CheckNewNotificationsUseCase {
+  /// Crea una instancia y prepara el estado inicial de `CheckNewNotificationsUseCase`.
   CheckNewNotificationsUseCase(this._repository);
 
   final HomeRepositoryPort _repository;

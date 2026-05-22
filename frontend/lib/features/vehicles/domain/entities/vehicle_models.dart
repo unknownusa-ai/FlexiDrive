@@ -1,4 +1,3 @@
-// Utilidades pa' convertir JSON
 import 'package:flexidrive/core/utils/json_utils.dart';
 
 // Modelo de un vehículo/carro
@@ -39,7 +38,7 @@ class VehicleModel {
   // Descripción opcional del carro
   final String? description;
 
-  // Crea un VehicleModel desde JSON (cuando cargamos de la BD)
+  /// Crea una instancia y prepara el estado inicial de `VehicleModel`.
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
     return VehicleModel(
       id: JsonUtils.asInt(json['vehiculo_id']), // Convertimos a int
@@ -55,7 +54,7 @@ class VehicleModel {
     );
   }
 
-  // Convierte el modelo a JSON (para guardar en BD)
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'vehiculo_id': id,
         'categoria_vehiculo_id': categoryId,

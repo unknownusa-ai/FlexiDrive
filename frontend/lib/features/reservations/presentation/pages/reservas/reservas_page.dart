@@ -26,7 +26,10 @@ import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Página de reservas del usuario
 // Muestra todas las reservas activas y pasadas
 class ReservasPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `ReservasPage`.
   const ReservasPage({super.key});
+
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ReservasPage> createState() => _ReservasPageState();
 }
@@ -34,7 +37,7 @@ class ReservasPage extends StatefulWidget {
 // Estado de la pagina de reservas
 class _ReservasPageState extends State<ReservasPage>
     with WidgetsBindingObserver {
-  // Filtro seleccionado: Activas, Pendientes, Historial
+  // Filtro seleccionado: Activas, Pendientes, Finalizadas, Historial
   String _selectedFilter = 'Activas';
   // Contador de reservas finalizadas
   int _finalizadasCount = 0;
@@ -64,7 +67,10 @@ class _ReservasPageState extends State<ReservasPage>
   List<_ReservaCardData> _pendingReservations = [];
   // Lista de historial de reservas
   List<_ReservaCardData> _historyReservations = [];
+  // Lista de reservas finalizadas
+  List<_ReservaCardData> _completedReservations = [];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -72,12 +78,14 @@ class _ReservasPageState extends State<ReservasPage>
     _loadHistoryReservations(); // Carga historial de reservas
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  /// Gestiona did change app lifecycle estado dentro de esta parte del flujo.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -86,6 +94,7 @@ class _ReservasPageState extends State<ReservasPage>
     }
   }
 
+  /// Gestiona did change dependencies dentro de esta parte del flujo.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -96,7 +105,7 @@ class _ReservasPageState extends State<ReservasPage>
   // Refresca todas las reservas
   Future<void> _refreshReservations() async {
     setState(() => _isLoadingHistory = true);
-    // Small delay to ensure new reservation is properly saved
+    // Small delay a ensure new reserva is properly saved
     await Future.delayed(const Duration(milliseconds: 100));
     await _loadHistoryReservations();
   }
@@ -354,12 +363,15 @@ class _ReservasPageState extends State<ReservasPage>
       _activeReservations = activeReservationData;
       _pendingReservations = pendingReservationData;
       _historyReservations = history;
+      _completedReservations =
+          history.where((item) => item.status == 'Finalizada').toList();
       _finalizadasCount = finalizadas;
       _canceladasCount = canceladas;
       _isLoadingHistory = false;
     });
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -387,6 +399,7 @@ class _ReservasPageState extends State<ReservasPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(int activasCount) {
     final label = activasCount == 1
         ? '1 reserva activa'
@@ -424,9 +437,11 @@ class _ReservasPageState extends State<ReservasPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildStatisticsCards(int activasCount) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     return SizedBox(
-        height: 86,
+        height: isSmallPhone ? 78 : 86,
         child: Row(children: [
           Expanded(
               child: _buildStatCard(
@@ -456,8 +471,12 @@ class _ReservasPageState extends State<ReservasPage>
       required String label,
       required Color color,
       required Color textColor}) {
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      padding: EdgeInsets.symmetric(
+        vertical: isSmallPhone ? 4 : 5,
+        horizontal: isSmallPhone ? 8 : 10,
+      ),
       decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16),
@@ -471,7 +490,7 @@ class _ReservasPageState extends State<ReservasPage>
         Text('$count',
             style: GoogleFonts.poppins(
                 color: textColor,
-                fontSize: 27,
+                fontSize: isSmallPhone ? 24 : 27,
                 fontWeight: FontWeight.bold,
                 height: 1.0)),
         const SizedBox(height: 1),
@@ -479,7 +498,7 @@ class _ReservasPageState extends State<ReservasPage>
             child: Text(label,
                 style: GoogleFonts.poppins(
                     color: textColor.withValues(alpha: 0.85),
-                    fontSize: 11,
+                    fontSize: isSmallPhone ? 10 : 11,
                     fontWeight: FontWeight.bold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis)),
@@ -487,93 +506,234 @@ class _ReservasPageState extends State<ReservasPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildFilterButtons() {
     final theme = Theme.of(context);
+    final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
+    final filters = <String>[
+      'Activas',
+      'Pendientes',
+      'Finalizadas',
+      'Historial',
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20)),
-        child: Row(children: [
-          Expanded(
-              child: _buildFilterButton(
-            label: 'Activas',
-            leadingWidget: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                    color: Color(0xFF10B981), shape: BoxShape.circle)),
-            isSelected: _selectedFilter == 'Activas',
-            onTap: () => setState(() => _selectedFilter = 'Activas'),
-          )),
-          Expanded(
-              child: _buildFilterButton(
-            label: 'Pendientes',
-            leadingWidget: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                    color: Color(0xFFF59E0B), shape: BoxShape.circle)),
-            isSelected: _selectedFilter == 'Pendientes',
-            onTap: () => setState(() => _selectedFilter = 'Pendientes'),
-          )),
-          Expanded(
-              child: _buildFilterButton(
-            label: 'Historial',
-            leadingWidget: Icon(Icons.description_outlined,
-                color: _selectedFilter == 'Historial'
-                    ? theme.colorScheme.onSurface
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                size: 18),
-            isSelected: _selectedFilter == 'Historial',
-            onTap: () => setState(() => _selectedFilter = 'Historial'),
-          )),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildFilterButton(
-      {required String label,
-      required Widget leadingWidget,
-      required bool isSelected,
-      required VoidCallback onTap}) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.cardTheme.color : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2))
-                ]
-              : [],
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallPhone ? 10 : 12,
+          vertical: isSmallPhone ? 4 : 6,
         ),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          leadingWidget,
-          const SizedBox(width: 8),
-          Text(label,
-              style: GoogleFonts.poppins(
-                  color: isSelected
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold)),
-        ]),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
+          ),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            isExpanded: true,
+            value: _selectedFilter,
+            menuMaxHeight: 290,
+            dropdownColor: theme.cardTheme.color ?? theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(14),
+            icon: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.09),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 20,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+              ),
+            ),
+            style: GoogleFonts.poppins(
+              color: theme.colorScheme.onSurface,
+              fontSize: isSmallPhone ? 14 : 15,
+              fontWeight: FontWeight.w600,
+            ),
+            selectedItemBuilder: (context) {
+              return filters.map((filter) {
+                final count = _filterCount(filter);
+                return Row(
+                  children: [
+                    Container(
+                      width: isSmallPhone ? 24 : 26,
+                      height: isSmallPhone ? 24 : 26,
+                      decoration: BoxDecoration(
+                        color: _filterIconColor(filter).withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _filterIcon(filter),
+                        size: isSmallPhone ? 15 : 16,
+                        color: _filterIconColor(filter),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      filter,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: GoogleFonts.poppins(
+                          fontSize: isSmallPhone ? 11 : 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList();
+            },
+            items: filters.map((filter) {
+              final isSelected = _selectedFilter == filter;
+              final count = _filterCount(filter);
+              return DropdownMenuItem<String>(
+                value: filter,
+                child: Row(
+                  children: [
+                    Container(
+                      width: isSmallPhone ? 24 : 26,
+                      height: isSmallPhone ? 24 : 26,
+                      decoration: BoxDecoration(
+                        color: _filterIconColor(filter).withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _filterIcon(filter),
+                        size: isSmallPhone ? 15 : 16,
+                        color: _filterIconColor(filter),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        filter,
+                        style: GoogleFonts.poppins(
+                          color: isSelected
+                              ? theme.colorScheme.onSurface
+                              : theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.85),
+                          fontSize: isSmallPhone ? 13 : 14,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: GoogleFonts.poppins(
+                          fontSize: isSmallPhone ? 11 : 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      isSelected
+                          ? Icons.check_circle_rounded
+                          : Icons.circle_outlined,
+                      size: isSmallPhone ? 18 : 19,
+                      color: isSelected
+                          ? const Color(0xFF2563EB)
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.25),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() => _selectedFilter = value);
+            },
+          ),
+        ),
       ),
     );
   }
 
+  /// Gestiona filter icon dentro de esta parte del flujo.
+  IconData _filterIcon(String filter) {
+    switch (filter) {
+      case 'Activas':
+        return Icons.play_circle_rounded;
+      case 'Pendientes':
+        return Icons.schedule_rounded;
+      case 'Finalizadas':
+        return Icons.verified_rounded;
+      case 'Historial':
+        return Icons.history_rounded;
+      default:
+        return Icons.tune_rounded;
+    }
+  }
+
+  /// Gestiona filter icon color dentro de esta parte del flujo.
+  Color _filterIconColor(String filter) {
+    switch (filter) {
+      case 'Activas':
+        return const Color(0xFF10B981);
+      case 'Pendientes':
+        return const Color(0xFFF59E0B);
+      case 'Finalizadas':
+        return const Color(0xFF3B82F6);
+      case 'Historial':
+        return const Color(0xFF6366F1);
+      default:
+        return const Color(0xFF64748B);
+    }
+  }
+
+  /// Gestiona filter count dentro de esta parte del flujo.
+  int _filterCount(String filter) {
+    switch (filter) {
+      case 'Activas':
+        return _activeReservations.length;
+      case 'Pendientes':
+        return _pendingReservations.length;
+      case 'Finalizadas':
+        return _completedReservations.length;
+      case 'Historial':
+        return _historyReservations.length;
+      default:
+        return 0;
+    }
+  }
+
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildReservationsList() {
     if (_selectedFilter == 'Activas') {
       if (_activeReservations.isEmpty) {
@@ -629,6 +789,32 @@ class _ReservasPageState extends State<ReservasPage>
                     ),
                   ))
               .toList());
+    } else if (_selectedFilter == 'Finalizadas') {
+      if (_isLoadingHistory) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (_completedReservations.isEmpty) {
+        return _buildEmptyCompletedReservations();
+      }
+
+      return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          children: _completedReservations
+              .map((reserva) => _buildReservationCard(
+                    data: reserva,
+                    onSecondaryAction: () {},
+                    onViewDetails: () => _openReservationDetails(
+                      vehicleName: reserva.vehicleName,
+                      vehicleSpecs: reserva.vehicleSpecs ?? '2024 - Negro Jet',
+                      vehicleRating: reserva.vehicleRating ?? 4.9,
+                      vehicleReviews: reserva.vehicleReviews ?? 128,
+                      vehiclePrice: reserva.vehiclePrice ?? 380000,
+                      vehicleImage: reserva.imageUrl,
+                      precioDia: reserva.precioDia,
+                      precioSemana: reserva.precioSemana,
+                    ),
+                  ))
+              .toList());
     } else {
       if (_isLoadingHistory) {
         return const Center(child: CircularProgressIndicator());
@@ -657,6 +843,7 @@ class _ReservasPageState extends State<ReservasPage>
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEmptyActiveReservations() {
     final theme = Theme.of(context);
     return Center(
@@ -686,6 +873,7 @@ class _ReservasPageState extends State<ReservasPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildEmptyPendingReservations() {
     final theme = Theme.of(context);
     return Center(
@@ -712,6 +900,45 @@ class _ReservasPageState extends State<ReservasPage>
             const SizedBox(height: 8),
             Text(
               'Las reservas pendientes aparecerán aquí',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Construye y devuelve el widget correspondiente a esta sección.
+  Widget _buildEmptyCompletedReservations() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              size: 56,
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'No tienes reservas finalizadas',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Las reservas que terminen aparecerán aquí',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 14,
@@ -883,18 +1110,18 @@ class _ReservasPageState extends State<ReservasPage>
     );
 
     if (shouldCancel == true) {
-      // Remove from database permanently
       final reservationIndex =
           _reservationDb.reservations.indexWhere((r) => r.code == reserva.code);
       if (reservationIndex != -1) {
         _reservationDb.reservations.removeAt(reservationIndex);
       }
 
-      // Refresh all reservations to update lists
+      // recargar all reservas a actualizar listas
       await _refreshReservations();
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSmallPlaceholder() => const Center(
         child: Icon(
           Icons.directions_car,
@@ -1098,7 +1325,6 @@ class _ReservasPageState extends State<ReservasPage>
     int? precioSemana,
     String? reservaCode,
   }) {
-    // Find the reservation by code to get the ID
     final reservas = _reservationDb.reservations;
     final reserva = reservas.firstWhere(
       (r) => r.code == reservaCode,
@@ -1116,6 +1342,7 @@ class _ReservasPageState extends State<ReservasPage>
     );
   }
 
+  /// Gestiona estado label dentro de esta parte del flujo.
   String _statusLabel(int statusId) {
     switch (statusId) {
       case 1:
@@ -1131,6 +1358,7 @@ class _ReservasPageState extends State<ReservasPage>
     }
   }
 
+  /// Gestiona estado color dentro de esta parte del flujo.
   Color _statusColor(String status) {
     switch (status) {
       case 'Pendiente':
@@ -1146,6 +1374,7 @@ class _ReservasPageState extends State<ReservasPage>
     }
   }
 
+  /// Gestiona normalize vehicle text dentro de esta parte del flujo.
   String _normalizeVehicleText(dynamic value) {
     if (value == null) return '';
     final normalized = '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -1156,6 +1385,7 @@ class _ReservasPageState extends State<ReservasPage>
     return normalized;
   }
 
+  /// Gestiona vehicle name desde map dentro de esta parte del flujo.
   String _vehicleNameFromMap(Map<String, dynamic> vehicle) {
     final marca = _normalizeVehicleText(vehicle['marca']);
     final linea = _normalizeVehicleText(vehicle['linea']);
@@ -1182,6 +1412,7 @@ class _ReservasPageState extends State<ReservasPage>
     return name;
   }
 
+  /// Gestiona vehicle specs desde map dentro de esta parte del flujo.
   String _vehicleSpecsFromMap(Map<String, dynamic> vehicle) {
     final anio = _normalizeVehicleText(vehicle['anio']);
     final color = _normalizeVehicleText(vehicle['color']);
@@ -1192,6 +1423,7 @@ class _ReservasPageState extends State<ReservasPage>
     return 'N/A';
   }
 
+  /// Gestiona format amount dentro de esta parte del flujo.
   String _formatAmount(int amount) {
     final digits = amount.toString();
     final buffer = StringBuffer();
@@ -1207,6 +1439,7 @@ class _ReservasPageState extends State<ReservasPage>
     return buffer.toString();
   }
 
+  /// Gestiona format date dentro de esta parte del flujo.
   String _formatDate(DateTime date) {
     const months = [
       'Ene',
@@ -1226,6 +1459,7 @@ class _ReservasPageState extends State<ReservasPage>
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPlaceholder() => Container(
         color: const Color(0xFFE5E7EB),
         child: const Center(
@@ -1234,6 +1468,7 @@ class _ReservasPageState extends State<ReservasPage>
       );
 }
 
+/// Define la responsabilidad de `_ReservaCardData` dentro de este módulo.
 class _ReservaCardData {
   const _ReservaCardData({
     required this.vehicleName,

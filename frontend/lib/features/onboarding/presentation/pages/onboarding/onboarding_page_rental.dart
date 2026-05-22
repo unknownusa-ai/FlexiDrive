@@ -6,8 +6,10 @@ import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Página de onboarding - tutorial de renta
 // Muestra cómo funciona el proceso de rentar un vehículo
 class OnboardingPageRental extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingPageRental`.
   const OnboardingPageRental({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<OnboardingPageRental> createState() => _OnboardingPageRentalState();
 }
@@ -25,6 +27,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
   late Animation<double> _tag2Animation;
   late Animation<double> _tag3Animation;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -64,12 +67,14 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
     _controller.forward();
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -221,6 +226,7 @@ class _OnboardingPageRentalState extends State<OnboardingPageRental>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTag(String text, Color color, {required bool isSmallPhone}) {
     return Container(
       padding: EdgeInsets.symmetric(

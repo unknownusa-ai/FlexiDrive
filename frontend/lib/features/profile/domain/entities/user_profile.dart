@@ -1,5 +1,6 @@
 /// Entidad que representa el perfil completo de un usuario
 class UserProfile {
+  /// Crea una instancia y prepara el estado inicial de `UserProfile`.
   const UserProfile({
     required this.id,
     required this.fullName,
@@ -74,6 +75,7 @@ class UserProfile {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'id': id,
         'full_name': fullName,
@@ -93,6 +95,7 @@ class UserProfile {
         'can_publish': canPublish,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `UserProfile`.
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       id: json['id'] as int,

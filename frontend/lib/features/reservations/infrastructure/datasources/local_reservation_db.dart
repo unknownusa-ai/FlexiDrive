@@ -32,7 +32,7 @@ class LocalReservationDb {
     await forceReload();
   }
 
-  // Recarga forzada desde API + overrides locales
+  /// Gestiona force recargar dentro de esta parte del flujo.
   Future<void> forceReload() async {
     final apiReservations = _parseList(
       await _safeLoadList('reservations'),
@@ -66,9 +66,11 @@ class LocalReservationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  /// Gestiona carga segura de lista dentro de esta parte del flujo.
   Future<List<dynamic>> _safeLoadList(String endpoint) async {
     try {
       return await _loadList(endpoint).timeout(const Duration(seconds: 6));
@@ -109,6 +111,7 @@ class LocalReservationDb {
     await _upsertReservation(model);
   }
 
+  /// Agregar reserva locally esta parte del flujo de trabajo.
   void addReservationLocally(ReservationModel reservation) {
     final index = reservations.indexWhere((item) => item.id == reservation.id);
     if (index == -1) {
@@ -127,6 +130,7 @@ class LocalReservationDb {
     unawaited(_saveReservationOverrides());
   }
 
+  /// Gestiona upsert reserva dentro de esta parte del flujo.
   Future<void> _upsertReservation(ReservationModel reservation) async {
     final index = reservations.indexWhere((item) => item.id == reservation.id);
     if (index == -1) {
@@ -146,6 +150,7 @@ class LocalReservationDb {
     await _saveReservationOverrides();
   }
 
+  /// Carga los cambios locales sobrescritos de reserva.
   Future<List<ReservationModel>> _loadReservationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_reservationsOverridesKey);
@@ -166,6 +171,7 @@ class LocalReservationDb {
     }
   }
 
+  /// Guardar reserva cambios locales esta parte del flujo de trabajo.
   Future<void> _saveReservationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created = _createdReservations
@@ -174,6 +180,7 @@ class LocalReservationDb {
     await prefs.setString(_reservationsOverridesKey, jsonEncode(created));
   }
 
+  /// Gestiona apply time based estado transitions dentro de esta parte del flujo.
   Future<void> _applyTimeBasedStatusTransitions() async {
     final nowColombia = ColombiaTime.now();
     var changed = false;
@@ -229,6 +236,7 @@ class LocalReservationDb {
     return reservation;
   }
 
+  /// Gestiona copia con nuevo estado dentro de esta parte del flujo.
   ReservationModel _copyWithStatus(ReservationModel reservation, int statusId) {
     return ReservationModel(
       id: reservation.id,

@@ -1,5 +1,6 @@
 /// Entidad que representa el estado del onboarding del usuario
 class OnboardingStatus {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingStatus`.
   const OnboardingStatus({
     required this.hasCompletedOnboarding,
     required this.completedSteps,
@@ -35,6 +36,7 @@ class OnboardingStatus {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'has_completed_onboarding': hasCompletedOnboarding,
         'completed_steps': completedSteps,
@@ -42,6 +44,7 @@ class OnboardingStatus {
         'last_shown_date': lastShownDate?.toIso8601String(),
       };
 
+  /// Crea una instancia y prepara el estado inicial de `OnboardingStatus`.
   factory OnboardingStatus.fromJson(Map<String, dynamic> json) {
     return OnboardingStatus(
       hasCompletedOnboarding:

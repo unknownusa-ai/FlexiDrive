@@ -2,6 +2,7 @@ import 'home_section.dart';
 
 /// Entidad que representa el contenido completo de la página home
 class HomeContent {
+  /// Crea una instancia y prepara el estado inicial de `HomeContent`.
   const HomeContent({
     required this.sections,
     required this.lastUpdated,
@@ -34,6 +35,7 @@ class HomeContent {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'sections': sections.map((s) => s.toJson()).toList(),
         'last_updated': lastUpdated.toIso8601String(),
@@ -41,6 +43,7 @@ class HomeContent {
         'has_new_notifications': hasNewNotifications,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `HomeContent`.
   factory HomeContent.fromJson(Map<String, dynamic> json) {
     return HomeContent(
       sections: (json['sections'] as List<dynamic>)

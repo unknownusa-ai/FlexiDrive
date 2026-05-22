@@ -4,7 +4,9 @@ import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/payments/domain/entities/payment_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Define la responsabilidad de `LocalPaymentDb` dentro de este módulo.
 class LocalPaymentDb {
+  /// Crea una instancia y prepara el estado inicial de `LocalPaymentDb`.
   LocalPaymentDb._();
 
   static final LocalPaymentDb instance = LocalPaymentDb._();
@@ -21,6 +23,7 @@ class LocalPaymentDb {
   final List<CardModel> _createdCards = [];
   final Map<int, String> _cardLast4ById = {};
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
 
@@ -71,9 +74,11 @@ class LocalPaymentDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  /// Gestiona carga segura de lista dentro de esta parte del flujo.
   Future<List<dynamic>> _safeLoadList(String endpoint) async {
     try {
       return await _loadList(endpoint).timeout(const Duration(seconds: 6));
@@ -82,12 +87,12 @@ class LocalPaymentDb {
     }
   }
 
-  // Get payment methods for the current user
+  /// Obtiene la información asociada a obtener usuario pago methods.
   List<PaymentMethodModel> getUserPaymentMethods(int userId) {
     return paymentMethods.where((method) => method.userId == userId).toList();
   }
 
-  // Get cards for the current user
+  /// Obtiene la información asociada a obtener usuario tarjetas.
   List<CardModel> getUserCards(int userId) {
     final userPaymentMethods = getUserPaymentMethods(userId);
     final userPaymentMethodIds =
@@ -97,7 +102,7 @@ class LocalPaymentDb {
         .toList();
   }
 
-  // Get PSE accounts for the current user
+  /// Obtiene la información asociada a obtener usuario pse accounts.
   List<PseModel> getUserPseAccounts(int userId) {
     final userPaymentMethods = getUserPaymentMethods(userId);
     final userPaymentMethodIds =
@@ -107,7 +112,7 @@ class LocalPaymentDb {
         .toList();
   }
 
-  // Get default payment method for user
+  /// Obtiene la información asociada a obtener usuario predeterminado pago method.
   PaymentMethodModel? getUserDefaultPaymentMethod(int userId) {
     final userMethods = getUserPaymentMethods(userId);
     try {
@@ -117,7 +122,7 @@ class LocalPaymentDb {
     }
   }
 
-  // Get payment method details by ID
+  /// Obtiene la información asociada a obtener pago method por id.
   PaymentMethodModel? getPaymentMethodById(int paymentMethodId) {
     try {
       return paymentMethods
@@ -127,7 +132,7 @@ class LocalPaymentDb {
     }
   }
 
-  // Get card details by payment method ID
+  /// Obtiene la información asociada a obtener tarjeta por pago method id.
   CardModel? getCardByPaymentMethodId(int paymentMethodId) {
     try {
       return cards
@@ -137,7 +142,7 @@ class LocalPaymentDb {
     }
   }
 
-  // Get PSE details by payment method ID
+  /// Obtiene la información asociada a obtener pse por pago method id.
   PseModel? getPseByPaymentMethodId(int paymentMethodId) {
     try {
       return pses.firstWhere((pse) => pse.paymentMethodId == paymentMethodId);
@@ -146,6 +151,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Obtiene la información asociada a obtener tarjeta last4 por id.
   String? getCardLast4ById(int cardId) => _cardLast4ById[cardId];
 
   Future<PaymentMethodModel> createPaymentMethod({
@@ -264,6 +270,7 @@ class LocalPaymentDb {
     return '';
   }
 
+  /// Gestiona upsert pago method dentro de esta parte del flujo.
   void _upsertPaymentMethod(PaymentMethodModel model) {
     final index = paymentMethods.indexWhere((item) => item.id == model.id);
     if (index == -1) {
@@ -273,6 +280,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Gestiona upsert tarjeta dentro de esta parte del flujo.
   void _upsertCard(CardModel model) {
     final index = cards.indexWhere((item) => item.id == model.id);
     if (index == -1) {
@@ -282,6 +290,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Gestiona upsert created pago method dentro de esta parte del flujo.
   void _upsertCreatedPaymentMethod(PaymentMethodModel model) {
     final index =
         _createdPaymentMethods.indexWhere((item) => item.id == model.id);
@@ -292,6 +301,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Gestiona upsert created tarjeta dentro de esta parte del flujo.
   void _upsertCreatedCard(CardModel model) {
     final index = _createdCards.indexWhere((item) => item.id == model.id);
     if (index == -1) {
@@ -301,6 +311,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Gestiona siguiente pago method id dentro de esta parte del flujo.
   int _nextPaymentMethodId() {
     if (paymentMethods.isEmpty) return 1;
     return paymentMethods
@@ -309,6 +320,7 @@ class LocalPaymentDb {
         1;
   }
 
+  /// Gestiona siguiente tarjeta id dentro de esta parte del flujo.
   int _nextCardId() {
     if (cards.isEmpty) return 1;
     return cards
@@ -317,6 +329,7 @@ class LocalPaymentDb {
         1;
   }
 
+  /// Carga los cambios locales sobrescritos de pago methods.
   Future<List<PaymentMethodModel>> _loadPaymentMethodsOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_paymentMethodsOverridesKey);
@@ -337,6 +350,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de tarjetas.
   Future<List<CardModel>> _loadCardsOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_cardsOverridesKey);
@@ -357,6 +371,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de tarjeta last4.
   Future<Map<int, String>> _loadCardLast4Overrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_cardLast4OverridesKey);
@@ -378,6 +393,7 @@ class LocalPaymentDb {
     }
   }
 
+  /// Guardar pago methods cambios locales esta parte del flujo de trabajo.
   Future<void> _savePaymentMethodsOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created = _createdPaymentMethods
@@ -386,12 +402,14 @@ class LocalPaymentDb {
     await prefs.setString(_paymentMethodsOverridesKey, jsonEncode(created));
   }
 
+  /// Guardar tarjetas cambios locales esta parte del flujo de trabajo.
   Future<void> _saveCardsOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final created = _createdCards.map((card) => card.toJson()).toList();
     await prefs.setString(_cardsOverridesKey, jsonEncode(created));
   }
 
+  /// Guardar tarjeta last4 cambios locales esta parte del flujo de trabajo.
   Future<void> _saveCardLast4Overrides() async {
     final prefs = await SharedPreferences.getInstance();
     final encoded = <String, String>{};

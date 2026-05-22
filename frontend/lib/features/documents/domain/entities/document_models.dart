@@ -31,6 +31,7 @@ class LandlordDocumentModel {
   final DateTime? verificationDate;
   final String? observations;
 
+  /// Crea una instancia y prepara el estado inicial de `LandlordDocumentModel`.
   factory LandlordDocumentModel.fromJson(Map<String, dynamic> json) {
     return LandlordDocumentModel(
       id: JsonUtils.asInt(json['documento_arrendador_id']),
@@ -47,6 +48,7 @@ class LandlordDocumentModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'documento_arrendador_id': id,
         'usuario_id': userId,

@@ -10,6 +10,7 @@ enum HomeSectionType {
 
 /// Entidad que representa una sección de la página home
 class HomeSection {
+  /// Crea una instancia y prepara el estado inicial de `HomeSection`.
   const HomeSection({
     required this.id,
     required this.type,
@@ -48,6 +49,7 @@ class HomeSection {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'id': id,
         'type': type.name,
@@ -58,6 +60,7 @@ class HomeSection {
         'metadata': metadata,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `HomeSection`.
   factory HomeSection.fromJson(Map<String, dynamic> json) {
     return HomeSection(
       id: json['id'] as String,

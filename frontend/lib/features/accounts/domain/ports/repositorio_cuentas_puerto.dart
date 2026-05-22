@@ -1,5 +1,6 @@
 import 'package:flexidrive/features/accounts/domain/entities/account_models.dart';
 
+/// Define la responsabilidad de `RepositorioCuentasPuerto` dentro de este módulo.
 abstract class RepositorioCuentasPuerto {
   Future<void> inicializar();
   Future<UserModel?> login({

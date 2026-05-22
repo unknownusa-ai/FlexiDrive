@@ -1,5 +1,6 @@
 import 'package:flexidrive/features/payments/domain/entities/payment_models.dart';
 
+/// Define la responsabilidad de `RepositorioPagosPuerto` dentro de este módulo.
 abstract class RepositorioPagosPuerto {
   Future<void> inicializar();
   List<PaymentMethodModel> obtenerMetodosPagoUsuario(int userId);

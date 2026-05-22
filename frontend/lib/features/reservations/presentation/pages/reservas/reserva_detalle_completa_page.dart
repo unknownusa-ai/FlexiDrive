@@ -24,11 +24,13 @@ class ReservaDetalleCompletaPage extends StatefulWidget {
   // ID de la reserva en la base de datos
   final int reservaId;
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ReservaDetalleCompletaPage> createState() =>
       _ReservaDetalleCompletaPageState();
 }
 
+/// Define la responsabilidad de `_ReservaDetalleCompletaPageState` dentro de este módulo.
 class _ReservaDetalleCompletaPageState
     extends State<ReservaDetalleCompletaPage> {
   final ReservationAccessUseCase _reservationDb =
@@ -52,12 +54,14 @@ class _ReservaDetalleCompletaPageState
       _isDark ? const Color(0xFF2E3355) : const Color(0xFFE2E8F0);
   Color get _cardBgColor => _isDark ? const Color(0xFF1A1F35) : Colors.white;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadReservaDetails();
   }
 
+  /// Carga los datos necesarios para cargar reserva details.
   Future<void> _loadReservaDetails() async {
     await Future.wait([
       _reservationDb.loadIfNeeded(),
@@ -65,7 +69,6 @@ class _ReservaDetalleCompletaPageState
       _vehiculoService.init(),
     ]);
 
-    // Find the reservation
     final reservas = _reservationDb.reservations;
     final reserva = reservas.firstWhere(
       (r) => r.id == widget.reservaId,
@@ -75,7 +78,6 @@ class _ReservaDetalleCompletaPageState
       ),
     );
 
-    // Get publication and vehicle details
     final publicacion = _publicationDb.publications
         .firstWhere((p) => p.id == reserva.publicationId);
     final vehiculos = _vehiculoService.getVehiculos();
@@ -102,6 +104,7 @@ class _ReservaDetalleCompletaPageState
     });
   }
 
+  /// Gestiona format date dentro de esta parte del flujo.
   String _formatDate(DateTime date) {
     final months = [
       'Ene',
@@ -120,6 +123,7 @@ class _ReservaDetalleCompletaPageState
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
+  /// Gestiona format amount dentro de esta parte del flujo.
   String _formatAmount(int amount) {
     // Formato simple: separar miles con puntos
     return amount.toString().replaceAllMapped(
@@ -128,6 +132,7 @@ class _ReservaDetalleCompletaPageState
         );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -162,6 +167,7 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSliverAppBar(bool isSmallPhone) {
     return SliverAppBar(
       expandedHeight: isSmallPhone ? 200 : 250,
@@ -209,6 +215,7 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPlaceholderImage() {
     return Container(
       color: const Color(0xFFF3F4F6),
@@ -222,6 +229,7 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVehicleInfo(bool isSmallPhone) {
     return _buildInfoCard(
       title: 'Información del Vehículo',
@@ -273,6 +281,7 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildReservationInfo(bool isSmallPhone) {
     return _buildInfoCard(
       title: 'Información de la Reserva',
@@ -327,12 +336,12 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPricingInfo(bool isSmallPhone) {
-    // Calculate actual values based on reservation data
+    // Calculate actual values based on reserva data
     final totalValue = (_reserva!['totalValue'] as num).toDouble();
     final periodCount = _reserva!['periodCount'] as int;
 
-    // Try to get publication prices
     final publicationId = _reserva!['publicationId'] as int?;
     double vehicleRental;
     double insurance;
@@ -343,7 +352,6 @@ class _ReservaDetalleCompletaPageState
           .toList();
 
       if (publicationPrices.isNotEmpty) {
-        // Find daily rate (periodTypeId 2 = daily)
         final dailyPrice = publicationPrices.firstWhere(
             (p) => p.periodTypeId == 2,
             orElse: () => publicationPrices.first);
@@ -357,15 +365,12 @@ class _ReservaDetalleCompletaPageState
           vehicleRental = totalValue * 0.85; // 85% for vehicle
         }
 
-        // Calculate insurance and service fee (remaining amount)
         insurance = totalValue - vehicleRental;
       } else {
-        // No prices found, use default split: 85% vehicle, 15% insurance
         vehicleRental = totalValue * 0.85;
         insurance = totalValue * 0.15;
       }
     } else {
-      // No publication info, use default split
       vehicleRental = totalValue * 0.85;
       insurance = totalValue * 0.15;
     }
@@ -435,6 +440,7 @@ class _ReservaDetalleCompletaPageState
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildInfoRow(String label, String value, IconData icon) {
     return Row(
       children: [

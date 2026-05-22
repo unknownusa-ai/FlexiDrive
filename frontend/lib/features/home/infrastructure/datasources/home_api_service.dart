@@ -2,7 +2,7 @@ import '../../../../core/api/api_client.dart';
 import '../../domain/entities/home_content.dart';
 import '../../domain/entities/home_section.dart';
 
-/// Servicio de API para operaciones de home
+/// Servicio de API para operaciones de inicio
 class HomeApiService {
   HomeApiService({ApiClient? apiClient})
       : _apiClient = apiClient ?? ApiClient.instance;
@@ -67,7 +67,8 @@ class HomeApiService {
   /// Verifica notificaciones nuevas
   Future<bool> hasNewNotifications(int userId) async {
     try {
-      final response = await _apiClient.getMap('users/$userId/notifications/unread');
+      final response =
+          await _apiClient.getMap('users/$userId/notifications/unread');
       return (response['count'] as int? ?? 0) > 0;
     } catch (_) {
       return false;

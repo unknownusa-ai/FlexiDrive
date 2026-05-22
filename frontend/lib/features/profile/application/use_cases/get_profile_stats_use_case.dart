@@ -3,6 +3,7 @@ import '../../domain/ports/profile_repository_port.dart';
 
 /// Caso de uso para obtener las estadísticas del perfil
 class GetProfileStatsUseCase {
+  /// Crea una instancia y prepara el estado inicial de `GetProfileStatsUseCase`.
   GetProfileStatsUseCase(this._repository);
 
   final ProfileRepositoryPort _repository;

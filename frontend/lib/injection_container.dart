@@ -1,30 +1,26 @@
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
 import 'package:flexidrive/features/accounts/domain/ports/repositorio_cuentas_puerto.dart';
-import 'package:flexidrive/features/accounts/infrastructure/datasources/user_preference_service.dart';
+import 'package:flexidrive/features/accounts/domain/ports/user_preferences_repository_port.dart';
 import 'package:flexidrive/features/accounts/infrastructure/repositories/repositorio_cuentas_local.dart';
+import 'package:flexidrive/features/accounts/infrastructure/repositories/user_preferences_repository_impl.dart';
 
-// Auth feature - Hexagonal Architecture
 import 'package:flexidrive/features/auth/domain/ports/auth_repository_port.dart';
 import 'package:flexidrive/features/auth/infrastructure/repositories/auth_repository_impl.dart';
 import 'package:flexidrive/features/auth/application/use_cases/auth_use_cases.dart';
 
-// Profile feature - Hexagonal Architecture
 import 'package:flexidrive/features/profile/domain/ports/profile_repository_port.dart';
 import 'package:flexidrive/features/profile/infrastructure/repositories/profile_repository_impl.dart';
 import 'package:flexidrive/features/profile/application/use_cases/profile_use_cases.dart';
 
-// Splash feature - Hexagonal Architecture
 import 'package:flexidrive/features/splash/domain/ports/config_repository_port.dart';
 import 'package:flexidrive/features/splash/infrastructure/repositories/config_repository_impl.dart';
 import 'package:flexidrive/features/splash/application/use_cases/splash_use_cases.dart';
 
-// Onboarding feature - Hexagonal Architecture
 import 'package:flexidrive/features/onboarding/domain/ports/onboarding_repository_port.dart';
 import 'package:flexidrive/features/onboarding/infrastructure/repositories/onboarding_repository_impl.dart';
 import 'package:flexidrive/features/onboarding/application/use_cases/onboarding_use_cases.dart';
 
-// Home feature - Hexagonal Architecture
 import 'package:flexidrive/features/home/domain/ports/home_repository_port.dart';
 import 'package:flexidrive/features/home/infrastructure/repositories/home_repository_impl.dart';
 import 'package:flexidrive/features/home/application/use_cases/home_use_cases.dart';
@@ -52,11 +48,17 @@ import 'package:flexidrive/features/security/domain/ports/repositorio_seguridad_
 import 'package:flexidrive/features/security/infrastructure/repositories/repositorio_seguridad_local.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_catalog_use_case.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
+import 'package:flexidrive/features/vehicles/domain/ports/vehicle_catalog_repository_port.dart';
 import 'package:flexidrive/features/vehicles/domain/ports/repositorio_vehiculos_puerto.dart';
-import 'package:flexidrive/features/vehicles/infrastructure/datasources/local_vehicle_db.dart';
+import 'package:flexidrive/features/vehicles/infrastructure/repositories/vehicle_catalog_repository_impl.dart';
 import 'package:flexidrive/features/vehicles/infrastructure/repositories/repositorio_vehiculos_local.dart';
 
+/// Composition root del frontend.
+///
+/// Registra adaptadores concretos de infraestructura y expone los casos de uso
+/// que consumen las capas de presentación.
 class InjectionContainer {
+  /// Crea una instancia y prepara el estado inicial de `InjectionContainer`.
   InjectionContainer._();
 
   static final InjectionContainer instance = InjectionContainer._();
@@ -79,18 +81,19 @@ class InjectionContainer {
       RepositorioNotificacionesLocal();
   late final RepositorioSeguridadPuerto _securityRepository =
       RepositorioSeguridadLocal();
-
-  late final UserPreferenceService _userPreferenceService =
-      UserPreferenceService();
+  late final UserPreferencesRepositoryPort _userPreferencesRepository =
+      UserPreferencesRepositoryImpl();
+  late final VehicleCatalogRepositoryPort _vehicleCatalogRepository =
+      VehicleCatalogRepositoryImpl();
 
   late final AccountAccessUseCase accountAccessUseCase =
       AccountAccessUseCase(_accountRepository);
   late final UserPreferencesUseCase userPreferencesUseCase =
-      UserPreferencesUseCase(_userPreferenceService);
+      UserPreferencesUseCase(_userPreferencesRepository);
   late final VehicleInventoryUseCase vehicleInventoryUseCase =
       VehicleInventoryUseCase(_vehicleRepository);
   late final VehicleCatalogUseCase vehicleCatalogUseCase =
-      VehicleCatalogUseCase(LocalVehicleDb.instance);
+      VehicleCatalogUseCase(_vehicleCatalogRepository);
   late final PublicationAccessUseCase publicationAccessUseCase =
       PublicationAccessUseCase(_publicationRepository);
   late final ReviewAccessUseCase reviewAccessUseCase =
@@ -106,7 +109,6 @@ class InjectionContainer {
   late final SecurityAccessUseCase securityAccessUseCase =
       SecurityAccessUseCase(_securityRepository);
 
-  // Auth feature use cases
   late final AuthRepositoryPort _authRepository = AuthRepositoryImpl();
   late final LoginUseCase authLoginUseCase = LoginUseCase(_authRepository);
   late final LogoutUseCase authLogoutUseCase = LogoutUseCase(_authRepository);
@@ -115,7 +117,6 @@ class InjectionContainer {
   late final GetCurrentSessionUseCase authGetCurrentSessionUseCase =
       GetCurrentSessionUseCase(_authRepository);
 
-  // Profile feature use cases
   late final ProfileRepositoryPort _profileRepository = ProfileRepositoryImpl();
   late final GetProfileUseCase profileGetUseCase =
       GetProfileUseCase(_profileRepository);
@@ -130,7 +131,6 @@ class InjectionContainer {
   late final UpdatePasswordUseCase profileUpdatePasswordUseCase =
       UpdatePasswordUseCase(_profileRepository);
 
-  // Splash feature use cases
   late final ConfigRepositoryPort _configRepository = ConfigRepositoryImpl();
   late final CheckFirstLaunchUseCase splashCheckFirstLaunchUseCase =
       CheckFirstLaunchUseCase(_configRepository);
@@ -141,7 +141,6 @@ class InjectionContainer {
   late final GetAppConfigUseCase splashGetAppConfigUseCase =
       GetAppConfigUseCase(_configRepository);
 
-  // Onboarding feature use cases
   late final OnboardingRepositoryPort _onboardingRepository =
       OnboardingRepositoryImpl();
   late final GetOnboardingStepsUseCase onboardingGetStepsUseCase =
@@ -155,7 +154,6 @@ class InjectionContainer {
   late final IsOnboardingCompletedUseCase onboardingIsCompletedUseCase =
       IsOnboardingCompletedUseCase(_onboardingRepository);
 
-  // Home feature use cases
   late final HomeRepositoryPort _homeRepository = HomeRepositoryImpl();
   late final GetHomeContentUseCase homeGetContentUseCase =
       GetHomeContentUseCase(_homeRepository);
@@ -168,6 +166,7 @@ class InjectionContainer {
   late final RefreshHomeContentUseCase homeRefreshContentUseCase =
       RefreshHomeContentUseCase(_homeRepository);
 
+  /// Inicializa dependencias críticas para dejar la app lista.
   Future<void> warmUp() async {
     await Future.wait([
       _accountRepository.inicializar(),
@@ -179,8 +178,8 @@ class InjectionContainer {
       _paymentRepository.inicializar(),
       _notificationRepository.inicializar(),
       _securityRepository.inicializar(),
-      _userPreferenceService.init(),
-      LocalVehicleDb.instance.loadIfNeeded(),
+      _userPreferencesRepository.initialize(),
+      _vehicleCatalogRepository.loadIfNeeded(),
       // Initialize new hexagonal repositories
       _authRepository.initialize(),
       _profileRepository.initialize(),

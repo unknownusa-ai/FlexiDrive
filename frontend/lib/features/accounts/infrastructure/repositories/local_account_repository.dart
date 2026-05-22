@@ -4,7 +4,9 @@ import 'package:flexidrive/features/accounts/domain/entities/account_models.dart
 
 import '../datasources/local_account_db.dart';
 
+/// Define la responsabilidad de `LocalAccountRepository` dentro de este módulo.
 class LocalAccountRepository {
+  /// Crea una instancia y prepara el estado inicial de `LocalAccountRepository`.
   LocalAccountRepository({
     LocalAccountDb? db,
     LocalSessionStore? session,
@@ -14,6 +16,7 @@ class LocalAccountRepository {
   final LocalAccountDb _db;
   final LocalSessionStore _session;
 
+  /// Inicializa el flujo de inicialización antes de su uso.
   Future<void> init() async {
     await _db.loadIfNeeded();
     await _session.init();
@@ -57,7 +60,8 @@ class LocalAccountRepository {
             id: user.id,
             identificationTypeId: user.identificationTypeId,
             identificationNumber: user.identificationNumber,
-            userTypeId: resolvedUserTypeId > 0 ? resolvedUserTypeId : user.userTypeId,
+            userTypeId:
+                resolvedUserTypeId > 0 ? resolvedUserTypeId : user.userTypeId,
             fullName: user.fullName,
             email: user.email,
             phone: user.phone,
@@ -83,16 +87,16 @@ class LocalAccountRepository {
     );
   }
 
+  /// Obtiene la información asociada a obtener usuarios.
   Future<List<UserModel>> getUsers() async {
     await init();
     try {
       await _db.reload();
-    } catch (_) {
-      // Keep existing cached list if refresh fails.
-    }
+    } catch (_) {}
     return List<UserModel>.unmodifiable(_db.users);
   }
 
+  /// Obtiene la información asociada a obtención de ciudades de referencia.
   Future<List<String>> getReferenceCities() async {
     await _db.loadIfNeeded();
     return List<String>.unmodifiable(_db.referenceCities);
@@ -147,6 +151,7 @@ class LocalAccountRepository {
     );
   }
 
+  /// Gestiona logout dentro de esta parte del flujo.
   Future<void> logout() async {
     await init();
     final currentUserId = _session.userId;
@@ -161,6 +166,7 @@ class LocalAccountRepository {
     await _session.clear();
   }
 
+  /// Obtiene la información asociada a obtención del usuario actual.
   Future<UserModel?> getCurrentUser() async {
     await init();
 
@@ -179,6 +185,7 @@ class LocalAccountRepository {
     }
   }
 
+  /// Obtiene la información asociada a obtención del usuario actual preferencia.
   Future<UserPreferenceModel?> getCurrentUserPreference() async {
     final currentUser = await getCurrentUser();
     if (currentUser == null) return null;
@@ -189,6 +196,7 @@ class LocalAccountRepository {
     return null;
   }
 
+  /// Actualiza el estado relacionado con actualizar preferencia.
   Future<void> updatePreference(UserPreferenceModel newPreference) async {
     await init();
     final index = _db.preferences.indexWhere((p) => p.id == newPreference.id);
@@ -208,6 +216,7 @@ class LocalAccountRepository {
     _db.preferences[index] = UserPreferenceModel.fromJson(updated);
   }
 
+  /// Gestiona búsqueda de usuario por correo dentro de esta parte del flujo.
   Future<UserModel?> findUserByEmail(String email) async {
     await init();
 
@@ -218,6 +227,7 @@ class LocalAccountRepository {
     return null;
   }
 
+  /// Actualiza el estado relacionado con actualización de contraseña.
   Future<void> updatePassword(int userId, String newPassword) async {
     await init();
 

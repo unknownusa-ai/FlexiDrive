@@ -22,6 +22,7 @@ class ChipPestanaNotificaciones extends StatelessWidget {
   // Widget opcional antes del texto (icono, etc)
   final Widget? leading;
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

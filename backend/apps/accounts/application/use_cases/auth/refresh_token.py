@@ -1,3 +1,5 @@
+"""Application use case for rotating refresh/access tokens."""
+
 from django.utils import timezone
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.exceptions import TokenError
@@ -7,22 +9,26 @@ from apps.accounts.domain.ports.auth_ports import (
     JwtTokenServicePort,
     RefreshTokenRepositoryPort,
 )
-from apps.accounts.infrastructure.dependencies import (
-    get_accounts_auth_repository,
-    get_jwt_token_service,
-    get_refresh_token_repository,
-)
 
 
 def refresh_access_token(
     refresh_token: str,
+    *,
     auth_repository: AccountsAuthRepositoryPort | None = None,
     refresh_token_repository: RefreshTokenRepositoryPort | None = None,
     token_service: JwtTokenServicePort | None = None,
 ) -> dict:
-    auth_repository = auth_repository or get_accounts_auth_repository()
-    refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
-    token_service = token_service or get_jwt_token_service()
+    """Validate and rotate refresh token, returning a new token pair."""
+    if auth_repository is None or refresh_token_repository is None or token_service is None:
+        from apps.accounts.infrastructure.dependencies import (
+            get_accounts_auth_repository,
+            get_jwt_token_service,
+            get_refresh_token_repository,
+        )
+
+        auth_repository = auth_repository or get_accounts_auth_repository()
+        refresh_token_repository = refresh_token_repository or get_refresh_token_repository()
+        token_service = token_service or get_jwt_token_service()
 
     token_row = refresh_token_repository.find_not_revoked(refresh_token)
     if not token_row:

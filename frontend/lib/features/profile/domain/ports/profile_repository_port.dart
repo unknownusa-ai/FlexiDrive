@@ -28,7 +28,8 @@ abstract class ProfileRepositoryPort {
   Future<bool> canUserPublish(int userId);
 
   /// Actualiza la contraseña del usuario
-  Future<void> updatePassword(int userId, String currentPassword, String newPassword);
+  Future<void> updatePassword(
+      int userId, String currentPassword, String newPassword);
 
   /// Cierra sesión y limpia datos del perfil
   Future<void> clearProfile();

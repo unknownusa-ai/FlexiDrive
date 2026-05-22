@@ -1,2 +1,4 @@
 # Root-level generated artifacts
 /build/
+.venv/
+backend/.venv/

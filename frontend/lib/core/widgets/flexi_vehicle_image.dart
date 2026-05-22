@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+/// Define la responsabilidad de `FlexiVehicleImage` dentro de este módulo.
 class FlexiVehicleImage extends StatelessWidget {
+  /// Crea una instancia y prepara el estado inicial de `FlexiVehicleImage`.
   const FlexiVehicleImage({
     super.key,
     required this.imagePath,
@@ -18,12 +20,17 @@ class FlexiVehicleImage extends StatelessWidget {
   final BoxFit fit;
   final Widget? placeholder;
 
+  /// Gestiona verificación de asset path dentro de esta parte del flujo.
   static bool isAssetPath(String path) => path.trim().startsWith('assets/');
+
+  /// Gestiona verificación de network path dentro de esta parte del flujo.
   static bool isNetworkPath(String path) {
     final normalized = path.trim().toLowerCase();
-    return normalized.startsWith('http://') || normalized.startsWith('https://');
+    return normalized.startsWith('http://') ||
+        normalized.startsWith('https://');
   }
 
+  /// Gestiona normalize path dentro de esta parte del flujo.
   static String normalizePath(String path) {
     final trimmed = path.trim();
     if (trimmed.startsWith('file://')) {
@@ -32,6 +39,7 @@ class FlexiVehicleImage extends StatelessWidget {
     return trimmed;
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final fallback = placeholder ??

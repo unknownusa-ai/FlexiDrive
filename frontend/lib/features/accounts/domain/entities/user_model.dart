@@ -2,7 +2,7 @@
 import 'package:flexidrive/core/utils/json_utils.dart';
 
 // Modelo de un usuario de la app
-// Guarda toda la info de la cuenta (login, datos personales, etc)
+// Guarda toda la info de la cuenta (inicio de sesión, datos personales, etc)
 class UserModel {
   // Constructor con todos los datos requeridos
   const UserModel({
@@ -27,7 +27,7 @@ class UserModel {
   final int userTypeId;
   // Nombre completo ej: "Carlos Rodríguez"
   final String fullName;
-  // Email ej: "carlos@email.com"
+  // correo ej: "carlos@correo.com"
   final String email;
   // Teléfono ej: "3101234567"
   final String phone;
@@ -36,7 +36,7 @@ class UserModel {
   // true = puede publicar vehículos
   final bool canPublish;
 
-  // Crea un UserModel desde JSON (cuando cargamos del archivo)
+  /// Crea una instancia y prepara el estado inicial de `UserModel`.
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: JsonUtils.asInt(json['usuario_id']),

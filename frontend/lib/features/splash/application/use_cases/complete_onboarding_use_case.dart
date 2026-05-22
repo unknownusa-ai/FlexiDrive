@@ -2,6 +2,7 @@ import '../../domain/ports/config_repository_port.dart';
 
 /// Caso de uso para completar el onboarding
 class CompleteOnboardingUseCase {
+  /// Crea una instancia y prepara el estado inicial de `CompleteOnboardingUseCase`.
   CompleteOnboardingUseCase(this._repository);
 
   final ConfigRepositoryPort _repository;

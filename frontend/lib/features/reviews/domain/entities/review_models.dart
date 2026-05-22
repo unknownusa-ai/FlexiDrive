@@ -18,7 +18,7 @@ class OpinionModel {
   // Comentario del usuario (puede ser null)
   final String? description;
 
-  // Crea OpinionModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `OpinionModel`.
   factory OpinionModel.fromJson(Map<String, dynamic> json) {
     return OpinionModel(
       id: JsonUtils.asInt(json['opinion_id']),
@@ -58,7 +58,7 @@ class ReviewModel {
   // Fecha y hora de la reseña
   final DateTime date;
 
-  // Crea ReviewModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `ReviewModel`.
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
       id: JsonUtils.asInt(json['resena_id']),

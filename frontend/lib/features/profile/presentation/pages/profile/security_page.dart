@@ -19,8 +19,10 @@ import 'package:flexidrive/injection_container.dart';
 // Pagina de seguridad del perfil
 // Para cambiar contraseña, ver sesiones activas, etc
 class SecurityPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `SecurityPage`.
   const SecurityPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<SecurityPage> createState() => _SecurityPageState();
 }
@@ -52,12 +54,14 @@ class _SecurityPageState extends State<SecurityPage> {
   int? _currentUserId; // ID del usuario actual
   List<UserSessionModel> _sessions = []; // Sesiones activas
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadSecurityData(); // Carga datos de seguridad al iniciar
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     // Liberamos los controladores para evitar memory leaks
@@ -110,6 +114,7 @@ class _SecurityPageState extends State<SecurityPage> {
     });
   }
 
+  /// Gestiona persist security settings dentro de esta parte del flujo.
   Future<void> _persistSecuritySettings() async {
     final userId = _currentUserId;
     if (userId == null) return;
@@ -126,6 +131,7 @@ class _SecurityPageState extends State<SecurityPage> {
     }
   }
 
+  /// Actualiza el estado relacionado con actualización de contraseña.
   Future<void> _updatePassword() async {
     if (_isUpdatingPassword) return;
 
@@ -196,6 +202,7 @@ class _SecurityPageState extends State<SecurityPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -250,6 +257,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGradientHeader(bool isSmallPhone, bool isDark) {
     return Stack(
       children: [
@@ -273,7 +281,6 @@ class _SecurityPageState extends State<SecurityPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back button and title in same row
                   Row(
                     children: [
                       GestureDetector(
@@ -316,7 +323,6 @@ class _SecurityPageState extends State<SecurityPage> {
                     ),
                   ),
                   SizedBox(height: isSmallPhone ? 16 : 20),
-                  // Verified badge
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: isSmallPhone ? 12 : 16,
@@ -398,7 +404,6 @@ class _SecurityPageState extends State<SecurityPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Lock icon and title
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -429,7 +434,7 @@ class _SecurityPageState extends State<SecurityPage> {
             ],
           ),
           SizedBox(height: isSmallPhone ? 16 : 20),
-          // Password fields
+          // contraseña fields
           _buildPasswordField(
             label: 'CONTRASEÑA ACTUAL',
             controller: _currentPasswordController,
@@ -469,7 +474,6 @@ class _SecurityPageState extends State<SecurityPage> {
             labelColor: labelColor,
           ),
           SizedBox(height: isSmallPhone ? 16 : 20),
-          // Update button
           GestureDetector(
             onTap: _isUpdatingPassword ? null : _updatePassword,
             child: Container(
@@ -938,6 +942,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Gestiona format session time dentro de esta parte del flujo.
   String _formatSessionTime(DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime.toLocal());
@@ -948,6 +953,7 @@ class _SecurityPageState extends State<SecurityPage> {
     return 'Hace ${diff.inDays} dias';
   }
 
+  /// Gestiona icon por device dentro de esta parte del flujo.
   IconData _iconByDevice(String device, String operatingSystem) {
     final source = '${device.toLowerCase()} ${operatingSystem.toLowerCase()}';
     if (source.contains('iphone') || source.contains('ios')) {
@@ -965,6 +971,7 @@ class _SecurityPageState extends State<SecurityPage> {
     return Icons.devices;
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDeleteAccountButton(bool isSmallPhone, bool isDark) {
     return GestureDetector(
       onTap: () => _showDeleteAccountDialog(),
@@ -1001,6 +1008,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Mostrar mensaje emergente esta parte del flujo de trabajo.
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1017,6 +1025,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Mostrar mensaje emergente de error esta parte del flujo de trabajo.
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1033,6 +1042,7 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
+  /// Mostrar diálogo para eliminar la cuenta esta parte del flujo de trabajo.
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
@@ -1066,6 +1076,7 @@ class _SecurityPageState extends State<SecurityPage> {
           ),
           TextButton(
             onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(context);
               _showSnackBar('Cuenta eliminada');
             },

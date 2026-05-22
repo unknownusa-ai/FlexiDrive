@@ -2,6 +2,7 @@ import '../../domain/ports/onboarding_repository_port.dart';
 
 /// Caso de uso para saltar el onboarding
 class SkipOnboardingUseCase {
+  /// Crea una instancia y prepara el estado inicial de `SkipOnboardingUseCase`.
   SkipOnboardingUseCase(this._repository);
 
   final OnboardingRepositoryPort _repository;

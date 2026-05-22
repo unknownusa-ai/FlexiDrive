@@ -24,7 +24,7 @@ class PublicationModel {
   // true = visible para rentar, false = oculta
   final bool active;
 
-  // Crea PublicationModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `PublicationModel`.
   factory PublicationModel.fromJson(Map<String, dynamic> json) {
     return PublicationModel(
       id: JsonUtils.asInt(json['publicacion_id']),
@@ -65,7 +65,7 @@ class PublicationPriceModel {
   // Precio en pesos colombianos
   final double price;
 
-  // Crea PublicationPriceModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `PublicationPriceModel`.
   factory PublicationPriceModel.fromJson(Map<String, dynamic> json) {
     return PublicationPriceModel(
       id: JsonUtils.asInt(json['precio_publicacion_id']),
@@ -110,7 +110,7 @@ class PublicationImageModel {
   // Fecha y hora de subida
   final DateTime uploadDate;
 
-  // Crea PublicationImageModel desde JSON
+  /// Crea una instancia y prepara el estado inicial de `PublicationImageModel`.
   factory PublicationImageModel.fromJson(Map<String, dynamic> json) {
     return PublicationImageModel(
       id: JsonUtils.asInt(json['imagen_publicacion_id']),

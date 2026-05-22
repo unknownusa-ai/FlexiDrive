@@ -20,6 +20,7 @@ class SolicitudesPage extends StatefulWidget {
   final int initialTab;
   const SolicitudesPage({super.key, this.initialTab = 0});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<SolicitudesPage> createState() => SolicitudesPageState();
 }
@@ -55,9 +56,10 @@ class SolicitudesPageState extends State<SolicitudesPage>
   final Map<int, String> _accountEmailsByUserId = {};
   bool _isLoading = true;
 
-  // Current user ID in session
+  // actual user ID in session
   int? _currentUserId;
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
@@ -77,6 +79,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     _loadData();
   }
 
+  /// Gestiona did actualizar widget dentro de esta parte del flujo.
   @override
   void didUpdateWidget(SolicitudesPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -85,18 +88,21 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
+  /// Actualiza el estado relacionado con definir tab.
   void setTab(int index) {
     if (index >= 0 && index < 3) {
       _tabController.animateTo(index);
     }
   }
 
+  /// Carga los datos necesarios para cargar data.
   Future<void> _loadData() async {
     try {
       setState(() => _isLoading = true);
@@ -104,11 +110,9 @@ class SolicitudesPageState extends State<SolicitudesPage>
       final currentUser = await _accountRepository.getCurrentUser();
       _currentUserId = currentUser?.id;
 
-      // Load reservations
       await _reservationDb.loadIfNeeded();
       _allReservations = List.from(_reservationDb.reservations);
 
-      // Load vehicles and users
       await _vehiculoService.init();
       _vehicles = _vehiculoService.vehiculos;
       _users = _vehiculoService.usuarios;
@@ -174,7 +178,6 @@ class SolicitudesPageState extends State<SolicitudesPage>
         }
       }
 
-      // Load publications
       _publications = await _loadPublications();
 
       setState(() => _isLoading = false);
@@ -183,6 +186,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Carga los datos necesarios para cargar publicaciones.
   Future<List<Map<String, dynamic>>> _loadPublications() async {
     try {
       await _publicationDb.loadIfNeeded();
@@ -194,7 +198,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
-  // Get reservations filtered by status for current user's vehicles
+  /// Filtra las reservas del usuario actual según el estado solicitado.
   List<ReservationModel> _getReservationsByStatus(int statusId) {
     return _allReservations.where((reservation) {
       final currentUserId = _currentUserId;
@@ -207,6 +211,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }).toList();
   }
 
+  /// Obtiene la información asociada a obtener completed reservas.
   List<ReservationModel> _getCompletedReservations() {
     return _allReservations.where((reservation) {
       final currentUserId = _currentUserId;
@@ -220,7 +225,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }).toList();
   }
 
-  // Find publication by ID
+  /// Gestiona búsqueda de publicación por id dentro de esta parte del flujo.
   Map<String, dynamic>? _findPublicationById(int publicationId) {
     try {
       return _publications
@@ -242,7 +247,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     return _getVehicleById(vehicleId);
   }
 
-  // Get vehicle info
+  /// Obtiene la información asociada a obtener vehicle por id.
   Map<String, dynamic>? _getVehicleById(int vehicleId) {
     try {
       return _vehicles.firstWhere(
@@ -253,7 +258,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
-  // Get user info
+  /// Obtiene la información asociada a obtener usuario por id.
   Map<String, dynamic>? _getUserById(int userId) {
     try {
       return _users.firstWhere(
@@ -264,12 +269,14 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Convierte el valor a entero de forma segura.
   int _asInt(dynamic value) {
     if (value is int) return value;
     if (value is double) return value.round();
     return int.tryParse('$value') ?? 0;
   }
 
+  /// Gestiona normalize text dentro de esta parte del flujo.
   String _normalizeText(dynamic value) {
     if (value == null) return '';
     final text = '$value'.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -281,6 +288,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     return _fixMojibake(text);
   }
 
+  /// Gestiona resolve usuario name dentro de esta parte del flujo.
   String _resolveUserName(int userId, Map<String, dynamic>? user) {
     final mappedName = _normalizeText(_accountNamesByUserId[userId]);
     if (mappedName.isNotEmpty) return mappedName;
@@ -299,6 +307,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     return 'Usuario #$userId';
   }
 
+  /// Gestiona resolve vehicle name dentro de esta parte del flujo.
   String _resolveVehicleName(Map<String, dynamic>? vehicle) {
     if (vehicle == null) return 'Vehículo';
     final explicitName = _normalizeText(vehicle['nombre']);
@@ -329,6 +338,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     return name;
   }
 
+  /// Gestiona resolve vehicle imagen dentro de esta parte del flujo.
   String _resolveVehicleImage(Map<String, dynamic>? vehicle) {
     return VehicleImageResolver.resolveFromVehicle(
       vehicle,
@@ -337,6 +347,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Gestiona fix mojibake dentro de esta parte del flujo.
   String _fixMojibake(String input) {
     if (!input.contains('Ã') && !input.contains('Â') && !input.contains('â')) {
       return input;
@@ -348,6 +359,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -378,6 +390,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -423,6 +436,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTitleSection(bool isSmallPhone) {
     final theme = Theme.of(context);
     return Container(
@@ -462,6 +476,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTabBar(bool isSmallPhone) {
     final theme = Theme.of(context);
     final pendingCount =
@@ -580,6 +595,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPendientesList(bool isSmallPhone) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -633,6 +649,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildActivasList(bool isSmallPhone) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -686,6 +703,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCompletadasList(bool isSmallPhone) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -1051,6 +1069,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Mostrar diálogo de aprobación esta parte del flujo de trabajo.
   void _showAcceptDialog(ReservationModel reservation) {
     showDialog(
       context: context,
@@ -1105,6 +1124,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
           ),
           ElevatedButton(
             onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(context);
               _approveReservation(reservation);
             },
@@ -1133,6 +1153,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Mostrar diálogo de rechazo esta parte del flujo de trabajo.
   void _showRejectDialog(ReservationModel reservation) {
     String? selectedReason;
     final reasons = [
@@ -1219,6 +1240,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
             ElevatedButton(
               onPressed: selectedReason != null
                   ? () {
+                      /// Crea una instancia y prepara el estado inicial de `Navigator`.
                       Navigator.pop(context);
                       _rejectReservation(reservation, selectedReason!);
                     }
@@ -1250,9 +1272,10 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Gestiona approve reserva dentro de esta parte del flujo.
   Future<void> _approveReservation(ReservationModel reservation) async {
     try {
-      // Update reservation status from pending (1) to active (4)
+      // actualizar reserva estado de pendiente (1) a activa (4)
       final updatedReservation = ReservationModel(
         id: reservation.id,
         code: reservation.code,
@@ -1320,6 +1343,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Mostrar mensaje emergente de éxito esta parte del flujo de trabajo.
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1346,6 +1370,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     );
   }
 
+  /// Gestiona crear approval notificación dentro de esta parte del flujo.
   Future<void> _createApprovalNotification(ReservationModel reservation) async {
     try {
       final vehicle = _getVehicleForReservation(reservation);
@@ -1420,6 +1445,7 @@ class SolicitudesPageState extends State<SolicitudesPage>
     }
   }
 
+  /// Mostrar mensaje emergente de error esta parte del flujo de trabajo.
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -43,10 +43,12 @@ class FacturaDigitalPage extends StatefulWidget {
   final int tarifaServicio; // Tarifa del servicio
   final int seguroBasico; // Costo del seguro basico
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<FacturaDigitalPage> createState() => _FacturaDigitalPageState();
 }
 
+/// Define la responsabilidad de `_FacturaDigitalPageState` dentro de este módulo.
 class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
   bool _isDownloadingPdf = false;
 
@@ -72,9 +74,11 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
     return buffer.toString();
   }
 
+  /// Gestiona verificación de dark dentro de esta parte del flujo.
   bool _isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
 
+  /// Gestiona download invoice pdf dentro de esta parte del flujo.
   Future<void> _downloadInvoicePdf() async {
     if (_isDownloadingPdf) return;
 
@@ -155,7 +159,8 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
                                 pw.SizedBox(height: 2),
                                 pw.Text(
                                   'NIT: ${widget.nit}',
-                                  style: pw.TextStyle(color: muted, fontSize: 10),
+                                  style:
+                                      pw.TextStyle(color: muted, fontSize: 10),
                                 ),
                               ],
                             ),
@@ -245,16 +250,14 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
                                 fontSize: 10)),
                         pw.SizedBox(height: 8),
                         _pdfPriceRow(
-                          '${
-                              widget.descripcionServicio
-                          } — ${widget.cantidad} ${widget.periodoUnidad}${widget.cantidad > 1 ? 's' : ''}',
+                          '${widget.descripcionServicio} — ${widget.cantidad} ${widget.periodoUnidad}${widget.cantidad > 1 ? 's' : ''}',
                           0,
                           title,
                         ),
                         _pdfPriceRow('Tarifa de servicio (5%)',
                             widget.tarifaServicio, title),
-                        _pdfPriceRow(
-                            'Seguro básico de viaje', widget.seguroBasico, title),
+                        _pdfPriceRow('Seguro básico de viaje',
+                            widget.seguroBasico, title),
                         pw.SizedBox(height: 8),
                         _pdfPriceRow('Subtotal', subtotal, title,
                             isBold: true, divider: false),
@@ -348,7 +351,8 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
                 style: pw.TextStyle(
                   color: color,
                   fontSize: 11,
-                  fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+                  fontWeight:
+                      isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
                 ),
               ),
             ),
@@ -372,6 +376,7 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -413,6 +418,7 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(BuildContext context, bool isSmallPhone) {
     return Container(
       decoration: const BoxDecoration(
@@ -632,10 +638,10 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
                   titleColor,
                   borderColor,
                 ),
-                _priceRow('Tarifa de servicio (5%)', widget.tarifaServicio, titleColor,
-                    borderColor),
-                _priceRow('Seguro básico de viaje', widget.seguroBasico, titleColor,
-                    borderColor,
+                _priceRow('Tarifa de servicio (5%)', widget.tarifaServicio,
+                    titleColor, borderColor),
+                _priceRow('Seguro básico de viaje', widget.seguroBasico,
+                    titleColor, borderColor,
                     showDivider: false),
                 const SizedBox(height: 16),
                 _totalsRow('Subtotal', subtotal, muted, titleColor),
@@ -785,6 +791,7 @@ class _FacturaDigitalPageState extends State<FacturaDigitalPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBottomButton(BuildContext context, bool isSmallPhone) {
     return Container(
       padding: EdgeInsets.fromLTRB(16, isSmallPhone ? 10 : 12, 16, 14),

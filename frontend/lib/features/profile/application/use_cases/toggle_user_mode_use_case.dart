@@ -2,6 +2,7 @@ import '../../domain/ports/profile_repository_port.dart';
 
 /// Caso de uso para cambiar el modo de usuario
 class ToggleUserModeUseCase {
+  /// Crea una instancia y prepara el estado inicial de `ToggleUserModeUseCase`.
   ToggleUserModeUseCase(this._repository);
 
   final ProfileRepositoryPort _repository;

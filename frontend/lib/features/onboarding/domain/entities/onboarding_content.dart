@@ -2,6 +2,7 @@ import 'onboarding_step.dart';
 
 /// Entidad que representa todo el contenido del onboarding
 class OnboardingContent {
+  /// Crea una instancia y prepara el estado inicial de `OnboardingContent`.
   const OnboardingContent({
     required this.steps,
     required this.currentStepIndex,
@@ -36,6 +37,7 @@ class OnboardingContent {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'steps': steps.map((s) => s.toJson()).toList(),
         'current_step_index': currentStepIndex,
@@ -43,6 +45,7 @@ class OnboardingContent {
         'was_skipped': wasSkipped,
       };
 
+  /// Crea una instancia y prepara el estado inicial de `OnboardingContent`.
   factory OnboardingContent.fromJson(Map<String, dynamic> json) {
     return OnboardingContent(
       steps: (json['steps'] as List<dynamic>)

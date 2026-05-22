@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flexidrive/features/home/presentation/pages/main_page.dart';
 // Temas y colores de la app
 import 'package:flexidrive/core/theme/flexi_drive_app.dart';
-// Servicios de usuarios y login
+// Servicios de usuarios y inicio de sesión
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 // Preferencias y configuraciones del usuario
 import 'package:flexidrive/features/accounts/application/use_cases/user_preferences_use_case.dart';
@@ -14,9 +14,7 @@ import 'package:flexidrive/features/accounts/application/use_cases/user_preferen
 import 'package:flexidrive/features/reservations/application/use_cases/reservation_access_use_case.dart';
 // Base de datos de reseñas
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
-// Profile feature - Hexagonal Architecture
 import 'package:flexidrive/features/profile/application/use_cases/profile_use_cases.dart';
-// Auth feature - Hexagonal Architecture
 import 'package:flexidrive/features/auth/application/use_cases/auth_use_cases.dart';
 // Paginas del perfil
 import 'edit_profile_page.dart';
@@ -34,7 +32,10 @@ import 'package:flexidrive/injection_container.dart';
 // Pagina principal del perfil del usuario
 // Muestra info personal, estadisticas y opciones
 class ProfilePage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `ProfilePage`.
   const ProfilePage({super.key});
+
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -53,12 +54,12 @@ class _ProfilePageState extends State<ProfilePage> {
   // Base de datos de reseñas
   final ReviewAccessUseCase _reviewDb =
       InjectionContainer.instance.reviewAccessUseCase;
-  // Use cases de Profile - Hexagonal Architecture (para uso futuro)
+  // uso cases de Profile - Hexagonal Architecture (para uso futuro)
   final GetProfileUseCase _profileGetUseCase =
       InjectionContainer.instance.profileGetUseCase;
   final GetProfileStatsUseCase _profileStatsUseCase =
       InjectionContainer.instance.profileGetStatsUseCase;
-  // Use cases de Auth - Hexagonal Architecture (para uso futuro)
+  // uso cases de Auth - Hexagonal Architecture (para uso futuro)
   final LogoutUseCase _authLogoutUseCase =
       InjectionContainer.instance.authLogoutUseCase;
   // Esta activo el modo arrendatario?
@@ -67,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
   int? _currentUserId;
   // Nombre del usuario (si no hay, "Invitado")
   String _profileName = 'Invitado';
-  // Email del usuario (si no hay, email por defecto)
+  // correo del usuario (si no hay, correo por defecto)
   String _profileEmail = 'sin_sesion@flexidrive.local';
 
   // Estadisticas dinamicas del perfil
@@ -78,10 +79,25 @@ class _ProfilePageState extends State<ProfilePage> {
   int _totalReservations = 0; // Total de reservas
   int _totalReviews = 0; // Total de reseñas
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
+    _reviewDb.changes.addListener(_onReviewsChanged);
     _cargarUsuarioPerfil(); // Carga datos del usuario
+  }
+
+  /// Gestiona dispose dentro de esta parte del flujo.
+  @override
+  void dispose() {
+    _reviewDb.changes.removeListener(_onReviewsChanged);
+    super.dispose();
+  }
+
+  /// Gestiona on reseñas changed dentro de esta parte del flujo.
+  void _onReviewsChanged() {
+    if (!mounted || _currentUserId == null) return;
+    _refreshProfileStats();
   }
 
   // Carga los datos del perfil desde el repositorio
@@ -103,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Cargamos datos para las estadisticas del perfil
     await _calculateProfileStats();
-    // También cargamos stats del nuevo use case hexagonal (para migración futura)
+    // También cargamos estadísticas del nuevo caso de uso hexagonal (para migración futura)
     if (_currentUserId != null) {
       await _profileStatsUseCase.execute(_currentUserId!);
     }
@@ -122,6 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /// Gestiona persist dark modo preferencia dentro de esta parte del flujo.
   Future<void> _persistDarkModePreference(bool isDarkMode) async {
     final userId = _currentUserId;
     if (userId == null) return;
@@ -132,6 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Gestiona persist arrendatario modo dentro de esta parte del flujo.
   Future<void> _persistArrendatarioMode(bool enabled) async {
     final userId = _currentUserId;
     if (userId == null) return;
@@ -147,6 +165,14 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  /// Gestiona refrescar perfil estadísticas dentro de esta parte del flujo.
+  Future<void> _refreshProfileStats() async {
+    await _calculateProfileStats();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -190,6 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeaderWithStats() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -365,6 +392,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildModoSection() {
     final theme = Theme.of(context);
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -475,6 +503,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildAccountSection() {
     final theme = Theme.of(context);
     return Container(
@@ -556,6 +585,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildActivitySection() {
     final theme = Theme.of(context);
     return Container(
@@ -614,12 +644,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 iconBgColor: const Color(0xFFFEF3C7),
                 title: 'Mis reseñas',
                 subtitle: '$_totalReviews reseñas escritas',
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const MyReviewsPage()),
                   );
+                  await _refreshProfileStats();
                 }),
             Divider(
                 height: 1,
@@ -643,6 +674,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPreferencesSection() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -679,6 +711,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildThemeToggleItem(bool isDarkMode, bool isSmallPhone) {
     return InkWell(
       onTap: () {
@@ -786,6 +819,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLogoutButton() {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -796,7 +830,6 @@ class _ProfilePageState extends State<ProfilePage> {
             normalizedEmail != 'sin_sesion@flexidrive.local') {
           await LocalSessionStore.instance.setLastLoggedEmail(normalizedEmail);
         }
-        // Usar el nuevo Auth hexagonal use case
         await _authLogoutUseCase.execute();
         // También limpiar el perfil local
         await _profileGetUseCase.execute(); // Refresca estado
@@ -828,6 +861,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildVersionInfo() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       Text('FlexiDrive v2.1.0 · Colombia',
@@ -838,6 +872,7 @@ class _ProfilePageState extends State<ProfilePage> {
     ]);
   }
 
+  /// Mostrar diálogo de modo arrendatario esta parte del flujo de trabajo.
   void _showModoArrendatarioDialog(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
 
@@ -948,6 +983,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
+                          /// Crea una instancia y prepara el estado inicial de `Navigator`.
                           Navigator.pop(context);
                           _persistArrendatarioMode(true);
                           Navigator.pushAndRemoveUntil(
@@ -1021,6 +1057,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Gestiona format currency dentro de esta parte del flujo.
   String _formatCurrency(double amount) {
     if (amount >= 1000000) {
       return '\$${(amount / 1000000).toStringAsFixed(1)}M';
@@ -1031,19 +1068,18 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /// Gestiona calculate perfil estadísticas dentro de esta parte del flujo.
   Future<void> _calculateProfileStats() async {
     try {
-      // Load reservations and reviews data
       await _reservationDb.loadIfNeeded();
       await _reviewDb.loadIfNeeded();
 
-      // Calculate completed trips (reservations with status 2 or 3)
       if (_currentUserId != null) {
         final userReservations = _reservationDb.reservations
             .where((r) => r.userId == _currentUserId)
             .toList();
 
-        // Total reservations (all statuses)
+        // Total reservas (all statuses)
         _totalReservations = userReservations.length;
 
         final completedReservations = userReservations
@@ -1060,20 +1096,20 @@ class _ProfilePageState extends State<ProfilePage> {
         // Calculate points (10 points per completed trip + bonus based on spending)
         _points = (_trips * 10) + (_totalSpent / 10000).floor();
 
-        // Count reviews
+        // Count reseñas
         final userReviews =
             _reviewDb.reviews.where((r) => r.userId == _currentUserId).toList();
 
         _totalReviews = userReviews.length;
 
-        // Rating is kept at default 4.9 since ReviewModel doesn't contain rating directly
         // (rating is in OpinionModel referenced by opinionId)
       }
     } catch (e) {
-      // Error calculating stats - silently handle
+      // Error calculating estadísticas - silently handle
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildFeatureItem(IconData icon, String text, bool isSmallPhone) {
     return Row(
       children: [

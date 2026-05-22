@@ -6,6 +6,7 @@ import '../datasources/auth_api_service.dart';
 
 /// Implementación del repositorio de autenticación
 class AuthRepositoryImpl implements AuthRepositoryPort {
+  /// Crea una instancia y prepara el estado inicial de `AuthRepositoryImpl`.
   AuthRepositoryImpl({
     LocalAuthStorage? localStorage,
     AuthApiService? apiService,
@@ -15,6 +16,7 @@ class AuthRepositoryImpl implements AuthRepositoryPort {
   final LocalAuthStorage _localStorage;
   final AuthApiService _apiService;
 
+  /// Inicializa el flujo de initialize antes de su uso.
   @override
   Future<void> initialize() async {
     // Inicialización si es necesaria
@@ -38,11 +40,13 @@ class AuthRepositoryImpl implements AuthRepositoryPort {
     return session;
   }
 
+  /// Gestiona logout dentro de esta parte del flujo.
   @override
   Future<void> logout() async {
     await _localStorage.clearSession();
   }
 
+  /// Obtiene la información asociada a obtener actual session.
   @override
   Future<AuthSession?> getCurrentSession() async {
     final session = await _localStorage.getSession();
@@ -68,23 +72,27 @@ class AuthRepositoryImpl implements AuthRepositoryPort {
     return session;
   }
 
+  /// Gestiona verificación de authenticated dentro de esta parte del flujo.
   @override
   Future<bool> isAuthenticated() async {
     final session = await getCurrentSession();
     return session != null && session.isValid;
   }
 
+  /// Gestiona refrescar token dentro de esta parte del flujo.
   @override
   Future<AuthToken?> refreshToken(String refreshToken) async {
     return _apiService.refreshToken(refreshToken);
   }
 
+  /// Guardar session esta parte del flujo de trabajo.
   @override
   Future<void> saveSession(AuthSession session) async {
     await _localStorage.saveSession(session);
     await _localStorage.saveAccessToken(session.token.accessToken);
   }
 
+  /// Gestiona clear session dentro de esta parte del flujo.
   @override
   Future<void> clearSession() async {
     await _localStorage.clearSession();

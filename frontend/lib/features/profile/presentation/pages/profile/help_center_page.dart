@@ -8,8 +8,10 @@ import 'package:flexidrive/core/utils/responsive_utils.dart';
 // Pagina de centro de ayuda
 // Chatbot con respuestas predefinidas y FAQs
 class HelpCenterPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `HelpCenterPage`.
   const HelpCenterPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<HelpCenterPage> createState() => _HelpCenterPageState();
 }
@@ -115,6 +117,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     },
   ];
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -124,7 +127,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // ── Main page ──────────────────────────────────────────────
           Column(
             children: [
               _buildGradientHeader(isSmallPhone),
@@ -176,7 +178,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // GRADIENT HEADER
   // ─────────────────────────────────────────────────────────────────
   Widget _buildGradientHeader(bool isSmallPhone) {
     return Stack(
@@ -328,6 +329,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildContactCard(Map<String, dynamic> option, bool isSmallPhone) {
     final theme = Theme.of(context);
     return GestureDetector(
@@ -501,7 +503,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // CHAT WITH AGENT BUTTON
   // ─────────────────────────────────────────────────────────────────
   Widget _buildChatWithAgentButton(bool isSmallPhone) {
     return GestureDetector(
@@ -617,11 +618,8 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
-  /// White header as seen in the prototype:
-  /// - Purple rounded-square avatar with robot icon + green dot badge
   /// - "Ana · Soporte FlexiDrive" in dark bold
   /// - "● En línea ahora" in green
-  /// - Grey X close button on the right
   Widget _buildChatHeader(bool isSmallPhone) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -647,7 +645,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
       ),
       child: Row(
         children: [
-          // Avatar with online dot badge
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -668,7 +665,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
                   size: isSmallPhone ? 26 : 28,
                 ),
               ),
-              // Green online dot badge
               Positioned(
                 bottom: -2,
                 right: -2,
@@ -686,7 +682,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
             ],
           ),
           SizedBox(width: isSmallPhone ? 12 : 14),
-          // Name + status text
+          // Name + estado text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -725,7 +721,6 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
               ],
             ),
           ),
-          // Close (X) button
           GestureDetector(
             onTap: _closeChat,
             child: Container(
@@ -747,6 +742,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildChatMessages(bool isSmallPhone) {
     final theme = Theme.of(context);
     return Expanded(
@@ -764,6 +760,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildMessageBubble(Map<String, dynamic> message, bool isSmallPhone) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -868,6 +865,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildChatInput(bool isSmallPhone) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -964,8 +962,10 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     });
   }
 
+  /// Gestiona cerrar chat dentro de esta parte del flujo.
   void _closeChat() => setState(() => _isChatOpen = false);
 
+  /// Gestiona send message dentro de esta parte del flujo.
   void _sendMessage() {
     final message = _chatController.text.trim();
     if (message.isEmpty) return;
@@ -981,6 +981,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
 
     _scrollToBottom();
 
+    /// Crea una instancia y prepara el estado inicial de `Future`.
     Future.delayed(const Duration(milliseconds: 800), () {
       final response = _generateBotResponse(message);
       setState(() {
@@ -994,6 +995,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     });
   }
 
+  /// Gestiona scroll a bottom dentro de esta parte del flujo.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -1006,6 +1008,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     });
   }
 
+  /// Gestiona generate bot response dentro de esta parte del flujo.
   String _generateBotResponse(String userMessage) {
     final lower = userMessage.toLowerCase();
     for (final entry in _botResponses.entries) {
@@ -1018,15 +1021,18 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
         '¿Hay algo más en lo que pueda ayudarte?';
   }
 
+  /// Obtiene la información asociada a obtener actual time.
   String _getCurrentTime() {
     final now = DateTime.now();
     return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   }
 
+  /// Alternar faq esta parte del flujo de trabajo.
   void _toggleFAQ(int index) {
     setState(() => _faqs[index]['isExpanded'] = !_faqs[index]['isExpanded']);
   }
 
+  /// Gestiona handle contact option dentro de esta parte del flujo.
   void _handleContactOption(String title) {
     if (title == 'Chat') {
       _openChat();
@@ -1045,6 +1051,7 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     );
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     _searchController.dispose();

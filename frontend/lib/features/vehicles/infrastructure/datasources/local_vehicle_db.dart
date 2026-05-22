@@ -3,7 +3,6 @@ import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/vehicles/domain/entities/vehicle_models.dart';
 
 // Base de datos local de vehiculos
-// Carga los carros desde un archivo JSON y los mantiene en memoria
 class LocalVehicleDb {
   // Constructor privado para singleton
   LocalVehicleDb._();
@@ -44,7 +43,7 @@ class LocalVehicleDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
-  // Carga un archivo JSON desde assets
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 }

@@ -1,29 +1,35 @@
 import 'package:flexidrive/features/accounts/domain/entities/user_preference_model.dart';
-import 'package:flexidrive/features/accounts/infrastructure/datasources/user_preference_service.dart';
+import 'package:flexidrive/features/accounts/domain/ports/user_preferences_repository_port.dart';
 
+/// Casos de uso de preferencias de usuario.
+///
+/// La capa de aplicación solo conoce el puerto de dominio y no el datasource.
 class UserPreferencesUseCase {
-  UserPreferencesUseCase(this._service);
+  /// Crea una instancia y prepara el estado inicial de `UserPreferencesUseCase`.
+  UserPreferencesUseCase(this._repository);
 
-  final UserPreferenceService _service;
+  final UserPreferencesRepositoryPort _repository;
 
-  Future<void> initialize() => _service.init();
+  /// Inicializa el flujo de initialize antes de su uso.
+  Future<void> initialize() => _repository.initialize();
 
+  /// Buscar efectiva por usuario id esta parte del flujo de trabajo.
   Future<UserPreferenceModel?> findEffectiveByUserId(int userId) {
-    return _service.findEffectiveByUserId(userId);
+    return _repository.findEffectiveByUserId(userId);
   }
 
   Future<void> setDarkMode({
     required int userId,
     required bool darkMode,
   }) {
-    return _service.setDarkMode(userId: userId, darkMode: darkMode);
+    return _repository.setDarkMode(userId: userId, darkMode: darkMode);
   }
 
   Future<bool> getArrendatarioMode({
     required int userId,
     bool defaultValue = false,
   }) {
-    return _service.getArrendatarioMode(
+    return _repository.getArrendatarioMode(
       userId: userId,
       defaultValue: defaultValue,
     );
@@ -33,6 +39,6 @@ class UserPreferencesUseCase {
     required int userId,
     required bool enabled,
   }) {
-    return _service.setArrendatarioMode(userId: userId, enabled: enabled);
+    return _repository.setArrendatarioMode(userId: userId, enabled: enabled);
   }
 }

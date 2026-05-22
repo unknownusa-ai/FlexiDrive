@@ -3,6 +3,7 @@ import '../../domain/ports/profile_repository_port.dart';
 
 /// Caso de uso para obtener el perfil del usuario actual
 class GetProfileUseCase {
+  /// Crea una instancia y prepara el estado inicial de `GetProfileUseCase`.
   GetProfileUseCase(this._repository);
 
   final ProfileRepositoryPort _repository;

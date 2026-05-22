@@ -1,4 +1,4 @@
-git sservices:
+services:
   db:
     container_name: flexidrive_db
     image: postgres:16-alpine
@@ -70,22 +70,6 @@ git sservices:
       interval: 15s
       timeout: 5s
       retries: 8
-    networks:
-      - flexidrive_network
-
-  frontend:
-    container_name: flexidrive_frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    restart: "no"
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - flexidrive_network
 

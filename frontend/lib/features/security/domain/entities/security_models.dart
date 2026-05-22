@@ -21,6 +21,7 @@ class UserSecurityModel {
   // True si tiene acceso biométrico habilitado
   final bool biometricAccess;
 
+  /// Crea una instancia y prepara el estado inicial de `UserSecurityModel`.
   factory UserSecurityModel.fromJson(Map<String, dynamic> json) {
     return UserSecurityModel(
       id: JsonUtils.asInt(json['seguridad_usuario_id']),
@@ -30,6 +31,7 @@ class UserSecurityModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'seguridad_usuario_id': id,
         'usuario_id': userId,
@@ -38,7 +40,9 @@ class UserSecurityModel {
       };
 }
 
+/// Define la responsabilidad de `UserSessionModel` dentro de este módulo.
 class UserSessionModel {
+  /// Crea una instancia y prepara el estado inicial de `UserSessionModel`.
   const UserSessionModel({
     required this.id,
     required this.userId,
@@ -57,6 +61,7 @@ class UserSessionModel {
   final DateTime startDate;
   final bool active;
 
+  /// Crea una instancia y prepara el estado inicial de `UserSessionModel`.
   factory UserSessionModel.fromJson(Map<String, dynamic> json) {
     return UserSessionModel(
       id: JsonUtils.asInt(json['sesion_usuario_id']),
@@ -69,6 +74,7 @@ class UserSessionModel {
     );
   }
 
+  /// Serializa esta instancia a un mapa JSON compatible con persistencia.
   Map<String, dynamic> toJson() => {
         'sesion_usuario_id': id,
         'usuario_id': userId,

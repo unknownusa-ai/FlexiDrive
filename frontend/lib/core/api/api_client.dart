@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
+/// Define la responsabilidad de `ApiClient` dentro de este módulo.
 class ApiClient {
+  /// Crea una instancia y prepara el estado inicial de `ApiClient`.
   ApiClient._() {
     _initClient();
   }
@@ -25,6 +27,7 @@ class ApiClient {
   final Map<String, _CachedResponse> _cache = {};
   static const _cacheDuration = Duration(minutes: 2);
 
+  /// Inicializa el flujo de inicialización client antes de su uso.
   void _initClient() {
     if (kIsWeb) {
       _client = http.Client();
@@ -49,14 +52,16 @@ class ApiClient {
     return 'http://localhost:8000/api';
   }
 
-  /// Limpia el cache de respuestas
+  /// Limpia el caché de respuestas
   void clearCache() => _cache.clear();
 
+  /// Obtiene la información asociada a obtener lista.
   Future<List<dynamic>> getList(String path, {bool useCache = true}) async {
     final decoded = await _send('GET', path, useCache: useCache);
     if (decoded is List) return decoded;
     if (decoded is Map) {
-      final dynamic results = decoded['results'] ?? decoded['data'] ?? decoded['items'];
+      final dynamic results =
+          decoded['results'] ?? decoded['data'] ?? decoded['items'];
       if (results is List) return results;
     }
     return const [];
@@ -84,6 +89,7 @@ class ApiClient {
     return _asStringKeyMap(decoded);
   }
 
+  /// Elimina los datos vinculados a eliminar.
   Future<void> delete(String path) async {
     await _send('DELETE', path);
   }
@@ -97,7 +103,7 @@ class ApiClient {
     final uri = Uri.parse('$baseUrl/${path.replaceFirst(RegExp(r'^/+'), '')}');
     final cacheKey = '$method:$uri';
 
-    // Verificar cache para GET requests
+    // Verificar caché para GET requests
     if (method == 'GET' && useCache && _cache.containsKey(cacheKey)) {
       final cached = _cache[cacheKey]!;
       if (!cached.isExpired) {
@@ -144,7 +150,7 @@ class ApiClient {
         if (response.body.trim().isEmpty) return null;
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
 
-        // Guardar en cache para GET requests exitosos
+        // Guardar en caché para GET requests exitosos
         if (method == 'GET' && useCache) {
           _cache[cacheKey] = _CachedResponse(decoded, DateTime.now());
         }
@@ -168,6 +174,7 @@ class ApiClient {
     _cache.clear();
   }
 
+  /// Convierte la estructura a un mapa con claves de texto.
   Map<String, dynamic> _asStringKeyMap(dynamic decoded) {
     if (decoded is Map<String, dynamic>) return decoded;
     if (decoded is Map) {
@@ -177,7 +184,7 @@ class ApiClient {
   }
 }
 
-/// Clase interna para cache de respuestas
+/// Clase interna para caché de respuestas
 class _CachedResponse {
   _CachedResponse(this.data, this.timestamp);
   final dynamic data;
@@ -187,12 +194,15 @@ class _CachedResponse {
       DateTime.now().difference(timestamp) > ApiClient._cacheDuration;
 }
 
+/// Define la responsabilidad de `ApiException` dentro de este módulo.
 class ApiException implements Exception {
+  /// Crea una instancia y prepara el estado inicial de `ApiException`.
   const ApiException(this.message, this.body);
 
   final String message;
   final String body;
 
+  /// Gestiona a string dentro de esta parte del flujo.
   @override
   String toString() => '$message: $body';
 }

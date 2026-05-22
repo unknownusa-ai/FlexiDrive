@@ -142,6 +142,7 @@ class UserPreferenceService {
     return null;
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Future<UserPreferenceModel> _buildDefaultPreference(int userId) async {
     await init();
     return UserPreferenceModel(
@@ -153,6 +154,7 @@ class UserPreferenceService {
     );
   }
 
+  /// Gestiona read preferencia cambios locales dentro de esta parte del flujo.
   Future<List<UserPreferenceModel>> _readPreferenceOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_preferencesOverridesKey);
@@ -176,10 +178,12 @@ class UserPreferenceService {
     }
   }
 
+  /// Inserta o actualiza una preferencia local sobrescrita.
   Future<void> _upsertPreferenceOverride(UserPreferenceModel preference) async {
     final prefs = await SharedPreferences.getInstance();
     final overrides = await _readPreferenceOverrides();
-    final index = overrides.indexWhere((item) => item.userId == preference.userId);
+    final index =
+        overrides.indexWhere((item) => item.userId == preference.userId);
 
     if (index == -1) {
       overrides.add(preference);
@@ -193,6 +197,7 @@ class UserPreferenceService {
     );
   }
 
+  /// Gestiona read modo cambios locales dentro de esta parte del flujo.
   Future<List<Map<String, dynamic>>> _readModeOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_userModesKey);

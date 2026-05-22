@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+/// Define la responsabilidad de `ReservaActiva` dentro de este módulo.
 class ReservaActiva {
+  /// Crea una instancia y prepara el estado inicial de `ReservaActiva`.
   const ReservaActiva({
     required this.vehicleName,
     required this.code,
@@ -36,16 +38,20 @@ class ReservaActiva {
   final String status;
 }
 
+/// Define la responsabilidad de `ReservasStore` dentro de este módulo.
 class ReservasStore {
+  /// Crea una instancia y prepara el estado inicial de `ReservasStore`.
   ReservasStore._();
 
   static final ValueNotifier<List<ReservaActiva>> activasNotifier =
       ValueNotifier<List<ReservaActiva>>([]);
 
+  /// Agregar activa esta parte del flujo de trabajo.
   static void addActiva(ReservaActiva reserva) {
     activasNotifier.value = [reserva, ...activasNotifier.value];
   }
 
+  /// Elimina los datos vinculados a remover activa por code.
   static void removeActivaByCode(String code) {
     activasNotifier.value =
         activasNotifier.value.where((reserva) => reserva.code != code).toList();

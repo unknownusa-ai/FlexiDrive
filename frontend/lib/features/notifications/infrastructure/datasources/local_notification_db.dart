@@ -5,7 +5,9 @@ import 'package:flexidrive/core/api/api_client.dart';
 import 'package:flexidrive/features/notifications/domain/entities/notification_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Define la responsabilidad de `LocalNotificationDb` dentro de este módulo.
 class LocalNotificationDb {
+  /// Crea una instancia y prepara el estado inicial de `LocalNotificationDb`.
   LocalNotificationDb._();
 
   static final LocalNotificationDb instance = LocalNotificationDb._();
@@ -17,11 +19,13 @@ class LocalNotificationDb {
   final List<NotificationModel> _createdNotifications = [];
   final ValueNotifier<int> changes = ValueNotifier<int>(0);
 
+  /// Carga los datos necesarios para cargar if needed.
   Future<void> loadIfNeeded() async {
     if (_loaded == true) return;
     await reload();
   }
 
+  /// Gestiona recargar dentro de esta parte del flujo.
   Future<void> reload() async {
     final remote = _parseList(
       await _safeLoadList('notifications'),
@@ -102,6 +106,7 @@ class LocalNotificationDb {
     return notification;
   }
 
+  /// Marca una notificación como leída.
   Future<void> markAsRead(int notificationId) async {
     await loadIfNeeded();
     NotificationModel? updatedModel;
@@ -135,6 +140,7 @@ class LocalNotificationDb {
     changes.value = changes.value + 1;
   }
 
+  /// Elimina los datos vinculados a eliminar notificación.
   Future<void> deleteNotification(int notificationId) async {
     await loadIfNeeded();
     try {
@@ -154,9 +160,11 @@ class LocalNotificationDb {
     return raw.map((item) => parser(item as Map<String, dynamic>)).toList();
   }
 
+  /// Carga los datos necesarios para cargar lista.
   Future<List<dynamic>> _loadList(String endpoint) =>
       ApiClient.instance.getList(endpoint);
 
+  /// Gestiona carga segura de lista dentro de esta parte del flujo.
   Future<List<dynamic>> _safeLoadList(String endpoint) async {
     try {
       return await _loadList(endpoint).timeout(const Duration(seconds: 6));
@@ -165,6 +173,7 @@ class LocalNotificationDb {
     }
   }
 
+  /// Carga los cambios locales sobrescritos de notificación.
   Future<List<NotificationModel>> _loadNotificationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_notificationsOverridesKey);
@@ -185,6 +194,7 @@ class LocalNotificationDb {
     }
   }
 
+  /// Guardar notificación cambios locales esta parte del flujo de trabajo.
   Future<void> _saveNotificationOverrides() async {
     final prefs = await SharedPreferences.getInstance();
     final data = _createdNotifications.map((item) => item.toJson()).toList();

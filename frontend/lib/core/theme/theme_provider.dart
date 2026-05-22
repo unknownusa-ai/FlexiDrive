@@ -20,6 +20,7 @@ class ThemeProvider extends ChangeNotifier {
     return _isDarkMode! ? ThemeMode.dark : ThemeMode.light;
   }
 
+  /// Crea una instancia y prepara el estado inicial de `ThemeProvider`.
   ThemeProvider() {
     _loadThemePreference();
   }
@@ -39,6 +40,7 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Carga los datos necesarios para cargar tema preferencia.
   Future<void> _loadThemePreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -51,6 +53,7 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
+  /// Guardar tema preferencia esta parte del flujo de trabajo.
   Future<void> _saveThemePreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();

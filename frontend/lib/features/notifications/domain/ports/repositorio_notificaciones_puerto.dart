@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flexidrive/features/notifications/domain/entities/notification_models.dart';
 
+/// Define la responsabilidad de `RepositorioNotificacionesPuerto` dentro de este módulo.
 abstract class RepositorioNotificacionesPuerto {
   Future<void> inicializar();
   List<NotificationModel> obtenerNotificaciones();

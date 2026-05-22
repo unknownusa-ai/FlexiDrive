@@ -9,8 +9,10 @@ import 'package:flexidrive/injection_container.dart';
 // Página de métodos de pago
 // Muestra los métodos de pago del usuario y permite agregar nuevos
 class PaymentMethodsPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `PaymentMethodsPage`.
   const PaymentMethodsPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<PaymentMethodsPage> createState() => _PaymentMethodsPageState();
 }
@@ -51,12 +53,14 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     },
   ];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadPaymentMethods();
   }
 
+  /// Carga los datos necesarios para cargar pago methods.
   Future<void> _loadPaymentMethods() async {
     try {
       final currentUser = await _accountRepository.getCurrentUser();
@@ -84,6 +88,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -135,6 +140,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildGradientHeader(bool isSmallPhone, bool isDark) {
     return Stack(
       children: [
@@ -240,6 +246,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSavedCardsSection(bool isSmallPhone, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +329,6 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top row: card number dots + delete icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -379,7 +385,6 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   ),
                 ),
                 SizedBox(height: isSmallPhone ? 12 : 14),
-                // Bottom row: default badge + set default button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -440,7 +445,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                           ),
                         ),
                       ),
-                    // Brand logo (solo para tarjetas)
+                    // marca logo (solo para tarjetas)
                     if (isCard) _buildBrandLogo(isVisa, isSmallPhone),
                   ],
                 ),
@@ -452,6 +457,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBrandLogo(bool isVisa, bool isSmallPhone) {
     if (isVisa) {
       return Container(
@@ -502,6 +508,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     }
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildAddCardButton(bool isSmallPhone, bool isDark, Color cardColor) {
     return GestureDetector(
       onTap: _showAddPaymentMethodDialog,
@@ -606,7 +613,6 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
       Color secondaryTextColor,
       Color dividerColor) {
     final bool isActive = method['isActive'] as bool;
-    // Keep original icon backgrounds in both light and dark mode
     final iconBg = method['iconBg'] as Color;
 
     return Column(
@@ -658,7 +664,6 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                   ],
                 ),
               ),
-              // Status badge
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: isSmallPhone ? 8 : 10,
@@ -698,6 +703,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSecurityBadge(bool isSmallPhone, bool isDark) {
     return Container(
       width: double.infinity,
@@ -737,6 +743,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Define un método de pago como predeterminado para el usuario.
   void _setAsDefault(Map<String, dynamic> selected) {
     setState(() {
       for (final method in _paymentMethods) {
@@ -746,6 +753,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     _showSnackBar('Tarjeta predefinida actualizada');
   }
 
+  /// Gestiona confirm eliminar tarjeta dentro de esta parte del flujo.
   void _confirmDeleteCard(Map<String, dynamic> method) {
     showDialog(
       context: context,
@@ -779,6 +787,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           ),
           TextButton(
             onPressed: () {
+              /// Crea una instancia y prepara el estado inicial de `Navigator`.
               Navigator.pop(context);
               setState(() {
                 _paymentMethods.removeWhere((m) => m['id'] == method['id']);
@@ -798,6 +807,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Mostrar diálogo para agregar método de pago esta parte del flujo de trabajo.
   void _showAddPaymentMethodDialog() {
     showDialog(
       context: context,
@@ -821,6 +831,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 style: GoogleFonts.inter(fontWeight: FontWeight.w500),
               ),
               onTap: () {
+                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                 Navigator.pop(context);
                 _showSnackBar('Agregar tarjeta');
               },
@@ -833,6 +844,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 style: GoogleFonts.inter(fontWeight: FontWeight.w500),
               ),
               onTap: () {
+                /// Crea una instancia y prepara el estado inicial de `Navigator`.
                 Navigator.pop(context);
                 _showSnackBar('Agregar cuenta PSE');
               },
@@ -855,6 +867,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     );
   }
 
+  /// Mostrar mensaje emergente esta parte del flujo de trabajo.
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

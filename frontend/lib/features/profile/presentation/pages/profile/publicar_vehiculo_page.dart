@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flexidrive/core/utils/responsive_utils.dart';
 import 'package:flexidrive/core/widgets/flexi_vehicle_image.dart';
 import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
-import 'package:flexidrive/features/accounts/infrastructure/datasources/local_account_db.dart';
 import 'package:flexidrive/features/publications/application/use_cases/publication_access_use_case.dart';
 import 'package:flexidrive/features/publications/domain/entities/publication_models.dart';
 import 'package:flexidrive/features/vehicles/application/use_cases/vehicle_inventory_use_case.dart';
@@ -13,8 +12,10 @@ import 'package:flexidrive/injection_container.dart';
 // Página para publicar vehículo
 // Formulario para que los arrendadores publiquen sus carros
 class PublicarVehiculoPage extends StatefulWidget {
+  /// Crea una instancia y prepara el estado inicial de `PublicarVehiculoPage`.
   const PublicarVehiculoPage({super.key});
 
+  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<PublicarVehiculoPage> createState() => _PublicarVehiculoPageState();
 }
@@ -76,15 +77,16 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     'Eléctrico',
   ];
 
+  /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
     _loadCities();
   }
 
+  /// Carga los datos necesarios para cargar ciudades.
   Future<void> _loadCities() async {
-    await LocalAccountDb.instance.loadIfNeeded();
-    final cities = LocalAccountDb.instance.referenceCities
+    final cities = (await _accountRepository.getReferenceCities())
         .where((city) => city.trim().isNotEmpty)
         .toSet()
         .toList()
@@ -100,6 +102,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     });
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
     final isSmallPhone = ResponsiveUtils.isSmallPhone(context);
@@ -131,6 +134,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildHeader(bool isSmallPhone) {
     return Container(
       width: double.infinity,
@@ -201,6 +205,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildProgressBar() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -213,6 +218,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<Widget> _buildStepOneContent(bool isSmallPhone) {
     return [
       _buildPhotoUploadArea(isSmallPhone),
@@ -236,6 +242,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     ];
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<Widget> _buildStepTwoContent(bool isSmallPhone) {
     return [
       _buildFormField(
@@ -256,6 +263,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     ];
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   List<Widget> _buildStepThreeContent(bool isSmallPhone) {
     return [
       _buildPriceField(),
@@ -267,6 +275,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     ];
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPhotoUploadArea(bool isSmallPhone) {
     final theme = Theme.of(context);
     final previewPath = _selectedVehicleImagePath ?? _assetVehicleImages.first;
@@ -461,6 +470,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildCategorySection(bool isSmallPhone) {
     final theme = Theme.of(context);
     return Column(
@@ -525,6 +535,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildTransmissionSection() {
     final theme = Theme.of(context);
     return Column(
@@ -570,6 +581,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildSeatsSection() {
     const options = [2, 4, 5, 7];
     final theme = Theme.of(context);
@@ -610,6 +622,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildFuelTypeSection() {
     final theme = Theme.of(context);
     return Column(
@@ -667,6 +680,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildDescriptionSection() {
     final theme = Theme.of(context);
     return Column(
@@ -717,6 +731,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPriceField() {
     final theme = Theme.of(context);
     return Column(
@@ -790,6 +805,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildLocationField() {
     final theme = Theme.of(context);
     final selectedLocation = availableCities.contains(ubicacionController.text)
@@ -870,6 +886,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildPotentialCard() {
     final theme = Theme.of(context);
     return Container(
@@ -964,12 +981,14 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Gestiona verificación de form valid dentro de esta parte del flujo.
   bool _isFormValid() {
     return nombreController.text.isNotEmpty &&
         marcaController.text.isNotEmpty &&
         selectedCategory != null;
   }
 
+  /// Gestiona verificación de paso two valid dentro de esta parte del flujo.
   bool _isStepTwoValid() {
     return anoController.text.isNotEmpty &&
         selectedTransmission != null &&
@@ -977,11 +996,13 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
         selectedSeats != null;
   }
 
+  /// Gestiona verificación de paso three valid dentro de esta parte del flujo.
   bool _isStepThreeValid() {
     return precioController.text.trim().isNotEmpty &&
         ubicacionController.text.trim().isNotEmpty;
   }
 
+  /// Gestiona format cop amount dentro de esta parte del flujo.
   String _formatCopAmount(String rawValue) {
     final digitsOnly = rawValue.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return '\$0';
@@ -999,6 +1020,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return '\$${buffer.toString().split('').reversed.join()}';
   }
 
+  /// Gestiona capitalize words dentro de esta parte del flujo.
   String _capitalizeWords(String value) {
     if (value.trim().isEmpty) return value;
     return value
@@ -1010,6 +1032,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
         .join(' ');
   }
 
+  /// Gestiona reiniciar for new vehicle dentro de esta parte del flujo.
   void _resetForNewVehicle() {
     setState(() {
       currentStep = 1;
@@ -1027,18 +1050,25 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     });
   }
 
+  /// Gestiona handle ir inicio desde success dentro de esta parte del flujo.
   void _handleGoHomeFromSuccess(BuildContext dialogContext) {
+    /// Crea una instancia y prepara el estado inicial de `Navigator`.
     Navigator.of(dialogContext).pop();
     if (!mounted) return;
+
+    /// Crea una instancia y prepara el estado inicial de `Navigator`.
     Navigator.of(context).pop(true);
   }
 
+  /// Gestiona handle publish another vehicle dentro de esta parte del flujo.
   void _handlePublishAnotherVehicle(BuildContext dialogContext) {
+    /// Crea una instancia y prepara el estado inicial de `Navigator`.
     Navigator.of(dialogContext).pop();
     if (!mounted) return;
     _resetForNewVehicle();
   }
 
+  /// Mostrar diálogo de éxito al publicar esta parte del flujo de trabajo.
   Future<void> _showPublishSuccessDialog() async {
     final formattedPrice = _formatCopAmount(precioController.text);
     final location = _capitalizeWords(ubicacionController.text);
@@ -1255,11 +1285,13 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Gestiona parse precio value dentro de esta parte del flujo.
   int _parsePriceValue() {
     final digits = precioController.text.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(digits) ?? 0;
   }
 
+  /// Gestiona resolve siguiente vehicle id dentro de esta parte del flujo.
   int _resolveNextVehicleId() {
     final vehicles = _vehicleInventory.getVehiculos();
     if (vehicles.isEmpty) return 1;
@@ -1271,6 +1303,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return maxId + 1;
   }
 
+  /// Gestiona resolve siguiente publicación id dentro de esta parte del flujo.
   int _resolveNextPublicationId() {
     if (_publicationAccess.publications.isEmpty) return 1;
     final maxId = _publicationAccess.publications
@@ -1279,6 +1312,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return maxId + 1;
   }
 
+  /// Gestiona resolve siguiente publicación precio id dentro de esta parte del flujo.
   int _resolveNextPublicationPriceId() {
     if (_publicationAccess.publicationPrices.isEmpty) return 1;
     final maxId = _publicationAccess.publicationPrices
@@ -1287,6 +1321,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return maxId + 1;
   }
 
+  /// Gestiona resolve siguiente publicación imagen id dentro de esta parte del flujo.
   int _resolveNextPublicationImageId() {
     if (_publicationAccess.publicationImages.isEmpty) return 1;
     final maxId = _publicationAccess.publicationImages
@@ -1295,6 +1330,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return maxId + 1;
   }
 
+  /// Gestiona category a id dentro de esta parte del flujo.
   int _categoryToId(String? category) {
     switch (category) {
       case 'Sedán':
@@ -1314,6 +1350,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     }
   }
 
+  /// Gestiona resolve imagen for publicación dentro de esta parte del flujo.
   String _resolveImageForPublication() {
     final selectedPath = _selectedVehicleImagePath?.trim();
     if (selectedPath != null && selectedPath.isNotEmpty) {
@@ -1322,6 +1359,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     return _assetVehicleImages.first;
   }
 
+  /// Gestiona pick imagen desde gallery dentro de esta parte del flujo.
   Future<void> _pickImageFromGallery() async {
     try {
       final picked = await _imagePicker.pickImage(
@@ -1342,6 +1380,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     }
   }
 
+  /// Gestiona publish vehicle dentro de esta parte del flujo.
   Future<void> _publishVehicle() async {
     await _vehicleInventory.init();
     await _publicationAccess.loadIfNeeded();
@@ -1423,6 +1462,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Construye y devuelve el widget correspondiente a esta sección.
   Widget _buildBottomButton(bool isSmallPhone) {
     final isStepOneValid = _isFormValid();
     final isStepTwoValid = _isStepTwoValid();
@@ -1612,6 +1652,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
     );
   }
 
+  /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
     nombreController.dispose();
