@@ -6,6 +6,11 @@ import '../../domain/entities/onboarding_content.dart';
 class OnboardingLocalStorage {
   OnboardingLocalStorage({SharedPreferences? prefs}) : _prefs = prefs;
 
+  // Keys de persistencia del onboarding:
+  // - _contentKey: payload completo serializado (pasos + estado general).
+  // - _completedKey: bandera global de onboarding completado.
+  // - _skippedKey: bandera de onboarding omitido.
+  // - _currentStepKey: índice de paso actual para retomar flujo.
   static const String _contentKey = 'onboarding_content';
   static const String _completedKey = 'onboarding_completed';
   static const String _skippedKey = 'onboarding_skipped';
@@ -45,6 +50,8 @@ class OnboardingLocalStorage {
     final completedSteps = prefs.getStringList('${_completedKey}_steps') ?? [];
     if (!completedSteps.contains(stepId.toString())) {
       completedSteps.add(stepId.toString());
+      // Se persiste como lista de strings para mantener compatibilidad simple
+      // con SharedPreferences entre plataformas.
       await prefs.setStringList('${_completedKey}_steps', completedSteps);
     }
   }

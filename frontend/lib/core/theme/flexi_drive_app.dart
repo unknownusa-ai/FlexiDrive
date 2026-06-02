@@ -25,25 +25,29 @@ class FlexiDriveApp extends StatefulWidget {
 // Estado de la aplicación principal
 // Maneja el proveedor de temas y construye la UI
 class FlexiDriveAppState extends State<FlexiDriveApp> {
-  // Proveedor que gestiona el modo claro/oscuro
+  // Proveedor global de tema (ChangeNotifier).
+  // Cuando cambia, se reconstruye MaterialApp con el nuevo ThemeMode.
   final ThemeProvider _themeProvider = ThemeProvider();
 
   /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
     super.initState();
+    // Escucha cambios de ThemeProvider para refrescar la raíz de la app.
     _themeProvider.addListener(_onThemeChanged);
   }
 
   /// Gestiona dispose dentro de esta parte del flujo.
   @override
   void dispose() {
+    // Limpia listener para evitar fugas de memoria.
     _themeProvider.removeListener(_onThemeChanged);
     super.dispose();
   }
 
   /// Gestiona on tema changed dentro de esta parte del flujo.
   void _onThemeChanged() {
+    // Refresca MaterialApp cuando ThemeProvider notifica cambios.
     setState(() {});
   }
 

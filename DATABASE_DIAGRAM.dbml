@@ -1,0 +1,272 @@
+// FlexiDrive - Modelo Relacional para dbdiagram.io
+// Diagrama ER completo del proyecto
+
+Table usuarios {
+  id int [pk, increment]
+  email varchar [unique, not null]
+  nombre varchar [not null]
+  apellido varchar [not null]
+  telefono varchar
+  documento_tipo varchar [not null]
+  documento_numero varchar [unique, not null]
+  fecha_nacimiento date
+  genero varchar
+  foto_perfil_url text
+  es_arrendatario boolean [default: false]
+  es_propietario boolean [default: false]
+  calificacion_promedio decimal [default: 0.0]
+  total_resenas int [default: 0]
+  saldo_disponible decimal [default: 0.0]
+  saldo_retirado decimal [default: 0.0]
+  estado varchar [default: 'activo']
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_eliminacion timestamp
+}
+
+Table direcciones {
+  id int [pk, increment]
+  usuario_id int [not null, ref: > usuarios.id]
+  tipo varchar [not null]
+  calle varchar [not null]
+  numero varchar
+  apartamento varchar
+  ciudad varchar [not null]
+  departamento varchar [not null]
+  codigo_postal varchar
+  pais varchar [default: 'Colombia']
+  latitud decimal
+  longitud decimal
+  es_principal boolean [default: false]
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table vehiculos {
+  id int [pk, increment]
+  propietario_id int [not null, ref: > usuarios.id]
+  placa varchar [unique, not null]
+  marca varchar [not null]
+  modelo varchar [not null]
+  anio int [not null]
+  tipo_vehiculo varchar [not null]
+  color varchar
+  numero_puertas int
+  numero_asientos int
+  transmision varchar
+  combustible varchar
+  cilindraje int
+  kilometraje int
+  numero_serie varchar [unique]
+  numero_motor varchar [unique]
+  foto_principal_url text
+  descripcion text
+  caracteristicas jsonb
+  estado_vehiculo varchar [default: 'disponible']
+  estado_publicacion varchar [default: 'activa']
+  calificacion_promedio decimal [default: 0.0]
+  total_resenas int [default: 0]
+  total_rentales int [default: 0]
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table fotos_vehiculos {
+  id int [pk, increment]
+  vehiculo_id int [not null, ref: > vehiculos.id]
+  url_foto text [not null]
+  descripcion varchar
+  orden int [default: 0]
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table publicaciones {
+  id int [pk, increment]
+  vehiculo_id int [not null, ref: > vehiculos.id]
+  propietario_id int [not null, ref: > usuarios.id]
+  titulo varchar [not null]
+  descripcion text
+  tarifa_por_hora decimal [not null]
+  tarifa_por_dia decimal
+  tarifa_por_semana decimal
+  tarifa_por_mes decimal
+  deposito_garantia decimal [default: 0.0]
+  seguro_incluido boolean [default: false]
+  combustible_incluido boolean [default: false]
+  kilometraje_ilimitado boolean [default: false]
+  limite_kilometraje_diario int
+  edad_minimo_conductor int [default: 18]
+  licencia_minima_antiguedad int [default: 0]
+  permitir_viajes_fuera_ciudad boolean [default: false]
+  permitir_viajes_fuera_pais boolean [default: false]
+  reglas_adicionales text
+  estado varchar [default: 'activa']
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table disponibilidad_calendario {
+  id int [pk, increment]
+  publicacion_id int [not null, ref: > publicaciones.id]
+  fecha date [not null]
+  disponible boolean [default: true]
+  razon_no_disponible varchar
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table reservas {
+  id int [pk, increment]
+  publicacion_id int [not null, ref: > publicaciones.id]
+  arrendatario_id int [not null, ref: > usuarios.id]
+  propietario_id int [not null, ref: > usuarios.id]
+  fecha_inicio date [not null]
+  fecha_fin date [not null]
+  hora_inicio time [default: '08:00:00']
+  hora_fin time [default: '18:00:00']
+  duracion_horas int
+  duracion_dias int
+  tarifa_total decimal [not null]
+  deposito_garantia decimal [default: 0.0]
+  costo_seguro decimal [default: 0.0]
+  descuento decimal [default: 0.0]
+  monto_final decimal [not null]
+  estado_reserva varchar [default: 'pendiente']
+  motivo_cancelacion varchar
+  fecha_cancelacion timestamp
+  ubicacion_recogida_id int [ref: > direcciones.id]
+  ubicacion_entrega_id int [ref: > direcciones.id]
+  notas_arrendatario text
+  notas_propietario text
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table pagos {
+  id int [pk, increment]
+  reserva_id int [not null, ref: > reservas.id]
+  usuario_id int [not null, ref: > usuarios.id]
+  monto decimal [not null]
+  tipo_pago varchar [not null]
+  metodo_pago_id int [ref: > metodos_pago.id]
+  referencia_externa varchar
+  estado_pago varchar [default: 'pendiente']
+  fecha_pago timestamp
+  fecha_reembolso timestamp
+  descripcion text
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table metodos_pago {
+  id int [pk, increment]
+  usuario_id int [not null, ref: > usuarios.id]
+  tipo_metodo varchar [not null]
+  nombre_metodo varchar
+  ultimos_digitos varchar
+  fecha_vencimiento date
+  es_predeterminado boolean [default: false]
+  estado varchar [default: 'activo']
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table resenas {
+  id int [pk, increment]
+  reserva_id int [not null, ref: > reservas.id]
+  autor_id int [not null, ref: > usuarios.id]
+  destinatario_id int [not null, ref: > usuarios.id]
+  vehiculo_id int [ref: > vehiculos.id]
+  tipo_resena varchar [not null]
+  calificacion int [not null]
+  titulo varchar
+  comentario text
+  aspectos_positivos jsonb
+  aspectos_negativos jsonb
+  estado_resena varchar [default: 'publicada']
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table notificaciones {
+  id int [pk, increment]
+  usuario_id int [not null, ref: > usuarios.id]
+  tipo_notificacion varchar [not null]
+  titulo varchar [not null]
+  mensaje text [not null]
+  datos_adicionales jsonb
+  leida boolean [default: false]
+  fecha_lectura timestamp
+  enviada_email boolean [default: false]
+  enviada_push boolean [default: false]
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table transacciones_saldo {
+  id int [pk, increment]
+  usuario_id int [not null, ref: > usuarios.id]
+  tipo_transaccion varchar [not null]
+  monto decimal [not null]
+  saldo_anterior decimal
+  saldo_posterior decimal
+  referencia_id int
+  descripcion text
+  estado varchar [default: 'completada']
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table documentos_usuario {
+  id int [pk, increment]
+  usuario_id int [not null, ref: > usuarios.id]
+  tipo_documento varchar [not null]
+  url_documento text [not null]
+  estado_verificacion varchar [default: 'pendiente']
+  motivo_rechazo text
+  fecha_vencimiento date
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table reportes {
+  id int [pk, increment]
+  usuario_reportante_id int [not null, ref: > usuarios.id]
+  usuario_reportado_id int [ref: > usuarios.id]
+  vehiculo_id int [ref: > vehiculos.id]
+  reserva_id int [ref: > reservas.id]
+  tipo_reporte varchar [not null]
+  titulo varchar [not null]
+  descripcion text [not null]
+  evidencias jsonb
+  estado_reporte varchar [default: 'abierto']
+  resolucion text
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table configuracion_usuario {
+  id int [pk, increment]
+  usuario_id int [unique, not null, ref: > usuarios.id]
+  modo_oscuro boolean [default: false]
+  notificaciones_email boolean [default: true]
+  notificaciones_push boolean [default: true]
+  notificaciones_sms boolean [default: false]
+  privacidad_perfil varchar [default: 'publico']
+  mostrar_calificacion boolean [default: true]
+  mostrar_numero_telefonico boolean [default: false]
+  permitir_contacto_directo boolean [default: true]
+  idioma varchar [default: 'es']
+  moneda varchar [default: 'COP']
+  zona_horaria varchar [default: 'America/Bogota']
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table historial_cambios {
+  id int [pk, increment]
+  usuario_id int [ref: > usuarios.id]
+  tabla_afectada varchar [not null]
+  registro_id int
+  tipo_cambio varchar [not null]
+  datos_anteriores jsonb
+  datos_nuevos jsonb
+  razon_cambio varchar
+  fecha_cambio timestamp [default: `CURRENT_TIMESTAMP`]
+}

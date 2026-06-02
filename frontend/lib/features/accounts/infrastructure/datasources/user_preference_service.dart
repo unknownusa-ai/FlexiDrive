@@ -8,8 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Base de datos local de cuentas
 import 'local_account_db.dart';
 
-// Servicio para manejar preferencias de usuario
-// Guarda configuraciones como modo oscuro, idioma, etc
+// Servicio para manejar preferencias de usuario.
+//
+// Estrategia de persistencia:
+// - Intenta guardar/cargar contra API cuando está disponible.
+// - Si falla remoto, conserva cambios localmente en SharedPreferences.
+// - Las preferencias locales se aplican como "overrides" sobre los datos base.
 class UserPreferenceService {
   // Constructor con base de datos opcional (para tests)
   UserPreferenceService({LocalAccountDb? db})
@@ -18,7 +22,9 @@ class UserPreferenceService {
   // Base de datos de cuentas
   final LocalAccountDb _db;
 
-  // Keys para guardar en SharedPreferences
+  // Keys para guardar en SharedPreferences:
+  // - _preferencesOverridesKey: preferencias efectivas por usuario (JSON).
+  // - _userModesKey: modo arrendatario por usuario (JSON).
   static const _preferencesOverridesKey =
       'accounts_user_preferences_overrides_v1'; // Preferencias personalizadas
   static const _userModesKey = 'accounts_user_modes_v1'; // Modos de usuario
@@ -130,6 +136,8 @@ class UserPreferenceService {
       modes[index] = updated;
     }
 
+    // Persistimos como lista JSON para soportar múltiples usuarios en el mismo
+    // dispositivo.
     await prefs.setString(_userModesKey, jsonEncode(modes));
   }
 
@@ -191,6 +199,8 @@ class UserPreferenceService {
       overrides[index] = preference;
     }
 
+    // Persistimos toda la colección de overrides para recomponer estado en
+    // el próximo arranque.
     await prefs.setString(
       _preferencesOverridesKey,
       jsonEncode(overrides.map((item) => item.toJson()).toList()),

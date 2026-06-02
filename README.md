@@ -61,6 +61,8 @@ Módulo de cálculo de tarifas por hora
   - `docs/HEXAGONAL_ARCHITECTURE.md`
 - Inventario completo de clases del proyecto:
   - `docs/CLASS_INDEX.md`
+- Guía de grabación y walkthrough técnico (guion + arquitectura + Provider + SharedPreferences):
+  - `GUIA_VIDEO_FLEXIDRIVE.md`
 
 # 🛠️ Tecnologías Utilizadas
 

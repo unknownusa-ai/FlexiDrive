@@ -55,14 +55,23 @@ import 'package:flexidrive/features/vehicles/infrastructure/repositories/reposit
 
 /// Composition root del frontend.
 ///
-/// Registra adaptadores concretos de infraestructura y expone los casos de uso
-/// que consumen las capas de presentación.
+/// Este archivo es la pieza central de la arquitectura hexagonal en Flutter:
+///
+/// - Infraestructura: crea implementaciones concretas de repositorios.
+/// - Dominio: esas implementaciones satisfacen puertos (`domain/ports`).
+/// - Aplicación: construye casos de uso sobre dichos puertos.
+/// - Presentación: páginas/widgets consumen casos de uso ya resueltos aquí.
+///
+/// Regla importante para mantener desacoplamiento:
+/// la UI no debería instanciar repositorios concretos por su cuenta.
 class InjectionContainer {
   /// Crea una instancia y prepara el estado inicial de `InjectionContainer`.
   InjectionContainer._();
 
   static final InjectionContainer instance = InjectionContainer._();
 
+  // ===================== INFRASTRUCTURE ADAPTERS =====================
+  // Implementaciones concretas que cumplen puertos de dominio.
   late final RepositorioCuentasPuerto _accountRepository =
       RepositorioCuentasLocal();
   late final RepositorioVehiculosPuerto _vehicleRepository =
@@ -86,6 +95,8 @@ class InjectionContainer {
   late final VehicleCatalogRepositoryPort _vehicleCatalogRepository =
       VehicleCatalogRepositoryImpl();
 
+  // ========================== APPLICATION ============================
+  // Casos de uso que orquestan reglas y son consumidos por presentación.
   late final AccountAccessUseCase accountAccessUseCase =
       AccountAccessUseCase(_accountRepository);
   late final UserPreferencesUseCase userPreferencesUseCase =
@@ -167,6 +178,9 @@ class InjectionContainer {
       RefreshHomeContentUseCase(_homeRepository);
 
   /// Inicializa dependencias críticas para dejar la app lista.
+  ///
+  /// Se ejecuta al arranque para cargar catálogos, caches y fuentes locales
+  /// que necesitan estar preparadas antes de la navegación principal.
   Future<void> warmUp() async {
     await Future.wait([
       _accountRepository.inicializar(),
