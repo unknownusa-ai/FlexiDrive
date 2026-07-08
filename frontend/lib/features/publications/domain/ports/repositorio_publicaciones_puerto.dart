@@ -8,7 +8,12 @@ abstract class RepositorioPublicacionesPuerto {
   List<PublicationPriceModel> obtenerPreciosPublicacion();
   List<PublicationImageModel> obtenerImagenesPublicacion();
   Future<PublicationModel> agregarPublicacion(PublicationModel publication);
+  Future<PublicationModel> actualizarPublicacion(PublicationModel publication);
+  Future<void> eliminarPublicacion(int publicationId);
   Future<PublicationPriceModel> agregarPrecioPublicacion(
+    PublicationPriceModel publicationPrice,
+  );
+  Future<PublicationPriceModel> actualizarPrecioPublicacion(
     PublicationPriceModel publicationPrice,
   );
   Future<PublicationImageModel> agregarImagenPublicacion(

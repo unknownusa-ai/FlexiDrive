@@ -44,10 +44,27 @@ class RepositorioPublicacionesLocal implements RepositorioPublicacionesPuerto {
   }
 
   @override
+  Future<PublicationModel> actualizarPublicacion(PublicationModel publication) {
+    return _origen.updatePublication(publication);
+  }
+
+  @override
+  Future<void> eliminarPublicacion(int publicationId) {
+    return _origen.deletePublication(publicationId);
+  }
+
+  @override
   Future<PublicationPriceModel> agregarPrecioPublicacion(
     PublicationPriceModel publicationPrice,
   ) {
     return _origen.addPublicationPrice(publicationPrice);
+  }
+
+  @override
+  Future<PublicationPriceModel> actualizarPrecioPublicacion(
+    PublicationPriceModel publicationPrice,
+  ) {
+    return _origen.updatePublicationPrice(publicationPrice);
   }
 
   @override

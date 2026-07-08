@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flexidrive/features/onboarding/presentation/pages/onboarding/onboarding_page.dart';
-import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
-import 'package:flexidrive/features/splash/application/use_cases/splash_use_cases.dart';
-import 'package:flexidrive/injection_container.dart';
+import 'package:flexidrive/features/onboarding/presentation/pages/welcome/welcome_landing_page.dart';
 
 // Página de bienvenida (splash)
 // Pantalla inicial que muestra el logo y redirige al onboarding o inicio de sesión
@@ -24,12 +21,6 @@ class _SplashPageState extends State<SplashPage>
   // Animación del progreso de carga
   late Animation<double> _progressAnimation;
 
-  // uso cases de la arquitectura hexagonal
-  final GetInitialRouteUseCase _getInitialRouteUseCase =
-      InjectionContainer.instance.splashGetInitialRouteUseCase;
-  final CompleteOnboardingUseCase _completeOnboardingUseCase =
-      InjectionContainer.instance.splashCompleteOnboardingUseCase;
-
   /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
   void initState() {
@@ -42,22 +33,10 @@ class _SplashPageState extends State<SplashPage>
 
     _progressAnimation.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        final initialRoute = await _getInitialRouteUseCase.execute();
-
-        if (mounted) {
-          if (initialRoute == GetInitialRouteUseCase.routeLogin) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const LoginPage()),
-            );
-          } else {
-            await _completeOnboardingUseCase.execute();
-            if (mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const OnboardingPage()),
-              );
-            }
-          }
-        }
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const WelcomeLandingPage()),
+        );
       }
     });
 

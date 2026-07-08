@@ -59,6 +59,8 @@ class _AlertasPageState extends State<AlertasPage> {
   List<_AlertItem> _alerts = <_AlertItem>[];
   Timer? _refreshTimer;
   bool _isSyncingReviewNotifications = false;
+  bool _isReloadingAlerts = false;
+  bool _pendingAlertsReload = false;
 
   /// Inicializa el proceso de inicialización del estado antes de su uso.
   @override
@@ -82,55 +84,74 @@ class _AlertasPageState extends State<AlertasPage> {
 
   /// Gestiona on notificaciones changed dentro de esta parte del flujo.
   void _onNotificationsChanged() {
+    if (_isReloadingAlerts) {
+      _pendingAlertsReload = true;
+      return;
+    }
     _loadAlerts();
   }
 
   /// Carga los datos necesarios para cargar alerts.
   Future<void> _loadAlerts() async {
-    await Future.wait([
-      _catalogDb.loadIfNeeded(),
-      _notificationDb.loadIfNeeded(),
-      _reservationDb.loadIfNeeded(),
-      _publicationDb.loadIfNeeded(),
-      _reviewDb.loadIfNeeded(),
-      _vehicleDb.loadIfNeeded(),
-    ]);
-
-    final currentUser = await _accountDb.getCurrentUser();
-    final currentUserId = currentUser?.id;
-    if (currentUserId != null) {
-      await _syncReservationReminders(currentUserId);
-      await _syncReviewNotifications(currentUserId);
-      await _notificationDb.loadIfNeeded();
+    if (_isReloadingAlerts) {
+      _pendingAlertsReload = true;
+      return;
     }
 
-    final categoriesById = <int, String>{
-      for (final category in _catalogDb.notificationCategories)
-        category.id: category.name,
-    };
+    _isReloadingAlerts = true;
+    try {
+      await Future.wait([
+        _catalogDb.loadIfNeeded(),
+        _notificationDb.loadIfNeeded(),
+        _reservationDb.loadIfNeeded(),
+        _publicationDb.loadIfNeeded(),
+        _reviewDb.loadIfNeeded(),
+        _vehicleDb.loadIfNeeded(),
+      ]);
 
-    final source = currentUserId == null
-        ? _notificationDb.notifications
-        : _notificationDb.notifications
-            .where((notification) => notification.userId == currentUserId);
+      final currentUser = await _accountDb.getCurrentUser();
+      final currentUserId = currentUser?.id;
+      if (currentUserId != null) {
+        await _syncReservationReminders(currentUserId);
+        await _syncReviewNotifications(currentUserId);
+        await _notificationDb.loadIfNeeded();
+      }
 
-    final loaded = source
-        .map(
-          (notification) => _toAlertItem(
-            notification,
-            categoriesById[notification.categoryId],
-          ),
-        )
-        .toList();
+      final categoriesById = <int, String>{
+        for (final category in _catalogDb.notificationCategories)
+          category.id: category.name,
+      };
 
-    loaded.sort((a, b) => b.sentAt.compareTo(a.sentAt));
+      final source = currentUserId == null
+          ? _notificationDb.notifications
+          : _notificationDb.notifications
+              .where((notification) => notification.userId == currentUserId);
 
-    if (!mounted) return;
-    setState(() {
-      _alerts = loaded;
-      _unreadCount = _alerts.where((item) => item.unread).length;
-      _isLoading = false;
-    });
+      final loaded = source
+          .map(
+            (notification) => _toAlertItem(
+              notification,
+              categoriesById[notification.categoryId],
+            ),
+          )
+          .toList();
+
+      loaded.sort((a, b) => b.sentAt.compareTo(a.sentAt));
+
+      if (mounted) {
+        setState(() {
+          _alerts = loaded;
+          _unreadCount = _alerts.where((item) => item.unread).length;
+          _isLoading = false;
+        });
+      }
+    } finally {
+      _isReloadingAlerts = false;
+      if (_pendingAlertsReload) {
+        _pendingAlertsReload = false;
+        _loadAlerts();
+      }
+    }
   }
 
   /// Gestiona a alert item dentro de esta parte del flujo.

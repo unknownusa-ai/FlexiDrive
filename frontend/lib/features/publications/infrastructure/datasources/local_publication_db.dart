@@ -183,6 +183,53 @@ class LocalPublicationDb {
     }
   }
 
+  Future<PublicationModel> updatePublication(
+      PublicationModel publication) async {
+    await loadIfNeeded();
+    try {
+      final updatedRaw = await ApiClient.instance.patchMap(
+        'publications/${publication.id}',
+        {
+          'usuario_id': publication.userId,
+          'vehiculo_id': publication.vehicleId,
+          'fecha_publicacion': publication.publishDate.toIso8601String(),
+          'activa': publication.active,
+        },
+      );
+      final updated = PublicationModel.fromJson(updatedRaw);
+      _upsertPublication(updated);
+      _upsertCreatedPublication(updated);
+      await _savePublicationOverrides();
+      return updated;
+    } catch (_) {
+      _upsertPublication(publication);
+      _upsertCreatedPublication(publication);
+      await _savePublicationOverrides();
+      return publication;
+    }
+  }
+
+  Future<void> deletePublication(int publicationId) async {
+    await loadIfNeeded();
+    try {
+      await ApiClient.instance.delete('publications/$publicationId');
+    } catch (_) {}
+
+    publications.removeWhere((item) => item.id == publicationId);
+    publicationPrices
+        .removeWhere((item) => item.publicationId == publicationId);
+    publicationImages
+        .removeWhere((item) => item.publicationId == publicationId);
+    _createdPublications.removeWhere((item) => item.id == publicationId);
+    _createdPublicationPrices
+        .removeWhere((item) => item.publicationId == publicationId);
+    _createdPublicationImages
+        .removeWhere((item) => item.publicationId == publicationId);
+    await _savePublicationOverrides();
+    await _savePublicationPriceOverrides();
+    await _savePublicationImageOverrides();
+  }
+
   Future<PublicationPriceModel> addPublicationPrice(
     PublicationPriceModel publicationPrice,
   ) async {
@@ -197,6 +244,32 @@ class LocalPublicationDb {
       final created = PublicationPriceModel.fromJson(createdRaw);
       _upsertPublicationPrice(created);
       return created;
+    } catch (_) {
+      _upsertPublicationPrice(publicationPrice);
+      _upsertCreatedPublicationPrice(publicationPrice);
+      await _savePublicationPriceOverrides();
+      return publicationPrice;
+    }
+  }
+
+  Future<PublicationPriceModel> updatePublicationPrice(
+    PublicationPriceModel publicationPrice,
+  ) async {
+    await loadIfNeeded();
+    try {
+      final updatedRaw = await ApiClient.instance.patchMap(
+        'publication-prices/${publicationPrice.id}',
+        {
+          'publicacion_id': publicationPrice.publicationId,
+          'tipo_periodo_id': publicationPrice.periodTypeId,
+          'precio': publicationPrice.price,
+        },
+      );
+      final updated = PublicationPriceModel.fromJson(updatedRaw);
+      _upsertPublicationPrice(updated);
+      _upsertCreatedPublicationPrice(updated);
+      await _savePublicationPriceOverrides();
+      return updated;
     } catch (_) {
       _upsertPublicationPrice(publicationPrice);
       _upsertCreatedPublicationPrice(publicationPrice);

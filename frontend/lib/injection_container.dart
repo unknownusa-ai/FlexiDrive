@@ -143,12 +143,6 @@ class InjectionContainer {
       UpdatePasswordUseCase(_profileRepository);
 
   late final ConfigRepositoryPort _configRepository = ConfigRepositoryImpl();
-  late final CheckFirstLaunchUseCase splashCheckFirstLaunchUseCase =
-      CheckFirstLaunchUseCase(_configRepository);
-  late final CompleteOnboardingUseCase splashCompleteOnboardingUseCase =
-      CompleteOnboardingUseCase(_configRepository);
-  late final GetInitialRouteUseCase splashGetInitialRouteUseCase =
-      GetInitialRouteUseCase(configRepository: _configRepository);
   late final GetAppConfigUseCase splashGetAppConfigUseCase =
       GetAppConfigUseCase(_configRepository);
 

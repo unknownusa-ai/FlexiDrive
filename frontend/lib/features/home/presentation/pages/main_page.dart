@@ -137,7 +137,7 @@ class MainPageState extends State<MainPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home_outlined, 'Inicio', 0),
+              _buildNavItem(Icons.home_outlined, 'Explorar', 0),
               _buildNavItem(Icons.description_outlined, 'Reservas', 1),
               _buildNavItem(
                 Icons.notifications_outlined,

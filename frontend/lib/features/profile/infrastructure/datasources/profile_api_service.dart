@@ -47,12 +47,10 @@ class ProfileApiService {
 
   /// Obtiene las estadísticas del perfil
   Future<ProfileStats?> getStats(int userId) async {
-    try {
-      final response = await _apiClient.getMap('users/$userId/stats');
-      return ProfileStats.fromJson(response);
-    } catch (_) {
-      return null;
-    }
+    // El backend actual no expone este endpoint todavia.
+    // Evitamos disparar un 404 en web y dejamos que el repositorio use
+    // almacenamiento local o valores por defecto.
+    return null;
   }
 
   /// Cambia el modo de usuario (arrendatario/arrendador)

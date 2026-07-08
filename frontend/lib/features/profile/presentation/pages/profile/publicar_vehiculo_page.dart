@@ -119,11 +119,15 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                 padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: currentStep == 1
-                      ? _buildStepOneContent(isSmallPhone)
-                      : currentStep == 2
-                          ? _buildStepTwoContent(isSmallPhone)
-                          : _buildStepThreeContent(isSmallPhone),
+                  children: [
+                    _buildStepInsightCard(isSmallPhone),
+                    const SizedBox(height: 16),
+                    ...currentStep == 1
+                        ? _buildStepOneContent(isSmallPhone)
+                        : currentStep == 2
+                            ? _buildStepTwoContent(isSmallPhone)
+                            : _buildStepThreeContent(isSmallPhone),
+                  ],
                 ),
               ),
             ),
@@ -200,6 +204,8 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
           ),
           const SizedBox(height: 16),
           _buildProgressBar(),
+          const SizedBox(height: 14),
+          _buildStepGuide(),
         ],
       ),
     );
@@ -214,6 +220,137 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
         minHeight: 7,
         backgroundColor: Colors.white.withValues(alpha: 0.28),
         valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildStepGuide() {
+    final steps = [
+      (index: 1, title: 'Vehículo', icon: Icons.directions_car_outlined),
+      (index: 2, title: 'Detalles', icon: Icons.tune_outlined),
+      (index: 3, title: 'Precio', icon: Icons.payments_outlined),
+    ];
+
+    return Row(
+      children: steps.map((step) {
+        final isActive = currentStep == step.index;
+        final isDone = currentStep > step.index;
+        return Expanded(
+          child: Container(
+            margin:
+                EdgeInsets.only(right: step.index == steps.last.index ? 0 : 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : Colors.white.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDone
+                    ? Colors.white.withValues(alpha: 0.65)
+                    : Colors.white.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  isDone ? Icons.check_circle : step.icon,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  step.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildStepInsightCard(bool isSmallPhone) {
+    final title = switch (currentStep) {
+      1 => 'Muestra el vehículo como se lo imagina el cliente',
+      2 => 'Define las características que lo hacen confiable',
+      _ => 'Cierra con precio y ciudad para salir a rentar',
+    };
+    final subtitle = switch (currentStep) {
+      1 =>
+        'Nombre, marca, categoría e imagen principal. Este bloque vende la primera impresión.',
+      2 =>
+        'Transmisión, combustible, asientos y descripción para generar confianza.',
+      _ =>
+        'Completa el valor por día y la ciudad para activar el potencial de ingresos.',
+    };
+    final accent = switch (currentStep) {
+      1 => const Color(0xFFF59E0B),
+      2 => const Color(0xFFF97316),
+      _ => const Color(0xFFEF4444),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isSmallPhone ? 14 : 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              currentStep == 1
+                  ? Icons.camera_alt_outlined
+                  : currentStep == 2
+                      ? Icons.fact_check_outlined
+                      : Icons.auto_graph_outlined,
+              color: accent,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: isSmallPhone ? 14 : 15,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    height: 1.45,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1243,7 +1380,7 @@ class _PublicarVehiculoPageState extends State<PublicarVehiculoPage> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Volver al Inicio',
+                      'Ir a Mis Vehículos',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,

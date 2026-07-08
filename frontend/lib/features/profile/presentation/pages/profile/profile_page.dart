@@ -15,10 +15,9 @@ import 'package:flexidrive/features/reservations/application/use_cases/reservati
 // Base de datos de reseñas
 import 'package:flexidrive/features/reviews/application/use_cases/review_access_use_case.dart';
 import 'package:flexidrive/features/profile/application/use_cases/profile_use_cases.dart';
-import 'package:flexidrive/features/auth/application/use_cases/auth_use_cases.dart';
 // Paginas del perfil
 import 'edit_profile_page.dart';
-import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
+import 'package:flexidrive/features/onboarding/presentation/pages/welcome/welcome_landing_page.dart';
 import 'security_page.dart';
 import 'payment_methods_page.dart';
 import 'my_reviews_page.dart';
@@ -26,7 +25,6 @@ import 'help_center_page.dart';
 import 'arrendatario_main_page.dart';
 // Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
-import 'package:flexidrive/core/session/local_session_store.dart';
 import 'package:flexidrive/injection_container.dart';
 
 // Pagina principal del perfil del usuario
@@ -54,14 +52,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // Base de datos de reseñas
   final ReviewAccessUseCase _reviewDb =
       InjectionContainer.instance.reviewAccessUseCase;
-  // uso cases de Profile - Hexagonal Architecture (para uso futuro)
-  final GetProfileUseCase _profileGetUseCase =
-      InjectionContainer.instance.profileGetUseCase;
   final GetProfileStatsUseCase _profileStatsUseCase =
       InjectionContainer.instance.profileGetStatsUseCase;
-  // uso cases de Auth - Hexagonal Architecture (para uso futuro)
-  final LogoutUseCase _authLogoutUseCase =
-      InjectionContainer.instance.authLogoutUseCase;
   // Esta activo el modo arrendatario?
   bool _isModoArrendatarioActive = false;
   // ID del usuario actual
@@ -825,18 +817,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return GestureDetector(
       onTap: () async {
-        final normalizedEmail = _profileEmail.trim().toLowerCase();
-        if (normalizedEmail.isNotEmpty &&
-            normalizedEmail != 'sin_sesion@flexidrive.local') {
-          await LocalSessionStore.instance.setLastLoggedEmail(normalizedEmail);
-        }
-        await _authLogoutUseCase.execute();
-        // También limpiar el perfil local
-        await _profileGetUseCase.execute(); // Refresca estado
+        // Termina la sesión activa pero recuerda el correo para el
+        // acceso rápido la próxima vez que se abra la app.
+        await _accountRepository.logout();
         if (!mounted) return;
 
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginPage()),
+          MaterialPageRoute(builder: (_) => const WelcomeLandingPage()),
           (route) => false,
         );
       },

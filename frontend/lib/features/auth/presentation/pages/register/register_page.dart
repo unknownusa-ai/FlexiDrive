@@ -1,30 +1,19 @@
-// Flutter framework
-import 'package:flutter/material.dart';
-// Fuentes bonitas de Google
-import 'package:google_fonts/google_fonts.dart';
-// Servicios para manejar usuarios y catalogos
-import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
-import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
-// Modelos de catalogos (tipos de documento, etc)
-import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
-// Utilidades responsive
 import 'package:flexidrive/core/utils/responsive_utils.dart';
-import 'package:flexidrive/injection_container.dart';
-// Pagina de inicio de sesión (si ya tiene cuenta)
+import 'package:flexidrive/features/accounts/application/use_cases/account_access_use_case.dart';
 import 'package:flexidrive/features/auth/presentation/pages/login/login_page.dart';
+import 'package:flexidrive/features/catalogs/application/use_cases/catalog_access_use_case.dart';
+import 'package:flexidrive/features/catalogs/domain/entities/catalog_models.dart';
+import 'package:flexidrive/injection_container.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-// Pagina de registro de nuevos usuarios
-// Formulario para crear una cuenta en FlexiDrive
 class RegisterPage extends StatefulWidget {
-  /// Crea una instancia y prepara el estado inicial de `RegisterPage`.
   const RegisterPage({super.key});
 
-  /// Gestiona crear estado dentro de esta parte del flujo.
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-// Estado de la pagina de registro
 class _RegisterPageState extends State<RegisterPage> {
   static const List<String> _preferredColombianIdentificationTypes = [
     'Cedula de Ciudadania',
@@ -37,6 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
     'Numero Unico de Identificacion Personal',
     'NIT',
   ];
+
   static const List<String> _preferredUserTypes = [
     'Arrendador',
     'Arrendatario',
@@ -53,40 +43,52 @@ class _RegisterPageState extends State<RegisterPage> {
     8: 'Permiso por Proteccion Temporal',
     9: 'Numero Unico de Identificacion Personal',
   };
+
   static const Map<int, String> _fallbackUserTypeNamesById = {
     1: 'Arrendador',
     2: 'Arrendatario',
   };
 
-  // Controladores de los campos del formulario
-  final _nameController = TextEditingController(); // Nombre completo
-  final _documentController = TextEditingController(); // Numero de documento
-  final _emailController = TextEditingController(); // Email
-  final _phoneController = TextEditingController(); // Telefono
-  final _passwordController = TextEditingController(); // Contraseña
-  final _confirmPasswordController =
-      TextEditingController(); // Confirmar contraseña
+  final _nameController = TextEditingController();
+  final _documentController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  // Servicios para registro y catalogos
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
   final CatalogAccessUseCase _catalogDb =
       InjectionContainer.instance.catalogAccessUseCase;
 
-  // Estados de la UI
-  bool _obscurePassword = true; // Ocultar contraseña
-  bool _obscureConfirmPassword = true; // Ocultar confirmacion
-  bool _acceptTerms = false; // Acepta terminos y condiciones
-  bool _isSubmitting = false; // Esta enviando el formulario?
-  bool _isLoadingCatalogs = true; // Cargando tipos de documento?
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _acceptTerms = false;
+  bool _isSubmitting = false;
+  bool _isLoadingCatalogs = true;
 
-  // Catalogo de tipos de documento (CC, CE, Pasaporte, etc)
   List<IdentificationTypeModel> _identificationTypes = [];
-  IdentificationTypeModel? _selectedIdentificationType; // Tipo seleccionado
+  IdentificationTypeModel? _selectedIdentificationType;
   List<UserTypeModel> _userTypes = [];
   UserTypeModel? _selectedUserType;
 
-  // Muestra un dialogo con mensaje
+  @override
+  void initState() {
+    super.initState();
+    _loadIdentificationTypes();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _documentController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _showDialogMessage(String title, String message) async {
     final isSuccess = title.toLowerCase().contains('exitoso');
     final accentColor =
@@ -119,15 +121,12 @@ class _RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                         colors: [accentColor, secondAccentColor],
                       ),
                       borderRadius: BorderRadius.circular(16),
@@ -138,8 +137,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: Text(
                       title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         color: const Color(0xFF111827),
                         fontSize: 20,
@@ -188,14 +185,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  /// Inicializa el proceso de inicialización del estado antes de su uso.
-  @override
-  void initState() {
-    super.initState();
-    _loadIdentificationTypes();
-  }
-
-  /// Carga los datos necesarios para cargar identification types.
   Future<void> _loadIdentificationTypes() async {
     setState(() {
       _isLoadingCatalogs = true;
@@ -205,11 +194,13 @@ class _RegisterPageState extends State<RegisterPage> {
       await _catalogDb.loadIfNeeded();
 
       final normalizedTypes = _catalogDb.identificationTypes
-          .map((type) => IdentificationTypeModel(
-                id: type.id,
-                name: _resolveIdentificationTypeName(type),
-                description: type.description,
-              ))
+          .map(
+            (type) => IdentificationTypeModel(
+              id: type.id,
+              name: _resolveIdentificationTypeName(type),
+              description: type.description,
+            ),
+          )
           .where((type) => type.name.trim().isNotEmpty)
           .toList();
 
@@ -235,15 +226,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final finalUserTypes =
           orderedUserTypes.isEmpty ? _buildLocalUserTypes() : orderedUserTypes;
+
       setState(() {
         _identificationTypes = selectedOrderedTypes;
-        if (_identificationTypes.isNotEmpty) {
-          _selectedIdentificationType = _identificationTypes.first;
-        }
+        _selectedIdentificationType =
+            _identificationTypes.isNotEmpty ? _identificationTypes.first : null;
         _userTypes = finalUserTypes;
-        if (_userTypes.isNotEmpty) {
-          _selectedUserType = _userTypes.first;
-        }
+        _selectedUserType = _userTypes.isNotEmpty ? _userTypes.first : null;
         _isLoadingCatalogs = false;
       });
     } catch (_) {
@@ -266,43 +255,38 @@ class _RegisterPageState extends State<RegisterPage> {
   ) {
     final uniqueByNormalizedName = <String, IdentificationTypeModel>{};
     for (final type in normalizedTypes) {
-      final normalizedName = _normalizeText(type.name);
-      // Priorizamos el primer elemento para mantener estabilidad en el orden inicial.
-      uniqueByNormalizedName.putIfAbsent(normalizedName, () => type);
+      uniqueByNormalizedName.putIfAbsent(_normalizeText(type.name), () => type);
     }
-    final uniqueTypes = uniqueByNormalizedName.values.toList();
 
+    final uniqueTypes = uniqueByNormalizedName.values.toList();
     final typesByNormalizedName = <String, IdentificationTypeModel>{
       for (final type in uniqueTypes) _normalizeText(type.name): type,
     };
 
-    final selectedOrderedTypes = <IdentificationTypeModel>[];
+    final ordered = <IdentificationTypeModel>[];
     for (final preferredName in _preferredColombianIdentificationTypes) {
       final matched = typesByNormalizedName[_normalizeText(preferredName)];
-      if (matched != null &&
-          !selectedOrderedTypes.any((item) => item.id == matched.id)) {
-        selectedOrderedTypes.add(matched);
+      if (matched != null && !ordered.any((item) => item.id == matched.id)) {
+        ordered.add(matched);
       }
     }
 
     for (final type in uniqueTypes) {
-      if (!selectedOrderedTypes.any((item) => item.id == type.id)) {
-        selectedOrderedTypes.add(type);
+      if (!ordered.any((item) => item.id == type.id)) {
+        ordered.add(type);
       }
     }
 
-    return selectedOrderedTypes;
+    return ordered;
   }
 
-  /// Construye y devuelve el widget correspondiente a esta sección.
   List<UserTypeModel> _buildOrderedUserTypes(List<UserTypeModel> userTypes) {
     final uniqueByNormalizedName = <String, UserTypeModel>{};
     for (final type in userTypes) {
-      final normalizedName = _normalizeText(type.name);
-      uniqueByNormalizedName.putIfAbsent(normalizedName, () => type);
+      uniqueByNormalizedName.putIfAbsent(_normalizeText(type.name), () => type);
     }
-    final uniqueTypes = uniqueByNormalizedName.values.toList();
 
+    final uniqueTypes = uniqueByNormalizedName.values.toList();
     final typesByName = <String, UserTypeModel>{
       for (final type in uniqueTypes) _normalizeText(type.name): type,
     };
@@ -324,7 +308,6 @@ class _RegisterPageState extends State<RegisterPage> {
     return ordered;
   }
 
-  /// Construye y devuelve el widget correspondiente a esta sección.
   List<IdentificationTypeModel> _buildLocalColombianIdentificationTypes() {
     return _fallbackIdentificationNamesById.entries
         .map(
@@ -346,15 +329,9 @@ class _RegisterPageState extends State<RegisterPage> {
       });
   }
 
-  /// Construye y devuelve el widget correspondiente a esta sección.
   List<UserTypeModel> _buildLocalUserTypes() {
     return _fallbackUserTypeNamesById.entries
-        .map(
-          (entry) => UserTypeModel(
-            id: entry.key,
-            name: entry.value,
-          ),
-        )
+        .map((entry) => UserTypeModel(id: entry.key, name: entry.value))
         .toList()
       ..sort((a, b) {
         final indexA = _preferredUserTypes.indexOf(_resolveUserTypeName(a));
@@ -366,21 +343,18 @@ class _RegisterPageState extends State<RegisterPage> {
       });
   }
 
-  /// Gestiona resolve identification tipo name dentro de esta parte del flujo.
   String _resolveIdentificationTypeName(IdentificationTypeModel type) {
     final rawName = type.name.trim();
     if (rawName.isNotEmpty) return rawName;
     return _fallbackIdentificationNamesById[type.id] ?? '';
   }
 
-  /// Gestiona resolve usuario tipo name dentro de esta parte del flujo.
   String _resolveUserTypeName(UserTypeModel type) {
     final rawName = type.name.trim();
     if (rawName.isNotEmpty) return rawName;
     return _fallbackUserTypeNamesById[type.id] ?? '';
   }
 
-  /// Gestiona normalize text dentro de esta parte del flujo.
   String _normalizeText(String text) {
     final lower = text.toLowerCase();
     return lower
@@ -394,7 +368,6 @@ class _RegisterPageState extends State<RegisterPage> {
         .replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
-  /// Gestiona submit register dentro de esta parte del flujo.
   Future<void> _submitRegister() async {
     if (_isSubmitting) return;
 
@@ -422,16 +395,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (password != confirmPassword) {
       await _showDialogMessage(
-        'Contraseñas distintas',
-        'La contraseña y su confirmación deben coincidir.',
+        'Contrasenas distintas',
+        'La contrasena y su confirmacion deben coincidir.',
       );
       return;
     }
 
     if (!_acceptTerms) {
       await _showDialogMessage(
-        'Términos requeridos',
-        'Debes aceptar los términos y condiciones para continuar.',
+        'Terminos requeridos',
+        'Debes aceptar los terminos y condiciones para continuar.',
       );
       return;
     }
@@ -459,7 +432,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       await _showDialogMessage(
         'Registro exitoso',
-        'Tu cuenta fue creada correctamente. Ahora puedes iniciar sesión.',
+        'Tu cuenta fue creada correctamente. Ahora puedes iniciar sesion.',
       );
 
       if (!mounted) return;
@@ -478,555 +451,426 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  /// Gestiona dispose dentro de esta parte del flujo.
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _documentController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  /// Construye y devuelve el widget correspondiente a esta sección.
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
     final scale = ResponsiveUtils.scale(context, 1.0);
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF111A2C) : Colors.white;
+    final fieldColor =
+        isDark ? const Color(0xFF172338) : const Color(0xFFF4F7FC);
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final secondaryColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF667085);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.primary,
-      body: ConstrainedContainer(
-        maxWidth: 600,
-        child: Column(
-          children: [
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding, vertical: 16 * scale),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white.withAlpha((0.9 * 255).round()),
-                            size: 18,
-                          ),
-                          Text(
-                            'Atrás',
-                            style: GoogleFonts.poppins(
-                              color:
-                                  Colors.white.withAlpha((0.9 * 255).round()),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 24 * scale),
-                    // Title
-                    Text(
-                      'Crear Cuenta',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: ResponsiveUtils.fontSize(context, 32),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8 * scale),
-                    Text(
-                      'Únete a miles de usuarios FlexiDrive',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withAlpha((0.8 * 255).round()),
-                        fontSize: ResponsiveUtils.fontSize(context, 14),
-                      ),
-                    ),
-                    SizedBox(height: 24 * scale),
-                  ],
-                ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              isDark ? const Color(0xFF0B1220) : const Color(0xFFEAF2FF),
+              isDark ? const Color(0xFF101828) : const Color(0xFFF8FAFF),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: ConstrainedContainer(
+            maxWidth: 680,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                20 * scale,
+                12 * scale,
+                20 * scale,
+                24 * scale,
               ),
-            ),
-            // White tarjeta Section
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 44 * scale,
+                      height: 44 * scale,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.8)),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: const Color(0xFF1D4ED8),
+                        size: 22 * scale,
+                      ),
+                    ),
                   ),
-                ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(24 * scale),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Nombre Completo
-                      _buildLabel('NOMBRE COMPLETO'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _nameController,
-                        hintText: 'Tu nombre completo',
-                        prefixIcon: Icons.person_outline,
+                  SizedBox(height: 18 * scale),
+                  _buildHero(scale),
+                  SizedBox(height: 20 * scale),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(22 * scale),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(30 * scale),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF243147)
+                            : const Color(0xFFE6EBF5),
                       ),
-                      const SizedBox(height: 16),
-                      // Tipo de Identificación
-                      _buildLabel('TIPO DE IDENTIFICACIÓN'),
-                      const SizedBox(height: 8),
-                      _isLoadingCatalogs
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5F7FA),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.badge_outlined,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Cargando...',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey.withValues(alpha: 0.6),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5F7FA),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<IdentificationTypeModel>(
-                                  value: _selectedIdentificationType,
-                                  isExpanded: true,
-                                  style: GoogleFonts.poppins(
-                                    color: const Color(0xFF111827),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    color: Colors.grey,
-                                  ),
-                                  dropdownColor: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  selectedItemBuilder: (context) {
-                                    return _identificationTypes.map((type) {
-                                      return _buildIdentificationTypeOption(
-                                        type,
-                                        selected: true,
-                                      );
-                                    }).toList();
-                                  },
-                                  items: _identificationTypes.map((type) {
-                                    return DropdownMenuItem<
-                                        IdentificationTypeModel>(
-                                      value: type,
-                                      child:
-                                          _buildIdentificationTypeOption(type),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedIdentificationType = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                      const SizedBox(height: 16),
-                      // Tipo de Usuario
-                      _buildLabel('TIPO DE USUARIO'),
-                      const SizedBox(height: 8),
-                      _isLoadingCatalogs
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5F7FA),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.groups_outlined,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Cargando...',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey.withValues(alpha: 0.6),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5F7FA),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<UserTypeModel>(
-                                  value: _selectedUserType,
-                                  isExpanded: true,
-                                  style: GoogleFonts.poppins(
-                                    color: const Color(0xFF111827),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    color: Colors.grey,
-                                  ),
-                                  dropdownColor: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  selectedItemBuilder: (context) {
-                                    return _userTypes.map((type) {
-                                      return _buildUserTypeOption(
-                                        type,
-                                        selected: true,
-                                      );
-                                    }).toList();
-                                  },
-                                  items: _userTypes.map((type) {
-                                    return DropdownMenuItem<UserTypeModel>(
-                                      value: type,
-                                      child: _buildUserTypeOption(type),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedUserType = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                      const SizedBox(height: 16),
-                      // Documento
-                      _buildLabel('NÚMERO DE IDENTIFICACIÓN'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _documentController,
-                        hintText: 'Número de documento',
-                        prefixIcon: Icons.numbers_outlined,
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 16),
-                      // Correo Electrónico
-                      _buildLabel('CORREO ELECTRÓNICO'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _emailController,
-                        hintText: 'tu@email.com',
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                      // Teléfono
-                      _buildLabel('TELÉFONO'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _phoneController,
-                        hintText: '+57 300 000 0000',
-                        prefixIcon: Icons.phone_outlined,
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 16),
-                      // Contraseña
-                      _buildLabel('CONTRASEÑA'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _passwordController,
-                        hintText: 'Mínimo 8 caracteres',
-                        prefixIcon: Icons.lock_outline,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.grey,
-                            size: 20,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              const Color(0xFF0F172A).withValues(alpha: 0.12),
+                          blurRadius: 26,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Crear cuenta',
+                          style: GoogleFonts.poppins(
+                            color: textColor,
+                            fontSize: ResponsiveUtils.fontSize(context, 24),
+                            fontWeight: FontWeight.w700,
                           ),
-                          onPressed: () {
+                        ),
+                        SizedBox(height: 6 * scale),
+                        Text(
+                          'Completa tus datos para rentar o publicar vehiculos dentro de FlexiDrive.',
+                          style: GoogleFonts.poppins(
+                            color: secondaryColor,
+                            fontSize: ResponsiveUtils.fontSize(context, 13),
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(height: 20 * scale),
+                        _buildQuickTips(scale, isDark),
+                        SizedBox(height: 22 * scale),
+                        _buildLabel('NOMBRE COMPLETO', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _nameController,
+                          hintText: 'Tu nombre completo',
+                          prefixIcon: Icons.person_outline_rounded,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('TIPO DE IDENTIFICACION', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildDropdownField<IdentificationTypeModel>(
+                          value: _selectedIdentificationType,
+                          items: _identificationTypes,
+                          isLoading: _isLoadingCatalogs,
+                          fieldColor: fieldColor,
+                          scale: scale,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          getLabel: _resolveIdentificationTypeName,
+                          icon: Icons.badge_outlined,
+                          onChanged: (value) {
                             setState(() {
-                              _obscurePassword = !_obscurePassword;
+                              _selectedIdentificationType = value;
                             });
                           },
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Confirmar Contraseña
-                      _buildLabel('CONFIRMAR CONTRASEÑA'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _confirmPasswordController,
-                        hintText: 'Repite tu contraseña',
-                        prefixIcon: Icons.lock_outline,
-                        obscureText: _obscureConfirmPassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                          onPressed: () {
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('TIPO DE USUARIO', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildDropdownField<UserTypeModel>(
+                          value: _selectedUserType,
+                          items: _userTypes,
+                          isLoading: _isLoadingCatalogs,
+                          fieldColor: fieldColor,
+                          scale: scale,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          getLabel: _resolveUserTypeName,
+                          icon: Icons.groups_outlined,
+                          onChanged: (value) {
                             setState(() {
-                              _obscureConfirmPassword =
-                                  !_obscureConfirmPassword;
+                              _selectedUserType = value;
                             });
                           },
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F7FA),
-                          borderRadius: BorderRadius.circular(12),
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('NUMERO DE IDENTIFICACION', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _documentController,
+                          hintText: 'Numero de documento',
+                          prefixIcon: Icons.numbers_rounded,
+                          keyboardType: TextInputType.number,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('CORREO ELECTRONICO', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _emailController,
+                          hintText: 'tu@email.com',
+                          prefixIcon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('TELEFONO', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _phoneController,
+                          hintText: '+57 300 000 0000',
+                          prefixIcon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('CONTRASENA', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _passwordController,
+                          hintText: 'Minimo 8 caracteres',
+                          prefixIcon: Icons.lock_outline_rounded,
+                          obscureText: _obscurePassword,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: secondaryColor,
+                              size: 20 * scale,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildLabel('CONFIRMAR CONTRASENA', secondaryColor),
+                        SizedBox(height: 8 * scale),
+                        _buildTextField(
+                          controller: _confirmPasswordController,
+                          hintText: 'Repite tu contrasena',
+                          prefixIcon: Icons.lock_person_outlined,
+                          obscureText: _obscureConfirmPassword,
+                          fieldColor: fieldColor,
+                          textColor: textColor,
+                          secondaryColor: secondaryColor,
+                          scale: scale,
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: secondaryColor,
+                              size: 20 * scale,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 18 * scale),
+                        _buildTermsCard(scale, isDark, secondaryColor),
+                        SizedBox(height: 22 * scale),
+                        _buildPrimaryButton(scale),
+                        SizedBox(height: 18 * scale),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // alternar Switch
+                            Text(
+                              'Ya tienes cuenta? ',
+                              style: GoogleFonts.poppins(
+                                color: secondaryColor,
+                                fontSize: ResponsiveUtils.fontSize(context, 14),
+                              ),
+                            ),
                             GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  _acceptTerms = !_acceptTerms;
-                                });
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginPage(),
+                                  ),
+                                );
                               },
-                              child: Container(
-                                width: 44,
-                                height: 24,
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: _acceptTerms
-                                      ? const Color(0xFF2563EB)
-                                      : const Color(0xFFD1D5DB),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: AnimatedAlign(
-                                  duration: const Duration(milliseconds: 200),
-                                  alignment: _acceptTerms
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                    height: 1.4,
-                                  ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Acepto los ',
-                                    ),
-                                    TextSpan(
-                                      text: 'Términos y Condiciones',
-                                      style: GoogleFonts.poppins(
-                                        color: const Color(0xFF2563EB),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const TextSpan(
-                                      text: ' y la ',
-                                    ),
-                                    TextSpan(
-                                      text: 'Política de Privacidad',
-                                      style: GoogleFonts.poppins(
-                                        color: const Color(0xFF2563EB),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const TextSpan(
-                                      text: ' de FlexiDrive.',
-                                    ),
-                                  ],
+                              child: Text(
+                                'Inicia sesion',
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF2563EB),
+                                  fontSize:
+                                      ResponsiveUtils.fontSize(context, 14),
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: (_acceptTerms && !_isSubmitting)
-                              ? _submitRegister
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                _acceptTerms ? null : const Color(0xFFE8ECF4),
-                            foregroundColor: _acceptTerms
-                                ? Colors.white
-                                : const Color(0xFF9CA3AF),
-                            disabledBackgroundColor: const Color(0xFFE8ECF4),
-                            disabledForegroundColor: const Color(0xFF9CA3AF),
-                            elevation: 0,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: _acceptTerms
-                                ? BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF2563EB),
-                                        Color(0xFF7C3AED)
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                  )
-                                : null,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (_isSubmitting)
-                                  const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                else ...[
-                                  Text(
-                                    'Crear Cuenta',
-                                    style: GoogleFonts.poppins(
-                                      color: _acceptTerms
-                                          ? Colors.white
-                                          : const Color(0xFF9CA3AF),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.chevron_right,
-                                    color: _acceptTerms
-                                        ? Colors.white
-                                        : const Color(0xFF9CA3AF),
-                                    size: 20,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      // inicio de sesión Link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '¿Ya tienes cuenta? ',
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey.withValues(alpha: 0.8),
-                              fontSize: 14,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (_) => const LoginPage(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              'Inicia sesión',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF2563EB),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildIdentificationTypeOption(
-    IdentificationTypeModel type, {
-    bool selected = false,
-  }) {
+  Widget _buildHero(double scale) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(24 * scale),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+        ),
+        borderRadius: BorderRadius.circular(32 * scale),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.28),
+            blurRadius: 28,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -26 * scale,
+            right: -18 * scale,
+            child: Container(
+              width: 140 * scale,
+              height: 140 * scale,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.12),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -42 * scale,
+            left: -24 * scale,
+            child: Container(
+              width: 150 * scale,
+              height: 150 * scale,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 54 * scale,
+                height: 54 * scale,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(18 * scale),
+                ),
+                child: Icon(
+                  Icons.person_add_alt_1_rounded,
+                  color: Colors.white,
+                  size: 28 * scale,
+                ),
+              ),
+              SizedBox(height: 20 * scale),
+              Text(
+                'Crea tu cuenta y\nempieza con fuerza',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: ResponsiveUtils.fontSize(context, 30),
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
+                ),
+              ),
+              SizedBox(height: 10 * scale),
+              Text(
+                'Un registro mas limpio, mas serio y mas alineado con el proyecto para que el primer contacto se sienta premium.',
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.88),
+                  fontSize: ResponsiveUtils.fontSize(context, 14),
+                  height: 1.55,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickTips(double scale, bool isDark) {
+    final bgColor = isDark ? const Color(0xFF172338) : const Color(0xFFF4F7FE);
+    final textColor =
+        isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475467);
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16 * scale),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(22 * scale),
+      ),
+      child: Column(
+        children: [
+          _buildTipRow(Icons.verified_user_outlined,
+              'Datos verificados y claros', textColor, scale),
+          SizedBox(height: 10 * scale),
+          _buildTipRow(Icons.speed_rounded,
+              'Entrada mas rapida en futuras visitas', textColor, scale),
+          SizedBox(height: 10 * scale),
+          _buildTipRow(Icons.shield_outlined,
+              'Control de acceso desde tu dispositivo', textColor, scale),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipRow(
+    IconData icon,
+    String text,
+    Color textColor,
+    double scale,
+  ) {
     return Row(
       children: [
-        Icon(
-          Icons.badge_outlined,
-          color: const Color(0xFF9CA3AF),
-          size: 20,
-        ),
-        const SizedBox(width: 12),
+        Icon(icon, color: const Color(0xFF4F46E5), size: 18 * scale),
+        SizedBox(width: 10 * scale),
         Expanded(
           child: Text(
-            type.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            text,
             style: GoogleFonts.poppins(
-              color: Colors.black87, // Siempre negro para máxima visibilidad
-              fontSize: 14,
-              fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
+              color: textColor,
+              fontSize: ResponsiveUtils.fontSize(context, 12),
             ),
           ),
         ),
@@ -1034,43 +878,14 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildUserTypeOption(
-    UserTypeModel type, {
-    bool selected = false,
-  }) {
-    return Row(
-      children: [
-        Icon(
-          Icons.groups_outlined,
-          color: const Color(0xFF9CA3AF),
-          size: 20,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            _resolveUserTypeName(type),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              color: Colors.black87,
-              fontSize: 14,
-              fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Construye y devuelve el widget correspondiente a esta sección.
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, Color color) {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        color: Colors.grey.withValues(alpha: 0.7),
-        fontSize: 12,
+        color: color,
+        fontSize: ResponsiveUtils.fontSize(context, 12),
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
+        letterSpacing: 0.6,
       ),
     );
   }
@@ -1079,6 +894,10 @@ class _RegisterPageState extends State<RegisterPage> {
     required TextEditingController controller,
     required String hintText,
     required IconData prefixIcon,
+    required Color fieldColor,
+    required Color textColor,
+    required Color secondaryColor,
+    required double scale,
     bool obscureText = false,
     Widget? suffixIcon,
     TextInputType? keyboardType,
@@ -1087,36 +906,259 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      cursorColor: textColor,
+      style: GoogleFonts.poppins(
+        color: textColor,
+        fontSize: ResponsiveUtils.fontSize(context, 14),
+      ),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.poppins(
-          color: Colors.grey.withValues(alpha: 0.6),
-          fontSize: 14,
+          color: secondaryColor,
+          fontSize: ResponsiveUtils.fontSize(context, 14),
         ),
-        prefixIcon: Icon(
-          prefixIcon,
-          color: Colors.grey,
-          size: 20,
-        ),
+        prefixIcon: Icon(prefixIcon, color: secondaryColor, size: 20 * scale),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFFF5F7FA),
+        fillColor: fieldColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18 * scale),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18 * scale),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(18 * scale),
+          borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.2),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 18 * scale,
+          vertical: 18 * scale,
         ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required T? value,
+    required List<T> items,
+    required bool isLoading,
+    required Color fieldColor,
+    required double scale,
+    required Color textColor,
+    required Color secondaryColor,
+    required String Function(T item) getLabel,
+    required IconData icon,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+      decoration: BoxDecoration(
+        color: fieldColor,
+        borderRadius: BorderRadius.circular(18 * scale),
+      ),
+      child: isLoading
+          ? SizedBox(
+              height: 56 * scale,
+              child: Row(
+                children: [
+                  Icon(icon, color: secondaryColor, size: 20 * scale),
+                  SizedBox(width: 12 * scale),
+                  Text(
+                    'Cargando...',
+                    style: GoogleFonts.poppins(
+                      color: secondaryColor,
+                      fontSize: ResponsiveUtils.fontSize(context, 14),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : DropdownButtonHideUnderline(
+              child: DropdownButton<T>(
+                value: value,
+                isExpanded: true,
+                icon: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: secondaryColor,
+                  size: 22 * scale,
+                ),
+                dropdownColor: fieldColor,
+                borderRadius: BorderRadius.circular(18 * scale),
+                style: GoogleFonts.poppins(
+                  color: textColor,
+                  fontSize: ResponsiveUtils.fontSize(context, 14),
+                  fontWeight: FontWeight.w500,
+                ),
+                items: items
+                    .map(
+                      (item) => DropdownMenuItem<T>(
+                        value: item,
+                        child: Row(
+                          children: [
+                            Icon(icon, color: secondaryColor, size: 20 * scale),
+                            SizedBox(width: 12 * scale),
+                            Expanded(
+                              child: Text(
+                                getLabel(item),
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  color: textColor,
+                                  fontSize:
+                                      ResponsiveUtils.fontSize(context, 14),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onChanged,
+              ),
+            ),
+    );
+  }
+
+  Widget _buildTermsCard(double scale, bool isDark, Color secondaryColor) {
+    return Container(
+      padding: EdgeInsets.all(16 * scale),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF172338) : const Color(0xFFF4F7FE),
+        borderRadius: BorderRadius.circular(22 * scale),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _acceptTerms = !_acceptTerms;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              width: 24 * scale,
+              height: 24 * scale,
+              decoration: BoxDecoration(
+                color:
+                    _acceptTerms ? const Color(0xFF2563EB) : Colors.transparent,
+                borderRadius: BorderRadius.circular(8 * scale),
+                border: Border.all(
+                  color: _acceptTerms
+                      ? const Color(0xFF2563EB)
+                      : secondaryColor.withValues(alpha: 0.45),
+                  width: 1.4,
+                ),
+              ),
+              child: _acceptTerms
+                  ? Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 16 * scale,
+                    )
+                  : null,
+            ),
+          ),
+          SizedBox(width: 12 * scale),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.poppins(
+                  color: secondaryColor,
+                  fontSize: ResponsiveUtils.fontSize(context, 12),
+                  height: 1.5,
+                ),
+                children: [
+                  const TextSpan(text: 'Acepto los '),
+                  TextSpan(
+                    text: 'Terminos y Condiciones',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF2563EB),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ' y la '),
+                  TextSpan(
+                    text: 'Politica de Privacidad',
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFF2563EB),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ' para continuar en FlexiDrive.'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton(double scale) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: _acceptTerms
+            ? const LinearGradient(
+                colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+              )
+            : null,
+        color: _acceptTerms ? null : const Color(0xFFE5E7EB),
+        borderRadius: BorderRadius.circular(18 * scale),
+        boxShadow: _acceptTerms
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.22),
+                  blurRadius: 18,
+                  offset: const Offset(0, 12),
+                ),
+              ]
+            : null,
+      ),
+      child: ElevatedButton(
+        onPressed: (_acceptTerms && !_isSubmitting) ? _submitRegister : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          minimumSize: Size(double.infinity, 56 * scale),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18 * scale),
+          ),
+        ),
+        child: _isSubmitting
+            ? SizedBox(
+                width: 20 * scale,
+                height: 20 * scale,
+                child: const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Crear cuenta',
+                    style: GoogleFonts.poppins(
+                      color:
+                          _acceptTerms ? Colors.white : const Color(0xFF9CA3AF),
+                      fontSize: ResponsiveUtils.fontSize(context, 16),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(width: 8 * scale),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color:
+                        _acceptTerms ? Colors.white : const Color(0xFF9CA3AF),
+                    size: 18 * scale,
+                  ),
+                ],
+              ),
       ),
     );
   }

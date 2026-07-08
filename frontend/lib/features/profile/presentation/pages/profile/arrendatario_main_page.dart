@@ -37,6 +37,8 @@ class ArrendatarioMainPage extends StatefulWidget {
 
 // Estado de la pagina principal del arrendador
 class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
+  static const Color _brandPrimary = Color(0xFF4F46E5);
+  static const Color _brandSecondary = Color(0xFF7C3AED);
   final AccountAccessUseCase _accountRepository =
       InjectionContainer.instance.accountAccessUseCase;
   final UserPreferencesUseCase _preferenceService =
@@ -205,17 +207,21 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
             8,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildNavItem(
-                icon: Icons.home_outlined,
-                label: 'Inicio',
-                index: 0,
+              Expanded(
+                child: _buildNavItem(
+                  icon: Icons.home_outlined,
+                  label: 'Mis vehículos',
+                  index: 0,
+                ),
               ),
-              _buildNavItem(
-                icon: Icons.description_outlined,
-                label: 'Solicitudes',
-                index: 1,
+              Expanded(
+                child: _buildNavItem(
+                  icon: Icons.description_outlined,
+                  label: 'Solicitudes',
+                  index: 1,
+                ),
               ),
               GestureDetector(
                 onTap: () async {
@@ -234,18 +240,19 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
                   }
                 },
                 child: Container(
-                  width: 74,
-                  height: 62,
+                  width: isSmallPhone ? 68 : 74,
+                  height: isSmallPhone ? 58 : 62,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                      colors: [_brandPrimary, _brandSecondary],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                        color: _brandPrimary.withValues(alpha: 0.32),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -254,16 +261,20 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
                   child: const Icon(Icons.add, color: Colors.white, size: 36),
                 ),
               ),
-              _buildNavItem(
-                icon: Icons.notifications_none,
-                label: 'Alertas',
-                index: 2,
-                dot: _hasUnreadAlerts,
+              Expanded(
+                child: _buildNavItem(
+                  icon: Icons.notifications_none,
+                  label: 'Alertas',
+                  index: 2,
+                  dot: _hasUnreadAlerts,
+                ),
               ),
-              _buildNavItem(
-                icon: Icons.person_outline,
-                label: 'Perfil',
-                index: 3,
+              Expanded(
+                child: _buildNavItem(
+                  icon: Icons.person_outline,
+                  label: 'Perfil',
+                  index: 3,
+                ),
               ),
             ],
           ),
@@ -280,13 +291,12 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
   }) {
     final isSelected = _selectedIndex == index && index >= 0;
     final theme = Theme.of(context);
-    final activeColor = const Color(0xFFF59E0B);
+    final activeColor = _brandPrimary;
     final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.5);
 
     return GestureDetector(
       onTap: () => setIndex(index),
       child: Container(
-        width: 70,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -322,13 +332,14 @@ class ArrendatarioMainPageState extends State<ArrendatarioMainPage> {
             const SizedBox(height: 2),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 11,
+                fontSize: 10.5,
                 color: isSelected ? activeColor : inactiveColor,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              overflow: TextOverflow.fade,
             ),
           ],
         ),
